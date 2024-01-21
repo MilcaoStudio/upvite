@@ -8,7 +8,7 @@ main {
     margin: auto;
     padding: 1rem;
     background-color: #252424;
-    width: 40%;
+    width: 30%;
 }
 .container .title {
     margin: 0;
@@ -17,8 +17,28 @@ main {
 .login-form {
     display: flex;
     flex-direction: column;
+    gap: 10px;
 }
 
-.login-form label {
-    margin-bottom: 2rem;
+
+.form-label {
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.form-input {
+    padding: 11px 16px;
+    font-size: 15px;
+    border-radius: 6px;
+}
+
+.form-btn {
+    padding: 8px;
+    margin-bottom: 15px;
+    background-color: #2e3436;
+    display: flex;
+    justify-content: center;
+    border: medium;
+    cursor: pointer;
+    font-size: 14px;
 }

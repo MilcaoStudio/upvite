@@ -29,15 +29,11 @@
   <div class="container">
     <h1 class="title">Iniciar Sesión</h1>
     <form class="login-form" on:submit|preventDefault={handleLogin}>
-      <label>
-        Correo:
-        <input type="email" bind:value={email} required />
-      </label>
-      <label>
-        Contraseña:
-        <input type="password" bind:value={password} required />
-      </label>
-      <button class="login-btn" type="submit">Iniciar Sesión</button>
+      <div class="form-label">CORREO ELECTRÓNICO</div>
+      <input class="form-input" type="email" bind:value={email} placeholder="" required />
+      <div class="form-label">CONTRASEÑA</div>
+      <input class="form-input" type="password" bind:value={password} placeholder="" required />
+      <button class="form-btn" type="submit">Iniciar Sesión</button>
     </form>
   </div>
 </main>
