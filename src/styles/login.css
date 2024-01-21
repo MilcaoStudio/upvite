@@ -1,0 +1,24 @@
+main {
+    display: flex;
+    place-items: center;
+    height: 100vh;
+}
+
+.container {
+    margin: auto;
+    padding: 1rem;
+    background-color: #252424;
+    width: 40%;
+}
+.container .title {
+    margin: 0;
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.login-form label {
+    margin-bottom: 2rem;
+}
