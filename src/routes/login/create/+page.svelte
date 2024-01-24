@@ -3,8 +3,8 @@
 </script>
 
 <div class="container">
-    <h1 class="title">{$_('login.title')}</h1>
-    <form class="login-form" method="POST" action="?/register" >
+    <h1 class="title">{$_('login.register')}</h1>
+    <form class="login-form" >
       <div class="form-label">{$_('login.email')}</div>
       <input class="form-input" name="email" type="email"  placeholder={$_('login.enter.email')} required />
       <div class="form-label">{$_('login.password')}</div>
