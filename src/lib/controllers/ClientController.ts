@@ -1,6 +1,6 @@
 import { MapStore } from "$lib/stores/Store";
 import { Client, type API } from "revolt.js";
-import { modalController } from "./ModalController";
+import { modalController } from "../components/modals/ModalController";
 import { injectController, takeError } from "$lib";
 import type Auth from "$lib/stores/Auth";
 import { detect } from "detect-browser";

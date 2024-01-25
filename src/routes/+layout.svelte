@@ -1,9 +1,16 @@
 <script lang="ts">
+    import { page } from '$app/stores';
+    import CheckAuth from '$lib/controllers/CheckAuth.svelte';
     import '../styles/app.css'
-    import { setContext } from 'svelte';
-    import { writable } from 'svelte/store';
-    import { Client } from 'revolt.js'
-    import { PUBLIC_API_URL } from '$env/static/public';
+
 </script>
 
-<slot />
+{#if $page.url.pathname.startsWith('/login')}
+    <CheckAuth>
+        <slot />
+    </CheckAuth>
+{:else}
+    <CheckAuth auth>
+        <slot />
+    </CheckAuth>
+{/if}
