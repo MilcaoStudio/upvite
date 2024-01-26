@@ -7,21 +7,21 @@ export default defineConfig({
 		port: 5000,
 		proxy: {
 			'/api': {
-				target: 'http://172.19.0.7:8000',
+				target: import.meta.env.API_TARGET,
 				headers: {'Content-Type': 'application/json'},
 				rewrite: (path) => path.replace(/^\/api/, ''),
 			},
 			'/autumn': {
-				target: 'http://localhost:3000',
+				target: import.meta.env.AUTUMN_TARGET,
 				rewrite: (path) => path.replace(/^\/autumn/, ''),
 			},
 			'/january': {
-				target: 'http://localhost:7000',
+				target: import.meta.env.JANUARY_TARGET,
 				rewrite: (path) => path.replace(/^\/january/, ''),
 			},
 			'/ws': {
 				ws: true,
-				target: 'http://172.19.0.6:9000',
+				target: import.meta.env.WS_TARGET,
 			}
 		}
 	},
