@@ -6,7 +6,7 @@ export class CollectionStore<T> {
     constructor(items?: T[]){
         this.collection = items ?? [];
         this.state = writable(this.collection);
-        this.state.subscribe(this.onUpdate);
+        this.state.subscribe(this.onUpdate.bind(this));
     }
 
     push(item: T) {
@@ -49,6 +49,8 @@ export class MapStore<K,V> extends Map<K,V> {
     }
 
     onUpdate(self: this){
-        console.log(self);
+        for (const [key, value] of self.entries()) {
+            console.log(key, value);
+        }
     }
 }
