@@ -1,10 +1,11 @@
 import { MapStore } from "$lib/stores/Store";
 import { Client, type API } from "revolt.js";
 import { modalController } from "../components/modals/ModalController";
-import { injectController, takeError } from "$lib";
 import type Auth from "$lib/stores/Auth";
 import { detect } from "detect-browser";
 import { PUBLIC_API_URL } from "$env/static/public";
+import { state } from "$lib/State";
+import { takeError } from "$lib";
 
 /**
  * Current lifecycle state
@@ -150,7 +151,7 @@ export default class Session {
         try {
             await this.client!.useExistingSession(data.session);
             this.user_id = this.client!.user!._id;
-            (globalThis as any).state.auth.setSession(data.session);
+            state.auth.setSession(data.session);
         } catch (err) {
             this.state = "Ready";
             throw err;
@@ -306,9 +307,6 @@ export class ClientController {
 
         this.login = this.login.bind(this);
         this.logoutCurrent = this.logoutCurrent.bind(this);
-
-        // Inject globally
-        injectController("client", this);
     }
 
     pickNextSession() {
@@ -415,7 +413,7 @@ export class ClientController {
                     this.sessions.delete(user_id);
                     this.current = null;
                     this.pickNextSession();
-                    (globalThis as any).state.auth.removeSession(user_id);
+                    state.auth.removeSession(user_id);
                     modalController.push({ type: "signed_out" });
                     session.destroy();
                 } else {
@@ -441,7 +439,7 @@ export class ClientController {
             const { os } = browser;
             let isiPad;
             // @ts-ignore
-            if (globalThis.isNative) {
+            if (window.isNative) {
                 friendly_name = `Revolt Desktop on ${os}`;
             } else {
                 if (name === "ios") {

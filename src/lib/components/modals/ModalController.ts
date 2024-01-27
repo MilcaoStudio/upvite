@@ -1,4 +1,3 @@
-import { injectController } from "$lib";
 import type { Modal } from "$lib/types/Modal";
 import { ulid } from "ulid";
 
@@ -10,9 +9,6 @@ export class ModalController<T extends Modal> {
         this.components = components;
 
         this.close = this.close.bind(this);
-
-        // Inject globally
-        injectController("modal", this);
     }
 
     /**

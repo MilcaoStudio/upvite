@@ -18,23 +18,13 @@ export interface Data {
  */
 export default class Auth implements Persistent<Data> {
     private sessions: MapStore<string, Account>;
+    private current?: string;
 
     /**
      * Construct new Auth store.
      */
     constructor() {
         this.sessions = new MapStore();
-
-        // Inject session token if it is provided.
-        if (import.meta.env.VITE_SESSION_TOKEN) {
-            this.sessions.set("0", {
-                session: {
-                    name: "0",
-                    user_id: "0",
-                    token: import.meta.env.VITE_SESSION_TOKEN as string,
-                },
-            });
-        }
     }
 
     get id() {
@@ -90,9 +80,9 @@ export default class Auth implements Persistent<Data> {
     /**
      * Remove current session.
      */
-    /*@action logout() {
+    logout() {
         this.current && this.removeSession(this.current);
-    }*/
+    }
 
     /**
      * Get current session.
