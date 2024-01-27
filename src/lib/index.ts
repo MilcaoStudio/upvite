@@ -1,5 +1,6 @@
 // place files you want to import through the `$lib` alias in this folder.
 
+import { browser } from "$app/environment";
 import State from "./State";
 
 export function urlBase64ToUint8Array(base64String: string) {
@@ -35,8 +36,8 @@ export function injectWindow(key: string, value: any) {
  * @param value Value
  */
 export function injectController(key: string, value: any) {
-    (globalThis as any).controllers = {
-        ...((globalThis as any).controllers ?? {}),
+    (window as any).controllers = {
+        ...((window as any).controllers ?? {}),
         [key]: value,
     };
 }
@@ -69,3 +70,5 @@ export function takeError(error: any): string {
 export function mapError(error: any): never {
     throw takeError(error);
 }
+
+export const isTouchscreenDevice = browser && navigator.maxTouchPoints > 1;
