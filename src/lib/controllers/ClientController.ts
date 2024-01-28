@@ -6,6 +6,7 @@ import { detect } from "detect-browser";
 import { PUBLIC_API_URL } from "$env/static/public";
 import { state } from "$lib/State";
 import { takeError } from "$lib";
+import { writable } from "svelte/store";
 
 /**
  * Current lifecycle state
@@ -536,6 +537,7 @@ export class ClientController {
 
     switchAccount(user_id: string) {
         this.current = user_id;
+        console.log('account switched to', user_id);
 
         // This will allow account switching to work more seamlessly,
         // maybe it'll be properly / fully implemented at some point.
@@ -543,4 +545,4 @@ export class ClientController {
     }
 }
 
-export const clientController = new ClientController;
+export const clientController = writable(new ClientController);

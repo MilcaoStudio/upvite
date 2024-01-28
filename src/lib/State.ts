@@ -62,13 +62,30 @@ export default class State {
 
     async hydrate() {
         await this.save();
-        clientController.hydrate(this.auth);
+        clientController.subscribe(c=>c.hydrate(this.auth));
     }
 
     onPacket(packet: ClientboundNotification){
 
     }
 
+    /**
+     * Register reaction listeners for persistent data stores.
+     * @returns Function to dispose of listeners
+     */
+    registerListeners(client?: Client) {
+        // If a client is present currently, expose it and provide it to plugins.
+        if (client) {
+            // Register message listener for clearing queue.
+            client.addListener("message", this.queue.onMessage);
+
+            // Register listener for incoming packets.
+            client.addListener("packet", this.onPacket);
+        }
+
+        
+        const listeners = this.persistent.map(([_, store])=>stringify(store.toJSON()));
+    }
     reset() {
         this.queue = new MessageQueue;
         this.save();
@@ -78,4 +95,3 @@ export default class State {
 }
 
 export const state = new State;
-console.log("module imported");
