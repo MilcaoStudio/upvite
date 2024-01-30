@@ -6,8 +6,7 @@ import { detect } from "detect-browser";
 import { PUBLIC_API_URL } from "$env/static/public";
 import { state } from "$lib/State";
 import { takeError } from "$lib";
-import { writable } from "svelte/store";
-
+import { ObservableMap, action, computed, makeAutoObservable, observable } from "mobx";
 /**
  * Current lifecycle state
  */
@@ -44,10 +43,13 @@ export default class Session {
      * Create a new Session
      */
     constructor() {
+        makeAutoObservable(this);
         this.onDropped = this.onDropped.bind(this);
         this.onReady = this.onReady.bind(this);
         this.onOnline = this.onOnline.bind(this);
         this.onOffline = this.onOffline.bind(this);
+
+        
 
         window.addEventListener("online", this.onOnline);
         window.addEventListener("offline", this.onOffline);
@@ -55,7 +57,7 @@ export default class Session {
     /**
      * Initiate logout and destroy client
      */
-    destroy() {
+    @action destroy() {
         if (this.client) {
             this.client.logout(false);
             this.state = "Ready";
@@ -163,7 +165,7 @@ export default class Session {
      * Transition to a new state by a certain action
      * @param data Transition Data
      */
-    async emit(data: Transition) {
+    @action async emit(data: Transition) {
         console.info(`[FSM ${this.user_id ?? "Anonymous"}]`, data);
 
         switch (data.action) {
@@ -267,7 +269,7 @@ export default class Session {
      * Whether we are ready to render.
      * @returns Boolean
      */
-    get ready() {
+    @computed get ready() {
         return !!this.client?.user;
     }
 }
@@ -285,7 +287,7 @@ export class ClientController {
     /**
      * Map of user IDs to sessions
      */
-    private sessions: MapStore<string, Session>;
+    private sessions: ObservableMap<string, Session>
 
     /**
      * User ID of active session
@@ -303,14 +305,22 @@ export class ClientController {
             .then(() => (this.configuration = this.apiClient.configuration!));
 
         this.configuration = null;
-        this.sessions = new MapStore();
+        this.sessions = observable.map();
         this.current = null;
+
+        makeAutoObservable(this, {
+            getActiveSession: computed,
+            getAnonymousClient: computed,
+            getAvailableClient: computed,
+            getReadyClient: computed,
+            getServerConfig: computed
+        });
 
         this.login = this.login.bind(this);
         this.logoutCurrent = this.logoutCurrent.bind(this);
     }
 
-    pickNextSession() {
+    @action pickNextSession() {
         this.switchAccount(
             this.current ?? this.sessions.keys().next().value ?? null,
         );
@@ -320,7 +330,7 @@ export class ClientController {
      * Hydrate sessions and start client lifecycles.
      * @param auth Authentication store
      */
-    hydrate(auth: Auth) {
+    @action hydrate(auth: Auth) {
         for (const entry of auth.getAccounts()) {
             this.addSession(entry, "existing");
         }
@@ -390,7 +400,7 @@ export class ClientController {
      * @param entry Session Information
      * @param knowledge Whether the session is new or existing
      */
-    addSession(
+    @action addSession(
         entry: { session: SessionPrivate; apiUrl?: string },
         knowledge: "new" | "existing",
     ) {
@@ -514,7 +524,7 @@ export class ClientController {
      * Log out of a specific user session
      * @param user_id Target User ID
      */
-    logout(user_id: string) {
+    @action logout(user_id: string) {
         const session = this.sessions.get(user_id);
         if (session) {
             if (user_id === this.current) {
@@ -529,13 +539,13 @@ export class ClientController {
     /**
      * Logout of the current session
      */
-    logoutCurrent() {
+    @action logoutCurrent() {
         if (this.current) {
             this.logout(this.current);
         }
     }
 
-    switchAccount(user_id: string) {
+    @action switchAccount(user_id: string) {
         this.current = user_id;
         console.log('account switched to', user_id);
 
@@ -545,4 +555,4 @@ export class ClientController {
     }
 }
 
-export const clientController = writable(new ClientController);
+export const clientController = new ClientController;

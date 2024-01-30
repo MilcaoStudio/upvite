@@ -2,6 +2,7 @@ import type Persistent from "$lib/types/Persistent";
 import { MapStore } from "./Store";
 import { mapToRecord } from "$lib";
 import { clientController } from "$lib/controllers/ClientController";
+import { ObservableMap, action, computed, makeAutoObservable } from "mobx";
 
 interface Account {
     session: Session;
@@ -17,27 +18,31 @@ export interface Data {
  * accounts and their sessions.
  */
 export default class Auth implements Persistent<Data> {
-    private sessions: MapStore<string, Account>;
+    private sessions: ObservableMap;
     private current?: string;
 
     /**
      * Construct new Auth store.
      */
     constructor() {
-        this.sessions = new MapStore();
+        this.sessions = new ObservableMap();
+        makeAutoObservable(this, {
+            getAccounts: computed,
+            isLoggedIn: computed
+        });
     }
 
     get id() {
         return "auth";
     }
 
-    toJSON() {
+    @action toJSON() {
         return {
             sessions: JSON.parse(JSON.stringify(mapToRecord(this.sessions))),
         };
     }
 
-    hydrate(data: Data) {
+    @action hydrate(data: Data) {
         if (Array.isArray(data.sessions)) {
             data.sessions.forEach(([key, value]) =>
                 this.sessions.set(key, value),
@@ -57,7 +62,7 @@ export default class Auth implements Persistent<Data> {
      * @param session Session
      * @param apiUrl Custom API URL
      */
-    setSession(session: Session, apiUrl?: string) {
+    @action setSession(session: Session, apiUrl?: string) {
         this.sessions.set(session.user_id, { session, apiUrl });
     }
 
@@ -65,7 +70,7 @@ export default class Auth implements Persistent<Data> {
      * Remove existing session by user ID.
      * @param user_id User ID tied to session
      */
-    removeSession(user_id: string) {
+    @action removeSession(user_id: string) {
         this.sessions.delete(user_id);
     }
 
@@ -80,7 +85,7 @@ export default class Auth implements Persistent<Data> {
     /**
      * Remove current session.
      */
-    logout() {
+    @action logout() {
         this.current && this.removeSession(this.current);
     }
 

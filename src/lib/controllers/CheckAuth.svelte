@@ -6,8 +6,7 @@
 
     export let auth: boolean = false, blockRender: boolean = false;
     console.log($page.url.pathname, 'requiresAuth?', auth);
-    let loggedIn: boolean;
-    $: loggedIn = $clientController.isLoggedIn();
+    let loggedIn: boolean = clientController.isLoggedIn();
     console.log('logged in?', loggedIn);
     if (auth && !loggedIn){
         if (!blockRender) goto('/login');
@@ -16,7 +15,7 @@
     }
 </script>
 
-{#if auth && loggedIn && !$clientController.isReady()}
+{#if auth && loggedIn && !clientController.isReady()}
     <Preloader type='spinner' />
 {:else}
     <slot />
