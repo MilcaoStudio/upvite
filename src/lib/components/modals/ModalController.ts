@@ -1,11 +1,16 @@
 import type { Modal } from "$lib/types/Modal";
 import { ulid } from "ulid";
+import UserProfile from "./UserProfile.svelte";
+import Onboarding from "./Onboarding.svelte";
+import { action, computed, makeObservable } from "mobx";
 
 export class ModalController<T extends Modal> {
     stack: T[] = [];
     components: any;
 
     constructor(components: any) {
+
+        makeObservable(this);
         this.components = components;
 
         this.close = this.close.bind(this);
@@ -15,7 +20,7 @@ export class ModalController<T extends Modal> {
      * Display a new modal on the stack
      * @param modal Modal data
      */
-    push(modal: T) {
+    @action push(modal: T) {
         this.stack = [
             ...this.stack,
             {
@@ -29,7 +34,7 @@ export class ModalController<T extends Modal> {
      * Remove the top modal from the screen
      * @param signal What action to trigger
      */
-    pop(signal: "close" | "confirm" | "force") {
+    @action pop(signal: "close" | "confirm" | "force") {
         this.stack = this.stack.map((entry, index) =>
             index === this.stack.length - 1 ? { ...entry, signal } : entry,
         );
@@ -45,16 +50,19 @@ export class ModalController<T extends Modal> {
     /**
      * Remove the keyed modal from the stack
      */
-    remove(key: string) {
+    @action remove(key: string) {
         this.stack = this.stack.filter((x) => x.key !== key);
     }
 
     /**
      * Whether a modal is currently visible
      */
-    get isVisible() {
+    @computed get isVisible() {
         return this.stack.length > 0;
     }
 }
 
-export const modalController = new ModalController([]);
+export const modalController = new ModalController({
+    onboarding: Onboarding,
+    user_profile: UserProfile,
+});
