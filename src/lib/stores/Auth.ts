@@ -26,10 +26,7 @@ export default class Auth implements Persistent<Data> {
      */
     constructor() {
         this.sessions = new ObservableMap();
-        makeAutoObservable(this, {
-            getAccounts: computed,
-            isLoggedIn: computed
-        });
+        makeAutoObservable(this);
     }
 
     get id() {
@@ -78,7 +75,7 @@ export default class Auth implements Persistent<Data> {
      * Get all known accounts.
      * @returns Array of accounts
      */
-    getAccounts() {
+    @computed get accounts() {
         return [...this.sessions.values()];
     }
 
@@ -97,13 +94,4 @@ export default class Auth implements Persistent<Data> {
         if (!this.current) return;
         return this.sessions.get(this.current)!.session;
     }*/
-
-    /**
-     * Check whether we are currently logged in.
-     * @returns Whether we are logged in
-     */
-    isLoggedIn() {
-        // ! FIXME: temp proxy info
-        return clientController.getActiveSession()?.ready;
-    }
 }

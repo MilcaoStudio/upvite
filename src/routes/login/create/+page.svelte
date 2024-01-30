@@ -4,7 +4,7 @@
     import { _ } from 'svelte-i18n'
     let email = '', password = '';
     function onSubmit(){
-      $clientController.getAnonymousClient().register({email, password}).then(()=>{
+      clientController.anonymousClient.register({email, password}).then(()=>{
         goto('/login');
       });
     }

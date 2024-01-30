@@ -1,11 +1,10 @@
-import { MapStore } from "$lib/stores/Store";
 import { Client, type API } from "revolt.js";
 import { modalController } from "../components/modals/ModalController";
 import type Auth from "$lib/stores/Auth";
 import { detect } from "detect-browser";
 import { PUBLIC_API_URL } from "$env/static/public";
 import { state } from "$lib/State";
-import { takeError } from "$lib";
+import { injectWindow, takeError } from "$lib";
 import { ObservableMap, action, computed, makeAutoObservable, observable } from "mobx";
 /**
  * Current lifecycle state
@@ -48,8 +47,6 @@ export default class Session {
         this.onReady = this.onReady.bind(this);
         this.onOnline = this.onOnline.bind(this);
         this.onOffline = this.onOffline.bind(this);
-
-        
 
         window.addEventListener("online", this.onOnline);
         window.addEventListener("offline", this.onOffline);
@@ -308,16 +305,12 @@ export class ClientController {
         this.sessions = observable.map();
         this.current = null;
 
-        makeAutoObservable(this, {
-            getActiveSession: computed,
-            getAnonymousClient: computed,
-            getAvailableClient: computed,
-            getReadyClient: computed,
-            getServerConfig: computed
-        });
+        makeAutoObservable(this);
 
         this.login = this.login.bind(this);
         this.logoutCurrent = this.logoutCurrent.bind(this);
+
+        injectWindow('clientController', this);
     }
 
     @action pickNextSession() {
@@ -331,7 +324,7 @@ export class ClientController {
      * @param auth Authentication store
      */
     @action hydrate(auth: Auth) {
-        for (const entry of auth.getAccounts()) {
+        for (const entry of auth.accounts) {
             this.addSession(entry, "existing");
         }
 
@@ -342,7 +335,7 @@ export class ClientController {
      * Get the currently selected session
      * @returns Active Session
      */
-    getActiveSession() {
+    @computed get activeSession() {
         return this.sessions.get(this.current!);
     }
 
@@ -350,8 +343,8 @@ export class ClientController {
      * Get the currently ready client
      * @returns Ready Client
      */
-    getReadyClient() {
-        const session = this.getActiveSession();
+    @computed get readyClient() {
+        const session = this.activeSession;
         return session && session.ready ? session.client! : undefined;
     }
 
@@ -359,7 +352,7 @@ export class ClientController {
      * Get an unauthenticated instance of the Revolt.js Client
      * @returns API Client
      */
-    getAnonymousClient() {
+    @computed get anonymousClient() {
         return this.apiClient;
     }
 
@@ -367,32 +360,27 @@ export class ClientController {
      * Get the next available client (either from session or API)
      * @returns Revolt.js Client
      */
-    getAvailableClient() {
-        return this.getActiveSession()?.client ?? this.apiClient;
+    @computed get availableClient() {
+        return this.activeSession?.client ?? this.apiClient;
     }
 
     /**
      * Fetch server configuration
      * @returns Server Configuration
      */
-    getServerConfig() {
+    @computed get serverConfig() {
         return this.configuration;
     }
 
-    /**
-     * Check whether we are logged in right now
-     * @returns Whether we are logged in
-     */
-    isLoggedIn() {
-        return this.current !== null;
+    @computed get isLoggedIn(){
+        return !!this.current
     }
-
     /**
      * Check whether we are currently ready
      * @returns Whether we are ready to render
      */
-    isReady() {
-        return this.getActiveSession()?.ready;
+    @computed get isReady() {
+        return this.activeSession?.ready;
     }
 
     /**

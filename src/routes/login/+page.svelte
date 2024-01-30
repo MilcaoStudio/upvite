@@ -10,9 +10,9 @@
 
   function onSubmit(){
     loading = true;
-    $clientController.login(credentials).then(()=>{
+    clientController.login(credentials).then(()=>{
       success = credentials.email;
-      console.log($clientController.getActiveSession());
+      console.log(clientController.activeSession);
     })
   }
 </script>
