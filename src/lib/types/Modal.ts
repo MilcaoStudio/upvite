@@ -1,8 +1,9 @@
 import type { API, Client, User, Member, Channel, Server, Message } from "revolt.js";
+import type { HTMLAttributes } from "svelte/elements";
 
 export type Modal = {
-    key?: string;
-} & (
+    key: string,
+  } & (
     | {
           type:
               | "signed_out"
@@ -192,7 +193,28 @@ export type Modal = {
       }
 );
 
-export type ModalProps<T extends Modal["type"]> = Modal & { type: T } & {
-    onClose: () => void;
-    signal?: "close" | "confirm";
+export type ModalProps<T extends Modal["type"]> = Modal & {
+    type: T
+    onClose: () => void
+    signal?: "close" | "confirm"
 };
+
+export type Action = Omit<HTMLAttributes<HTMLButtonElement>, "as"> &
+    Omit<ButtonProps, "onClick"> & {
+        confirmation?: boolean;
+        onClick: () => void | boolean | Promise<boolean>;
+        children?: string
+};
+
+export interface ButtonProps {
+  readonly compact?: boolean | "icon";
+  readonly palette?:
+      | "primary"
+      | "secondary"
+      | "plain"
+      | "plain-secondary"
+      | "accent"
+      | "success"
+      | "warning"
+      | "error";
+}

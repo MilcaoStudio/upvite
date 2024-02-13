@@ -1,10 +1,26 @@
 :root {
     color-scheme: dark light;
 
+    --light: false;
+    --accent: #FD6671;
+    --error: #ED4245;
+    --success: #65E572;
+    --warning: #FAA352;
     --primary-background: #0f0f35;
+    --secondary-background: #2e3436;
+    --tertiary-background: #4D4D4D;
     font-family: 'Open Sans', sans-serif;
     --border-radius: 15px;
     --foreground: #fff;
+    --secondary-foreground: #C8C8C8;
+    --tertiary-foreground: #848484;
+    --primary-header: #363636;
+    --secondary-header: #2D2D2D;
+
+    --status-online: #3ABF7E;
+    --status-away: #F39F00;
+    --status-focus: #4799F0;
+    --status-busy: #F84848;
 }
 
 .app-container {
@@ -43,4 +59,28 @@
     gap: 12px;
     display: flex;
     padding-right: 4px;
+}
+
+@keyframes -global-fadeIn {
+    0% {opacity: 0;}
+    70% {opacity: 0;}
+    100% {opacity: 1;}
+}
+
+@keyframes -global-fadeOut {
+    0% {opacity: 1;}
+    70% {opacity: 0;}
+    100% {opacity: 0;}
+}
+
+@keyframes -global-zoomIn {
+    0% {transform: scale(0.5);}
+    98% {transform: scale(1.01);}
+    100% {transform: scale(1);}
+}
+
+@keyframes -global-zoomOut {
+    0% {transform: scale(0.5);}
+    98% {transform: scale(1.01);}
+    100% {transform: scale(1);}
 }

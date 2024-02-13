@@ -2,18 +2,17 @@ import type { Modal } from "$lib/types/Modal";
 import { ulid } from "ulid";
 import UserProfile from "./UserProfile.svelte";
 import Onboarding from "./Onboarding.svelte";
-import { action, computed, makeObservable } from "mobx";
+import { action, computed, makeObservable, observable } from "mobx";
+import { injectWindow } from "$lib";
 
 export class ModalController<T extends Modal> {
-    stack: T[] = [];
-    components: any;
+    @observable stack: T[] = [];
 
-    constructor(components: any) {
+    constructor(public components: Record<string, SvelteComponentConstructor<any, any>>) {
 
         makeObservable(this);
-        this.components = components;
-
         this.close = this.close.bind(this);
+        injectWindow('modalController', this)
     }
 
     /**
@@ -28,6 +27,7 @@ export class ModalController<T extends Modal> {
                 key: ulid(),
             },
         ];
+        console.log('[ModalController.ts] modal pushed', modal.type);
     }
 
     /**
@@ -36,7 +36,7 @@ export class ModalController<T extends Modal> {
      */
     @action pop(signal: "close" | "confirm" | "force") {
         this.stack = this.stack.map((entry, index) =>
-            index === this.stack.length - 1 ? { ...entry, signal } : entry,
+            index == this.stack.length - 1 ? { ...entry, signal } : entry,
         );
     }
 
@@ -51,7 +51,7 @@ export class ModalController<T extends Modal> {
      * Remove the keyed modal from the stack
      */
     @action remove(key: string) {
-        this.stack = this.stack.filter((x) => x.key !== key);
+        this.stack = this.stack.filter((x) => x.key != key);
     }
 
     /**

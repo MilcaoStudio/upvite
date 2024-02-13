@@ -544,3 +544,27 @@ export class ClientController {
 }
 
 export const clientController = new ClientController;
+/**
+ * Get the currently active session.
+ * @returns Session
+ */
+export function useSession() {
+    return clientController.activeSession
+}
+
+/**
+ * Get the currently active client or an unauthorised
+ * client for API requests, whichever is available.
+ * @returns Revolt.js Client
+ */
+export function useClient() {
+    return clientController.availableClient
+}
+
+/**
+ * Get unauthorised client for API requests.
+ * @returns Revolt.js Client
+ */
+export function useApi() {
+    return clientController.anonymousClient.api
+}
