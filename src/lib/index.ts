@@ -1,7 +1,6 @@
 // place files you want to import through the `$lib` alias in this folder.
 
 import { browser } from "$app/environment";
-import State from "./State";
 
 export function urlBase64ToUint8Array(base64String: string) {
     const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
