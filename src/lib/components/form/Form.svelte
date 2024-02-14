@@ -17,16 +17,19 @@
         submitBtn: Omit<HTMLButtonAttributes, "type"> | undefined = undefined;
 
     $: keys = Object.keys(schema);
-    $: values = observed ?? getInitialValues(schema, defaults)
+    let values: MapFormToValues<T>;
+    $: {
+        values = observed ?? getInitialValues(schema, defaults);
+        setContext('form', {schema, disabled, values, onChange, data })
+    }
     $: submit = function(){
         onSubmit?.(values)
     };
-
+    
 </script>
 
 <form on:submit|preventDefault={submit}>
     <Column>
-        {setContext('form', {schema, disabled, values, onChange, data })}
         <slot name="field">
             {#each keys as key}
                 <FormElement id={key} />
