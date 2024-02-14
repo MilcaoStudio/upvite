@@ -15,7 +15,6 @@
   props={props}
   callback={async ({username})=>{
     loading = true;
-    console.log('Calling callback...');
     props.callback(''+username, true).then(()=>{
       console.log('Onboarding completed!')
       props.onClose()

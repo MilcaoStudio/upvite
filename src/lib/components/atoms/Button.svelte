@@ -1,5 +1,7 @@
 <script lang="ts">
+    import { createEventDispatcher } from "svelte";
     import type { HTMLButtonAttributes } from "svelte/elements";
+
     export let props: HTMLButtonAttributes & {
         compact?: boolean | 'icon',
         palette?: 
@@ -13,6 +15,8 @@
         | "error"} = { compact: false, palette: 'primary' }
 
     const { compact, palette } = props;
+
+    let dispatch = createEventDispatcher();
     const compactCSS = `<style>
         button {
             ${compact == 'icon' ? 'height: 38px; width: 38px;' :
@@ -121,6 +125,6 @@
     }
 </style>
 
-<button {...props} >
+<button {...props} on:click={()=>dispatch('click')}>
     <slot />
 </button>

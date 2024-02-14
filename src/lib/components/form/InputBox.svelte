@@ -1,7 +1,9 @@
 <script lang="ts">
-    import type { HTMLInputAttributes } from "svelte/elements";
+    import type { ChangeEventHandler, HTMLInputAttributes } from "svelte/elements";
 
-    export let props: HTMLInputAttributes & {palette: 'primary' | 'secondary'};
+    export let props: HTMLInputAttributes & {
+        palette: 'primary' | 'secondary',
+    };
     const css = `
     <style>
         input.InputBox {
@@ -37,5 +39,5 @@
     </style>`;
 </script>
 
-<input class="InputBox" {...props} />
+<input class="InputBox" {...props} on:change={props['on:change']} />
 {@html css}

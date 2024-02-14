@@ -12,7 +12,7 @@
             el.component = InputBox;
             el.props = {
                 value: v as string,
-                onChange: (ev: Event & {currentTarget: HTMLInputElement})=>onChange?.(ev.currentTarget?.value),
+                'on:change': (ev: Event & {currentTarget: HTMLInputElement})=>onChange?.(ev.currentTarget?.value),
                 ..._props
             }
             break;
