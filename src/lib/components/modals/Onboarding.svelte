@@ -8,7 +8,7 @@
     export let props: ModalProps<"onboarding">
     let loading = false
     let error: string
-    $: console.error(error);
+    $: error && console.error(error);
 </script>
 
 <ModalForm
