@@ -4,9 +4,11 @@ import type { Client, ClientboundNotification } from "revolt.js";
 import type Persistent from "./types/Persistent";
 import MessageQueue from "./stores/MessageQueue";
 import Auth from "./stores/Auth";
+import type { Data as DataSync, SyncKeys } from './stores/Sync'
 import { clientController } from "./controllers/ClientController";
-import { action, makeAutoObservable, reaction } from "mobx";
+import { action, makeAutoObservable, reaction, runInAction } from "mobx";
 import { injectWindow } from "$lib";
+import type Syncable from "./types/Syncable";
 
 export default class State {
     private persistent: [string, Persistent<unknown>][] = [];
@@ -66,12 +68,21 @@ export default class State {
         }
     }
     
-    @action async hydrate() {
+    async hydrate() {
+        const sync = (await localforage.getItem("sync")) as DataSync;
+        const { revision } = sync ?? { revision: {} };
+        for (const [id, store] of this.persistent) {
+            if (id == "sync") continue;
+            const data = await localforage.getItem(id);
+            if (typeof data == "object" && data !== null) {
+                store.hydrate(data, revision[id] ?? +new Date());
+            }
+        }
         await this.save();
         clientController.hydrate(this.auth)
     }
 
-    onPacket(packet: ClientboundNotification) {
+    @action onPacket(packet: ClientboundNotification) {
         console.log('onPacket:', packet.type);
     }
     /**
@@ -115,16 +126,17 @@ export default class State {
                     try {
                         // Save updated store to local storage.
                         await localforage.setItem(id, JSON.parse(value));
+                        console.log('Data saved to localforage.');
 
                         // Skip if meta store or client not available.
-                        if (id === "sync") return;
+                        if (id == "sync") return;
                         if (!client) return;
 
                         // Generate a new revision and upload changes.
                         const revision = +new Date();
-                        /*
+                        
                         switch (id) {
-                            case "settings": {
+                            case "settings": {/*
                                 const { appearance, theme } =
                                     this.settings.toSyncable();
     
@@ -161,9 +173,9 @@ export default class State {
                                         );
                                     }
                                 }
-                                break;
+                                break;*/
                             }
-                            default: {
+                            default: {/*
                                 if (this.sync.isEnabled(id as SyncKeys)) {
                                     if (this.disabled.has(id)) {
                                         this.disabled.delete(id);
@@ -178,9 +190,9 @@ export default class State {
                                             revision,
                                         );
                                     }
-                                }
+                                }/*/
                             }
-                        }*/
+                        }
                     } catch (err) {
                         console.error("Failed to serialise!");
                         console.error(err);
@@ -212,9 +224,23 @@ export default class State {
         };
     }
     reset() {
-        this.queue = new MessageQueue;
-        this.save();
-        this.persistent = [];
+        runInAction(() => {
+            /*
+            this.draft = new Draft();
+            this.experiments = new Experiments();
+            this.layout = new Layout();
+            this.notifications = new NotificationOptions(this);*/
+            this.queue = new MessageQueue();
+            /*
+            this.settings = new Settings();
+            this.sync = new Sync(this);
+            this.ordering = new Ordering(this);
+            */
+            this.save();
+
+            this.persistent = [];
+            this.register();
+        });
     }
 
 }

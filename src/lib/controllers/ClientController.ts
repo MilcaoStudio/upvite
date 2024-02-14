@@ -6,6 +6,7 @@ import { PUBLIC_API_URL } from "$env/static/public";
 import { state } from "$lib/State";
 import { injectWindow, takeError } from "$lib";
 import { ObservableMap, action, computed, makeAutoObservable, observable } from "mobx";
+import { goto } from "$app/navigation";
 /**
  * Current lifecycle state
  */
@@ -200,7 +201,7 @@ export default class Session {
                 }
 
                 await this.continueLogin(data);
-
+                goto('/');
                 break;
             }
             // Ready successfully received

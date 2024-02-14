@@ -13,16 +13,19 @@
     $: autorun(()=>{
         loggedIn = clientController.isLoggedIn;
         console.log('logged in?', loggedIn);
+        if (auth && !loggedIn){
+            if (!blockRender) goto('/login');
+        } else if (!auth && loggedIn) {
+            if (!blockRender) goto('/');
+        }
     });
-    if (auth && !loggedIn){
-        if (!blockRender) goto('/login');
-    } else if (!auth && loggedIn) {
-        if (!blockRender) goto('/');
-    }
+    
 </script>
 
-{#if auth && loggedIn && !clientController.isReady}
-    <Preloader type='spinner' />
-{:else}
-    <slot />
-{/if}
+{#key loggedIn}
+    {#if auth && loggedIn && !clientController.isReady}
+        <Preloader type='spinner' />
+    {:else}
+        <slot />
+    {/if}
+{/key}
