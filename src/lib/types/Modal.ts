@@ -2,7 +2,7 @@ import type { API, Client, User, Member, Channel, Server, Message } from "revolt
 import type { HTMLAttributes } from "svelte/elements";
 
 export type Modal = {
-    key: string,
+    key?: string,
   } & (
     | {
           type:

@@ -6,8 +6,8 @@
             flex-direction: column;
             gap: ${gap};
             margin: ${typeof group == 'string' ? group : '16px'} 0;
-            ${centred && 'align-items: center;'}
-            ${grow && 'flex-grow: 1;'}
+            ${centred ? 'align-items: center;': ''}
+            ${grow ? 'flex-grow: 1;' : ''}
         }
     </style>`
 </script>

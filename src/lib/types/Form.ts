@@ -182,12 +182,6 @@ export type FormContext = Pick<FormProps<any>, "schema" | "disabled" | "onChange
     values: Record<string, any>;
 }
 
-/**
- * Context providing form data
- */
-setContext<FormContext>('form', null!);
-
-
 export type ModalFormProps<T extends FormTemplate, M extends Modal["type"]> = Exclude<
     ModalProps<M>,
     "children" | "actions" | "registerOnClose" | "registerOnConfirm"

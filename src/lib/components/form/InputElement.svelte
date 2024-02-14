@@ -28,9 +28,9 @@
     <div>
         <!-- <Category>{_props.field}</Category> -->
         <div>{field}</div>
-        <svelte:component this={el.component} {...el.props} />
+        <svelte:component this={el.component} props={el.props} />
     </div>
     {:else}
-    <svelte:component this={el.component} {...el.props} />
+    <svelte:component this={el.component} props={el.props} />
     {/if}
 {/key}
