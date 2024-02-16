@@ -1,9 +1,9 @@
 <script lang="ts">
-    import type { ChangeEventHandler, HTMLInputAttributes } from "svelte/elements";
+    import type { HTMLInputAttributes } from "svelte/elements";
 
     export let props: HTMLInputAttributes & {
-        palette: 'primary' | 'secondary',
-    };
+        palette?: 'primary' | 'secondary',
+    } = {palette: 'primary'};
     const css = `
     <style>
         input.InputBox {

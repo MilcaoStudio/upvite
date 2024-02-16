@@ -1,33 +1,27 @@
 <script lang="ts">
+  import LoginForm from '$lib/components/form/LoginForm.svelte';
   import { clientController } from '$lib/controllers/ClientController';
   import { _ } from 'svelte-i18n';
-  let loading = false;
-  let success: string | null = null;
-  let credentials = {
-    email: '',
-    password: ''
-  };
 
-  function onSubmit(){
-    loading = true;
-    clientController.login(credentials).then(()=>{
-      success = credentials.email;
-      console.log(clientController.activeSession);
-    })
-  }
 </script>
 
-{#if success}
-  <div></div>
-{/if}
-
-<div class="container">
-  <h1 class="title">{$_('login.title')}</h1>
-  <form class="login-form" on:submit|preventDefault={onSubmit}>
-    <div class="form-label">{$_('login.email')}</div>
-    <input name="email" class="form-input" type="email" bind:value={credentials.email} placeholder={$_('login.enter.email')} required />
-    <div class="form-label">{$_('login.password')}</div>
-    <input name="password" class="form-input" type="password" bind:value={credentials.password} placeholder={$_('login.enter.password')} required />
-    <button class="form-btn" type="submit">{$_('login.title')}</button>
-  </form>
-</div>
+<LoginForm page="login" callback={clientController.login}>
+  <span class="create">
+    {$_('login.new') + ' '}
+    <a href="/login/create">
+      {$_('login.create')}
+    </a>
+</span>
+<span class="create">
+    {$_('login.forgot') + ' '}
+    <a href="/login/reset">
+        {$_('login.reset')}
+    </a>
+</span>
+<span class="create">
+    {$_('login.missing_verification') + ' '}
+    <a href="/login/resend">
+        {$_('login.resend')}
+    </a>
+</span>
+</LoginForm>
