@@ -1,0 +1,103 @@
+:root {
+    color-scheme: dark light;
+
+    --light: false;
+    --accent: #FD6671;
+    --error: #ED4245;
+    --success: #65E572;
+    --warning: #FAA352;
+    --primary-background: #0f0f35;
+    --secondary-background: #2e3436;
+    --tertiary-background: #4D4D4D;
+    font-family: 'Open Sans', sans-serif;
+    --border-radius: 15px;
+    --foreground: #fff;
+    --secondary-foreground: #C8C8C8;
+    --tertiary-foreground: #848484;
+    --primary-header: #363636;
+    --secondary-header: #2D2D2D;
+
+    --status-online: #3ABF7E;
+    --status-away: #F39F00;
+    --status-focus: #4799F0;
+    --status-busy: #F84848;
+
+    --scrollbar-thickness: 3px;
+    --scrollbar-thickness-ff: thin;
+    --border-radius: 6px;
+    --border-radius-half: 50%;
+    --border-radius-user-icon: var(--border-radius-half);
+    --border-radius-channel-icon: var(--border-radius-half);
+    --border-radius-server-icon: var(--border-radius-half);
+    --input-border-width: 2px;
+    --textarea-padding: 16px;
+    --textarea-line-height: 20px;
+    --message-box-padding: 14px 14px 14px 0;
+    --attachment-max-width: 400px;
+    --attachment-max-height: 300px;
+    --attachment-default-width: 400px;
+    --attachment-max-text-width: 800px;
+    --bottom-navigation-height: 50px;
+}
+
+.app-container {
+    background-size: cover;
+    background-position: center;
+}
+
+.status-bar {
+    height: 40px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    gap: 8px;
+    user-select: none;
+}
+
+.status-bar .button {
+    padding: 5px;
+    border: 1px solid white;
+    border-radius: var(--border-radius);
+}
+
+.status-bar a {
+    cursor: pointer;
+    color: var(--foreground);
+}
+
+.status-bar .title {
+    flex-grow: 1;
+    text-align: center;
+}
+
+.status-bar .action {
+    gap: 12px;
+    display: flex;
+    padding-right: 4px;
+}
+
+@keyframes -global-fadeIn {
+    0% {opacity: 0;}
+    70% {opacity: 0;}
+    100% {opacity: 1;}
+}
+
+@keyframes -global-fadeOut {
+    0% {opacity: 1;}
+    70% {opacity: 0;}
+    100% {opacity: 0;}
+}
+
+@keyframes -global-zoomIn {
+    0% {transform: scale(0.5);}
+    98% {transform: scale(1.01);}
+    100% {transform: scale(1);}
+}
+
+@keyframes -global-zoomOut {
+    0% {transform: scale(0.5);}
+    98% {transform: scale(1.01);}
+    100% {transform: scale(1);}
+}

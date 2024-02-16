@@ -1,0 +1,230 @@
+.login {
+    width: 100%;
+    height: 100%;
+    padding: 40px 35px;
+    display: flex;
+    user-select: none;
+    /*background: url("/src/pages/login/background.jpg");*/
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+.login .content {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    flex-grow: 1;
+}
+
+.login .form {
+    background-color: rgba(36, 36, 36, 0.75);
+    border: 2px solid rgba(128, 128, 128, 0.15);
+    backdrop-filter: blur(20px);
+    max-width: 360px;
+    max-height: 600px;
+    padding: 30px 25px;
+    border-radius: 8px;
+    margin-inline-start: 50px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 10px 0 rgb(0 0 0 / 20%);
+}
+
+.login .formModal {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.formModal > span {
+    font-size: 13px;
+    word-break: keep-all;
+}
+
+.formModal > span a {
+    color: var(--accent);
+    white-space: nowrap;
+}
+
+.formModal .welcome {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.welcome .title {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.formModal .subtitle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 400;
+    font-size: 14px;
+}
+
+.subtitle > div {
+    display: none;
+    margin-top: 1px;
+    font-size: 11px;
+    color: var(--secondary-foreground);
+}
+
+.formModal form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.formModal form > div {
+    margin: 0;
+    margin-bottom: -4px;
+    font-size: 12px;
+    color: var(--secondary-foreground);
+}
+
+.formModal form input {
+    background: var(--secondary-background);
+}
+
+.formModal form button {
+    padding: 8px;
+    background: var(--secondary-background);
+    margin-bottom: 15px;
+}
+
+.login a {
+    color: white;
+}
+
+.login a:hover {
+    text-decoration: underline;
+}
+
+.login .bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 14px;
+}
+
+.bottom .links {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.links .socials {
+    display: flex;
+    gap: 10px;
+}
+
+.socials a {
+    transition: opacity .2s ease-in-out;
+}
+
+.socials a:hover {
+    opacity: .7;
+}
+
+.socials a:active {
+    opacity: .5;
+}
+
+.success {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.success .title {
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.success .subtitle {
+    font-weight: 400;
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+.success button {
+    width: 100%;
+    background: var(--secondary-background);
+    margin-bottom: 8px;
+}
+
+.success a {
+    font-size: 13px;
+    color: var(--accent);
+}
+
+
+@media only screen and (max-width: 768px) {
+    .login {
+        padding: 30px 20px;
+        background-image: unset;
+        background-color: var(--primary-background);
+    }
+
+    .content .bottom {
+        flex-direction: column;
+    }
+    
+    .bottom .links {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .login .form {
+        border: unset;
+        margin-inline-start: 0;
+        padding: 0;
+        max-width: unset;
+        box-shadow: unset;
+    }
+}
+/*
+.container {
+    margin: auto;
+    padding: 1rem;
+    background-color: #252424;
+    width: 24rem;
+}
+
+.container .title {
+    margin: 0;
+}*/
+/*
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+
+.form-label {
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.form-input {
+    padding: 11px 16px;
+    font-size: 15px;
+    border-radius: 6px;
+}
+
+.form-btn {
+    padding: 8px;
+    margin-bottom: 15px;
+    background-color: #2e3436;
+    display: flex;
+    justify-content: center;
+    border: medium;
+    cursor: pointer;
+    font-size: 14px;
+}*/
