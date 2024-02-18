@@ -1,4 +1,5 @@
 <script lang="ts">
+    import '../../../styles/modal.css'
     import { connect } from "svelte-mobx";
     import { modalController } from "./ModalController";
     import type { SvelteComponent } from "svelte";

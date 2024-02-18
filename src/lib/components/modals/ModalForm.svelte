@@ -6,6 +6,7 @@
     import Error from "../atoms/Error.svelte";
     import type { HTMLButtonAttributes } from "svelte/elements";
     import type { Action, ModalProps } from "$lib/types/Modal";
+    import Category from "../atoms/Category.svelte";
 
     
     export let schema: FormTemplate,
@@ -51,7 +52,6 @@
         <svelte:fragment slot="submit">{submitBtn?.children}</svelte:fragment>
     </Form>
     {#if error}
-        <!--<Category>...</Category>-->
-        <div><Error error={$_('error')}>{error}</Error></div>
+        <Category><Error error={$_('error')}>{error}</Error></Category>
     {/if}
 </Modal>
