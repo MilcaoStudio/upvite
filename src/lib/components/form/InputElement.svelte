@@ -2,6 +2,7 @@
     import type { ComponentProps } from "svelte";
     import InputBox from "./InputBox.svelte";
     import type { HTMLInputAttributes } from "svelte/elements";
+    import Category from "../atoms/Category.svelte";
 
     export let props: HTMLInputAttributes & {onChange?: (value: string)=>void, field?: string};
     const { value, type, field, onChange, ..._props } = props;
@@ -26,8 +27,7 @@
 {#key props}
     {#if field}
     <div>
-        <!-- <Category>{_props.field}</Category> -->
-        <div>{field}</div>
+        <Category>{field}</Category>
         <svelte:component this={el.component} props={el.props} />
     </div>
     {:else}
