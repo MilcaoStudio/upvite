@@ -46,4 +46,8 @@
     );
 </script>
 
-<input class={InputBox} {...props} on:change={props["on:change"]} />
+<!--TextBox is not recommended because it does not listen to change events-->
+<div class="text-box-container">
+    <input class={InputBox} {...props} on:change={props["on:change"]} />
+    <div class="text-box-underline" />
+</div>

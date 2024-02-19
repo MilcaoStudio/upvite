@@ -48,6 +48,5 @@ div.Base {
     display: flex;
     padding: 1rem;
     flex-direction: row-reverse;
-    background: var(--secondary-background);
     border-radius: 0 0 var(--border-radius) var(--border-radius);
 }

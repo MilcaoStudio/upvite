@@ -23,7 +23,6 @@
     export let props: ModalProps<Modal["type"]>
     const values = getInitialValues(schema, defaults);
     let error = '', processing = false;
-    _;
     async function onSubmit() {
         try {
             processing = true;
