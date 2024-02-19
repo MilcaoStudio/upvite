@@ -8,13 +8,14 @@ import type { Data as DataSync, SyncKeys } from './stores/Sync'
 import { clientController } from "./controllers/ClientController";
 import { action, makeAutoObservable, reaction, runInAction } from "mobx";
 import { injectWindow } from "$lib";
-import type Syncable from "./types/Syncable";
+import Layout from "./stores/Layout";
 
 export default class State {
     private persistent: [string, Persistent<unknown>][] = [];
     private disabled: Set<string> = new Set;
     auth = new Auth;
     queue = new MessageQueue;
+    layout = new Layout;
 
     constructor() {
         makeAutoObservable(this);
