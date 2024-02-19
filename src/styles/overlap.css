@@ -1,0 +1,65 @@
+.docked {
+	display: flex;
+	flex-direction: row;
+}
+
+.docked .main {
+	flex-grow: 1;
+	min-width: 0;
+	display: flex;
+}
+
+.docked .main > * {
+	flex-grow: 1;
+}
+
+
+.container {
+	overflow: hidden;
+}
+
+
+.snap {
+	display: grid;
+	overflow-x: scroll;
+	overflow-y: hidden;
+	grid-template-rows: 1;
+	-ms-scroll-snap-type: x mandatory;
+	scroll-snap-type: x mandatory;
+	scrollbar-width: none;
+	scrollbar-color: transparent;
+}
+
+.snap::-webkit-scrollbar {
+	width: 0px;
+	height: 0px;
+}
+
+
+.snap > div {
+	scroll-snap-align: center;
+}
+
+
+.snap > div:nth-child(2) {
+	scroll-snap-stop: always;
+}
+
+
+.nav {
+	z-index: 1;
+	position: relative;
+	pointer-events: none;
+}
+
+
+.nav > div {
+	display: flex;
+	position: absolute;
+	flex-direction: column-reverse;
+}
+
+
+.nav > div > div {
+	pointer-events: all;
+}
