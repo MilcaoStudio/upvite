@@ -8,7 +8,6 @@
     import LeftSidebar from "./navigation/LeftSidebar.svelte";
     import RightSidebar from "./navigation/RightSidebar.svelte";
     import BottomNavigation from "./navigation/BottomNavigation.svelte";
-    import '../../styles/overlap.css'
 
     // Make true on worker alert
     // let showStatusBar = false;
@@ -53,17 +52,6 @@
         }}
         docked={isTouchscreenDevice ? Docked.None : Docked.Left}
     >
-        {#if /server\/.+(\/)?$/.test(path)}
-            <ChannelView />
-        <!--/settings/:page route -->
-        <!--/settings route -->
-        <!--/discover route -->
-        <!--/dev route -->
-        <!--/friends route -->
-        <!--/open/:id route -->
-        <!--/bot/:id route -->
-        {:else}
-            <Home />
-        {/if}
+       <slot />
     </OverlapPanel>
 </div>

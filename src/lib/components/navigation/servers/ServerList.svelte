@@ -15,6 +15,11 @@
         createServer: ()=>void,
         servers: Server[],
         reorder: (items: Server[]) => void;
+    
+    servers = servers.map((s)=>{
+        Object.defineProperty(s, 'id', {value: s._id});
+        return s
+    })
     const Base = cx(
         "ServerList",
         css`
