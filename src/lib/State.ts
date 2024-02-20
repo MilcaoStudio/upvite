@@ -9,6 +9,8 @@ import { clientController } from "./controllers/ClientController";
 import { action, makeAutoObservable, reaction, runInAction } from "mobx";
 import { injectWindow } from "$lib";
 import Layout from "./stores/Layout";
+import NotificationOptions from "./stores/NotificationOptions";
+import Ordering from "./stores/Ordering";
 
 export default class State {
     private persistent: [string, Persistent<unknown>][] = [];
@@ -16,6 +18,8 @@ export default class State {
     auth = new Auth;
     queue = new MessageQueue;
     layout = new Layout;
+    notifications: NotificationOptions;
+    ordering: Ordering;
 
     constructor() {
         makeAutoObservable(this);
@@ -23,6 +27,9 @@ export default class State {
         this.register();
         this.disable = this.disable.bind(this);
         this.onPacket = this.onPacket.bind(this);
+
+        this.notifications = new NotificationOptions(this);
+        this.ordering = new Ordering(this);
         injectWindow('state', this);
     }
 
