@@ -3,8 +3,8 @@
     import { BxChevronRight, BxLinkExternal } from 'svelte-boxicons'
     export let disabled = false,
         account = false, icon: ConstructorOfATypedSvelteComponent, description = '', onClick=function(){}, action: 'chevron' | 'external' | ConstructorOfATypedSvelteComponent = 'chevron';
-    $: Base = cx(
-        "Base",
+    $: CategoryButton = cx(
+        "CategoryButton",
         css`
             ${disabled
                 ? `
@@ -45,7 +45,7 @@
 </script>
 
 <style>
-    a.Base {
+    a.CategoryButton {
         padding: 9.8px 12px;
         border-radius: var(--border-radius);
         margin-bottom: 10px;
@@ -57,11 +57,11 @@
         flex-direction: row;
     }
 
-    a.Base > :global(svg) {
+    a.CategoryButton > :global(svg) {
         flex-shrink: 0;
     }
 
-    a.Base .content {
+    a.CategoryButton .content {
         display: flex;
         flex-grow: 1;
         flex-direction: column;
@@ -69,13 +69,13 @@
         font-size: 0.875rem;
     }
 
-    a.Base .title {
+    a.CategoryButton .title {
         display: -webkit-box;
         -webkit-box-orient: vertical;
         -webkit-line-clamp: 2;
         overflow: hidden;
     }
-    a.Base .description {
+    a.CategoryButton .description {
         font-weight: 400;
         display: -webkit-box;
         -webkit-box-orient: vertical;
@@ -83,13 +83,13 @@
         overflow: hidden;
         color: var(--secondary-foreground);
     }
-    a.Base .description :global(a:hover) {
+    a.CategoryButton .description :global(a:hover) {
         text-decoration: underline;
     }
 </style>
 
 <!-- svelte-ignore a11y-missing-attribute -->
-<a class={Base} role="button" tabindex="0" on:click={onClick} on:keydown={onClick}>
+<a class={CategoryButton} role="button" tabindex="0" on:click={onClick} on:keydown={onClick}>
     <svelte:component this={icon} size={24} />
     <div class="content">
         <div class="title">
