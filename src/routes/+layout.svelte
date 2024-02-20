@@ -8,6 +8,7 @@
     import ModalRenderer from "$lib/components/modals/ModalRenderer.svelte";
     import CheckAuth from "$lib/controllers/CheckAuth.svelte";
     import "../styles/app.css";
+    import '../styles/overlap.css'
     import "fluent-svelte/theme.css";
 
     let ready = false;
