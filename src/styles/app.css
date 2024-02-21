@@ -1,32 +1,45 @@
 :root {
-    color-scheme: dark light;
+
+
+    color-scheme: dark;
 
     --app-height: 100vh;
     --light: false;
-    --accent: #FD6671;
+
+    --accent: #e45a64;
     --error: #ED4245;
     --success: #65E572;
     --warning: #FAA352;
-    --primary-background: #9b9bbe;
-    --secondary-background: #2e3436;
-    --tertiary-background: #4D4D4D;
+
     font-family: 'Open Sans', sans-serif;
+
     --border-radius: 15px;
     --foreground: #fff;
-    --primary-background: #2c3039;
-    --primary-background-rgb: 44,48,57;
-    --primary-header: #363636;
-    --primary-header-rgb: 54,54,54;
-    --secondary-background: #2e3436;
-    --secondary-background-rgb: 46,52,54;
+
+    --background-rgb: 24, 25, 35;
+    
+    --primary-background: #181923;
+    --primary-background-rgb: 24, 25, 35;
+
+    --secondary-background: #292d41;
+    --secondary-background-rgb: 41,45,65;
+
     --secondary-foreground: #C8C8C8;
-    --secondary-foreground-rgb: 200,200,200;
-    --secondary-header: #2D2D2D;
-    --secondary-header-rgb: 45,45,45;
-    --tertiary-background: #4D4D4D;
-    --tertiary-background-rgb: 77,77,77;
-    --tertiary-foreground: #848484;
-    --tertiary-foreground-rgb: 132,132,132;
+    --secondary-foreground-rgb: 24,25,35;
+
+    --primary-header: #38405d;
+    --primary-header-rgb: 56, 64, 93;
+
+    --secondary-header: #292d41;
+    --secondary-header-rgb: 41,44,65;
+
+    --tertiary-background: #4c546d;
+    --tertiary-background-rgb: 24,25,35;
+    
+    --tertiary-foreground: #4c546d;
+    --tertiary-foreground-rgb: 24,25,35;
+
+
 
     --status-online: #3ABF7E;
     --status-away: #F39F00;

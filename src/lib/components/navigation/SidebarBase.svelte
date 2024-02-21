@@ -8,8 +8,7 @@
         /*background: var(--background);*/
 
         background-color: rgba(
-            var(--background-rgb),
-            max(var(--min-opacity), 0.75)
+            var(--background-rgb)
         );
         backdrop-filter: blur(20px);
     }
