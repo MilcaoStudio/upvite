@@ -11,6 +11,7 @@ import { injectWindow } from "$lib";
 import Layout from "./stores/Layout";
 import NotificationOptions from "./stores/NotificationOptions";
 import Ordering from "./stores/Ordering";
+import Settings from "./stores/Settings";
 
 export default class State {
     private persistent: [string, Persistent<unknown>][] = [];
@@ -20,6 +21,7 @@ export default class State {
     layout = new Layout;
     notifications: NotificationOptions;
     ordering: Ordering;
+    settings = new Settings;
 
     constructor() {
         makeAutoObservable(this);
