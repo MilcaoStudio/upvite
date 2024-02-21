@@ -48,6 +48,7 @@
     "@fontsource/ubuntu-mono": "^5.0.18",
     "color-rgba": "^3.0.0",
     "detect-browser": "^5.3.0",
+    "eventemitter3": "^5.0.1",
     "json-stringify-deterministic": "^1.0.12",
     "localforage": "^1.10.0",
     "mobx": "^6.12.0",
