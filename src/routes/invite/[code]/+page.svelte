@@ -15,6 +15,9 @@
     import { _ } from "svelte-i18n";
     import "../../../styles/invite.css"
     import TextSvelte from "$lib/i18n/TextSvelte.svelte";
+    import { translate } from "$lib/i18n";
+    import ServerIcon from "$lib/components/ServerIcon.svelte";
+    import UserIcon from "$lib/components/user/UserIcon.svelte"
 
     export let data;
 
@@ -81,6 +84,7 @@
         {#if !processing}
             <div class="icon">
                 <!--ServerIcon-->
+                <ServerIcon attachment={invite.server_icon} server_name={invite.server_name} size={64} />
             </div>
         {/if}
 
@@ -91,14 +95,10 @@
                 <h1>{invite.server_name}</h1>
                 <h2>
                     #{invite.channel_name} •{" "}
-                    {$_("app.special.invite.user_count", {
-                        values: { member_count: invite.member_count },
-                    })}
+                    {translate('app.special.invite.user_count', {member_count: invite.member_count})}
                 </h2>
                 <h3>
-                    {$_("app.special.invite.invited_by", {
-                        values: { user: invite.user_name },
-                    })}
+                    <TextSvelte id="app.special.invite.invited_by" fields={{user: {base: UserIcon, props: {size: 24, attachment: invite.user_avatar}}}}/>
                 </h3>
                 <Category><Error {error} /></Category>
                 <Button
