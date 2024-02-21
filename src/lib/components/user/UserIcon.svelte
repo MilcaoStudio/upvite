@@ -22,7 +22,7 @@
 </script>
 
 <script lang="ts">
-    export let target: User,
+    export let target: User | undefined = undefined,
         attachment: any = undefined,
         size: number,
         status = false,
@@ -31,7 +31,7 @@
         hover = false,
         showServerIdentity = false,
         masquerade: API.Masquerade | null = null,
-        innerRef: SVGElement,
+        innerRef: SVGElement | undefined = undefined,
         override: string | undefined = undefined,
         url: string | undefined = undefined;
     const client = useClient();

@@ -13,11 +13,12 @@
     import { API } from "revolt.js";
     import { BxArrowBack } from "svelte-boxicons";
     import { _ } from "svelte-i18n";
-    import "../../../styles/invite.css"
+    import "../../../styles/invite.css";
     import TextSvelte from "$lib/i18n/TextSvelte.svelte";
     import { translate } from "$lib/i18n";
     import ServerIcon from "$lib/components/ServerIcon.svelte";
-    import UserIcon from "$lib/components/user/UserIcon.svelte"
+    import UserIcon from "$lib/components/user/UserIcon.svelte";
+    import { createElement } from "$lib/components/Tree.svelte";
 
     export let data;
 
@@ -84,7 +85,11 @@
         {#if !processing}
             <div class="icon">
                 <!--ServerIcon-->
-                <ServerIcon attachment={invite.server_icon} server_name={invite.server_name} size={64} />
+                <ServerIcon
+                    attachment={invite.server_icon}
+                    server_name={invite.server_name}
+                    size={64}
+                />
             </div>
         {/if}
 
@@ -95,10 +100,25 @@
                 <h1>{invite.server_name}</h1>
                 <h2>
                     #{invite.channel_name} •{" "}
-                    {translate('app.special.invite.user_count', {member_count: invite.member_count})}
+                    {translate("app.special.invite.user_count", {
+                        member_count: invite.member_count,
+                    })}
                 </h2>
                 <h3>
-                    <TextSvelte id="app.special.invite.invited_by" fields={{user: {base: UserIcon, props: {size: 24, attachment: invite.user_avatar}}}}/>
+                    <TextSvelte
+                        id="app.special.invite.invited_by"
+                        fields={{
+                            user: createElement(
+                                "span",
+                                { style: "display:inline-flex;" },
+                                createElement(UserIcon, {
+                                    size: 24,
+                                    attachment: invite.user_avatar,
+                                }),
+                                invite.user_name,
+                            ),
+                        }}
+                    />
                 </h3>
                 <Category><Error {error} /></Category>
                 <Button
@@ -109,11 +129,13 @@
                         }
                         processing = true;
                         try {
-                            if (invite.type != 'Server') {
-                                throw TypeError('Invite has invalid format')
+                            if (invite.type != "Server") {
+                                throw TypeError("Invite has invalid format");
                             }
                             await client.joinInvite(invite);
-                            goto(`/server/${invite.server_id}/channel/${invite.channel_id}`);
+                            goto(
+                                `/server/${invite.server_id}/channel/${invite.channel_id}`,
+                            );
                         } catch (err) {
                             error = takeError(err);
                         } finally {
@@ -121,11 +143,11 @@
                         }
                     }}
                 >
-                {#if session}
-                    {$_('app.special.invite.accept')}
-                {:else}
-                    {$_('app.special.invite.login')}
-                {/if}
+                    {#if session}
+                        {$_("app.special.invite.accept")}
+                    {:else}
+                        {$_("app.special.invite.login")}
+                    {/if}
                 </Button>
             {/if}
         </div>
