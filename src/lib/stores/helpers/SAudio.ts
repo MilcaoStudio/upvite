@@ -1,12 +1,12 @@
 import { makeAutoObservable, computed, action } from "mobx";
-
+/*
 import call_join from "../../../assets/sounds/call_join.mp3";
 import call_leave from "../../../assets/sounds/call_leave.mp3";
 import message from "../../../assets/sounds/message.mp3";
-import outbound from "../../../assets/sounds/outbound.mp3";
+import outbound from "../../../assets/sounds/outbound.mp3";*/
 import Settings from "../Settings";
 
-export type Sounds = "message" | "outbound" | "call_join" | "call_leave";
+export type Sounds = string//"message" | "outbound" | "call_join" | "call_leave";
 
 export interface Sound {
     enabled: boolean;
@@ -17,12 +17,12 @@ export type SoundOptions = {
     [key in Sounds]?: Partial<Sound>;
 };
 
-export const DefaultSoundPack: { [key in Sounds]: string } = {
+export const DefaultSoundPack: { [key in Sounds]: string } = {/*
     message,
     outbound,
     call_join,
     call_leave,
-};
+*/};
 
 export const ALL_SOUNDS: Sounds[] = [
     "message",
@@ -30,7 +30,7 @@ export const ALL_SOUNDS: Sounds[] = [
     "call_join",
     "call_leave",
 ];
-export const DEFAULT_SOUNDS: Sounds[] = ["message", "call_join", "call_leave"];
+export const DEFAULT_SOUNDS: Sounds[] = [];
 
 /**
  * Helper class for reading and writing themes.
