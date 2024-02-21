@@ -21,15 +21,9 @@
 }
 
 .invite .icon {
-    width: 64px;
-    z-index: 100;
+    z-index: 10;
     text-align: left;
     position: relative;
-}
-
-.invite .icon > * {
-    top: -32px;
-    position: absolute;
 }
 
 .invite .leave {
