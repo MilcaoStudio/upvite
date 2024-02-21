@@ -15,18 +15,3 @@
 </script>
 
 <PersonPicture class="ServerText" src={iconURL} alt={name} {size} {...$$restProps} />
-
-<style>
-    .ServerText {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 0.2em;
-        font-size: 0.75rem;
-        font-weight: 600;
-        overflow: hidden;
-        color: var(--foreground);
-        background: var(--primary-background);
-        border-radius: var(--border-radius-half);
-    }
-</style>
