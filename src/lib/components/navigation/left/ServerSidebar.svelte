@@ -116,12 +116,11 @@
 </script>
 
 <div class={ServerBase}>
-    <ServerHeader {server}>
-        <!--<ConnectionStatus />-->
-        <div class={ServerList}>
-            {#each elements as element}
-                <Tree node={element} />
-            {/each}
-        </div>
-    </ServerHeader>
+    <ServerHeader {server}/>
+    <!--<ConnectionStatus />-->
+    <div class={ServerList}>
+        {#each elements as element}
+            <Tree node={element} />
+        {/each}
+    </div>
 </div>
