@@ -18,7 +18,7 @@
     data-alert={alerting}
     data-muted={muted}
     aria-label={channel.name} class={cx('item', { ['compact']: compact })}
-    {...$$props}>
+    {...$$restProps}>
         <div class="avatar">
             #
         </div>
