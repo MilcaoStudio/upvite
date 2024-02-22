@@ -18,8 +18,7 @@
     import type { Server } from "revolt.js";
     import Tooltip from "$lib/components/atoms/Tooltip.svelte";
     export let head = false,
-        item: Server,
-        permit: INotificationChecker; //, active = false;
+        item: Server;//,permit: INotificationChecker; //, active = false;
     const ItemContainer = cx(
         "ItemContainer",
         css`
@@ -32,7 +31,7 @@
         `,
     );
     //const unread = !!item.isUnread(permit);
-    const count = item.getMentions(permit).length;
+    //const count = item.getMentions(permit).length;
 </script>
 
 <div class={ItemContainer}>
@@ -45,9 +44,7 @@
                 size={42}
                 alt={item.name}
                 src={item.generateIconURL({ max_side: 256 }, false)}
-            >
-            <InfoBadge severity="critical" slot="badge">{count}</InfoBadge>
-            </PersonPicture>
+            />
         </a>
     </Tooltip>
 </div>

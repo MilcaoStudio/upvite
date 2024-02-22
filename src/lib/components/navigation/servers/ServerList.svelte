@@ -11,8 +11,7 @@
     export const active: string | undefined = undefined,
         client: Client | null = null,
         home: () => string = () => "/";
-    export let permit: INotificationChecker,
-        createServer: ()=>void,
+    export let createServer: ()=>void,
         servers: Server[],
         reorder: (items: Server[]) => void;
     
@@ -67,7 +66,7 @@
         on:finalize={useCustomReorder(reorder)}
     >
         {#each servers as server (server._id)}
-            <Item item={server} {permit} />
+            <Item item={server} />
         {/each}
     </div>
     <ListFooter {createServer}/>
