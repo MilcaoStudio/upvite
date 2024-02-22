@@ -1,6 +1,4 @@
 :root {
-
-
     color-scheme: dark;
 
     --app-height: 100vh;
@@ -10,8 +8,6 @@
     --error: #ED4245;
     --success: #65E572;
     --warning: #FAA352;
-
-    font-family: 'Open Sans', sans-serif;
 
     --border-radius: 15px;
     --foreground: #fff;
@@ -39,7 +35,10 @@
     --tertiary-foreground: #4c546d;
     --tertiary-foreground-rgb: 24,25,35;
 
-
+    --hover: rgba(0,0,0,0.1);
+    --hover-rgb: 0,0,0;
+    --hover-contrast: white;
+    --hover-contrast-rgb: 255,255,255;
 
     --status-online: #3ABF7E;
     --status-away: #F39F00;
@@ -111,6 +110,84 @@ body {
     box-sizing: border-box;
     scrollbar-width: var(--scrollbar-thickness-ff);
     -webkit-touch-callout: none;
+}
+
+:disabled {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+::-webkit-scrollbar {
+    width: var(--scrollbar-thickness);
+    height: var(--scrollbar-thickness);
+}
+
+::-webkit-scrollbar-track {
+    background: var(--scrollbar-track);
+}
+
+::-webkit-scrollbar-thumb {
+    min-width: 30px;
+    min-height: 30px;
+
+    background-clip: content-box;
+    background: var(--scrollbar-thumb);
+}
+
+[data-scroll-offset] {
+    overflow-y: scroll;
+}
+
+[data-scroll-offset="with-padding"],
+[data-scroll-offset] .with-padding {
+    padding-top: var(--header-height);
+}
+
+[data-scroll-offset]::-webkit-scrollbar-thumb {
+    background-clip: content-box;
+    border-top: var(--header-height) solid transparent;
+}
+
+[data-avoids-navigation]::-webkit-scrollbar-thumb {
+    background-clip: content-box;
+    border-bottom: var(--effective-bottom-offset) solid transparent;
+}
+
+::-webkit-scrollbar-corner {
+    background: transparent;
+}
+
+::selection {
+    background: var(--foreground);
+    color: var(--background);
+}
+
+::-moz-selection {
+    background: var(--foreground);
+    color: var(--background);
+}
+
+::-webkit-selection {
+    background: var(--foreground);
+    color: var(--background);
+}
+
+a,
+a:link,
+a:visited,
+a:hover {
+    text-decoration: none;
+    color: var(--accent);
+}
+
+hr {
+    border: 0;
+    height: 1px;
+    flex-grow: 1;
+}
+
+foreignObject > svg {
+    vertical-align: top;
 }
 
 .app-container {
@@ -216,7 +293,7 @@ div.TitlebarBase {
 
 .quick > div,
     .quick > div > div {
-    width: var(--titlebar-height) !important;
+    width: var(--titlebar-height);
 }
 
 .TitlebarBase .title {
