@@ -6,7 +6,7 @@
         alert: "unread" | "mention" | undefined = undefined,
         alertCount = 0,
         channel: Channel | undefined,
-        user: User | undefined = undefined,
+        //user: User | undefined = undefined,
         compact = false,
         muted = false;
     const alerting = alert && !muted && !active;

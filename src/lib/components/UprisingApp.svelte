@@ -52,6 +52,8 @@
         }}
         docked={isTouchscreenDevice ? Docked.None : Docked.Left}
     >
-       <slot />
+        <svelte:fragment slot="left"><slot name="left" /></svelte:fragment>
+        <svelte:fragment slot="right"><slot name="right" /></svelte:fragment>
+        <slot />
     </OverlapPanel>
 </div>

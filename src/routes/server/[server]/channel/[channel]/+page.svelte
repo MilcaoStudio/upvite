@@ -6,6 +6,11 @@
     import { useClient } from "$lib/controllers/ClientController";
     import type { Channel } from "revolt.js";
     import type { LayoutData } from "./$types";
+    import { isTouchscreenDevice } from "$lib";
+    import { SIDEBAR_CHANNELS } from "$lib/stores/Layout";
+    import SidebarBase from "$lib/components/navigation/SidebarBase.svelte";
+    import ServerSidebar from "$lib/components/navigation/left/ServerSidebar.svelte";
+    import ServerListSidebar from "$lib/components/navigation/left/ServerListSidebar.svelte";
     const client = useClient();
 
     export let data: LayoutData;
@@ -31,10 +36,22 @@
         }
 
     }
+
     channel = client.channels.get(id);
+    const open = isTouchscreenDevice || state.layout.getSectionState(SIDEBAR_CHANNELS, true);
+    const server = client.servers.get(server_id);
+    if(!server) {
+        goto("/");
+    }
 </script>
 
 <UprisingApp>
+    <SidebarBase slot="left">
+        <ServerListSidebar />
+        {#if open && server}
+            <ServerSidebar {server} {channel} />
+        {/if}  
+    </SidebarBase>
     {#if channel}
         <TextChannel {channel} />
     {/if}
