@@ -8,7 +8,8 @@
     import HamburgerAction from './HamburgerAction.svelte'
     import { connect } from "svelte-mobx";
     import { BxChevronLeft, BxChevronRight} from 'svelte-boxicons'
-    export let withBackground = false, withTransparency = false, noBurger = false, icon: ConstructorOfATypedSvelteComponent;
+    import type { ComponentType } from "svelte";
+    export let withBackground = false, withTransparency = false, noBurger = false, icon: ComponentType;
     const { autorun } = connect()
     const IconContainer = cx('IconContainer', css`
     display: flex;
