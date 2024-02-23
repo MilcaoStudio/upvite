@@ -3,6 +3,11 @@
     import { state } from "$lib/State";
     import { reaction } from "mobx";
     import type { Channel } from "revolt.js";
+    import ChannelHeader from "./ChannelHeader.svelte";
+    import { ErrorBoundary, createBoundary } from "$lib/error/errorBoundary";
+    import { isTouchscreenDevice } from "$lib";
+    import { SIDEBAR_MEMBERS } from "$lib/stores/Layout";
+    import RightSidebar from "../navigation/RightSidebar.svelte";
 
     export let channel: Channel;
     const layout = state.layout;
@@ -29,4 +34,37 @@
     }
 </script>
 
-Bienvenido al canal {channel.name}
+<ChannelHeader {channel} />
+<div class="ChannelMain" data-component="channel">
+    <ErrorBoundary section="renderer">
+        <div class="ChannelContent">
+            Bienvenido al canal {channel.name}
+            <!--<VoiceHeader id={channel._id} />
+                <NewMessages channel={channel} last_id={lastId} />
+                <MessageArea channel={channel} last_id={lastId} />
+                <TypingIndicator channel={channel} />
+                <JumpToBottom channel={channel} />
+                <MessageBox channel={channel} />-->
+        </div>
+    </ErrorBoundary>
+    {#if !isTouchscreenDevice && layout.getSectionState(SIDEBAR_MEMBERS, true)}
+        <RightSidebar />
+    {/if}
+</div>
+
+<style>
+    div.ChannelMain {
+        flex-grow: 1;
+        display: flex;
+        min-height: 0;
+        overflow: hidden;
+        flex-direction: row;
+    }
+
+    div.ChannelContent {
+        flex-grow: 1;
+        display: flex;
+        overflow: hidden;
+        flex-direction: column;
+    }
+</style>
