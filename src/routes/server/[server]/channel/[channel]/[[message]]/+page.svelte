@@ -1,3 +1,4 @@
+<!---TODO--->
 <script lang="ts">
     import { goto } from "$app/navigation";
     import { state } from "$lib/State";
@@ -14,12 +15,17 @@
     const client = useClient();
 
     export let data: LayoutData;
-    const { channel: id, server: server_id } = data;
+    const { channel: id, server: server_id, message } = data;
 
-    let channel: Channel | undefined
+    let server = client.servers.get(server_id);
+    let channel: Channel | undefined;
+
+    if (!server) {
+        goto('/');
+    }
+
     if (!client.channels.exists(id)) {
         if (server_id) {
-            const server = client.servers.get(server_id);
             if (server && server.channel_ids.length > 0) {
                 let target_id = server.channel_ids[0];
                 const last_id = state.layout.getLastOpened(server_id);
@@ -39,10 +45,6 @@
 
     channel = client.channels.get(id);
     const open = isTouchscreenDevice || state.layout.getSectionState(SIDEBAR_CHANNELS, true);
-    const server = client.servers.get(server_id);
-    if(!server) {
-        goto("/");
-    }
 </script>
 
 <UprisingApp>
@@ -53,6 +55,6 @@
         {/if}  
     </SidebarBase>
     {#if channel}
-        <TextChannel {channel} />
+        <TextChannel {channel} {message} />
     {/if}
 </UprisingApp>
