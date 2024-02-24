@@ -108,7 +108,7 @@ export default class State {
             // Register listener for incoming packets.
             client.addListener("packet", this.onPacket);
 
-            /*
+            
             // Register events for notifications.
             client.addListener("message", this.notifications.onMessage);
             client.addListener(
@@ -119,7 +119,7 @@ export default class State {
                 "visibilitychange",
                 this.notifications.onVisibilityChange,
             );
-    
+            /*
             // Sync settings from remote server.
             state.sync
                 .pull(client)
@@ -217,7 +217,7 @@ export default class State {
             if (client) {
                 client.removeListener("message", this.queue.onMessage);
                 client.removeListener("packet", this.onPacket);
-                /**
+                
                 client.removeListener("message", this.notifications.onMessage);
                 client.removeListener(
                     "user/relationship",
@@ -226,7 +226,7 @@ export default class State {
                 document.removeEventListener(
                     "visibilitychange",
                     this.notifications.onVisibilityChange,
-                );*/
+                );
             }
 
             // Wipe all listeners.
@@ -237,15 +237,14 @@ export default class State {
         runInAction(() => {
             /*
             this.draft = new Draft();
-            this.experiments = new Experiments();
+            this.experiments = new Experiments();*/
             this.layout = new Layout();
-            this.notifications = new NotificationOptions(this);*/
+            this.notifications = new NotificationOptions(this);
             this.queue = new MessageQueue();
-            /*
+            
             this.settings = new Settings();
-            this.sync = new Sync(this);
+            //this.sync = new Sync(this);
             this.ordering = new Ordering(this);
-            */
             this.save();
 
             this.persistent = [];
