@@ -12,10 +12,10 @@
         // turns on context menu
         //attachContent = false,
         replacement: string | undefined = undefined,
-        queued: QueuedMessage | undefined = undefined,
-        highlight = false,
-        contrast = false,
-        hideReply = false;
+        queued: QueuedMessage | undefined = undefined;
+        //highlight = false,
+        //contrast = false,
+        //hideReply = false;
     const Wrapper = cx(
         "Wrapper",
         css`
@@ -61,7 +61,7 @@
     <div class="Message">
         <div class="MessageTail">
             {#if head}
-                <UserIcon class="avatar" url={message.generateMasqAvatarURL()}
+                <UserIcon url={message.generateMasqAvatarURL()}
                 override={
                     message.webhook?.avatar
                         ? `https://autumn.revolt.chat/avatars/${message.webhook.avatar}`
@@ -100,10 +100,10 @@
     }
 
     /* Make time sent and edited components uniform */
-    div.Message time {
+    /*div.Message time {
         font-size: 10px;
         color: var(--tertiary-foreground);
-    }
+    }*/
 
     div.MessageTail {
         width: 62px;

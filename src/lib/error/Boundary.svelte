@@ -21,7 +21,7 @@
                 Refresh page
             </Button>
             <div class="buttonDivider" />
-            <Button props={{palette: error}} on:click={reset}>Reset app data</Button>
+            <Button props={{palette: 'error'}} on:click={reset}>Reset app data</Button>
         {:else}
             <h3>Component Error</h3>
         {/if}
@@ -29,7 +29,7 @@
         <br />
         <div>Uprising has crashed. Here's the error:</div>
         <pre>
-        <code>{error}</code>
+        <code>{JSON.stringify(error)}</code>
         </pre>
         <!-- No reports? -->
         <!--<div>This error has been automatically reported.</div>-->

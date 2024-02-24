@@ -5,6 +5,7 @@
     import { routeInformation } from "../context/history";
     import fallback from "$lib/assets/user.png";
     import IconBase from "../IconBase.svelte";
+    import { createEventDispatcher } from "svelte";
 
     export function useStatusColor(user?: User) {
         const theme = state.settings.theme;
@@ -35,6 +36,7 @@
         override: string | undefined = undefined,
         url: string | undefined = undefined;
     const client = useClient();
+    const dispatcher = createEventDispatcher();
     if (masquerade?.avatar) {
         url = client.proxyFile(masquerade.avatar);
     } else if (override) {
@@ -72,6 +74,8 @@
     borderRadius="--border-radius-user-icon"
     aria-hidden
     viewBox="0 0 32 32"
+    on:click={(e)=>dispatcher('click', e)}
+    {...$$restProps}
 >
     <foreignObject
         x="0"
