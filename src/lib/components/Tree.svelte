@@ -2,7 +2,7 @@
     import type { ComponentProps, ComponentType, SvelteComponent } from "svelte";
     import type { HTMLAttributes } from "svelte/elements";
 
-    export type Node = string | Component | Element | null;
+    export type Node = string | number | Component | Element | null;
     export type Children = Node | Node[];
     export type Component = {
         element: ComponentType,
