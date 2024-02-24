@@ -15,7 +15,7 @@
   let stack: SvelteComponent[] = [];
   $: autorun(()=>{
     stack.forEach(comp=>comp.$destroy());
-    stack = modalController.stack.map(modal=>{
+    stack = modalController.stack.filter(modal=>modalController.components[modal.type]).map(modal=>{
       const Component = modalController.components[modal.type];
       return new Component({target: document.body, props: {props: {...modal, onClose: ()=>modalController.remove(modal.key || '')}}});
     }
