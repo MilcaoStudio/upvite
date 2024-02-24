@@ -54,3 +54,15 @@ export const isTouchscreenDevice = browser && navigator.maxTouchPoints > 1;
 export function injectWindow(key: string, source: any) {
     !Object.hasOwn(window, key) && Object.defineProperty(window, key, {value: source});
 }
+
+/**
+ * Schedule a task at the end of the Event Loop
+ * @param cb Callback
+ */
+export const defer = (cb: () => void) => setTimeout(cb, 0);
+
+/**
+ * Schedule a task at the end of the second Event Loop
+ * @param cb Callback
+ */
+export const chainedDefer = (cb: () => void) => defer(() => defer(cb));
