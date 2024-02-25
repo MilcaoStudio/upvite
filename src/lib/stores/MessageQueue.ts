@@ -78,7 +78,7 @@ export default class MessageQueue {
      * @param id Nonce value
      */
     @action start(id: string) {
-        const entry = this.messages.find((x) => x.id === id)!;
+        const entry = this.messages.find((x) => x.id == id)!;
         entry.status = QueueStatus.SENDING;
     }
 
@@ -87,7 +87,7 @@ export default class MessageQueue {
      * @param id Nonce value
      */
     @action remove(id: string) {
-        const entry = this.messages.find((x) => x.id === id)!;
+        const entry = this.messages.find((x) => x.id == id)!;
         this.messages.remove(entry);
     }
 
@@ -97,7 +97,7 @@ export default class MessageQueue {
      * @returns Array of queued messages
      */
     @computed get(channel: string) {
-        return this.messages.filter((x) => x.channel === channel);
+        return this.messages.filter((x) => x.channel == channel);
     }
 
     /**

@@ -14,7 +14,7 @@
     import MessageDivider from "../indicators/MessageDivider.svelte";
     import Message from "./Message.svelte";
     import { css, cx } from "@emotion/css";
-    import type { QueuedMessage } from "$lib/stores/MessageQueue";
+    import { autorun } from "mobx";
 
     export let lastId: string | undefined = undefined,
         //highlight: string | undefined = undefined,
@@ -36,7 +36,7 @@
     const client = useClient();
     const userId = client.user!._id;
     const queue = state.queue;
-    const render: Node[] = [];
+    let render: Node[] = [];
 
     if (renderer) {
         render.push(createElement(Start, { channel: renderer.channel }));
@@ -109,7 +109,9 @@
         blocked = 0;
     }
 
-    for (const message of renderer.messages) {
+    autorun(()=>{
+        render = [];
+        for (const message of renderer.messages) {
         if (previous) {
             compare(
                 message._id,
@@ -130,15 +132,16 @@
         }
 
         previous = message;
-    }
-
-    if (blocked > 0) pushBlocked();
-    const nonces = renderer.messages.map((x) => x.nonce);
-
-    if (renderer.atBottom) {
+        }
+        if (blocked > 0) pushBlocked();
+    });
+    
+    autorun(()=>{
+        const nonces = renderer.messages.map((x) => x.nonce);
+        if (renderer.atBottom) {
         for (const message of queue.get(
             renderer.channel._id,
-        ) as QueuedMessage[]) {
+        )) {
             if (nonces.includes(message.id)) continue;
 
             if (previous) {
@@ -157,6 +160,8 @@
                 } as IMessage;
             }
 
+            console.info('Unknown message incoming...', JSON.stringify(message.data));
+
             render.push(
                 createElement(Message, {
                     message: new IMessage(client, {
@@ -171,8 +176,13 @@
     } else {
         render.push(createElement(Preloader, {type: 'ring'}))
     }
+    })
+    
 </script>
 
-{#each render as node}
-    <Tree {node} />
-{/each}
+{#key render}
+    {#each render as node}
+        <Tree {node} />
+    {/each}
+{/key}
+
