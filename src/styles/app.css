@@ -4,18 +4,14 @@
     --app-height: 100vh;
     --light: false;
 
-    --accent: #ACFCD9;
-    --error: #ED4245;
-    --success: #65E572;
-    --warning: #FAA352;
-
+    --text-size: 14px;
     --border-radius: 15px;
     --foreground: #fff;
 
     --background-rgb: 24, 25, 35;
     
-    --primary-background: #181923;
-    --primary-background-rgb: 24, 25, 35;
+    --background: #181923;
+    --background-rgb: 24, 25, 35;
 
     --secondary-background: #292d41;
     --secondary-background-rgb: 41,45,65;
@@ -35,15 +31,37 @@
     --tertiary-foreground: #4c546d;
     --tertiary-foreground-rgb: 24,25,35;
 
+    --accent: #ACFCD9;
+    --accent-rgb: 172, 252, 217;
+    --block: #2D2D2D;
+    --block-rgb: 45,45,45;
+    --mention: rgba(251,255,0,0.06);
+    --mention-rgb: 251,255,0;
+    --success: #65E572;
+    --success-rgb: 101,229,114;
+    --warning: #FAA352;
+    --warning-rgb: 250,163,82;
+    --tooltip: #000000;
+    --tooltip-rgb: 0,0,0;
+    --error: #ED4245;
+    --error-rgb: 237,66,69;
     --hover: rgba(0,0,0,0.1);
     --hover-rgb: 0,0,0;
     --hover-contrast: white;
     --hover-contrast-rgb: 255,255,255;
 
     --status-online: #3ABF7E;
+    --status-online-rgb: 58,191,126;
     --status-away: #F39F00;
+    --status-away-rgb: 243,159,0;
     --status-focus: #4799F0;
+    --status-focus-rgb: 71,153,240;
     --status-busy: #F84848;
+    --status-busy-rgb: 248,72,72;
+    --status-streaming: #977EFF;
+    --status-streaming-rgb: 151,126,255;
+    --status-invisible: #A5A5A5;
+    --status-invisible-rgb: 165,165,165;
 
     --scrollbar-thickness: 3px;
     --scrollbar-thickness-ff: thin;
@@ -59,6 +77,11 @@
     --input-border-width: 2px;
     --textarea-padding: 16px;
     --textarea-line-height: 20px;
+
+    --message-box: #363636;
+    --message-box-rgb: 54,54,54;
+    --message-box-contrast: white;
+    --message-box-contrast-rgb: 255,255,255;
     --message-box-padding: 14px 14px 14px 0;
     --attachment-max-width: 400px;
     --attachment-max-height: 300px;
