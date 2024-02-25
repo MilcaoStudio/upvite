@@ -12,6 +12,7 @@ import Layout from "./stores/Layout";
 import NotificationOptions from "./stores/NotificationOptions";
 import Ordering from "./stores/Ordering";
 import Settings from "./stores/Settings";
+import Draft from "./stores/Draft";
 
 export default class State {
     private persistent: [string, Persistent<unknown>][] = [];
@@ -22,6 +23,7 @@ export default class State {
     notifications: NotificationOptions;
     ordering: Ordering;
     settings = new Settings;
+    draft = new Draft;
 
     constructor() {
         makeAutoObservable(this);

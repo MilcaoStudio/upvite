@@ -1,12 +1,12 @@
 <script lang="ts">
     import { _ } from "svelte-i18n";
-    import tippy from "svelte-tippy";
+    import tippy, { type TippyProps } from "svelte-tippy";
 
     export let div = false,
         right = false,
         i18n: string = '',
         content: string | undefined = undefined,
-        placement: "top-start" | "top-end" | "bottom-start" | "bottom-end" | "right-start" | "right-end" | "left-start" | "left-end" | undefined = undefined;
+        placement: TippyProps["placement"] |undefined = undefined;
     console.log('[Tooltip] Tooltip rendered!');
 </script>
 
