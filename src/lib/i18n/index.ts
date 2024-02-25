@@ -4,8 +4,9 @@ import { init, json, register, unwrapFunctionStore } from 'svelte-i18n'
 
 const defaultLocale = 'en'
 
-register('en', () => import('../../routes/lang/en.json'))
-register('es', () => import('../../routes/lang/es.json'))
+register('en', () => import('$lib/lang/en.json'))
+register('es', () => import('$lib/lang/es.json'))
+register('eo', () => import('$lib/lang/eo.json'))
 
 init({
 	fallbackLocale: defaultLocale,
