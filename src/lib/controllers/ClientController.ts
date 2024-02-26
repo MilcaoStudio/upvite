@@ -201,7 +201,6 @@ export default class Session {
                 }
 
                 await this.continueLogin(data);
-                goto('/');
                 break;
             }
             // Ready successfully received
