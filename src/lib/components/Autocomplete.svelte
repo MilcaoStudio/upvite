@@ -278,6 +278,7 @@
         MouseEventHandler,
     } from "svelte/elements";
     import UserIcon from "./user/UserIcon.svelte";
+    import ChannelIcon from "./channels/ChannelIcon.svelte";
     import { get, writable, type Writable } from "svelte/store";
 
     export let detached = false,
@@ -377,7 +378,7 @@
                 on:mouseleave={()=>{
                     $state.type != "none" && ($state.within) && state.update(_state=>({..._state, within: false}))
                 }}>
-                <!--<ChannelIcon size={24} target={match} />-->
+                <ChannelIcon size={24} target={match} />
                 {match.name}
                 </button>
             {/each}
