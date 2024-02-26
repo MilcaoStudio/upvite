@@ -80,6 +80,23 @@ export default class SAudio {
     }
 
     getAudio(path: string) {
+        if (typeof Audio !== 'undefined') {
+            if (this.cache.has(path)) {
+                return this.cache.get(path)!;
+            } else {
+                const el = new Audio(path);
+                this.cache.set(path, el);
+                return el;
+            }
+        } else {
+            // Manejo alternativo si Audio no está disponible en este entorno
+            console.warn('Audio is not available in this environment.');
+            return null; // O puedes devolver un valor predeterminado o lanzar una excepción, dependiendo de tus necesidades
+        }
+    }
+
+    /*
+    getAudio(path: string) {
         if (this.cache.has(path)) {
             return this.cache.get(path)!;
         } 
@@ -88,6 +105,7 @@ export default class SAudio {
             return el;
         
     }
+    */
 
     loadCache() {
         this.getState().map(({ path }) => this.getAudio(path));

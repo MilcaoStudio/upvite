@@ -51,9 +51,23 @@ export function mapError(error: any): never {
 
 export const isTouchscreenDevice = browser && navigator.maxTouchPoints > 1;
 
+
+  export function injectWindow(key: string, source: any) {
+    if (typeof window !== 'undefined') {
+        // Solo ejecuta este código en el entorno del navegador
+        if (!window.hasOwnProperty(key)) {
+            Object.defineProperty(window, key, { value: source });
+        }
+    }
+}
+
+/*
+
 export function injectWindow(key: string, source: any) {
     !Object.hasOwn(window, key) && Object.defineProperty(window, key, {value: source});
 }
+
+*/
 
 /**
  * Schedule a task at the end of the Event Loop
