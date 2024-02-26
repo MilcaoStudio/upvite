@@ -8,10 +8,11 @@
     --border-radius: 15px;
     --foreground: #fff;
 
-    --background-rgb: 24, 25, 35;
-    
     --background: #181923;
     --background-rgb: 24, 25, 35;
+    
+    --primary-background: #181923;
+    --primary-background-rgb: 24, 25, 35;
 
     --secondary-background: #292d41;
     --secondary-background-rgb: 41,45,65;
@@ -33,7 +34,7 @@
 
     --accent: #ACFCD9;
     --accent-rgb: 172, 252, 217;
-    --accent-contrast: #131011;
+    --accent-contrast: #131313;
     --block: #2D2D2D;
     --block-rgb: 45,45,45;
     --mention: rgba(251,255,0,0.06);

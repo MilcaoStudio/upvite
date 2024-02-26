@@ -5,10 +5,12 @@
     import type { Channel } from "revolt.js";
     import ChannelHeader from "./ChannelHeader.svelte";
     import { ErrorBoundary } from "$lib/error/errorBoundary";
+    import NewMessages from "../messaging/bars/NewMessages.svelte";
     import { isTouchscreenDevice } from "$lib";
     import { SIDEBAR_MEMBERS } from "$lib/stores/Layout";
     import RightSidebar from "../navigation/RightSidebar.svelte";
     import MessageArea from "../messaging/MessageArea.svelte";
+    import MessageBox from "../messaging/MessageBox.svelte";
 
     export let channel: Channel, message: string | null = null;
     const layout = state.layout;
@@ -39,7 +41,9 @@
 <div class="ChannelMain" data-component="channel">
     <!--<ErrorBoundary section="renderer">-->
         <div class="ChannelContent">
+            <NewMessages {channel} {lastId} />
             <MessageArea {channel} {lastId} messageId={message} />
+            <MessageBox {channel} />
             <!--<VoiceHeader id={channel._id} />
                 <NewMessages channel={channel} {lastId} />
                 <MessageArea channel={channel} {lastId} messageId={message} />

@@ -127,6 +127,7 @@
     let setMessage = function (content?: string) {
         const dobj: DraftObject = { content };
         state.draft.set(channel._id, dobj);
+        value = content ?? value;
     };
 
     function append(content: string, action: "quote" | "mention") {
@@ -223,8 +224,6 @@
                     nonce,
                     replies,
                 });
-                // Clear box
-                value = "";
             } catch (error) {
                 state.queue.fail(nonce, takeError(error));
             }
@@ -300,6 +299,8 @@
                     e.preventDefault();
                     return send();
                 }
+
+                if (onKeyDown(e)) return;
 
                 if (
                     !e.shiftKey &&

@@ -1,8 +1,14 @@
 <script lang="ts">
     import { internalSubscribe } from "$lib/InternalEmitter";
     import { dayjs } from "$lib/components/context/Locale.svelte"
+    import { getRenderer } from "$lib/rendered/Singleton";
     import type { Channel } from "revolt.js";
     import { decodeTime } from "ulid";
+    import Bar from "./Bar.svelte";
+    import { goto } from "$app/navigation";
+    import { translate } from "$lib/i18n";
+    import { t } from "svelte-i18n";
+    import { BxUpArrowAlt } from "svelte-boxicons";
 
     export let channel: Channel, lastId: string | undefined = undefined;
     let hidden = false, timeAgo = '';
@@ -18,8 +24,27 @@
             timeAgo = (dayjs(decodeTime(lastId)) as any).fromNow() as string;
         } catch (err) {}
     }
+
+    const renderer = getRenderer(channel);
 </script>
 
 <svelte:document on:keydown={onKeyDown} />
 
-<div></div>
+{#if renderer.state == "RENDER" && lastId && !hidden}
+    <Bar position="top" accent>
+        <button on:click={()=>{
+            hidden = true;
+            if (channel.channel_type == "TextChannel") {
+                goto(`/server/${channel.server_id}/channel/${channel._id}/${lastId}`)
+            } else {
+                goto(`/channel/${channel._id}/${lastId}`)
+            }
+        }}>
+            <div>{translate("app.main.channel.misc.new_messages", {time_ago: timeAgo})}</div>
+            <div class="right">
+                <span>{$t('app.main.channel.misc.jump_beginning')}</span>
+                <BxUpArrowAlt size={20} />
+            </div>
+        </button>
+    </Bar>
+{/if}

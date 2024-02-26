@@ -5,15 +5,12 @@
         setValue: (v?: string) => void,
         searchClues?: SearchClues,
     ) {
-        let state: AutoCompleteState = { type: "none" };
+        let state: Writable<AutoCompleteState> = writable({ type: "none" });
         let focused = false;
-        function setState(_state: AutoCompleteState) {
-            console.log("state changed from", state, "to", _state);
-            state = _state;
-        }
         const client = useClient();
         function onChange(e: Event & { currentTarget: HTMLTextAreaElement }) {
             if (!e.currentTarget) return;
+            let _state = get(state);
             const result = searchString(e.currentTarget);
             if (result) {
                 const [type, search] = result;
@@ -71,9 +68,9 @@
 
                     if (matches.length) {
                         const currentPosition =
-                            state.type != "none" ? state.selected : 0;
+                            _state.type != "none" ? _state.selected : 0;
 
-                        setState({
+                        state.set({
                             type: "user",
                             matches,
                             selected: Math.min(
@@ -106,9 +103,9 @@
 
                     if (matches.length) {
                         const currentPosition =
-                            state.type != "none" ? state.selected : 0;
+                            _state.type != "none" ? _state.selected : 0;
 
-                        setState({
+                        state.set({
                             type: "channel",
                             matches,
                             selected: Math.min(
@@ -122,25 +119,26 @@
                     }
                 }
             }
-            if (state.type != "none") {
-                setState({ type: "none" });
+            if (_state.type != "none") {
+                state.set({ type: "none" });
             }
             setValue(e.currentTarget.value);
         }
 
         function selectCurrent(el: HTMLTextAreaElement) {
-            if (state.type != "none") {
+            let _state = get(state);
+            if (_state.type != "none") {
                 const result = searchString(el);
                 if (result) {
                     const [_type, search, index] = result;
 
                     const content = el.value.split("");
-                    if (state.type == "user") {
+                    if (_state.type == "user") {
                         content.splice(
                             index,
                             search.length + 1,
                             "<@",
-                            state.matches[state.selected]._id,
+                            _state.matches[_state.selected]._id,
                             "> ",
                         );
                     } else {
@@ -148,7 +146,7 @@
                             index,
                             search.length + 1,
                             "<#",
-                            state.matches[state.selected]._id,
+                            _state.matches[_state.selected]._id,
                             "> ",
                         );
                     }
@@ -165,14 +163,15 @@
         }
 
         function onKeyDown(e: KeyboardEvent) {
-            if (focused && state.type != "none") {
+            let _state = get(state);
+            if (focused && _state.type != "none") {
                 if (e.key == "ArrowUp") {
                     e.preventDefault();
-                    if (state.selected > 0) {
-                        setState({
+                    if (_state.selected > 0) {
+                        state.update(state=>({
                             ...state,
-                            selected: state.selected - 1,
-                        });
+                            selected: state.type != "none" ? state.selected - 1 : 0,
+                        }));
                     }
 
                     return true;
@@ -180,11 +179,11 @@
 
                 if (e.key == "ArrowDown") {
                     e.preventDefault();
-                    if (state.selected < state.matches.length - 1) {
-                        setState({
+                    if (_state.selected < _state.matches.length - 1) {
+                        state.update(state=>({
                             ...state,
-                            selected: state.selected + 1,
-                        });
+                            selected: state.type != "none" ? state.selected + 1 : 0,
+                        }));
                     }
 
                     return true;
@@ -193,7 +192,6 @@
                 if (e.key == "Enter" || e.key == "Tab") {
                     e.preventDefault();
                     selectCurrent(e.currentTarget as HTMLTextAreaElement);
-
                     return true;
                 }
             }
@@ -217,13 +215,13 @@
         }
 
         function onBlur() {
-            if (state.type != "none" && state.within) return;
+            let _state = get(state);
+            if (_state.type != "none" && _state.within) return;
             focused = false;
         }
 
         return {
-            state: focused ? state : { type: "none" } as AutoCompleteState,
-            setState,
+            state,
             onClick,
             onChange,
             onKeyUp,
@@ -277,15 +275,13 @@
     import { css, cx } from "@emotion/css";
     import type { Channel, User } from "revolt.js";
     import type {
-        ChangeEventHandler,
-        FocusEventHandler,
         MouseEventHandler,
     } from "svelte/elements";
     import UserIcon from "./user/UserIcon.svelte";
+    import { get, writable, type Writable } from "svelte/store";
 
     export let detached = false,
-        state: AutoCompleteState,
-        setState: (s: AutoCompleteState) => void,
+        state: Writable<AutoCompleteState>,
         onClick: MouseEventHandler<HTMLButtonElement>;
     const Base = cx(
         "AutoComplete",
@@ -294,12 +290,12 @@
             ${detached
                 ? `
             bottom: 8px;
-            > div {
+            > button {
                 border-radius: var(--border-radius);
             }`
                 : ``}
 
-            > div {
+            > button {
                 bottom: 0;
                 width: 100%;
                 position: absolute;
@@ -335,28 +331,29 @@
     );
 </script>
 
+
 <div class={Base}>
     <div>
-        {#if state.type == "user"}
-            {#each state.matches as match, i}
+        {#if $state.type == "user"}
+            {#each $state.matches as match, i}
                 <button
-                    class:active={i == state.selected}
+                    class:active={i == $state.selected}
                     on:mouseenter={() => {
-                        if (state.type == "none") return;
-                        (i != state.selected || !state.within) &&
-                            setState({
-                                ...state,
+                        if ($state.type == "none") return;
+                        (i != $state.selected || !$state.within) &&
+                            state.update(_state=>({
+                                ..._state,
                                 selected: i,
                                 within: true,
-                            });
+                            }));
                     }}
                     on:mouseleave={() =>
-                        state.type != "none" &&
-                        state.within &&
-                        setState({
-                            ...state,
+                        $state.type != "none" &&
+                        $state.within &&
+                        state.update(_state =>({
+                            ..._state,
                             within: false,
-                        })}
+                        }))}
                     on:click={onClick}
                 >
                     <UserIcon
@@ -366,7 +363,24 @@
                     />{match.username}
                 </button>
             {/each}
-            <!--TODO: Channel selector-->
+        {/if}
+        {#if $state.type == "channel"}
+            {#each $state.matches as match, i}
+                <button class:active={i == $state.selected}
+                on:mouseenter={()=>{
+                    $state.type != "none" && (i != $state.selected || !$state.within) && state.update(_state=>({
+                        ..._state,
+                        selected: i,
+                        within: true
+                    }))
+                }}
+                on:mouseleave={()=>{
+                    $state.type != "none" && ($state.within) && state.update(_state=>({..._state, within: false}))
+                }}>
+                <!--<ChannelIcon size={24} target={match} />-->
+                {match.name}
+                </button>
+            {/each}
         {/if}
     </div>
 </div>

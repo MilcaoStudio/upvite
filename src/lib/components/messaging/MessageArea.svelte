@@ -148,7 +148,7 @@
     // ? When the container is scrolled.
     // ? Also handle StayAtBottom
     // ? Top and bottom loaders.
-    $: onScroll = async function() {
+    let onScroll = async function() {
         if (scrollState.type === "Free" && atBottom()) {
                 setScrollState({ type: "Bottom" });
         } else if (scrollState.type === "Bottom" && !atBottom()) {
