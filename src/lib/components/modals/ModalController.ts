@@ -4,6 +4,7 @@ import UserProfile from "./UserProfile.svelte";
 import Onboarding from "./Onboarding.svelte";
 import { action, computed, makeObservable, observable } from "mobx";
 import { injectWindow } from "$lib";
+import CreateServer from "./CreateServer.svelte";
 
 export class ModalController<T extends Modal> {
     @observable stack: T[] = [];
@@ -65,4 +66,5 @@ export class ModalController<T extends Modal> {
 export const modalController = new ModalController({
     onboarding: Onboarding,
     user_profile: UserProfile,
+    create_server: CreateServer,
 });

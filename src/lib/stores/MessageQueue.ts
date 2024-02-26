@@ -1,5 +1,5 @@
 import type { Message } from "revolt.js";
-import { observable } from "mobx";
+import { makeAutoObservable, observable, type IObservableArray, action, computed } from "mobx";
 
 export enum QueueStatus {
     SENDING = "sending",
@@ -32,13 +32,14 @@ export interface QueuedMessage {
  * Handles waiting for messages to send and send failure.
  */
 export default class MessageQueue {
-    private messages
+    private messages: IObservableArray<QueuedMessage>
 
     /**
      * Construct new MessageQueue store.
      */
     constructor() {
-        this.messages = observable.array()
+        this.messages = observable.array();
+        makeAutoObservable(this);
         this.onMessage = this.onMessage.bind(this);
     }
 
@@ -52,7 +53,7 @@ export default class MessageQueue {
      * @param channel Channel ID
      * @param data Message data
      */
-    add(id: string, channel: string, data: QueuedMessageData) {
+    @action add(id: string, channel: string, data: QueuedMessageData) {
         this.messages.push({
             id,
             channel,
@@ -66,7 +67,7 @@ export default class MessageQueue {
      * @param id Nonce value
      * @param error Error string
      */
-    fail(id: string, error: string) {
+    @action fail(id: string, error: string) {
         const entry = this.messages.find((x) => x.id == id)!;
         entry.status = QueueStatus.ERRORED;
         entry.error = error;
@@ -76,8 +77,8 @@ export default class MessageQueue {
      * Mark a queued message as sending.
      * @param id Nonce value
      */
-    start(id: string) {
-        const entry = this.messages.find((x) => x.id === id)!;
+    @action start(id: string) {
+        const entry = this.messages.find((x) => x.id == id)!;
         entry.status = QueueStatus.SENDING;
     }
 
@@ -85,8 +86,8 @@ export default class MessageQueue {
      * Remove a queued message.
      * @param id Nonce value
      */
-    remove(id: string) {
-        const entry = this.messages.find((x) => x.id === id)!;
+    @action remove(id: string) {
+        const entry = this.messages.find((x) => x.id == id)!;
         this.messages.remove(entry);
     }
 
@@ -95,15 +96,15 @@ export default class MessageQueue {
      * @param channel Channel ID
      * @returns Array of queued messages
      */
-    get(channel: string) {
-        return this.messages.filter((x) => x.channel === channel);
+    @computed get(channel: string) {
+        return this.messages.filter((x) => x.channel == channel);
     }
 
     /**
      * Handle an incoming Message
      * @param message Message
      */
-    onMessage(message: Message) {
+    @action onMessage(message: Message) {
         if (!message.nonce) return;
         if (!this.get(message.channel_id).find((x) => x.id == message.nonce))
             return;

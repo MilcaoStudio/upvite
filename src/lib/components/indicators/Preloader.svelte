@@ -1,17 +1,9 @@
 <script lang="ts">
+    import { ProgressRing } from "fluent-svelte";
     export let type: 'ring' | 'spinner';
 </script>
 
 <style>
-
-    @keyframes prRing {
-        0% {
-            transform: rotate(0deg);
-        }
-        100% {
-            transform: rotate(360deg);
-        }
-    }
 
     @keyframes skSpinner {
         0%, 80%, 100% {
@@ -57,44 +49,17 @@
     .spinner div:nth-child(2) {
         animation-delay: -0.16s;
     }
-    
-    .ring {
-        display: inline-block;
-        position: relative;
-        width: 48px;
-        height: 52px;
-    }
-    
-    .ring div {
-        width: 32px;
-        margin: 8px;
-        height: 32px;
-        display: block;
-        position: absolute;
-        box-sizing: border-box;
-        border: 2px solid var(--foreground);
-        border-radius: var(--border-radius-half);
-        animation: prRing 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
-        border-color: var(--foreground) transparent transparent transparent;
-    }
-    
-    .ring div:nth-child(1) {
-        animation-delay: -0.45s;
-    }
-    
-    .ring div:nth-child(2) {
-        animation-delay: -0.3s;
-    }
-    
-    .ring div:nth-child(3) {
-        animation-delay: -0.15s;
-    }
 </style>
 
+
 <div class="preloader">
-    <div class={type}>
-        <div />
-        <div />
-        <div />
-    </div>
+    {#if type == 'ring'}
+        <ProgressRing class="ring" size={48} />
+    {:else}
+        <div class="spinner">
+            <div />
+            <div />
+            <div />
+        </div>
+    {/if}
 </div>

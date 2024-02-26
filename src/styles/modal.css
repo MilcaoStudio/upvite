@@ -1,0 +1,52 @@
+div.Base {
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 99;
+    position: fixed;
+    max-height: 100%;
+    user-select: none;
+    animation-duration: 0.2s;
+    animation-fill-mode: forwards;
+    display: grid;
+    overflow-y: auto;
+    place-items: center;
+    color: var(--foreground);
+    background: rgba(0, 0, 0, 0.8);
+}
+
+.Base .Container {
+    min-height: 200px;
+    margin: 20px;
+    display: flex;
+    flex-direction: column;
+    animation: zoomIn 0.25s cubic-bezier(0.3, 0.3, 0.18, 1.1);
+}
+
+.Title {
+    padding: 1rem;
+    flex-shrink: 0;
+    word-break: break-word;
+    gap: 8px;
+    display: flex;
+    flex-direction: column;    
+}
+
+.Content {
+    flex-grow: 1;
+    padding-top: 0;
+    overflow-y: auto;
+    font-size: 0.9375rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.Actions {
+    flex-shrink: 0;
+    gap: 8px;
+    display: flex;
+    padding: 1rem;
+    flex-direction: row-reverse;
+    border-radius: 0 0 var(--border-radius) var(--border-radius);
+}
