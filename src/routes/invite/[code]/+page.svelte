@@ -23,7 +23,7 @@
     export let data;
 
     const code = data.code;
-    const session = null;
+    const session = useSession();
     const client = useClient();
     const layout = state.layout;
 
