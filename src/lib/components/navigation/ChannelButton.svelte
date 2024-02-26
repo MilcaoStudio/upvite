@@ -1,6 +1,7 @@
 <script lang="ts">
     import { css, cx } from "@emotion/css";
     import type { Channel, User } from "revolt.js";
+    import ChannelIcon from "../channels/ChannelIcon.svelte";
 
     export let active = false,
         alert: "unread" | "mention" | undefined = undefined,
@@ -20,7 +21,7 @@
     aria-label={channel.name} class={cx('item', { ['compact']: compact })}
     {...$$restProps}>
         <div class="avatar">
-            #
+            <ChannelIcon target={channel} size={compact ? 24 : 32} />
         </div>
         <div class="name">
             <div>{channel.name}</div>
