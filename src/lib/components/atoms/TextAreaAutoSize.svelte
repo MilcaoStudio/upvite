@@ -80,7 +80,7 @@
 
 <svelte:document on:keydown={keyDown} />
 
-<div class="AutoSize" style="flex-grow: 1;display: flex; flex-direction: column;">
+<div class="AutoSize" style="flex-grow: 1;display: flex; flex-direction: column; padding: var(--message-box-padding);">
     <TextArea bind:ref={ref} {id} {value} {padding} style={`min-height: ${minHeight}`} {hideBorder} {lineHeight} onChange={(ev) =>
         onChange && onChange(ev)
     } {onKeyUp} {onKeyDown} {onFocus} {onBlur} {...$$restProps} />

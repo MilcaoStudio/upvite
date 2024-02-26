@@ -1,16 +1,18 @@
 .docked {
 	display: flex;
 	flex-direction: row;
+	
 }
 
 .docked .main {
 	flex-grow: 1;
 	min-width: 0;
 	display: flex;
+	flex-direction: column;
 }
 
 .docked .main > * {
-	flex-grow: 1;
+	/*flex-grow: 1;*/
 }
 
 

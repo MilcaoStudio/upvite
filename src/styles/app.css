@@ -32,7 +32,8 @@
     --tertiary-foreground: #4c546d;
     --tertiary-foreground-rgb: 24,25,35;
 
-    --accent: #ACFCD9;
+    --accent: #8097de;
+    --acent: #476fe9;
     --accent-rgb: 172, 252, 217;
     --accent-contrast: #131313;
     --block: #2D2D2D;
@@ -84,7 +85,7 @@
     --message-box-rgb: 54,54,54;
     --message-box-contrast: white;
     --message-box-contrast-rgb: 255,255,255;
-    --message-box-padding: 14px 14px 14px 0;
+    --message-box-padding: 10px 16px;
     --attachment-max-width: 400px;
     --attachment-max-height: 300px;
     --attachment-default-width: 400px;

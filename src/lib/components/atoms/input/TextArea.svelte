@@ -25,7 +25,7 @@
             ? `border: none;`
             : `border-radius: var(--border-radius);
             transition: border-color 0.2s ease-in-out;
-            border: var(--input-border-width) solid transparent;`}
+            border: var(--input-border-width) solid var(--secondary-foreground);`}
         &:focus {
             outline: none;
             ${!hideBorder

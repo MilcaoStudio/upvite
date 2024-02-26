@@ -31,8 +31,10 @@
         css`
             z-index: 1;
             display: flex;
-            align-items: flex-start;
-            background: var(--message-box);
+            align-items: center;
+            background: var(--primary-background);
+            gap: 16px;
+            padding: 0px 12px 0px 12px;
 
             textarea {
                 font-size: var(--text-size);

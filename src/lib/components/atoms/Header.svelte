@@ -18,7 +18,6 @@
 
                   width: 100%;
                   z-index: 20;
-                  position: absolute;
               `
                 : `background-color: var(--${palette}-header);`}
             ${withBackground
@@ -35,18 +34,21 @@
 <style>
     div.Header {
         gap: 10px;
-        flex: 0 auto;
+        /* flex: 0 auto; */
         display: flex;
-        flex-shrink: 0;
-        padding: 0 16px;
+        flex-shrink: 1;
+ 
+        padding: 12px 16px;
         align-items: center;
         font-weight: 600;
+        /* width: fit-content; */
         user-select: none;
         height: var(--header-height);
         color: var(--foreground);
         background-size: cover !important;
         background-position: center !important;
     }
+    
     div.Header :global(svg) {
         flex-shrink: 0;
     }

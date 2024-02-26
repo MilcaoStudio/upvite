@@ -80,7 +80,10 @@
                 </span>
             {/if}
             <!--Markdown here-->
-            {replacement ?? content}
+            <div style="    width: 100%;">
+                {replacement ?? content}
+            </div>
+            
             <!--InviteList-->
             {#if queued?.error}
                 <Category>{$_(queued.error)}</Category>
@@ -114,7 +117,7 @@
     div.MessageContent {
         font-size: 14px;
         color: var(--foreground);
-
+        width: 100%;
         display: flex;
         flex-direction: column;
     }
