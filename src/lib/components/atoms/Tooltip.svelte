@@ -12,12 +12,12 @@
 
 {#if div}
     <svelte:self {right} {i18n} {content} {placement}>
-        <div><slot /></div>
+        <div ><slot /></div>
     </svelte:self>
 {:else if i18n}
     <svelte:self content={$_(i18n)} {right} {placement}/>
 {:else}
-    <div
+    <div 
         use:tippy={{
             animation: "shift-away",
             placement: right ? "right" : placement,

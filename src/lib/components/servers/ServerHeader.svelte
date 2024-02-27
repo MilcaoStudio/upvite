@@ -25,7 +25,7 @@
                 transparent
             );
         }` : `
-            background-color: var(--secondary-header);
+           
         `}
 
     .container {

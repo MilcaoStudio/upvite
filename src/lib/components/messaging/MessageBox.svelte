@@ -32,7 +32,7 @@
             z-index: 1;
             display: flex;
             align-items: center;
-            background: var(--primary-background);
+            background: var(--secondary-header);
             gap: 16px;
             padding: 0px 12px 0px 12px;
 

@@ -97,9 +97,22 @@
 </div>
 
 <style>
+
+    .detail{
+        font-weight: 600;
+        color: var(--secondary-foreground);
+        font-size: 15px;
+
+    }
     div.Message {
         display: flex;
         line-height: 18px;
+        transition: 0.2s ease-in all;
+    }
+
+    div.Message:hover {
+        background-color: var(--secondary-background);
+        transition: 0.2s ease-in all;
     }
 
     /* Make time sent and edited components uniform */

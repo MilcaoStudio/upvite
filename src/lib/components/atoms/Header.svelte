@@ -12,7 +12,7 @@
             ${withTransparency
                 ? `background-color: rgba(
                       var(--${palette}-header-rgb),
-                      max(var(--min-opacity), 0.75)
+                      max(var(--min-opacity), 1)
                   );
                   backdrop-filter: blur(20px);
 
