@@ -371,3 +371,15 @@ div.TitlebarBase {
 .actions div.error:hover {
     background: var(--error);
 }
+
+@keyframes highlight {
+    0% {
+        background: var(--mention);
+    }
+    66% {
+        background: var(--mention);
+    }
+    100% {
+        background: transparent;
+    }
+}

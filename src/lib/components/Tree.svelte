@@ -59,8 +59,8 @@
                 <slot />
             </svelte:element>
         {:else}
-            <svelte:component this={node.element} {...node.props} >
-                {#if node.children}
+            {#if node.children}
+                <svelte:component this={node.element} {...node.props} >
                     {#if Array.isArray(node.children)}
                         {#each node.children as child}
                             <svelte:self node={child} />
@@ -69,8 +69,10 @@
                         <svelte:self node={node.children} />
                     {/if}
                     <slot />
-                {/if}
-            </svelte:component>
+                </svelte:component>
+            {:else}
+                <svelte:component this={node.element} {...node.props} />
+            {/if}
         {/if}
     {/if}
 {/if}
