@@ -46,12 +46,15 @@
 </script>
 
 <UprisingApp>
-    <SidebarBase slot="left">
-        <ServerListSidebar />
-        {#if open && server}
-            <ServerSidebar {server} {channel} />
-        {/if}  
-    </SidebarBase>
+    
+        <SidebarBase slot="left">
+            <ServerListSidebar />
+            {#key channel}
+                {#if open && server}
+                    <ServerSidebar {server} {channel} />
+                {/if}
+            {/key}
+        </SidebarBase>
     {#key channel}
         {#if channel}
             <TextChannel {channel} {message} />
