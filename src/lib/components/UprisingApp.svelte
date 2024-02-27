@@ -50,7 +50,7 @@
             showIf: fixedBottomNav ? ShowIf.Always : ShowIf.Left,
             height: 50,
         }}
-        docked={isTouchscreenDevice ? Docked.None : Docked.Left}
+        docked={Docked.Left}
     >
         <svelte:fragment slot="left"><slot name="left" /></svelte:fragment>
         <svelte:fragment slot="right"><slot name="right" /></svelte:fragment>
