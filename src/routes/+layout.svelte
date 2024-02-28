@@ -9,6 +9,7 @@
     import '../styles/overlap.css';
     import "../styles/atoms.css";
     import "fluent-svelte/theme.css";
+    import 'tippy.js/dist/tippy.css';
 
     let ready = false;
     if (browser) {

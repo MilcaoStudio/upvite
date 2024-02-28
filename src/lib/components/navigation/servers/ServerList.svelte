@@ -7,13 +7,15 @@
     import Item from "./Item.svelte";
     import { useCustomReorder } from "$lib/dnd";
     import ListFooter from "./ListFooter.svelte";
+    import ListHeader from "./ListHeader.svelte";
 
-    export const active: string | undefined = undefined,
-        client: Client | null = null,
-        home: () => string = () => "/";
+    export const active: string | undefined = undefined;
     export let createServer: ()=>void,
+        client: Client,
+        home: () => string = ()=>"/",
         servers: Server[],
-        reorder: (items: Server[]) => void;
+        reorder: (items: Server[]) => void,
+        permit: INotificationChecker;
     
     servers = servers.map((s)=>{
         Object.defineProperty(s, 'id', {value: s._id});
@@ -61,6 +63,7 @@
 </script>
 
 <div class={Base}>
+    <ListHeader {client} {home} {permit} />
     <div
         use:dndzone={{ items: servers }}
         on:finalize={useCustomReorder(reorder)}
