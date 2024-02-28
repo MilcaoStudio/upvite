@@ -6,7 +6,7 @@
     import { BxTimeFive } from "svelte-boxicons";
     import { t } from "svelte-i18n";
 
-    export let user: User | undefined = undefined, prefixAt = false, masquerade: API.Masquerade | null = null, showServerIdentity: boolean | "both" = false;
+    export let user: User | undefined = undefined, prefixAt = false, masquerade: API.Masquerade | null = null, showServerIdentity: boolean | "both" = false, onClick: ((e: MouseEvent)=>void) | null = null;
     let username = (user as unknown as { display_name: string })?.display_name ??
             user?.username;
     let color = masquerade?.colour;
@@ -48,10 +48,13 @@
     ` : css`color: ${color}`));
 </script>
 
-<span class={Name} bind:this={innerRef} {...$$restProps} >
-    {prefixAt ? "@" : undefined}
+<!-- svelte-ignore a11y-invalid-attribute -->
+<a href="" on:click={onClick}>
+    <span class={Name} bind:this={innerRef} {...$$restProps} >
+        {prefixAt ? "@" : ""}
         {masquerade?.name ?? username ?? $t("app.main.channel.unknown_user")}
-</span>
+    </span>
+</a>
 {#if timed_out}
     <BxTimeFive size={16} color="var(--secondary-foreground)" />
 {/if}

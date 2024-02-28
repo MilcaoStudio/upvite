@@ -6,7 +6,7 @@
         display: flex;
         align-items: center;
         height: 0;
-        margin: 17px 12px 5px;
+        margin: 17px 12px 8px;
         border-top: thin solid var(--tertiary-foreground);
         user-select: none;
 

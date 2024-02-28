@@ -7,21 +7,26 @@
     import UserIcon from "../user/UserIcon.svelte";
     import Category from "../atoms/Category.svelte";
     import { _ } from "svelte-i18n";
-    export let message: MessageType & {webhook?: {name: string, avatar?: string}},
+    import MessageBase from "./MessageBase.svelte";
+    import MessageInfo from "./MessageInfo.svelte";
+    import MessageDetail from "./MessageDetail.svelte";
+    import Username from "../user/Username.svelte";
+    export let message: MessageType & {
+            webhook?: { name: string; avatar?: string };
+        },
         head = false,
         // turns on context menu
         //attachContent = false,
         replacement: string | undefined = undefined,
-        queued: QueuedMessage | undefined = undefined;
-        //highlight = false,
-        //contrast = false,
-        //hideReply = false;
+        queued: QueuedMessage | undefined = undefined,
+        highlight = false,
+        contrast = false,
+        hideReply = false;
     const Wrapper = cx(
         "Wrapper",
         css`
             display: flex;
             flex-direction: column;
-            ${head ? `padding-top: 14px;` : ``}
         `,
     );
 
@@ -31,59 +36,77 @@
     const content = message.content;
     head = head || (message.reply_ids ? message.reply_ids.length > 0 : false);
 
-    function openProfile(){
+    function openProfile() {
         modalController.push({
             type: "user_profile",
             user_id: message.author_id,
-        })
+        });
     }
 
-    function handleUserClick(e: MouseEvent){
+    function handleUserClick(e: MouseEvent) {
         if (e.shiftKey && user?._id) {
-            internalEmit(
-                    "MessageBox",
-                    "append",
-                    `<@${user._id}>`,
-                    "mention",
-            );
+            internalEmit("MessageBox", "append", `<@${user._id}>`, "mention");
         } else {
-            openProfile()
+            openProfile();
         }
     }
 
     let mouseHover = false;
     let reactionOpen = false;
-    $: replacement && (mouseHover = false)
+    $: replacement && (mouseHover = false);
 </script>
 
 <div class={Wrapper} id={message._id}>
     <!--TODO: Reply-->
-    <div class="Message">
-        <div class="MessageTail">
+    <MessageBase
+        {highlight}
+        head={hideReply
+            ? false
+            : (head && !(message.reply_ids && message.reply_ids.length > 0)) ??
+              false}
+        {contrast}
+        sending={typeof queued != "undefined"}
+        mention={message.mention_ids && client.user
+            ? message.mention_ids.includes(client.user._id)
+            : undefined}
+        failed={typeof queued?.error != "undefined"}
+    >
+        <MessageInfo click={typeof head != "undefined"}>
             {#if head}
-                <UserIcon url={message.generateMasqAvatarURL()}
-                override={
-                    message.webhook?.avatar
+                <UserIcon
+                    url={message.generateMasqAvatarURL()}
+                    override={message.webhook?.avatar
                         ? `https://autumn.revolt.chat/avatars/${message.webhook.avatar}`
-                        : undefined
-                }
-                target={user}
-                size={36}
-                showServerIdentity
+                        : undefined}
+                    target={user}
+                    onClick={handleUserClick}
+                    size={36}
+                    showServerIdentity
                 />
+            {:else}
+                <MessageDetail {message} position="left" />
             {/if}
-        </div>
+        </MessageInfo>
         <div class="MessageContent">
             {#if head}
-                <span class="detail">
-                    {user?.username}
-                </span>
+            <span class="detail">
+               <Username
+                    {user}
+                    class="author"
+                    showServerIdentity
+                    onClick={handleUserClick}
+                    masquerade={message.masquerade}
+                    override={message.webhook?.name}
+                />
+                <MessageDetail
+                    message={message}
+                    position="top"
+                />
+            </span>
             {/if}
             <!--Markdown here-->
-            <div style="    width: 100%;">
-                {replacement ?? content}
-            </div>
-            
+            {replacement ?? content}
+
             <!--InviteList-->
             {#if queued?.error}
                 <Category>{$_(queued.error)}</Category>
@@ -93,16 +116,14 @@
             <!--Reactions-->
             <!--MessageOverlaybar-->
         </div>
-    </div>
+    </MessageBase>
 </div>
 
 <style>
-
-    .detail{
+    .detail {
         font-weight: 600;
         color: var(--secondary-foreground);
         font-size: 15px;
-
     }
     div.Message {
         display: flex;
@@ -115,24 +136,14 @@
         transition: 0.2s ease-in all;
     }
 
-    /* Make time sent and edited components uniform */
-    /*div.Message time {
-        font-size: 10px;
-        color: var(--tertiary-foreground);
-    }*/
-
-    div.MessageTail {
-        width: 62px;
-        display: flex;
-        justify-content: center;
-    }
-
     div.MessageContent {
-        font-size: 14px;
-        color: var(--foreground);
-        width: 100%;
+        position: relative;
+        min-width: 0;
+        flex-grow: 1;
         display: flex;
         flex-direction: column;
+        justify-content: center;
+        font-size: var(--text-size);
     }
 
     div.MessageHead {

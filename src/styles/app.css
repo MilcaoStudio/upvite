@@ -222,6 +222,7 @@ foreignObject > svg {
 .app-container {
     background-size: cover;
     background-position: center;
+    position: fixed;
 }
 
 .status-bar {
