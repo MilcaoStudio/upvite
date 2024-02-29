@@ -17,4 +17,14 @@ declare namespace svelte.JSX {
 		onfinalize?: (event: CustomEvent<DndEvent<ItemType>> & { target: EventTarget & T})=>void
 	}
 }
+
+declare module 'mdast' {
+	interface RootContentMap {
+	  timestamp: {
+		type: "timestamp",
+		children: {text: Text}[],
+		data?: null,
+	  }
+	}
+}
 export {};

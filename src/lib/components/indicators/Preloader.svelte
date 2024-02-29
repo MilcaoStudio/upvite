@@ -19,23 +19,25 @@
 
     .preloader {
         width: 100%;
-        height: 100%;
+        height: 100vh;
         display: flex;
+        align-items: center;
+        justify-content: center;
+        
+    }
+
+    .spinner {
+        height:100%;
+        display: flex;
+        text-align: center;
+        justify-content: space-between;
         align-items: center;
         justify-content: center;
     }
 
-    .spinner {
-        width: 58px;
-        display: flex;
-        text-align: center;
-        margin: 100px auto 0;
-        justify-content: space-between;
-    }
-
     .spinner > div {
-        width: 14px;
-        height: 14px;
+        width: 16px;
+        height: 16px;
         background-color: var(--tertiary-foreground);
         border-radius: 100%;
         display: inline-block;

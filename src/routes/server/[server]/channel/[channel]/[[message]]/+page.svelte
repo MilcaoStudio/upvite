@@ -5,7 +5,6 @@
     import UprisingApp from "$lib/components/UprisingApp.svelte";
     import TextChannel from "$lib/components/channels/TextChannel.svelte"
     import { useClient } from "$lib/controllers/ClientController";
-    import type { Channel } from "revolt.js";
     import type { LayoutData } from "./$types";
     import { isTouchscreenDevice } from "$lib";
     import { SIDEBAR_CHANNELS } from "$lib/stores/Layout";
@@ -15,14 +14,13 @@
     const client = useClient();
 
     export let data: LayoutData;
-    const { channel: id, server: server_id, message } = data;
-
-    let server = client.servers.get(server_id);
-    let channel: Channel | undefined;
-
-    if (!server) {
-        goto('/');
-    }
+    
+    
+    $: id = data.channel;
+    $: server_id = data.server;
+    $: message = data.message;
+    
+    $: server = client.servers.get(server_id);
 
     if (!client.channels.exists(id)) {
         if (server_id) {
@@ -37,24 +35,30 @@
 
                 goto(`/server/${server_id}/channel/${target_id}`)
             }
-        } else {
-            goto("/")
+            if (!server) {
+                goto("/");
+            }
         }
-
     }
 
-    channel = client.channels.get(id);
+    $: channel = client.channels.get(id);
     const open = isTouchscreenDevice || state.layout.getSectionState(SIDEBAR_CHANNELS, true);
 </script>
 
 <UprisingApp>
-    <SidebarBase slot="left">
-        <ServerListSidebar />
-        {#if open && server}
-            <ServerSidebar {server} {channel} />
-        {/if}  
-    </SidebarBase>
-    {#if channel}
-        <TextChannel {channel} {message} />
-    {/if}
+    
+        <SidebarBase slot="left">
+            <ServerListSidebar />
+            {#key channel}
+                {#if open && server}
+                    <ServerSidebar {server} {channel} />
+                {/if}
+            {/key}
+        </SidebarBase>
+    {#key channel}
+        {#if channel}
+            <TextChannel {channel} {message} />
+        {/if}
+    {/key}
 </UprisingApp>
+

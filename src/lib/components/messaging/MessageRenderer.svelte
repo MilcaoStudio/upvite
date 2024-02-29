@@ -38,10 +38,10 @@
     const queue = state.queue;
     let render: Node[] = [];
 
-    if (renderer) {
-        render.push(createElement(Start, { channel: renderer.channel }));
+    $: if (renderer) {
+        render.unshift(createElement(Start, { channel: renderer.channel }));
     } else {
-        render.push(createElement(Preloader, { type: "ring" }));
+        render.unshift(createElement(Preloader, { type: "ring" }));
     }
 
     let previous: IMessage | undefined;
@@ -70,9 +70,9 @@
 
         let date;
         if (
-            adate.getFullYear() !== bdate.getFullYear() ||
-            adate.getMonth() !== bdate.getMonth() ||
-            adate.getDate() !== bdate.getDate()
+            adate.getFullYear() != bdate.getFullYear() ||
+            adate.getMonth() != bdate.getMonth() ||
+            adate.getDate() != bdate.getDate()
         ) {
             date = adate;
         }
@@ -180,9 +180,8 @@
     
 </script>
 
-{#key render}
-    {#each render as node}
+{#each render as node}
         <Tree {node} />
-    {/each}
-{/key}
+{/each}
+
 

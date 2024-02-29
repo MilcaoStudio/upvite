@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { BxHome, BxPlusCircle, BxCompass, BxRightArrowCircle, BxGroup } from 'svelte-boxicons'
+    import { BxHome, BxPlusCircle, BxCompass, BxRightArrowCircle, BxGroup, BxMoney } from 'svelte-boxicons'
     import { css, cx } from "@emotion/css";
     import { useClient } from "$lib/controllers/ClientController";
     import { isTouchscreenDevice } from "$lib";
@@ -108,6 +108,9 @@
                         <CategoryButton action="chevron" icon={BxGroup} description={$_('app.home.join-testers_desc')}>{$_('app.home.join-testers')}</CategoryButton>
                     </a>
                 {/if}
+                <a href="https://ko-fi.com/projectuprising">
+                    <CategoryButton action="external" icon={BxMoney} description={$_('app.home.donate_desc')}>{$_('app.home.donate')}</CategoryButton>
+                </a>
             </div>
             {#if isDecember}
             <!-- svelte-ignore a11y-invalid-attribute -->

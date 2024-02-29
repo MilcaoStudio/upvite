@@ -113,6 +113,7 @@
   import type { Nullable } from "revolt.js";
   import { browser } from "$app/environment";
   import defaultsDeep from "lodash.defaultsdeep";
+    import { setContext } from "svelte";
 
   let definitions: Dictionary = definition;
   let lang = Language.ENGLISH;
@@ -157,6 +158,7 @@
   };
 
   $: source && loadLanguage(lang);
+  $: definitions && setContext('dictionary', definitions);
   $: document.body.style.direction = source.rtl ? "rtl" : "";
 
   waitLocale();

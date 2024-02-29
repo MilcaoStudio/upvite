@@ -1,7 +1,7 @@
 <script lang="ts">
     import { css, cx } from "@emotion/css";
 
-    export let borderRadius = '--border-radius', hover = false;
+    export let borderRadius = '--border-radius', hover = false, onClick: ((e: MouseEvent)=>void) | null = null;
     export let ref: SVGElement | null = null;
     const IconBase = cx('IconBase', css`
     flex-shrink: 0;
@@ -17,6 +17,7 @@
     `)
 </script>
 
-<svg class={IconBase} bind:this={ref} {...$$restProps} >
+<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
+<svg class={IconBase} role="img" bind:this={ref} on:click={onClick} {...$$restProps} >
     <slot />
 </svg>
