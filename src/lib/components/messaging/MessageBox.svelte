@@ -284,7 +284,6 @@
 {:else}
     <Autocomplete {...autoCompleteProps} />
     <div class={Base}>
-        <div style:width="16px" />
         <TextAreaAutoSize
             id="message"
             maxlength="2000"

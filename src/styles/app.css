@@ -71,7 +71,8 @@
 
     --scrollbar-thickness: 3px;
     --scrollbar-thickness-ff: thin;
-    --border-radius: 6px;
+    --border-radius: 16px;
+    --border-radius-inner: 12px;
     --border-radius-half: 50%;
     --border-radius-user-icon: var(--border-radius-half);
     --border-radius-channel-icon: var(--border-radius-half);

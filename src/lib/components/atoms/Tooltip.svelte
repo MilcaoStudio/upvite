@@ -19,7 +19,7 @@
 {:else}
     <div 
         use:tippy={{
-            animation: "shift-away",
+            animation: "shift-away-extreme",
             placement: right ? "right" : placement,
             content,
         }}
