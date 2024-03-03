@@ -1,13 +1,20 @@
 <script lang="ts">
-    import Appearance from '$lib/components/settings/appearance.svelte';
-    import Profile from '$lib/components/settings/profile.svelte';
+    import { goto } from '$app/navigation';
+    import Appearance from '$lib/components/settings/personal/appearance.svelte';
+    import Profile from '$lib/components/settings/personal/profile.svelte';
+    import type { ComponentType } from 'svelte';
+    
+    const Pages: Record<string, ComponentType> = {
+        profile: Profile,
+        appearance: Appearance,
+    }
     export let data;
-    $: tab = data.tab;
-    let page;
+    let tab = data.tab;
+    if (!tab) {
+        goto("/settings/profile");
+    }
 </script>
 
-{#if tab == "appearance"}
-<Appearance />
-{:else}
-<Profile />
+{#if tab}
+    <svelte:component this={Pages[tab]} />
 {/if}

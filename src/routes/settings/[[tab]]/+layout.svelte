@@ -2,6 +2,6 @@
     import CheckAuth from "$lib/controllers/CheckAuth.svelte";
 </script>
 
-<CheckAuth blockRender>
+<CheckAuth auth>
     <slot />
 </CheckAuth>
