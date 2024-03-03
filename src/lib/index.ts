@@ -61,6 +61,8 @@ export const isTouchscreenDevice = browser && navigator.maxTouchPoints > 1;
     }
 }
 
+export const RE_ULID = /^[0123456789ABCDEFGHJKMNPQRSTVWXYZ]{26}$/;
+
 /*
 
 export function injectWindow(key: string, source: any) {

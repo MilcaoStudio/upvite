@@ -48,7 +48,6 @@
         if (target && showServerIdentity) {
             const server = $page.params.server;
             if (server) {
-                console.log('Loading avatar for', target._id);
                 const member = client.members.getKey({
                     server,
                     user: target._id,
