@@ -2,6 +2,7 @@ import { mapToRecord } from "$lib";
 import type { Overrides, Fonts, MonospaceFonts } from "$lib/components/context/Theme.svelte";
 import type Persistent from "$lib/types/Persistent";
 import type Syncable from "$lib/types/Syncable";
+import type Plugin from "./Plugins"
 import { ObservableMap, makeAutoObservable, action, computed } from "mobx";
 import SAudio,{ type SoundOptions } from "./helpers/SAudio";
 import SSecurity from "./helpers/SSecurity";
@@ -11,6 +12,7 @@ export interface ISettings {
     "notifications:desktop": boolean;
     "notifications:sounds": SoundOptions;
 
+    "appearance:emoji": any;
     "appearance:ligatures": boolean;
     "appearance:seasonal": boolean;
     "appearance:transparency": boolean;
@@ -121,8 +123,8 @@ export default class Settings
         data: unknown,
         _revision: number,
     ) {
-        if (key === "appearance") {
-            //this.remove("appearance:emoji");
+        if (key == "appearance") {
+            this.remove("appearance:emoji");
             this.remove("appearance:seasonal");
             this.remove("appearance:transparency");
         } else {
@@ -152,7 +154,7 @@ export default class Settings
     @computed toSyncable() {
         const data: Record<"appearance" | "theme", Partial<ISettings>> = {
             appearance: this.pullKeys([
-                //"appearance:emoji",
+                "appearance:emoji",
                 "appearance:seasonal",
                 "appearance:transparency",
             ]),

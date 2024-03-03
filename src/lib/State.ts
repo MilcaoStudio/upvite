@@ -13,16 +13,23 @@ import NotificationOptions from "./stores/NotificationOptions";
 import Ordering from "./stores/Ordering";
 import Settings from "./stores/Settings";
 import Draft from "./stores/Draft";
+import Sync from "./stores/Sync";
+import Changelog from "./stores/Changelog";
+import type Syncable from "./types/Syncable";
+import Plugins from "./stores/Plugins";
 
 export default class State {
     private persistent: [string, Persistent<unknown>][] = [];
     private disabled: Set<string> = new Set;
     auth = new Auth;
+    changelog = new Changelog;
     queue = new MessageQueue;
     layout = new Layout;
     notifications: NotificationOptions;
     ordering: Ordering;
+    plugins: Plugins;
     settings = new Settings;
+    sync: Sync;
     draft = new Draft;
 
     constructor() {
@@ -34,6 +41,8 @@ export default class State {
 
         this.notifications = new NotificationOptions(this);
         this.ordering = new Ordering(this);
+        this.sync = new Sync(this);
+        this.plugins = new Plugins(this);
         injectWindow('state', this);
     }
 
@@ -79,6 +88,14 @@ export default class State {
             );
         }
     }
+
+    /**
+     * Temporarily ignore updates to a key.
+     * @param key Key to ignore
+     */
+    setDisabled(key: string) {
+        this.disabled.add(key);
+    }
     
     async hydrate() {
         const sync = (await localforage.getItem("sync")) as DataSync;
@@ -95,7 +112,13 @@ export default class State {
     }
 
     @action onPacket(packet: ClientboundNotification) {
-        console.log('onPacket:', packet.type);
+        if (packet.type == "UserSettingsUpdate") {
+            try {
+                this.sync.apply(packet.update);
+            } catch (err) {
+                //reportError(err as any, "failed_sync_apply");
+            }
+        }
     }
     /**
          * Register reaction listeners for persistent data stores.
@@ -121,13 +144,12 @@ export default class State {
                 "visibilitychange",
                 this.notifications.onVisibilityChange,
             );
-            /*
+            
             // Sync settings from remote server.
             state.sync
                 .pull(client)
                 .catch(console.error)
                 .finally(() => state.changelog.checkForUpdates());
-                */
         }
 
         // Register all the listeners required for saving and syncing state.
@@ -148,7 +170,7 @@ export default class State {
                         const revision = +new Date();
                         
                         switch (id) {
-                            case "settings": {/*
+                            case "settings": {
                                 const { appearance, theme } =
                                     this.settings.toSyncable();
     
@@ -177,7 +199,7 @@ export default class State {
                                     }
                                 }
     
-                                if (Object.keys(obj).length > 0) {
+                                if (Object.keys(obj).length) {
                                     if (client.websocket.connected) {
                                         client.syncSetSettings(
                                             obj as any,
@@ -185,9 +207,9 @@ export default class State {
                                         );
                                     }
                                 }
-                                break;*/
+                                break;
                             }
-                            default: {/*
+                            default: {
                                 if (this.sync.isEnabled(id as SyncKeys)) {
                                     if (this.disabled.has(id)) {
                                         this.disabled.delete(id);
@@ -202,7 +224,7 @@ export default class State {
                                             revision,
                                         );
                                     }
-                                }/*/
+                                }
                             }
                         }
                     } catch (err) {
@@ -219,7 +241,6 @@ export default class State {
             if (client) {
                 client.removeListener("message", this.queue.onMessage);
                 client.removeListener("packet", this.onPacket);
-                
                 client.removeListener("message", this.notifications.onMessage);
                 client.removeListener(
                     "user/relationship",
@@ -237,15 +258,14 @@ export default class State {
     }
     reset() {
         runInAction(() => {
-            /*
             this.draft = new Draft();
-            this.experiments = new Experiments();*/
+            //this.experiments = new Experiments();
             this.layout = new Layout();
             this.notifications = new NotificationOptions(this);
             this.queue = new MessageQueue();
             
             this.settings = new Settings();
-            //this.sync = new Sync(this);
+            this.sync = new Sync(this);
             this.ordering = new Ordering(this);
             this.save();
 
