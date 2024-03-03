@@ -1,11 +1,11 @@
 <script lang="ts">
-    import Tree from "$lib/components/Tree.svelte";
-    import type { Node } from "$lib/components/Tree.svelte";
+    import Tree from "$lib/components/JSXRender.svelte";
+    import type { SvelteNode } from "$lib/markdown/runtime/svelteRuntime";
     import { json } from "svelte-i18n";
 
-    export let id: string, fields: Record<string, Node> = {};
+    export let id: string, fields: Record<string, SvelteNode> = {};
 
-    function recursiceReplaceSlots(input: string, _fields: Record<string, Node>): (string|Node)[] {
+    function recursiceReplaceSlots(input: string, _fields: Record<string, SvelteNode>): (string|SvelteNode)[] {
         const key = Object.keys(_fields)[0];
         if (key) {
             const { [key]: field, ...restOfFields } = _fields;

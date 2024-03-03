@@ -2,7 +2,7 @@
     import { isTouchscreenDevice } from "$lib";
     import { state } from "$lib/State";
     import ConditionalLink from "$lib/components/atoms/ConditionalLink.svelte";
-    import Tree, { createElement, type Node } from "$lib/components/Tree.svelte";
+    import JSXRender from "$lib/components/JSXRender.svelte";
     import { useClient } from "$lib/controllers/ClientController";
     import { css, cx } from "@emotion/css";
     import type { Channel, Server } from "revolt.js";
@@ -11,6 +11,7 @@
     import CollapsibleSection from "$lib/components/CollapsibleSection.svelte";
     import Category from "$lib/components/atoms/Category.svelte";
     import ServerHeader from "$lib/components/servers/ServerHeader.svelte";
+    import { createElement, type SvelteElement } from "$lib/markdown/runtime/svelteRuntime";
 
     export let server: Server, channel: Channel | undefined;
     const ServerBase = cx(
@@ -45,7 +46,7 @@
     const client = useClient();
     $: channel && state.layout.setLastOpened(server._id, channel._id);
     const uncategorised = new Set(server.channel_ids);
-    const elements: Node[] = [];
+    const elements: SvelteElement[] = [];
     function addChannel(id: string) {
         const entry = client.channels.get(id);
         if (!entry) {
@@ -59,7 +60,7 @@
         return createElement(
             ConditionalLink,
             {
-                onClick: (e) => {
+                onClick: (e: MouseEvent) => {
                     if (e.shiftKey) {
                         internalEmit(
                             "MessageBox",
@@ -89,7 +90,7 @@
     }
     if (server.categories) {
         for (const category of server.categories) {
-            const channels: Node[] = [];
+            const channels: SvelteElement[] = [];
             for (const id of category.channels) {
                 uncategorised.delete(id);
                 const channel = addChannel(id);
@@ -120,7 +121,7 @@
     <!--<ConnectionStatus />-->
     <div class={ServerList}>
         {#each elements as element}
-            <Tree node={element} />
+            <JSXRender node={element} />
         {/each}
     </div>
 </div>

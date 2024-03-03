@@ -22,9 +22,14 @@ declare module 'mdast' {
 	interface RootContentMap {
 	  timestamp: {
 		type: "timestamp",
-		children: {text: Text}[],
-		data?: null,
 	  }
 	}
 }
+
+declare module 'unified' {
+	interface CompileResultMap {
+	  // Register a new result (value is used, key should match it).
+	  SvelteElement: import("$lib/markdown/runtime/svelteRuntime").SvelteElement
+	}
+  }
 export {};

@@ -1,4 +1,8 @@
+import { RE_ULID } from "$lib";
+import { clientController } from "$lib/controllers/ClientController";
 import type { Handler } from "mdast-util-to-hast";
+import { RevoltEmojiDictionary } from "revkit";
+import { RE_MENTIONS } from "revolt.js";
 import type { Plugin } from "unified";
 import { visit } from "unist-util-visit";
 
@@ -52,7 +56,6 @@ export function createComponent(
                                     value: node.value.slice(start, position),
                                 });
                             }
-
                             result.push({
                                 type,
                                 match: match[1],
@@ -91,7 +94,7 @@ export function createComponent(
  * @returns Handler
  */
 export const passThroughRehype: (name: string) => Handler =
-    (name: string) => (s, node) => ({type: "element", tagName: name, properties: {}, children: s.all(node)})
+    (name: string) => (s, node) => { return { type: "element", tagName: name, properties: { ...node }, children: s.all(node) } }
 
 /**
  * Pass-through multiple components at once
@@ -105,3 +108,19 @@ export const passThroughComponents = (...keys: string[]) => {
     }
     return obj;
 };
+
+export const remarkMention = createComponent("mention", RE_MENTIONS, (match) =>
+    clientController.availableClient.users.has(match),
+);
+
+export const remarkChannel = createComponent("channel", /<#([A-z0-9]{26})>/g, (match) =>
+    clientController.availableClient.channels.has(match)
+);
+
+const RE_EMOJI = /:([a-zA-Z0-9\-_]+):/g;
+
+export const remarkEmoji = createComponent("emoji", RE_EMOJI, (match) => match in RevoltEmojiDictionary || RE_ULID.test(match));
+
+export function isOnlyEmoji(text: string) {
+    return !text.replaceAll(RE_EMOJI, "").trim().length;
+}

@@ -5,7 +5,7 @@
     import { state } from "$lib/State";
     import { useClient } from "$lib/controllers/ClientController";
     import type { ChannelRenderer } from "$lib/rendered/Singleton";
-    import Tree, { createElement, type Node } from "../Tree.svelte";
+    import JSXRender from "../JSXRender.svelte";
     import Start from "./Start.svelte";
     import Preloader from "../indicators/Preloader.svelte";
     import { BxX } from "svelte-boxicons";
@@ -15,6 +15,7 @@
     import Message from "./Message.svelte";
     import { css, cx } from "@emotion/css";
     import { autorun } from "mobx";
+    import { createElement, type SvelteNode } from "$lib/markdown/runtime/svelteRuntime";
 
     export let lastId: string | undefined = undefined,
         //highlight: string | undefined = undefined,
@@ -36,7 +37,7 @@
     const client = useClient();
     const userId = client.user!._id;
     const queue = state.queue;
-    let render: Node[] = [];
+    let render: SvelteNode[] = [];
 
     $: if (renderer) {
         render.unshift(createElement(Start, { channel: renderer.channel }));
@@ -181,7 +182,7 @@
 </script>
 
 {#each render as node}
-        <Tree {node} />
+        <JSXRender {node} />
 {/each}
 
 
