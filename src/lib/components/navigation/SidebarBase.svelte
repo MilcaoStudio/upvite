@@ -1,5 +1,5 @@
 <style>
-    div.SidebarBase {
+    div.Sidebar {
         height: 100%;
         display: flex;
         user-select: none;
@@ -14,6 +14,6 @@
     }
 </style>
 
-<div class="SidebarBase">
+<div class="Sidebar">
     <slot />
 </div>

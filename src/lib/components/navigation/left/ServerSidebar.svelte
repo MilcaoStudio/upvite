@@ -7,7 +7,7 @@
     import { css, cx } from "@emotion/css";
     import type { Channel, Server } from "revolt.js";
     import { internalEmit } from "$lib/InternalEmitter";
-    import ChannelButton from "../ChannelButton.svelte";
+    import ChannelButton from "../items/ChannelButton.svelte";
     import CollapsibleSection from "$lib/components/CollapsibleSection.svelte";
     import Category from "$lib/components/atoms/Category.svelte";
     import ServerHeader from "$lib/components/servers/ServerHeader.svelte";
