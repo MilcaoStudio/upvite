@@ -11,7 +11,8 @@
 
     .container{
         min-width: 218px;
-        padding: 70px 8px;
+        width:100%;
+        padding: 30px 8px;
         display: flex;
         gap: 2px;
         flex-direction: column;
@@ -22,10 +23,13 @@
 
         overflow-y: auto;
         transition: visibility .1s;
-        max-height: 100vh; /* Ajusta según sea necesario */
-        overflow-x: hidden;
-        min-width: 232px;
-        direction: ltr  /*ltr  rtl*/
+        max-height: 100vh;
+        overflow-x: auto;
+        padding: 0px 16px;
+        background-color: var(--secondary-background);
+        height: 100vh;
+        width: 100%;
+        direction: ltr /*ltr rtl*/;
     }
 
 </style>
