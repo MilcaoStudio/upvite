@@ -18,7 +18,7 @@
     import { translate } from "$lib/i18n";
     import ServerIcon from "$lib/components/ServerIcon.svelte";
     import UserIcon from "$lib/components/user/UserIcon.svelte";
-    import { createElement } from "$lib/components/Tree.svelte";
+    import { createElement } from "$lib/markdown/runtime/svelteRuntime";
 
     export let data;
 

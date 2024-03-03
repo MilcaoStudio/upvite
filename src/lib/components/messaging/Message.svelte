@@ -11,6 +11,7 @@
     import MessageInfo from "./MessageInfo.svelte";
     import MessageDetail from "./MessageDetail.svelte";
     import Username from "../user/Username.svelte";
+    import Markdown from "$lib/markdown/Markdown.svelte";
     export let message: MessageType & {
             webhook?: { name: string; avatar?: string };
         },
@@ -105,7 +106,11 @@
             </span>
             {/if}
             <!--Markdown here-->
-            {replacement ?? content}
+            {#if replacement}
+                {replacement}
+            {:else}
+                <Markdown {content} /> 
+            {/if}
 
             <!--InviteList-->
             {#if queued?.error}

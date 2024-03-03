@@ -1,5 +1,5 @@
 export function load({params}) {
     return {
-        setting: params.setting
+        tab: params.tab
     }
 }
