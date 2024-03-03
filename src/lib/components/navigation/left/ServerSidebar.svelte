@@ -12,6 +12,7 @@
     import Category from "$lib/components/atoms/Category.svelte";
     import ServerHeader from "$lib/components/servers/ServerHeader.svelte";
     import { createElement, type SvelteElement } from "$lib/markdown/runtime/svelteRuntime";
+    import UserPanel from "./UserPanel.svelte";
 
     export let server: Server, channel: Channel | undefined;
     const ServerBase = cx(
@@ -124,4 +125,5 @@
             <JSXRender node={element} />
         {/each}
     </div>
+    <UserPanel {client} />
 </div>

@@ -6,7 +6,7 @@
     import { BxTimeFive } from "svelte-boxicons";
     import { t } from "svelte-i18n";
 
-    export let user: User | undefined = undefined, prefixAt = false, masquerade: API.Masquerade | null = null, showServerIdentity: boolean | "both" = false, onClick: ((e: MouseEvent)=>void) | null = null;
+    export let user: User | null | undefined = undefined, prefixAt = false, masquerade: API.Masquerade | null = null, showServerIdentity: boolean | "both" = false, onClick: ((e: MouseEvent)=>void) | null = null;
     let username = (user as unknown as { display_name: string })?.display_name ??
             user?.username;
     let color = masquerade?.colour;
