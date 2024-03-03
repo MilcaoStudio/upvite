@@ -17,6 +17,7 @@
     import ChannelButton from "../items/ChannelButton.svelte";
     import JsxRender from "$lib/components/JSXRender.svelte";
     import IconButton from "$lib/components/atoms/input/IconButton.svelte";
+    import UserPanel from "./UserPanel.svelte";
 
     const Navbar = cx(
         "Navbar",
@@ -129,4 +130,5 @@
             <JsxRender node={channel} />
         {/each}
     </GenericSidebarList>
+    <UserPanel {client}/>
 </GenericSidebarBase>
