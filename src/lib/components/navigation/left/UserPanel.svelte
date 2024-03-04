@@ -12,12 +12,13 @@ import { css, cx } from "@emotion/css";
         justify-content: space-between;
         padding: 12px 8px;
         background: var(--tertiary-background);
+        border-radius: var(--border-radius);
 
         .user {
             display: flex;
             align-items: center;
             gap: 8px;
-            font-size: 14px;
+            font-size: 13px;
         }
 
         .user > div {

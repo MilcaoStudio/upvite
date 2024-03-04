@@ -9,6 +9,10 @@
     --border-radius: 15px;
     --foreground: #fff;
 
+
+    /* MAYBE SOME USEFUL COLORS
+    #383544
+    */
     --background-dark: #1a1a1e;
 
     --background: #181923;
@@ -20,7 +24,7 @@
     --secondary-background: #292d41;
     --secondary-background-rgb: 41,45,65;
 
-    --secondary-foreground: #C8C8C8;
+    --secondary-foreground: #bcb9c4;
     --secondary-foreground-rgb: 24,25,35;
 
     --primary-header: #38405d;
@@ -32,7 +36,7 @@
     --tertiary-background: #4c546d;
     --tertiary-background-rgb: 24,25,35;
     
-    --tertiary-foreground: #5e6780;
+    --tertiary-foreground: #71798f;
     --tertiary-foreground-rgb: 24,25,35;
 
     --accent: #8097de;
@@ -96,7 +100,7 @@
     --attachment-max-text-width: 800px;
     --bottom-navigation-height: 50px;
 
-    --scrollbar-thumb: #CA525A;
+    --scrollbar-thumb: #383544;
     --scrollbar-thumb-rgb: 202,82,90;
     --scrollbar-track: transparent;
     --scrollbar-track-rgb: 0,0,0;
@@ -105,7 +109,7 @@
     --scrollbar-track-contrast: white;
     --scrollbar-track-contrast-rgb: 255,255,255;
     --scrollbar-thickness: 3px;
-    --scrollbar-thickness-ff: thin;
+    --scrollbar-thickness-ff: 3px;
 
     --min-opacity: 0;
     --min-opacity-rgb: 0,0,0;
@@ -150,6 +154,7 @@ body {
 ::-webkit-scrollbar {
     width: var(--scrollbar-thickness);
     height: var(--scrollbar-thickness);
+
 }
 
 ::-webkit-scrollbar-track {
@@ -158,7 +163,7 @@ body {
 
 ::-webkit-scrollbar-thumb {
     min-width: 30px;
-    min-height: 30px;
+    min-height: 30px; 
 
     background-clip: content-box;
     background: var(--scrollbar-thumb);
@@ -185,11 +190,13 @@ body {
 
 ::-webkit-scrollbar-corner {
     background: transparent;
+    
 }
 
 ::selection {
     background: var(--foreground);
     color: var(--background);
+    
 }
 
 ::-moz-selection {

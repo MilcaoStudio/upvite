@@ -5,7 +5,8 @@
 </script>
 
 {#if active}
-    <a on:click={onClick} on:keydown={onClick} {href} >
+    <!-- svelte-ignore a11y-missing-attribute -->
+    <a role="none" on:click={onClick} on:keydown={onClick} >
         <slot />
     </a>
 {:else}

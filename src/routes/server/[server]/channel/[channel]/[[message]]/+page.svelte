@@ -11,7 +11,6 @@
     import SidebarBase from "$lib/components/navigation/SidebarBase.svelte";
     import ServerSidebar from "$lib/components/navigation/left/ServerSidebar.svelte";
     import ServerListSidebar from "$lib/components/navigation/left/ServerListSidebar.svelte";
-    import BottomPanel from "$lib/components/navigation/left/BottomPanel.svelte";
     const client = useClient();
 
     export let data: LayoutData;

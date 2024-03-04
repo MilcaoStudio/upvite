@@ -5,6 +5,7 @@ import call_leave from "../../../assets/sounds/call_leave.mp3";
 import message from "../../../assets/sounds/message.mp3";
 import outbound from "../../../assets/sounds/outbound.mp3";*/
 import Settings from "../Settings";
+import { browser } from "$app/environment";
 
 export type Sounds = string//"message" | "outbound" | "call_join" | "call_leave";
 
@@ -50,7 +51,9 @@ export default class SAudio {
         this.cache = new Map();
 
         // Asynchronously load Audio files into cache.
-        setTimeout(() => this.loadCache(), 0);
+        if (browser) {
+            setTimeout(() => this.loadCache(), 100);
+        }
     }
 
     @action setEnabled(sound: Sounds, enabled: boolean) {
@@ -80,7 +83,7 @@ export default class SAudio {
     }
 
     getAudio(path: string) {
-        if (typeof Audio !== 'undefined') {
+        if (browser) {
             if (this.cache.has(path)) {
                 return this.cache.get(path)!;
             } else {
@@ -116,7 +119,7 @@ export default class SAudio {
         if (definition.enabled) {
             const audio = this.getAudio(definition.path);
             try {
-                audio.play();
+                audio?.play();
             } catch (err) {
                 console.error("Hit error while playing", `${sound  }:`, err);
             }
