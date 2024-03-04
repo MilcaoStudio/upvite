@@ -3,7 +3,7 @@
 
 <style>
    h4{
-    color: var(--secondary-foreground);
+    color: var(--tertiary-foreground);
     font-weight: 600;
     margin: 0px;
     padding: 12px 4px 6px 4px;

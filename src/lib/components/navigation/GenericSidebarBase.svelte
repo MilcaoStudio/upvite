@@ -11,7 +11,7 @@
         flex-direction: column;
         background: var(--secondary-background);
 
-        ${mobilePadding && isTouchscreenDevice && `padding-bottom: 50px;`}
+        ${mobilePadding && isTouchscreenDevice && ``}
     `)
 </script>
 
