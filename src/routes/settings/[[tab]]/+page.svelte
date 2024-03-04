@@ -1,93 +1,184 @@
 <script lang="ts">
+    import { goto, replaceState } from "$app/navigation";
 
-    import { goto } from '$app/navigation';
+    import UprisingApp from "$lib/components/UprisingApp.svelte";
 
-    
+    import Appearance from "$lib/components/settings/personal/appearance.svelte";
+    import Profile from "$lib/components/settings/personal/profile.svelte";
 
-    import UprisingApp from '$lib/components/UprisingApp.svelte';
+    import type { ComponentType } from "svelte";
+    import ConditionalLink from "$lib/components/atoms/ConditionalLink.svelte";
+    import ButtonItem from "$lib/components/navigation/items/ButtonItem.svelte";
+    import {
+        BxArrowBack,
+        BxGlobe,
+        BxPalette,
+        BxTransfer,
+        BxUserCircle,
+        BxWrench,
+        BxX,
+    } from "svelte-boxicons";
+    import GenericSidebarBase from "$lib/components/navigation/GenericSidebarBase.svelte";
+    import { t } from "svelte-i18n";
+    import Category from "$lib/components/atoms/Category.svelte";
+    import SidebarBase from "$lib/components/navigation/SidebarBase.svelte";
+    import H1 from "$lib/components/atoms/heading/H1.svelte";
+    import { state } from "$lib/State.js";
+    import { isTouchscreenDevice } from "$lib";
+    import Header from "$lib/components/atoms/Header.svelte";
+    import IconButton from "$lib/components/atoms/input/IconButton.svelte";
 
-    import Appearance from '$lib/components/settings/personal/appearance.svelte';
-    import Profile from '$lib/components/settings/personal/profile.svelte';
-
-    import Scroller from '$lib/components/settings/common/scroller.svelte';
-    import Item from '$lib/components/settings/common/item.svelte';
-    import Category from '$lib/components/settings/common/category.svelte';
-
-    import type { ComponentType } from 'svelte';
-    import ScrollerContent from '$lib/components/settings/common/scrollerContent.svelte';
-    
     const Pages: Record<string, ComponentType> = {
-        Profile: Profile,
-        Appearance: Appearance,
-
-    }
+        profile: Profile,
+        appearance: Appearance,
+    };
     export let data;
+    let closing = false;
+
+    $: exitSettings = function(){
+        closing = true;
+        setTimeout(() => {
+            goto(state.layout.getLastPath());
+        }, 200);
+    }
+
+    $: keyDown = function(ev: KeyboardEvent){
+        if (ev.key == "Escape") {
+            exitSettings();
+        }
+    }
+    function switchPage(to?: string) {
+        if (to) {
+            goto(`/settings/${to}`);
+        } else {
+            goto(`/settings`);
+        }
+    }
     $: tab = data.tab;
     if (!tab) {
-        goto("/settings/Profile");
+        goto("/settings/profile");
     }
-
-
 </script>
 
-
+<svelte:body on:keydown={keyDown} />
 
 <UprisingApp>
-    <div class="flex-column">
-        <Scroller>
-            <Category>User preferences</Category> 
-                <Item href="Profile" active={tab == "Profile"}>
-                    <svg slot="svg" xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" /><path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" /></svg>
-                    Profile</Item>
-                <Item href="Appearance" active={tab == "Appearance"}>
-                    <svg slot="svg" xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-palette" width="24" height="24" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 21a9 9 0 0 1 0 -18c4.97 0 9 3.582 9 8c0 1.06 -.474 2.078 -1.318 2.828c-.844 .75 -1.989 1.172 -3.182 1.172h-2.5a2 2 0 0 0 -1 3.75a1.3 1.3 0 0 1 -1 2.25" /><path d="M8.5 10.5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /><path d="M12.5 7.5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /><path d="M16.5 10.5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /></svg>
-                    Appearance</Item>
-                <Item href="Notifications" active={tab == "Notifications"}>
-                    <svg slot="svg" xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-bell" width="24" height="24" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M10 5a2 2 0 1 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3h-16a4 4 0 0 0 2 -3v-3a7 7 0 0 1 4 -6" /><path d="M9 17v1a3 3 0 0 0 6 0v-1" /></svg>
-                    Notifications</Item>
-                <Item href="Chat" active={tab == "Chat"}>
-                    <svg slot="svg" xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-message-dots" width="24" height="24" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 21v-13a3 3 0 0 1 3 -3h10a3 3 0 0 1 3 3v6a3 3 0 0 1 -3 3h-9l-4 4" /><path d="M12 11l0 .01" /><path d="M8 11l0 .01" /><path d="M16 11l0 .01" /></svg>
-                    Chat</Item>
-                <Item href="Language" active={tab == "Language"}>
-                    <svg slot="svg" xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-world" width="24" height="24" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" /><path d="M3.6 9h16.8" /><path d="M3.6 15h16.8" /><path d="M11.5 3a17 17 0 0 0 0 18" /><path d="M12.5 3a17 17 0 0 1 0 18" /></svg>
-                    Language</Item>
-                <Item href="Devmode" active={tab == "Devmode"}>
-                    <svg slot="svg" xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-code-circle" width="24" height="24" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M10 14l-2 -2l2 -2" /><path d="M14 10l2 2l-2 2" /><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" /></svg>
-                    Dev mode</Item>
-                <Item href="Tf2" active={tab == "TF2"}> 
-                    <svg slot="svg" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="24" height="24" viewBox="0 0 48 48">
-                        <path fill="#bf862a" d="M40.533 12.733c-.343 5.552-2.248 9.362-7.629 10.067l-2.419-.324c-.429-1.867-1.648-3.429-3.286-4.333l1.829-13.505C33.771 5.867 37.838 8.79 40.533 12.733zM17.962 26.81c-.629 1.952-1.838 2.905-2.533 2.905-4.619 0-7.619 0-11.362-4.086C4.019 25.095 4 24.552 4 24c0-.105 0-.2.01-.305l13.505 1.829C17.619 25.971 17.762 26.4 17.962 26.81zM24.305 4.01l-1.829 13.505c-1.867.429-3.429 1.648-4.333 3.286L4.638 18.971C6.867 10.362 14.686 4 24 4 24.105 4 24.2 4 24.305 4.01z"></path><g><path fill="#a2632c" d="M20.8 29.857l-1.829 13.505c-8.105-2.095-14.21-9.143-14.905-17.733 3.295.79 7.219 1.229 11.838 1.229.695 0 1.381-.019 2.057-.048C18.552 28.105 19.552 29.171 20.8 29.857zM43.362 29.029C41.133 37.638 33.314 44 24 44c-.105 0-.2 0-.305-.01l1.829-13.505c1.867-.429 3.429-1.648 4.333-3.286L43.362 29.029zM44 24c0 .105 0 .2-.01.305L32.905 22.8c3.848-2.362 6.505-5.743 7.629-10.067C42.724 15.943 44 19.819 44 24z"></path></g>
+    <SidebarBase slot="left">
+        <GenericSidebarBase>
+            <div class="sidebar">
+                <Category>User preferences</Category>
+                <ConditionalLink
+                    active={tab == "profile"}
+                    href="/settings/profile"
+                >
+                    <ButtonItem active={tab == "profile"}>
+                        <BxUserCircle size={24} />
+                        <span>{$t("app.settings.pages.profile.title")}</span>
+                    </ButtonItem>
+                </ConditionalLink>
+                <ConditionalLink
+                    active={tab == "appearance"}
+                    href="/settings/appearance"
+                >
+                    <ButtonItem active={tab == "appearance"}>
+                        <BxPalette size={24} />
+                        <span>{$t("app.settings.pages.appearance.title")}</span>
+                    </ButtonItem>
+                </ConditionalLink>
+                <ConditionalLink active={tab == "sync"} href="/settings/sync">
+                    <ButtonItem active={tab == "Sync"}>
+                        <BxTransfer size={24} />
+                        <span>{$t("app.settings.pages.sync.title")}</span>
+                    </ButtonItem>
+                </ConditionalLink>
+                <ConditionalLink
+                    active={tab == "language"}
+                    href="/settings/language"
+                >
+                    <ButtonItem active={tab == "language"}>
+                        <BxGlobe size={24} />
+                        <span>{$t("app.settings.pages.language.title")}</span>
+                    </ButtonItem>
+                </ConditionalLink>
+                <ConditionalLink active={tab == "dev"} href="/settings/dev">
+                    <ButtonItem active={tab == "dev"}>
+                        <BxWrench size={24} />
+                        <span>{$t("app.navigation.tabs.dev")}</span>
+                    </ButtonItem>
+                </ConditionalLink>
+                <ConditionalLink active={tab == "TF2"} href="/settings/tf2">
+                    <ButtonItem active={tab == "TF2"}>
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            x="0px"
+                            y="0px"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 48 48"
+                        >
+                            <path
+                                fill="#bf862a"
+                                d="M40.533 12.733c-.343 5.552-2.248 9.362-7.629 10.067l-2.419-.324c-.429-1.867-1.648-3.429-3.286-4.333l1.829-13.505C33.771 5.867 37.838 8.79 40.533 12.733zM17.962 26.81c-.629 1.952-1.838 2.905-2.533 2.905-4.619 0-7.619 0-11.362-4.086C4.019 25.095 4 24.552 4 24c0-.105 0-.2.01-.305l13.505 1.829C17.619 25.971 17.762 26.4 17.962 26.81zM24.305 4.01l-1.829 13.505c-1.867.429-3.429 1.648-4.333 3.286L4.638 18.971C6.867 10.362 14.686 4 24 4 24.105 4 24.2 4 24.305 4.01z"
+                            ></path><g
+                                ><path
+                                    fill="#a2632c"
+                                    d="M20.8 29.857l-1.829 13.505c-8.105-2.095-14.21-9.143-14.905-17.733 3.295.79 7.219 1.229 11.838 1.229.695 0 1.381-.019 2.057-.048C18.552 28.105 19.552 29.171 20.8 29.857zM43.362 29.029C41.133 37.638 33.314 44 24 44c-.105 0-.2 0-.305-.01l1.829-13.505c1.867-.429 3.429-1.648 4.333-3.286L43.362 29.029zM44 24c0 .105 0 .2-.01.305L32.905 22.8c3.848-2.362 6.505-5.743 7.629-10.067C42.724 15.943 44 19.819 44 24z"
+                                ></path></g
+                            >
                         </svg>
-                    TF2
-                </Item>
-
-        </Scroller>
-
-        <ScrollerContent>
-            <h1>{tab}</h1>
-            
-     
-                {#if tab}
-                
-                <svelte:component this={Pages[tab]}  />
-                {/if}
-
-        </ScrollerContent>
-
-
-
-
+                        <span>Team Fortress 2</span>
+                    </ButtonItem>
+                </ConditionalLink>
+            </div>
+        </GenericSidebarBase>
+    </SidebarBase>
+    {#if isTouchscreenDevice}
+        <Header palette="primary" withTransparency>
+            {#if tab}
+                <IconButton onClick={()=>switchPage()}>
+                    <BxArrowBack size={24} />
+                    {$t(`app.settings.pages.${tab}.title`)}
+                </IconButton>
+            {:else}
+               <IconButton onClick={exitSettings}>
+                    <BxX size={27} />
+                </IconButton> 
+            {/if}
+        </Header>
+    {/if}
+    <div class="scrollbox" data-scroll-offset={isTouchscreenDevice ? "with-padding" : undefined}>
+        <div class="content">
+        {#if tab}
+            <H1>{$t(`app.settings.pages.${tab}.title`)}</H1>
+            <svelte:component this={Pages[tab]} />
+        {/if}
+        </div> 
     </div>
-
-
-
+    
 </UprisingApp>
 
-
 <style>
-    .flex-column{
+    .sidebar {
+        flex: 1 0 300px;
         display: flex;
-        flex-direction: row;
-        
+        justify-content: flex-start;
+        flex-direction: column;
+        padding: 40px 8px 0 0;
+        background: var(--secondary-background);
+    }
+    .content {
+        display: flex;
+        gap: 13px;
+        max-width: 740px;
+        padding: 80px 32px;
+        width: 100%;
+        flex-direction: column;
+    }
+    .scrollbox {
+        display: flex;
+        flex-grow: 1;
+        align-items: stretch;
+        overflow-y: scroll;
+        transition: visibility .1s;
     }
 </style>
