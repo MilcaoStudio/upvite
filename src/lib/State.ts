@@ -35,7 +35,6 @@ export default class State {
     constructor() {
         makeAutoObservable(this);
 
-        this.register();
         this.disable = this.disable.bind(this);
         this.onPacket = this.onPacket.bind(this);
 
@@ -43,6 +42,7 @@ export default class State {
         this.ordering = new Ordering(this);
         this.sync = new Sync(this);
         this.plugins = new Plugins(this);
+        this.register();
         injectWindow('state', this);
     }
 
@@ -217,6 +217,7 @@ export default class State {
     
                                     this.sync.setRevision(id, revision);
                                     if (client.websocket.connected) {
+                                        console.log("Syncing", store.id, "to API");
                                         client.syncSetSettings(
                                             (
                                                 store as unknown as Syncable

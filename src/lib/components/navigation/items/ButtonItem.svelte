@@ -1,5 +1,6 @@
 <script lang="ts">
     import { cx } from "@emotion/css";
+    import "./Item.css";
 
     let className = "";
     export let active = false,

@@ -1,9 +1,13 @@
+import { page } from "$app/stores";
 import { mapToRecord } from "$lib";
+import { internalEmit, internalSubscribe } from "$lib/InternalEmitter";
 import type State from "$lib/State";
+import { state } from "$lib/State";
+import { modalController } from "$lib/components/modals/ModalController";
+import { clientController } from "$lib/controllers/ClientController";
 import type Persistent from "$lib/types/Persistent";
 import localforage from "localforage";
 import { action, computed, makeAutoObservable, ObservableMap } from "mobx";
-import { Client } from "revolt.js";
 
 type Plugin = {
     /**
@@ -89,8 +93,30 @@ export default class Plugins implements Persistent<Data> {
         this.hydrate(data as Data);
     }
 
+    @computed get ctx() {
+        let channel = null, server = null;
+        page.subscribe(p => {
+            const channel_id = p.params.channel;
+            const server_id = p.params.server;
+            try {
+                channel = clientController.availableClient.channels.get(channel_id);
+                server = clientController.availableClient.servers.get(server_id);
+            } catch (err) {}
+        })
+        return {
+            emit: internalEmit,
+            on: internalSubscribe,
+            client: clientController,
+            state: state,
+            modal: modalController,
+            api: clientController.availableClient.api,
+            channel,
+            server
+        }
+    }
+
     get id() {
-        return "uprising:plugins";
+        return "plugins";
     }
 
     // lexisother: https://github.com/revoltchat/revite/pull/571#discussion_r836824601
@@ -192,10 +218,8 @@ export default class Plugins implements Persistent<Data> {
         if (!plugin) throw "Unknown plugin!";
 
         try {
-            console.log("Plugin parsing is not available!");
-            /*
             const ns = `${plugin.namespace}/${plugin.id}`;
-            const instance: Instance = eval(plugin.entrypoint)();
+            const instance: Instance = eval(plugin.entrypoint)(this.ctx);
             this.instances.set(ns, {
                 ...instance,
                 format: plugin.format,
@@ -204,7 +228,7 @@ export default class Plugins implements Persistent<Data> {
             this.plugins.set(ns, {
                 ...plugin,
                 enabled: true,
-            });*/
+            });
         } catch (error) {
             console.error(`Failed to load ${namespace}/${id}!`);
             console.error(error);
