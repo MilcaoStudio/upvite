@@ -21,6 +21,7 @@
         gap: 6px;
         padding: 7px;
         border-radius: var(--border-radius);
+        color: var(--secondary-foreground);
         
     }
     /* Estilo de hover cuando el Item está activo */
