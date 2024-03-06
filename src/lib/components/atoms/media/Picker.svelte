@@ -16,10 +16,12 @@
         "Picker",
         css`
             user-select: none;
+            padding: 0 .5rem;
 
             // row width + scrollbar + group selector
-            width: calc(${ROW_SIZE} * 40px + 50px);
+            width: calc(${ROW_SIZE} * 40px + 20px + 40px);
             height: 420px;
+            background: var(--secondary-background);
 
             max-width: calc(100vw - 20px);
             max-height: calc(75vh);
@@ -32,6 +34,7 @@
             padding: 0;
             display: grid;
             place-items: center;
+            background: transparent;
 
             width: 40px;
             height: 40px;
@@ -288,7 +291,7 @@
         flex-direction: row;
 
         color: var(--foreground);
-        background: var(--tertiary-background);
+        border-top: 3px solid var(--background);
     }
 
     .EmojiPreview :global(img) {

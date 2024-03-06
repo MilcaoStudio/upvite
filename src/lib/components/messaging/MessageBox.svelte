@@ -39,8 +39,10 @@
     let replies: Reply[] = [];
     let typing = 0;
 
-    $: value = state.draft.get(channel._id)?.content ?? "";
-
+    let value = "";
+    $: autorun(()=>{
+        value = state.draft.get(channel._id)?.content ?? "";
+    });
     const Base = cx(
         "MessageBox",
         css`
@@ -376,7 +378,7 @@
                     {categories}
                     {emojis}
                     onSelect={(emoji) => append(`:${emoji}:`, "mention")}
-                    slot="flyout"
+                    slot="override"
                 />
             </Flyout>
         </div>
