@@ -11,6 +11,7 @@
     import RightSidebar from "../navigation/RightSidebar.svelte";
     import MessageArea from "../messaging/MessageArea.svelte";
     import MessageBox from "../messaging/MessageBox.svelte";
+    import JumpToBottom from "../messaging/bars/JumpToBottom.svelte";
 
     export let channel: Channel, message: string | null = null;
     const layout = state.layout;
@@ -43,6 +44,7 @@
         <div class="ChannelContent">
             <NewMessages {channel} {lastId} />
             <MessageArea {channel} {lastId} messageId={message} />
+            <JumpToBottom {channel} />
             <MessageBox {channel} />
             <!--<VoiceHeader id={channel._id} />
                 <NewMessages channel={channel} {lastId} />
