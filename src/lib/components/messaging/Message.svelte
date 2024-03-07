@@ -12,6 +12,7 @@
     import MessageDetail from "./MessageDetail.svelte";
     import Username from "../user/Username.svelte";
     import Markdown from "$lib/markdown/Markdown.svelte";
+    import ContextMenu from "../context/ContextMenu.svelte";
     export let message: MessageType & {
             webhook?: { name: string; avatar?: string };
         },
@@ -74,6 +75,7 @@
     >
         <MessageInfo click={typeof head != "undefined"}>
             {#if head}
+            <ContextMenu data={{user: user?._id, contextualMessage: message._id}} >
                 <UserIcon
                     url={message.generateMasqAvatarURL()}
                     override={message.webhook?.avatar
@@ -84,32 +86,30 @@
                     size={36}
                     showServerIdentity
                 />
+                    </ContextMenu>
             {:else}
                 <MessageDetail {message} position="left" />
             {/if}
         </MessageInfo>
         <div class="MessageContent">
             {#if head}
-            <span class="detail">
-               <Username
-                    {user}
-                    class="author"
-                    showServerIdentity
-                    onClick={handleUserClick}
-                    masquerade={message.masquerade}
-                    override={message.webhook?.name}
-                />
-                <MessageDetail
-                    message={message}
-                    position="top"
-                />
-            </span>
+                <span class="detail">
+                    <Username
+                        {user}
+                        class="author"
+                        showServerIdentity
+                        onClick={handleUserClick}
+                        masquerade={message.masquerade}
+                        override={message.webhook?.name}
+                    />
+                    <MessageDetail {message} position="top" />
+                </span>
             {/if}
             <!--Markdown here-->
             {#if replacement}
                 {replacement}
             {:else}
-                <Markdown {content} /> 
+                <Markdown {content} />
             {/if}
 
             <!--InviteList-->
