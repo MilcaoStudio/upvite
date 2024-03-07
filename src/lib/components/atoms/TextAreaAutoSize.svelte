@@ -42,14 +42,10 @@
             max-height: calc(calc(${lineHeight} * ${maxRows}))
         }`;
     const AutoSize = cx("AutoSize", css`flex-grow: 1;display: flex; flex-direction: column; padding: var(--message-box-padding);`)
-    $: if (Ghost && ref && value) {
-        ref.style.height = `${Ghost.clientHeight + 10}px`;
-        ref.style.minHeight = `${minHeight}px`;
 
-    }
 
     // Call adjustTextareaHeight whenever the value changes
-    $: adjustTextareaHeight();
+  
 
     function inputSelected(){
         return ["TEXTAREA", "INPUT"].includes(document.activeElement?.nodeName ?? "")
