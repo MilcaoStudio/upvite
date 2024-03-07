@@ -34,6 +34,9 @@
         }
         try {
             switch (data.action) {
+                case "copy_id":
+                    //modalController.writeText(data.id);
+                    break;
                 case "copy_message_link":
                     {
                         let pathname = `/channel/${data.message.channel_id}/${data.message._id}`;
@@ -166,7 +169,7 @@
                     modalController.push({
                         type: "user_profile",
                         user_id: data.user._id,
-                    })
+                    });
             }
         } catch (err) {
             modalController.push({
@@ -176,7 +179,6 @@
         } finally {
             isOpen = false;
         }
-    
     }
     function pushDivider() {
         if (lastDivider || !elements.length) return;
@@ -198,7 +200,7 @@
                 { data: action, disabled },
                 createElement(
                     "span",
-                    { style: { color } },
+                    { style: `color: ${color}` },
                     $t(`app.context_menu.${locale ?? action.action}`),
                 ),
                 (tip && createElement("div", { class: "tip" }, tip)) || null,
@@ -373,179 +375,178 @@
                         );
                     }
                 }
-                const { queued, message, attachment } = data;
-                if (queued) {
-                    makeAction({
-                        action: "retry_message",
-                        message: queued,
-                    });
+            }
+        }
+        const { queued, message, attachment } = data;
+        if (queued) {
+            makeAction({
+                action: "retry_message",
+                message: queued,
+            });
 
+            makeAction({
+                action: "cancel_message",
+                message: queued,
+            });
+        }
+
+        if (message && !queued) {
+            const sendPermission =
+                message.channel &&
+                message.channel.permission & Permission.SendMessage;
+
+            if (sendPermission) {
+                makeAction({
+                    action: "reply_message",
+                    target: message,
+                });
+            }
+
+            makeAction({
+                action: "mark_unread",
+                message,
+            });
+
+            if (
+                typeof message.content == "string" &&
+                message.content.length > 0
+            ) {
+                if (sendPermission) {
                     makeAction({
-                        action: "cancel_message",
-                        message: queued,
+                        action: "quote_message",
+                        content: message.content,
                     });
                 }
 
-                if (message && !queued) {
-                    const sendPermission =
-                        message.channel &&
-                        message.channel.permission & Permission.SendMessage;
+                makeAction({
+                    action: "copy_text",
+                    content: message.content,
+                });
+            }
 
-                    if (sendPermission) {
-                        makeAction({
-                            action: "reply_message",
-                            target: message,
-                        });
-                    }
+            if (message.author_id == userId) {
+                makeAction({
+                    action: "edit_message",
+                    id: message._id,
+                });
+            }
 
-                    makeAction({
-                        action: "mark_unread",
-                        message,
-                    });
+            if (message.author_id != userId) {
+                makeAction(
+                    {
+                        action: "report",
+                        target: message,
+                    },
+                    "report_message",
+                    undefined,
+                    undefined,
+                    "var(--error)",
+                );
+            }
 
-                    if (
-                        typeof message.content == "string" &&
-                        message.content.length > 0
-                    ) {
-                        if (sendPermission) {
-                            makeAction({
-                                action: "quote_message",
-                                content: message.content,
-                            });
-                        }
+            if (
+                message.author_id == userId ||
+                channelPermissions & Permission.ManageMessages
+            ) {
+                makeAction(
+                    {
+                        action: "delete_message",
+                        target: message,
+                    },
+                    undefined,
+                    undefined,
+                    undefined,
+                    "var(--error)",
+                );
+            }
 
-                        makeAction({
-                            action: "copy_text",
-                            content: message.content,
-                        });
-                    }
+            if (
+                message.attachments &&
+                message.attachments.length == 1 // if there are multiple attachments, the individual ones have to be clicked
+            ) {
+                pushDivider();
+                const { metadata } = message.attachments[0];
+                const { type } = metadata;
 
-                    if (message.author_id == userId) {
-                        makeAction({
-                            action: "edit_message",
-                            id: message._id,
-                        });
-                    }
+                makeAction(
+                    {
+                        action: "open_file",
+                        attachment: message.attachments[0],
+                    },
+                    type === "Image"
+                        ? "open_image"
+                        : type === "Video"
+                          ? "open_video"
+                          : "open_file",
+                );
 
-                    if (message.author_id != userId) {
-                        makeAction(
-                            {
-                                action: "report",
-                                target: message,
-                            },
-                            "report_message",
-                            undefined,
-                            undefined,
-                            "var(--error)",
-                        );
-                    }
+                makeAction(
+                    {
+                        action: "save_file",
+                        attachment: message.attachments[0],
+                    },
+                    type == "Image"
+                        ? "save_image"
+                        : type == "Video"
+                          ? "save_video"
+                          : "save_file",
+                );
 
-                    if (
-                        message.author_id == userId ||
-                        channelPermissions & Permission.ManageMessages
-                    ) {
-                        makeAction(
-                            {
-                                action: "delete_message",
-                                target: message,
-                            },
-                            undefined,
-                            undefined,
-                            undefined,
-                            "var(--error)",
-                        );
-                    }
+                makeAction(
+                    {
+                        action: "copy_file_link",
+                        attachment: message.attachments[0],
+                    },
+                    "copy_link",
+                );
+            }
 
-                    if (
-                        message.attachments &&
-                        message.attachments.length == 1 // if there are multiple attachments, the individual ones have to be clicked
-                    ) {
-                        pushDivider();
-                        const { metadata } = message.attachments[0];
-                        const { type } = metadata;
-
-                        makeAction(
-                            {
-                                action: "open_file",
-                                attachment: message.attachments[0],
-                            },
-                            type === "Image"
-                                ? "open_image"
-                                : type === "Video"
-                                  ? "open_video"
-                                  : "open_file",
-                        );
-
-                        makeAction(
-                            {
-                                action: "save_file",
-                                attachment: message.attachments[0],
-                            },
-                            type == "Image"
-                                ? "save_image"
-                                : type == "Video"
-                                  ? "save_video"
-                                  : "save_file",
-                        );
-
-                        makeAction(
-                            {
-                                action: "copy_file_link",
-                                attachment: message.attachments[0],
-                            },
-                            "copy_link",
-                        );
-                    }
-
-                    if (document.activeElement?.tagName == "A") {
-                        const link =
-                            document.activeElement.getAttribute("href");
-                        if (link) {
-                            pushDivider();
-                            makeAction({ action: "open_link", link });
-                            makeAction({ action: "copy_link", link });
-                        }
-                    }
-                }
-
-                if (attachment) {
+            if (document.activeElement?.tagName == "A") {
+                const link = document.activeElement.getAttribute("href");
+                if (link) {
                     pushDivider();
-                    const { metadata } = attachment;
-                    const { type } = metadata;
-
-                    makeAction(
-                        {
-                            action: "open_file",
-                            attachment,
-                        },
-                        type == "Image"
-                            ? "open_image"
-                            : type == "Video"
-                              ? "open_video"
-                              : "open_file",
-                    );
-
-                    makeAction(
-                        {
-                            action: "save_file",
-                            attachment,
-                        },
-                        type == "Image"
-                            ? "save_image"
-                            : type == "Video"
-                              ? "save_video"
-                              : "save_file",
-                    );
-
-                    makeAction(
-                        {
-                            action: "copy_file_link",
-                            attachment,
-                        },
-                        "copy_link",
-                    );
+                    makeAction({ action: "open_link", link });
+                    makeAction({ action: "copy_link", link });
                 }
             }
+        }
+
+        if (attachment) {
+            pushDivider();
+            const { metadata } = attachment;
+            const { type } = metadata;
+
+            makeAction(
+                {
+                    action: "open_file",
+                    attachment,
+                },
+                type == "Image"
+                    ? "open_image"
+                    : type == "Video"
+                      ? "open_video"
+                      : "open_file",
+            );
+
+            makeAction(
+                {
+                    action: "save_file",
+                    attachment,
+                },
+                type == "Image"
+                    ? "save_image"
+                    : type == "Video"
+                      ? "save_video"
+                      : "save_file",
+            );
+
+            makeAction(
+                {
+                    action: "copy_file_link",
+                    attachment,
+                },
+                "copy_link",
+            );
         }
     }
 
@@ -554,9 +555,9 @@
 
 <ContextMenu bind:open={isOpen}>
     <slot />
-    <div slot="flyout">
+    <svelte:fragment slot="flyout">
         {#each elements as element}
             <JsxRender node={element} />
         {/each}
-    </div>
+    </svelte:fragment>
 </ContextMenu>
