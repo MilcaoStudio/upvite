@@ -11,7 +11,11 @@
     import CollapsibleSection from "$lib/components/CollapsibleSection.svelte";
     import Category from "$lib/components/atoms/Category.svelte";
     import ServerHeader from "$lib/components/servers/ServerHeader.svelte";
-    import { createElement, type SvelteElement } from "$lib/markdown/runtime/svelteRuntime";
+    import ContextMenu from "$lib/components/context/ContextMenu.svelte";
+    import {
+        createElement,
+        type SvelteElement,
+    } from "$lib/markdown/runtime/svelteRuntime";
     import UserPanel from "./UserPanel.svelte";
 
     export let server: Server, channel: Channel | undefined;
@@ -118,12 +122,14 @@
 </script>
 
 <div class={ServerBase}>
-    <ServerHeader {server}/>
+    <ServerHeader {server} />
     <!--<ConnectionStatus />-->
-    <div class={ServerList}>
-        {#each elements as element}
-            <JSXRender node={element} />
-        {/each}
-    </div>
+    <ContextMenu data={{ server_list: server._id }}>
+        <div class={ServerList}>
+            {#each elements as element}
+                <JSXRender node={element} />
+            {/each}
+        </div>
+    </ContextMenu>
     <UserPanel {client} />
 </div>

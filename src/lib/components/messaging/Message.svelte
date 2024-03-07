@@ -60,68 +60,77 @@
 
 <div class={Wrapper} id={message._id}>
     <!--TODO: Reply-->
-    <MessageBase
-        {highlight}
-        head={hideReply
-            ? false
-            : (head && !(message.reply_ids && message.reply_ids.length > 0)) ??
-              false}
-        {contrast}
-        sending={typeof queued != "undefined"}
-        mention={message.mention_ids && client.user
-            ? message.mention_ids.includes(client.user._id)
-            : undefined}
-        failed={typeof queued?.error != "undefined"}
+    <ContextMenu
+        data={{ message, contextualChannel: message.channel_id, queued }}
     >
-        <MessageInfo click={typeof head != "undefined"}>
-            {#if head}
-            <ContextMenu data={{user: user?._id, contextualMessage: message._id}} >
-                <UserIcon
-                    url={message.generateMasqAvatarURL()}
-                    override={message.webhook?.avatar
-                        ? `https://autumn.revolt.chat/avatars/${message.webhook.avatar}`
-                        : undefined}
-                    target={user}
-                    onClick={handleUserClick}
-                    size={36}
-                    showServerIdentity
-                />
+        <MessageBase
+            {highlight}
+            head={hideReply
+                ? false
+                : (head &&
+                      !(message.reply_ids && message.reply_ids.length > 0)) ??
+                  false}
+            {contrast}
+            sending={typeof queued != "undefined"}
+            mention={message.mention_ids && client.user
+                ? message.mention_ids.includes(client.user._id)
+                : undefined}
+            failed={typeof queued?.error != "undefined"}
+        >
+            <MessageInfo click={typeof head != "undefined"}>
+                {#if head}
+                    <ContextMenu
+                        data={{
+                            user: user?._id,
+                            contextualMessage: message._id,
+                        }}
+                    >
+                        <UserIcon
+                            url={message.generateMasqAvatarURL()}
+                            override={message.webhook?.avatar
+                                ? `https://autumn.revolt.chat/avatars/${message.webhook.avatar}`
+                                : undefined}
+                            target={user}
+                            onClick={handleUserClick}
+                            size={36}
+                            showServerIdentity
+                        />
                     </ContextMenu>
-            {:else}
-                <MessageDetail {message} position="left" />
-            {/if}
-        </MessageInfo>
-        <div class="MessageContent">
-            {#if head}
-                <span class="detail">
-                    <Username
-                        {user}
-                        class="author"
-                        showServerIdentity
-                        onClick={handleUserClick}
-                        masquerade={message.masquerade}
-                        override={message.webhook?.name}
-                    />
-                    <MessageDetail {message} position="top" />
-                </span>
-            {/if}
-            <!--Markdown here-->
-            {#if replacement}
-                {replacement}
-            {:else}
-                <Markdown {content} />
-            {/if}
+                {:else}
+                    <MessageDetail {message} position="left" />
+                {/if}
+            </MessageInfo>
+            <div class="MessageContent">
+                {#if head}
+                    <span class="detail">
+                        <Username
+                            {user}
+                            class="author"
+                            showServerIdentity
+                            onClick={handleUserClick}
+                            masquerade={message.masquerade}
+                            override={message.webhook?.name}
+                        />
+                        <MessageDetail {message} position="top" />
+                    </span>
+                {/if}
+                {#if replacement}
+                    {replacement}
+                {:else}
+                    <Markdown {content} />
+                {/if}
 
-            <!--InviteList-->
-            {#if queued?.error}
-                <Category>{$_(queued.error)}</Category>
-            {/if}
-            <!--Attachments-->
-            <!--Embeds-->
-            <!--Reactions-->
-            <!--MessageOverlaybar-->
-        </div>
-    </MessageBase>
+                <!--InviteList-->
+                {#if queued?.error}
+                    <Category>{$_(queued.error)}</Category>
+                {/if}
+                <!--Attachments-->
+                <!--Embeds-->
+                <!--Reactions-->
+                <!--MessageOverlaybar-->
+            </div>
+        </MessageBase>
+    </ContextMenu>
 </div>
 
 <style>
