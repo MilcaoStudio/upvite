@@ -10,6 +10,7 @@
     --foreground: #fff;
 
 
+
     /* MAYBE SOME USEFUL COLORS
     #383544
     */
@@ -81,6 +82,9 @@
     --border-radius-user-icon: var(--border-radius-half);
     --border-radius-channel-icon: var(--border-radius-half);
     --border-radius-server-icon: var(--border-radius-half);
+
+
+    --emoji-size: 32px;
 
     --header-height: 48px;
     --header-height-rgb: undefined,undefined,undefined;
