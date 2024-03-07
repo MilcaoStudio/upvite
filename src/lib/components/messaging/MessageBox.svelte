@@ -334,24 +334,26 @@
         </div>
     </div>
 {:else}
-<Autocomplete {...autoCompleteProps} />
-<div class={Base}>
-    <TextAreaAutoSize
-        id="message"
-        maxlength="2000"
-        style="padding: var(--message-box-padding)"
-        {value}
-        onChange={(e) => {
-            setMessage(e.currentTarget.value);
-            startTyping();
-            onChange(e);
-        }}
-        {onKeyUp}
-        onKeyDown={(e) => {
-            if (e.ctrlKey && e.key == "Enter") {
-                e.preventDefault();
-                return send();
-            }
+    <Autocomplete {...autoCompleteProps} />
+    <div class={Base}>
+        <TextAreaAutoSize
+            maxRows={20}
+            id="message"
+            maxlength="2000"
+            minHeight={60}
+            {value}
+            onChange={(e) => {
+                setMessage(e.currentTarget.value);
+                startTyping();
+                onChange(e);
+            }}
+            {onKeyUp}
+            onKeyDown={(e) => {
+                if (e.ctrlKey && e.key == "Enter") {
+                    e.preventDefault();
+                    return send();
+                }
+
 
             if (onKeyDown(e)) return;
 

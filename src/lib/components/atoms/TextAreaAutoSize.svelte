@@ -21,11 +21,31 @@
         onBlur: ()=>void;
     let ref: HTMLTextAreaElement | undefined;
 
-    function adjustTextareaHeight() {
-        if (ref) {
-            ref.style.height = 'auto'; // Reset the height to auto to recalculate the height
-            ref.style.height = `${ref.scrollHeight}px`; // Set the height to the scroll height
-        }
+
+    // No editable
+    const Ghost = css`
+        flex: 0;
+        width: 100%;
+        overflow: hidden;
+        visibility: hidden;
+        position: relative;
+
+        > div {
+            width: 100%;
+            white-space: pre-wrap;
+            word-break: break-all;
+
+            top: 0;
+            position: absolute;
+            font-size: var(--text-size);
+            line-height: ${lineHeight};
+            max-height: calc(calc(${lineHeight} * ${maxRows}))
+        }`;
+    const AutoSize = cx("AutoSize", css`flex-grow: 1;display: flex; flex-direction: column; padding: var(--message-box-padding);`)
+    $: if (Ghost && ref && value) {
+        ref.style.height = `${Ghost.clientHeight + 10}px`;
+        ref.style.minHeight = `${minHeight}px`;
+
     }
 
     // Call adjustTextareaHeight whenever the value changes
@@ -64,8 +84,10 @@
 
 <svelte:document on:keydown={keyDown} />
 
-<div class="AutoSize" style="flex-grow: 1;display: flex; flex-direction: column; padding: var(--message-box-padding);">
-    <TextArea bind:ref={ref} {id} {value} {padding} style={`min-height: ${minHeight}px;`} {hideBorder} {lineHeight} onChange={(ev) =>
+
+<div class={AutoSize} >
+    <TextArea bind:ref={ref} {id} {value} {padding} {hideBorder} {lineHeight} onChange={(ev) =>
+
         onChange && onChange(ev)
     } {onKeyUp} {onKeyDown} {onFocus} {onBlur} {...$$restProps} />
 </div>
