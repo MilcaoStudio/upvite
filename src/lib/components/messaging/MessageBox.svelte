@@ -336,9 +336,10 @@
     <Autocomplete {...autoCompleteProps} />
     <div class={Base}>
         <TextAreaAutoSize
+            maxRows={20}
             id="message"
             maxlength="2000"
-            style="padding: var(--message-box-padding)"
+            minHeight={60}
             {value}
             onChange={(e) => {
                 setMessage(e.currentTarget.value);

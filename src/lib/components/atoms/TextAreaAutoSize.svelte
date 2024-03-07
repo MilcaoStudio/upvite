@@ -41,8 +41,10 @@
             line-height: ${lineHeight};
             max-height: calc(calc(${lineHeight} * ${maxRows}))
         }`;
+    const AutoSize = cx("AutoSize", css`flex-grow: 1;display: flex; flex-direction: column; padding: var(--message-box-padding);`)
     $: if (ghost && ref && value) {
-        ref.style.height = `${ghost.clientHeight}px`;
+        ref.style.height = `${ghost.clientHeight + 10}px`;
+        ref.style.minHeight = `${minHeight}px`;
     }
 
     $: !isTouchscreenDevice && autoFocus && ref?.focus() || value;
@@ -80,8 +82,8 @@
 
 <svelte:document on:keydown={keyDown} />
 
-<div class="AutoSize" style="flex-grow: 1;display: flex; flex-direction: column; padding: var(--message-box-padding);">
-    <TextArea bind:ref={ref} {id} {value} {padding} style={`min-height: ${minHeight}`} {hideBorder} {lineHeight} onChange={(ev) =>
+<div class={AutoSize} >
+    <TextArea bind:ref={ref} {id} {value} {padding} {hideBorder} {lineHeight} onChange={(ev) =>
         onChange && onChange(ev)
     } {onKeyUp} {onKeyDown} {onFocus} {onBlur} {...$$restProps} />
     <div class={Ghost}>
