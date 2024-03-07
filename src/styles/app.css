@@ -93,7 +93,7 @@
     --message-box-rgb: 54,54,54;
     --message-box-contrast: white;
     --message-box-contrast-rgb: 255,255,255;
-    --message-box-padding: 10px 16px;
+    --message-box-padding: 8px 1px;
     --attachment-max-width: 400px;
     --attachment-max-height: 300px;
     --attachment-default-width: 400px;

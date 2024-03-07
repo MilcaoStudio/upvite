@@ -20,32 +20,16 @@
         onFocus: FocusEventHandler<HTMLTextAreaElement>,
         onBlur: ()=>void;
     let ref: HTMLTextAreaElement | undefined;
-    let ghost: HTMLDivElement | undefined;
 
-    // No editable
-    const Ghost = css`
-        flex: 0;
-        width: 100%;
-        overflow: hidden;
-        visibility: hidden;
-        position: relative;
-
-        > div {
-            width: 100%;
-            white-space: pre-wrap;
-            word-break: break-all;
-
-            top: 0;
-            position: absolute;
-            font-size: var(--text-size);
-            line-height: ${lineHeight};
-            max-height: calc(calc(${lineHeight} * ${maxRows}))
-        }`;
-    $: if (ghost && ref && value) {
-        ref.style.height = `${ghost.clientHeight}px`;
+    function adjustTextareaHeight() {
+        if (ref) {
+            ref.style.height = 'auto'; // Reset the height to auto to recalculate the height
+            ref.style.height = `${ref.scrollHeight}px`; // Set the height to the scroll height
+        }
     }
 
-    $: !isTouchscreenDevice && autoFocus && ref?.focus() || value;
+    // Call adjustTextareaHeight whenever the value changes
+    $: adjustTextareaHeight();
 
     function inputSelected(){
         return ["TEXTAREA", "INPUT"].includes(document.activeElement?.nodeName ?? "")
@@ -75,19 +59,13 @@
         }
     }
 
-    internalSubscribe("TextArea", "focus", focus as (...args: unknown[]) => void,);
+    internalSubscribe("TextArea", "focus", focus as (...args: unknown[]) => void);
 </script>
 
 <svelte:document on:keydown={keyDown} />
 
 <div class="AutoSize" style="flex-grow: 1;display: flex; flex-direction: column; padding: var(--message-box-padding);">
-    <TextArea bind:ref={ref} {id} {value} {padding} style={`min-height: ${minHeight}`} {hideBorder} {lineHeight} onChange={(ev) =>
+    <TextArea bind:ref={ref} {id} {value} {padding} style={`min-height: ${minHeight}px;`} {hideBorder} {lineHeight} onChange={(ev) =>
         onChange && onChange(ev)
     } {onKeyUp} {onKeyDown} {onFocus} {onBlur} {...$$restProps} />
-    <div class={Ghost}>
-        <div bind:this={ghost} style:padding={padding}>
-            {value ? value.split('\n').map((x) => `\u200e${x}`)
-            .join("\n") : undefined ?? "\n"}
-        </div>
-    </div>
 </div>
