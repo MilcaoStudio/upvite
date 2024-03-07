@@ -254,7 +254,6 @@
 
     .row {
         display: flex;
-        flex-wrap: wrap;
     }
 
     .category {

@@ -91,7 +91,7 @@
                 <span>{$t("app.navigation.tabs.home")}</span>
             </ButtonItem>
         </ConditionalLink>
-        {#if !isTouchscreenDevice}
+        
             <ConditionalLink active={pathname == "/friends"} href="/friends">
                 <ButtonItem
                     active={pathname == "/friends"}
@@ -102,7 +102,7 @@
                     <span>{$t("app.navigation.tabs.friends")}</span>
                 </ButtonItem>
             </ConditionalLink>
-        {/if}
+      
         <ConditionalLink
             active={channel?.channel_type == "SavedMessages"}
             href="/open/saved"

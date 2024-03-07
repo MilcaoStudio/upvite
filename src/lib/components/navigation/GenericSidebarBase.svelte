@@ -10,8 +10,12 @@
         flex-shrink: 0;
         flex-direction: column;
         background: var(--secondary-background);
+        background: var(--secondary-background);
+        border-start-start-radius: 8px;
+        border-start-end-radius: 8px;
+        margin-top: 6px;
+        overflow: hidden;
 
-        ${mobilePadding && isTouchscreenDevice && ``}
     `)
 </script>
 

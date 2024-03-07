@@ -50,9 +50,10 @@
             display: flex;
             align-items: center;
             background: var(--secondary-header);
-            gap: 16px;
+            gap: 12px;
             padding: 0px 12px 0px 12px;
-
+            margin: 0px 6px 6px 6px;
+            border-radius: var(--border-radius-inner);
             textarea {
                 font-size: var(--text-size);
                 background: transparent;
@@ -353,38 +354,39 @@
                     return send();
                 }
 
-                if (onKeyDown(e)) return;
 
-                if (
-                    !e.shiftKey &&
-                    !e.isComposing &&
-                    e.key == "Enter" &&
-                    !isTouchscreenDevice
-                ) {
-                    e.preventDefault();
-                    return send();
-                }
-            }}
-            {onFocus}
-            {onBlur}
-            disabled={uploadState.type == "uploading" ||
-                uploadState.type == "sending"}
-        />
-        <div class={Action}>
-            <Flyout offset={24} alignment="end">
-                <IconButton>
-                    <BxHappyBeaming size={24} />
-                </IconButton>
-                <Picker
-                    {categories}
-                    {emojis}
-                    onSelect={(emoji) => append(`:${emoji}:`, "mention")}
-                    slot="override"
-                />
-            </Flyout>
-        </div>
-        <div class={Action}>
-            <BxSend size={20} on:click={send} />
-        </div>
+            if (onKeyDown(e)) return;
+
+            if (
+                !e.shiftKey &&
+                !e.isComposing &&
+                e.key == "Enter" &&
+                !isTouchscreenDevice
+            ) {
+                e.preventDefault();
+                return send();
+            }
+        }}
+        {onFocus}
+        {onBlur}
+        disabled={uploadState.type == "uploading" ||
+            uploadState.type == "sending"}
+    />
+    <div class={Action}>
+        <Flyout offset={24} alignment="end">
+            <IconButton>
+                <BxHappyBeaming size={24} />
+            </IconButton>
+            <Picker
+                {categories}
+                {emojis}
+                onSelect={(emoji) => append(`:${emoji}:`, "mention")}
+                slot="override"
+            />
+        </Flyout>
     </div>
+    <div class={Action}>
+        <BxSend size={20} on:click={send} />
+    </div>
+</div>
 {/if}

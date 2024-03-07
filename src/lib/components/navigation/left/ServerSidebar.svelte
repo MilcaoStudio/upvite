@@ -29,10 +29,10 @@
             flex-direction: column;
             background: var(--secondary-background);
             border-start-start-radius: 8px;
-            border-end-start-radius: 8px;
+            border-start-end-radius: 8px;
+            margin-top: 6px;
             overflow: hidden;
 
-            ${isTouchscreenDevice ? `padding-bottom: 50px;` : ``}
         `,
     );
     const ServerList = cx(
