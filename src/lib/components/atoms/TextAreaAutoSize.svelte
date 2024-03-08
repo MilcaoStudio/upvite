@@ -1,9 +1,12 @@
 <script lang="ts">
-    import { isTouchscreenDevice } from "$lib";
     import { internalSubscribe } from "$lib/InternalEmitter";
     import { css, cx } from "@emotion/css";
     import TextArea from "./input/TextArea.svelte";
-    import type { ChangeEventHandler, FocusEventHandler, KeyboardEventHandler } from "svelte/elements";
+    import type {
+        ChangeEventHandler,
+        FocusEventHandler,
+        KeyboardEventHandler,
+    } from "svelte/elements";
 
     export let autoFocus = false,
         id: string | undefined = undefined,
@@ -18,37 +21,41 @@
         onKeyUp: KeyboardEventHandler<HTMLTextAreaElement>,
         onKeyDown: KeyboardEventHandler<HTMLTextAreaElement>,
         onFocus: FocusEventHandler<HTMLTextAreaElement>,
-        onBlur: ()=>void;
+        onBlur: () => void;
     let ref: HTMLTextAreaElement | undefined;
+    let ghost: HTMLDivElement;
 
+    const AutoSize = cx(
+        "AutoSize",
+        css`
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            padding: var(--message-box-padding);
+            > div {
+                display: grid;
+                &::after {
+                    content: attr(data-value) " ";
+                    white-space: pre-wrap;
+                    visibility: hidden;
+                    grid-row: 1;
+                    grid-column: 1;
+                    min-height: ${minHeight}px;
+                    max-height: calc(${lineHeight} * ${maxRows});
+                }
+            }
+        `,
+    );
+    
 
-    // No editable
-    const Ghost = css`
-        flex: 0;
-        width: 100%;
-        overflow: hidden;
-        visibility: hidden;
-        position: relative;
+    function growUp() {
+        ghost.dataset.value = ref?.value;
+    }
 
-        > div {
-            width: 100%;
-            white-space: pre-wrap;
-            word-break: break-all;
-
-            top: 0;
-            position: absolute;
-            font-size: var(--text-size);
-            line-height: ${lineHeight};
-            max-height: calc(calc(${lineHeight} * ${maxRows}))
-        }`;
-    const AutoSize = cx("AutoSize", css`flex-grow: 1;display: flex; flex-direction: column; padding: var(--message-box-padding);`)
-
-
-    // Call adjustTextareaHeight whenever the value changes
-  
-
-    function inputSelected(){
-        return ["TEXTAREA", "INPUT"].includes(document.activeElement?.nodeName ?? "")
+    function inputSelected() {
+        return ["TEXTAREA", "INPUT"].includes(
+            document.activeElement?.nodeName ?? "",
+        );
     }
 
     $: {
@@ -75,15 +82,33 @@
         }
     }
 
-    internalSubscribe("TextArea", "focus", focus as (...args: unknown[]) => void);
+    internalSubscribe(
+        "TextArea",
+        "focus",
+        focus as (...args: unknown[]) => void,
+    );
 </script>
 
 <svelte:document on:keydown={keyDown} />
 
-
-<div class={AutoSize} >
-    <TextArea bind:ref={ref} {id} {value} {padding} {hideBorder} {lineHeight} onChange={(ev) =>
-
-        onChange && onChange(ev)
-    } {onKeyUp} {onKeyDown} {onFocus} {onBlur} {...$$restProps} />
+<div class={AutoSize}>
+    <div bind:this={ghost}>
+        <TextArea
+            bind:ref
+            {id}
+            {value}
+            {padding}
+            {hideBorder}
+            {lineHeight}
+            onChange={(ev) => onChange?.(ev)}
+            onKeyUp={(ev) => {
+                growUp();
+                onKeyUp(ev);
+            }}
+            {onKeyDown}
+            {onFocus}
+            {onBlur}
+            {...$$restProps}
+        />
+    </div>
 </div>

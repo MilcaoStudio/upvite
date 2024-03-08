@@ -2,7 +2,6 @@
 
   <script lang="ts">
     import { css } from "@emotion/css";
-    import { onMount } from "svelte";
     import type { ChangeEventHandler, FocusEventHandler, KeyboardEventHandler } from "svelte/elements";
 
     export let code = false,
@@ -15,9 +14,8 @@
         onFocus: FocusEventHandler<HTMLTextAreaElement> | null = null,
         onBlur: (()=>void) | null = null;
 
-    let ref: HTMLTextAreaElement | undefined;
+    export let ref: HTMLTextAreaElement | undefined;
 
-    
     const TextArea = css`
       width: 100%;
       max-height: 228px;
@@ -28,6 +26,7 @@
       background: var(--secondary-background);
       padding: ${padding};
       line-height: ${lineHeight};
+      grid-area: 1 / 1 / 2 / 2;
       ${hideBorder
           ? `border: none;`
           : `border-radius: var(--border-radius-inner);
@@ -44,22 +43,7 @@
           : `font-family: inherit;`}
       font-variant-ligatures: var(--ligatures);
     `;
-
-    // Ajusta la altura del textarea al cargar el componente
-    onMount(() => {
-      if (ref) {
-        ref.style.height = "auto";
-        ref.style.height = ref.scrollHeight + "px";
-      }
-    });
-    
-    // Ajusta la altura del textarea cada vez que su contenido cambia
-    function adjustTextareaHeight() {
-      if (ref) {
-        ref.style.height = "auto";
-        ref.style.height = ref.scrollHeight + "px";
-      }
-    }
+  
 </script>
 
 <textarea class={TextArea} bind:this={ref} on:change={onChange} on:keyup={onKeyUp} on:keydown={onKeyDown} on:focus={onFocus} on:blur={onBlur} {...$$restProps} />
