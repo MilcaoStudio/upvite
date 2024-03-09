@@ -16,7 +16,6 @@
                   );
                   backdrop-filter: blur(20px);
 
-                  width: 100%;
                   z-index: 20;
               `
                 : `background-color: var(--${palette}-header);`}
@@ -34,19 +33,18 @@
 <style>
     div.Header {
         gap: 10px;
-        /* flex: 0 auto; */
         display: flex;
         flex-shrink: 1;
- 
-        padding: 12px 16px;
-        align-items: center;
+        padding: 6px 8px;
+        margin: 6px 8px;
+        border-radius: var(--border-radius);
         font-weight: 600;
-        /* width: fit-content; */
         user-select: none;
         height: var(--header-height);
         color: var(--foreground);
         background-size: cover !important;
         background-position: center !important;
+        align-items: center;
     }
     
     div.Header :global(svg) {

@@ -288,6 +288,10 @@
         "AutoComplete",
         css`
             position: relative;
+      
+            background-color: var(--fds-focus-stroke-inner);
+            margin: 6px 6px;
+            border-radius: var(--border-radius-inner);
             ${detached
                 ? `
             bottom: 8px;
@@ -325,18 +329,21 @@
                 }
 
                 &.active {
-                    background: var(--primary-background);
+                    background: var(--background-dark);
+
                 }
             }
         `,
     );
+
+
 </script>
 
 
 <div class={Base}>
     <div>
         {#if $state.type == "user"}
-            {#each $state.matches as match, i}
+            {#each $state.matches as match, i (i)}
                 <button
                     class:active={i == $state.selected}
                     on:mouseenter={() => {

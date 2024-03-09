@@ -19,7 +19,6 @@
     $: id = data.channel;
     $: server_id = data.server;
     $: message = data.message;
-    
     $: server = client.servers.get(server_id);
 
     if (!client.channels.exists(id)) {
@@ -42,6 +41,7 @@
     }
 
     $: channel = client.channels.get(id);
+    $: document.title = `#${channel?.name ?? ""} - ${server?.name ?? ""} | Uprising`
     const open = isTouchscreenDevice || state.layout.getSectionState(SIDEBAR_CHANNELS, true);
 </script>
 

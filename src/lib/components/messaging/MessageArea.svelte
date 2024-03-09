@@ -6,7 +6,7 @@
     import type { ScrollState } from "$lib/rendered/types";
     import { autorun, runInAction } from "mobx";
     import type { Channel, Message } from "revolt.js";
-    import { setContext } from "svelte";
+    import { onMount, setContext } from "svelte";
     import { modalController } from "../modals/ModalController";
 
     export const MESSAGE_AREA_PADDING = 82;
@@ -56,9 +56,9 @@
 
                 setTimeout(
                     () =>
-                        scrollTo({
+                        ref.scrollTo({
                             behavior: "smooth",
-                            top: document.body.scrollHeight,
+                            top: ref.scrollHeight,
                         }),
                     0,
                 );
@@ -69,7 +69,7 @@
 
                 setScrollState({ type: "Free" });
             } else if (scrollState.type == "OffsetTop") {
-                scrollTo({
+                ref.scrollTo({
                     behavior: "instant",
                     top: Math.max(
                         101,
@@ -82,7 +82,7 @@
                 });
                 setScrollState({ type: "Free" });
             } else if (scrollState.type == "ScrollTop") {
-                scrollTo({behavior: 'instant', top: scrollState.y});
+                ref.scrollTo({ behavior: "instant", top: scrollState.y });
                 setScrollState({ type: "Free" });
             }
 
@@ -104,10 +104,10 @@
     );
 
     // it works?
-    autorun(()=>setScrollState(renderer.scrollState));
+    autorun(() => setScrollState(renderer.scrollState));
 
-    // ? Load channel initially.
-    {
+    onMount(() => {
+        // ? Load channel initially.
         if (renderer.state == "RENDER") {
             runInAction(() => (renderer.fetching = true));
 
@@ -122,12 +122,12 @@
         } else {
             renderer.init();
         }
-    }
+    });
 
     $: messageId && renderer.init(messageId);
 
     // ? If we are waiting for network, try again.
-    $: {
+    $: autorun(()=>{
         switch (session.state) {
             case "Online":
                 if (renderer.state == "WAITING_FOR_NETWORK") {
@@ -143,18 +143,18 @@
                 renderer.markStale();
                 break;
         }
-    }
+    })
 
     // ? When the container is scrolled.
     // ? Also handle StayAtBottom
     // ? Top and bottom loaders.
-    let onScroll = async function() {
-        if (scrollState.type === "Free" && atBottom()) {
-                setScrollState({ type: "Bottom" });
-        } else if (scrollState.type === "Bottom" && !atBottom()) {
+    let onScroll = async function () {
+        if (scrollState.type == "Free" && atBottom()) {
+            setScrollState({ type: "Bottom" });
+        } else if (scrollState.type == "Bottom" && !atBottom()) {
             if (
-                    scrollState.scrollingUntil &&
-                    scrollState.scrollingUntil > +new Date()
+                scrollState.scrollingUntil &&
+                scrollState.scrollingUntil > +new Date()
             )
                 return;
             setScrollState({ type: "Free" });
@@ -163,38 +163,38 @@
         if (!ref) return;
         renderer.scrollPosition = ref.scrollTop;
 
-            if (atTop(100)) {
-                renderer.loadTop(ref!);
-            }
+        if (atTop(100)) {
+            renderer.loadTop(ref!);
+        }
 
-            if (atBottom(100)) {
-                renderer.loadBottom(ref!);
-            }
+        if (atBottom(100)) {
+            renderer.loadBottom(ref!);
+        }
 
-            if (atBottom()) {
-                renderer.scrollAnchored = true;
-            } else {
-                renderer.scrollAnchored = false;
-            }
-    }
+        if (atBottom()) {
+            renderer.scrollAnchored = true;
+        } else {
+            renderer.scrollAnchored = false;
+        }
+    };
 
-    $: stbOnResize = function() {
+    $: stbOnResize = function () {
         if (!atBottom() && scrollState.type == "Bottom") {
-            scrollTo({behavior: 'instant', top: document.body.scrollHeight});
+            ref.scrollTo({ behavior: "instant", top: ref.scrollHeight });
             setScrollState({ type: "Bottom" });
         }
-    }
+    };
 
     $: height && stbOnResize();
 
-    $: keyUp = function(e: KeyboardEvent) {
+    $: keyUp = function (e: KeyboardEvent) {
         if (e.key == "Escape" && !modalController.isVisible) {
             renderer.jumpToBottom(true);
             internalEmit("TextArea", "focus", "message");
         }
-    }
+    };
 
-    $: setContext('MessageAreaWidth', (width ?? 0) - MESSAGE_AREA_PADDING);
+    $: setContext("MessageAreaWidth", (width ?? 0) - MESSAGE_AREA_PADDING);
 </script>
 
 <svelte:window bind:innerWidth={width} bind:innerHeight={height} />
@@ -202,17 +202,17 @@
 
 <div class="MessageArea" bind:this={ref} on:scroll={onScroll}>
     <div>
-        {#if renderer.state == 'LOADING'}
+        {#if renderer.state == "LOADING"}
             <Preloader type="ring" />
         {/if}
-        {#if renderer.state == 'WAITING_FOR_NETWORK'}
+        {#if renderer.state == "WAITING_FOR_NETWORK"}
             <!--<RequiresOnline>-->
             <Preloader type="ring" />
         {/if}
-        {#if renderer.state == 'RENDER'}
+        {#if renderer.state == "RENDER"}
             <MessageRenderer {lastId} {renderer} />
         {/if}
-        {#if renderer.state == 'EMPTY'}
+        {#if renderer.state == "EMPTY"}
             <Start {channel} />
         {/if}
     </div>

@@ -3,6 +3,7 @@
     import type { Server } from "revolt.js";
     import Tooltip from "../atoms/Tooltip.svelte";
     import { BxCheck } from "svelte-boxicons";
+    import LineDivider from "../atoms/LineDivider.svelte";
 
     export let server: Server, background = false;
     const ServerBanner = cx('ServerBanner', css`
@@ -27,6 +28,8 @@
         }` : `
            
         `}
+
+    
 
     .container {
         height: var(--header-height);
@@ -91,6 +94,9 @@
             {server.name}
         </a>
 
+        
+
         <!--TODO: link to server settings-->
     </div>
 </div>
+

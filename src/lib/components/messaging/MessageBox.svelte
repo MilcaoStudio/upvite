@@ -2,8 +2,11 @@
     import TextSvelte from "$lib/i18n/TextSvelte.svelte";
     import { dayjs } from "../context/Locale.svelte";
     import { _ } from "svelte-i18n";
-    import { useClient } from "$lib/controllers/ClientController";
-    import { BxSend, BxShieldX } from "svelte-boxicons";
+    import {
+        clientController,
+        useClient,
+    } from "$lib/controllers/ClientController";
+    import { BxHappyBeaming, BxSend, BxShieldX } from "svelte-boxicons";
     import type { DraftObject } from "$lib/stores/Draft";
     import { state } from "$lib/State";
     import { internalEmit, internalSubscribe } from "$lib/InternalEmitter";
@@ -11,21 +14,35 @@
     import type { Reply } from "$lib/stores/MessageQueue";
     import TextAreaAutoSize from "../atoms/TextAreaAutoSize.svelte";
     import type { Channel } from "revolt.js";
-    import type { UploadState } from "$lib/types/messaging";
+    import type {
+        EmojiCategory,
+        EmojiInfo,
+        UploadState,
+    } from "$lib/types/messaging";
     import { css, cx } from "@emotion/css";
-    import { SMOOTH_SCROLL_ON_RECEIVE, getRenderer } from "$lib/rendered/Singleton";
+    import {
+        SMOOTH_SCROLL_ON_RECEIVE,
+        getRenderer,
+    } from "$lib/rendered/Singleton";
     import { defer, isTouchscreenDevice, takeError } from "$lib";
     import Autocomplete, { useAutoComplete } from "../Autocomplete.svelte";
     import PermissionTooltip from "../atoms/PermissionTooltip.svelte";
+    import { Flyout } from "fluent-svelte";
+    import IconButton from "../atoms/input/IconButton.svelte";
+    import Picker from "../atoms/media/Picker.svelte";
+    import { RevoltEmojiDictionary } from "revkit";
+    import { autorun } from "mobx";
 
     export let channel: Channel;
     const client = useClient();
     let uploadState: UploadState = { type: "none" };
     let replies: Reply[] = [];
     let typing = 0;
-    
-    $: value = state.draft.get(channel._id)?.content ?? ""
 
+    let value = "";
+    $: autorun(()=>{
+        value = state.draft.get(channel._id)?.content ?? "";
+    });
     const Base = cx(
         "MessageBox",
         css`
@@ -33,9 +50,10 @@
             display: flex;
             align-items: center;
             background: var(--secondary-header);
-            gap: 16px;
+            gap: 12px;
             padding: 0px 12px 0px 12px;
-
+            margin: 0px 6px 6px 6px;
+            border-radius: var(--border-radius-inner);
             textarea {
                 font-size: var(--text-size);
                 background: transparent;
@@ -144,11 +162,13 @@
         if (!state.draft.has(channel._id)) {
             setMessage(text);
         } else {
-            setMessage(`${state.draft.get(channel._id)}\n${text}`);
+            setMessage(`${state.draft.get(channel._id)?.content} ${text}`);
         }
     }
 
-    internalSubscribe("MessageBox", "append",
+    internalSubscribe(
+        "MessageBox",
+        "append",
         append as (...args: unknown[]) => void,
     );
 
@@ -206,7 +226,7 @@
                     }
                 }
             }
-        }else {
+        } else {
             //state.settings.sounds.playSound("outbound");
 
             state.queue.add(nonce, channel._id, {
@@ -245,6 +265,38 @@
             channel.channel_type == "TextChannel"
                 ? { server: channel.server_id! }
                 : undefined,
+    });
+
+    let emojis: Record<string, EmojiInfo[]> = {
+        default: Object.keys(RevoltEmojiDictionary).map((id) => ({ id })),
+    };
+    let categories: EmojiCategory[] = [];
+    $: autorun(() => {
+        categories = [];
+        for (const server of state.ordering.orderedServers) {
+            // ! FIXME: add a separate map on each server for emoji
+            const list = [...clientController.readyClient!.emojis.values()]
+                .filter(
+                    (emoji) =>
+                        emoji.parent.type != "Detached" &&
+                        emoji.parent.id == server._id,
+                )
+                .map(({ _id, name }) => ({ id: _id, name }));
+
+            if (list.length) {
+                emojis[server._id] = list;
+                categories.push({
+                    id: server._id,
+                    name: server.name,
+                    iconURL: server.generateIconURL({ max_side: 256 }),
+                });
+            }
+        }
+        categories.push({
+            id: "default",
+            name: "Default",
+            emoji: "smiley",
+        });
     });
 </script>
 
@@ -285,41 +337,56 @@
     <Autocomplete {...autoCompleteProps} />
     <div class={Base}>
         <TextAreaAutoSize
+            maxRows={20}
             id="message"
             maxlength="2000"
-            style="padding: var(--message-box-padding)"
+            minHeight={60}
             {value}
             onChange={(e) => {
                 setMessage(e.currentTarget.value);
                 startTyping();
                 onChange(e);
             }}
-            onKeyUp={onKeyUp}
+            {onKeyUp}
             onKeyDown={(e) => {
                 if (e.ctrlKey && e.key == "Enter") {
                     e.preventDefault();
                     return send();
                 }
 
-                if (onKeyDown(e)) return;
 
-                if (
-                    !e.shiftKey &&
-                    !e.isComposing &&
-                    e.key == "Enter" &&
-                    !isTouchscreenDevice
-                ) {
-                    e.preventDefault();
-                    return send();
-                }
-            }}
-            onFocus={onFocus}
-            onBlur={onBlur}
-            disabled={uploadState.type == "uploading" ||
-                uploadState.type == "sending"}
-        />
-        <div class={Action}>
-            <BxSend size={20} on:click={send} />
-        </div>
+            if (onKeyDown(e)) return;
+
+            if (
+                !e.shiftKey &&
+                !e.isComposing &&
+                e.key == "Enter" &&
+                !isTouchscreenDevice
+            ) {
+                e.preventDefault();
+                return send();
+            }
+        }}
+        {onFocus}
+        {onBlur}
+        disabled={uploadState.type == "uploading" ||
+            uploadState.type == "sending"}
+    />
+    <div class={Action}>
+        <Flyout offset={24} alignment="end">
+            <IconButton>
+                <BxHappyBeaming size={24} />
+            </IconButton>
+            <Picker
+                {categories}
+                {emojis}
+                onSelect={(emoji) => append(`:${emoji}:`, "mention")}
+                slot="override"
+            />
+        </Flyout>
     </div>
+    <div class={Action}>
+        <BxSend size={20} on:click={send} />
+    </div>
+</div>
 {/if}

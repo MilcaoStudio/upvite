@@ -1,6 +1,8 @@
 <script>
     import { css, cx } from "@emotion/css";
 
+    let className = "";
+    export {className as class}
     export let gap = '8px', group = '16px', centred = false, grow = false;
     $: style = css`
             display: flex;
@@ -12,6 +14,6 @@
         }`;
 </script>
 
-<div class={cx('Column', style)}>
+<div class={cx('Column', className, style)}>
     <slot />
 </div>

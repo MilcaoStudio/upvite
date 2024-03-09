@@ -11,7 +11,11 @@
     import CollapsibleSection from "$lib/components/CollapsibleSection.svelte";
     import Category from "$lib/components/atoms/Category.svelte";
     import ServerHeader from "$lib/components/servers/ServerHeader.svelte";
-    import { createElement, type SvelteElement } from "$lib/markdown/runtime/svelteRuntime";
+    import ContextMenu from "$lib/components/context/ContextMenu.svelte";
+    import {
+        createElement,
+        type SvelteElement,
+    } from "$lib/markdown/runtime/svelteRuntime";
     import UserPanel from "./UserPanel.svelte";
 
     export let server: Server, channel: Channel | undefined;
@@ -25,10 +29,10 @@
             flex-direction: column;
             background: var(--secondary-background);
             border-start-start-radius: 8px;
-            border-end-start-radius: 8px;
+            border-start-end-radius: 8px;
+            margin-top: 6px;
             overflow: hidden;
 
-            ${isTouchscreenDevice ? `padding-bottom: 50px;` : ``}
         `,
     );
     const ServerList = cx(
@@ -118,12 +122,14 @@
 </script>
 
 <div class={ServerBase}>
-    <ServerHeader {server}/>
+    <ServerHeader {server} />
     <!--<ConnectionStatus />-->
-    <div class={ServerList}>
-        {#each elements as element}
-            <JSXRender node={element} />
-        {/each}
-    </div>
+    <ContextMenu data={{ server_list: server._id }}>
+        <div class={ServerList}>
+            {#each elements as element}
+                <JSXRender node={element} />
+            {/each}
+        </div>
+    </ContextMenu>
     <UserPanel {client} />
 </div>

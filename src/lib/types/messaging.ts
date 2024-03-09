@@ -32,3 +32,41 @@ export type SearchClues = {
     users?: { type: "channel"; id: string } | { type: "all" };
     channels?: { server: string };
 };
+
+/**
+ * Category of emoji
+ */
+export type EmojiCategory = {
+    id: string;
+    name: string;
+    emoji?: string;
+    iconURL?: string;
+};
+
+/**
+ * Emoji information
+ */
+export type EmojiInfo = {
+    id: string;
+    name?: string;
+};
+
+/**
+ * Generated information from query and given categories / emojis
+ */
+export type EmojiTable = {
+    /**
+     * Emoji items
+     */
+    items: EmojiInfo[][];
+
+    /**
+     * Emoji count for each category
+     */
+    categoryCounts: number[];
+
+    /**
+     * Currently visible categories
+     */
+    activeCategories: EmojiCategory[];
+};

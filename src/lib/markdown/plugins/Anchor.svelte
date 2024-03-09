@@ -3,15 +3,15 @@
     import { determineLink } from "$lib/links";
 
     export let href: string | undefined = undefined;
-    $: link = determineLink(href)
+    $: link = determineLink(href);
 </script>
 
 {#if !href || href.startsWith("#")}
-    <a {href} {...$$restProps} >
+    <a {href} {...$$restProps}>
         <slot />
     </a>
 {:else if link.type == "none"}
-    <a href=null {...$$restProps}>
+    <a href="null" {...$$restProps}>
         <slot />
     </a>
 {:else if link.type == "navigate"}
@@ -19,8 +19,18 @@
         <slot />
     </a>
 {:else}
-<!--TODO: open link modal-->
-<a {href} target="_blank" rel="noreferrer" on:click|preventDefault>
-    <slot />
-</a>
+    <a
+        {href}
+        target="_blank"
+        rel="noreferrer"
+        on:click|preventDefault={(ev) =>
+            modalController.openLink(
+                href,
+                false,
+                ev.currentTarget.innerText != href,
+            )}
+        {...$$restProps}
+    >
+        <slot />
+    </a>
 {/if}

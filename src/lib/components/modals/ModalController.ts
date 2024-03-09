@@ -5,9 +5,14 @@ import Onboarding from "./Onboarding.svelte";
 import { action, computed, makeObservable, observable } from "mobx";
 import { injectWindow } from "$lib";
 import CreateServer from "./CreateServer.svelte";
+import { determineLink } from "$lib/links";
+import { state } from "$lib/State";
+import { goto } from "$app/navigation";
+import ClipboardModal from "./ClipboardModal.svelte";
+import LinkWarning from "./LinkWarning.svelte";
 
-export class ModalController<T extends Modal> {
-    @observable stack: T[] = [];
+export class ModalController {
+    @observable stack: Modal[] = [];
 
     constructor(public components: Record<string, SvelteComponentConstructor<any, any>>) {
 
@@ -20,7 +25,7 @@ export class ModalController<T extends Modal> {
      * Display a new modal on the stack
      * @param modal Modal data
      */
-    @action push(modal: T) {
+    @action push(modal: Modal) {
         this.stack = [
             ...this.stack,
             {
@@ -61,10 +66,70 @@ export class ModalController<T extends Modal> {
     @computed get isVisible() {
         return this.stack.length > 0;
     }
+
+    /**
+     * Write text to the clipboard
+     * @param text Text to write
+     */
+    writeText(text: string) {
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(text);
+        } else {
+            this.push({type: "clipboard", text});
+        }
+    }
+    /**
+     * Safely open external or internal link
+     * @param href Raw URL
+     * @param trusted Whether we trust this link
+     * @param mismatch Whether to always open link warning
+     * @returns Whether to cancel default event
+     */
+    openLink(href?: string, trusted?: boolean, mismatch?: boolean) {
+        const link = determineLink(href);
+        const settings = state.settings;
+
+        if (mismatch) {
+            if (href) {
+                modalController.push({
+                    type: "link_warning",
+                    link: href,
+                    callback: () => this.openLink(href, true) as true,
+                });
+            }
+
+            return true;
+        }
+
+        switch (link.type) {
+            case "navigate": {
+                goto(link.path);
+                break;
+            }
+            case "external": {
+                if (
+                    !trusted &&
+                    !settings.security.isTrustedOrigin(link.url.hostname)
+                ) {
+                    modalController.push({
+                        type: "link_warning",
+                        link: link.href,
+                        callback: () => this.openLink(href, true) as true,
+                    });
+                } else {
+                    window.open(link.href, "_blank", "noreferrer");
+                }
+            }
+        }
+
+        return true;
+    }
 }
 
 export const modalController = new ModalController({
     onboarding: Onboarding,
     user_profile: UserProfile,
     create_server: CreateServer,
+    clipboard: ClipboardModal,
+    link_warning: LinkWarning,
 });
