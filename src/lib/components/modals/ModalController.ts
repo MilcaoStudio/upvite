@@ -10,6 +10,7 @@ import { state } from "$lib/State";
 import { goto } from "$app/navigation";
 import ClipboardModal from "./ClipboardModal.svelte";
 import LinkWarning from "./LinkWarning.svelte";
+import DeleteMessage from "./DeleteMessage.svelte";
 
 export class ModalController {
     @observable stack: Modal[] = [];
@@ -130,6 +131,7 @@ export const modalController = new ModalController({
     onboarding: Onboarding,
     user_profile: UserProfile,
     create_server: CreateServer,
+    delete_message: DeleteMessage,
     clipboard: ClipboardModal,
     link_warning: LinkWarning,
 });

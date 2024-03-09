@@ -5,7 +5,7 @@
     import Form from "../form/Form.svelte";
     import Error from "../atoms/Error.svelte";
     import type { HTMLButtonAttributes } from "svelte/elements";
-    import type { Action, ModalProps } from "$lib/types/Modal";
+    import type { Action } from "$lib/types/Modal";
     import Category from "../atoms/Category.svelte";
 
     
@@ -20,7 +20,6 @@
             children: "Cancel",
             palette: "plain",
         }];
-    export let props: ModalProps<Modal["type"]>
     const values = getInitialValues(schema, defaults);
     let error = '', processing = false;
     async function onSubmit() {
@@ -36,7 +35,7 @@
     }
 </script>
 
-<Modal {...props} disabled={processing} actions={[
+<Modal {...$$restProps} disabled={processing} actions={[
     {
         onClick: onSubmit,
         children: "Submit",

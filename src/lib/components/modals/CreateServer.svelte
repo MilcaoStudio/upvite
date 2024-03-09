@@ -36,7 +36,7 @@
     </div>
 </ModalForm>
 -->
-<DialogForm {props}
+<DialogForm {...props}
     callback={async ({name})=>{
         const server = await client.servers.createServer({
         name: ''+name,
