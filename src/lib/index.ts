@@ -82,3 +82,5 @@ export const defer = (cb: () => void) => setTimeout(cb, 0);
  * @param cb Callback
  */
 export const chainedDefer = (cb: () => void) => defer(() => defer(cb));
+
+export const noopTrue = ()=>true;

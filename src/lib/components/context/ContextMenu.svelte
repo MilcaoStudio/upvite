@@ -35,7 +35,7 @@
         try {
             switch (data.action) {
                 case "copy_id":
-                    //modalController.writeText(data.id);
+                    modalController.writeText(data.id);
                     break;
                 case "copy_message_link":
                     {
@@ -47,7 +47,7 @@
                         ) {
                             pathname = `/server/${channel.server_id}${pathname}`;
                         }
-                        //modalController.writeText(origin + pathname);
+                        modalController.writeText(origin + pathname);
                     }
                     break;
                 case "mark_as_read":
@@ -131,8 +131,11 @@
                 case "open_link":
                     window.open(data.link, "_blank")?.focus();
                     break;
+                case "copy_text":
+                    modalController.writeText(data.content);
+                    break;
                 case "copy_link":
-                    // modalController.writeText(data.link);
+                    modalController.writeText(data.link);
                     break;
                 case "delete_message":
                     modalController.push({
@@ -547,6 +550,81 @@
                 },
                 "copy_link",
             );
+        }
+        if (sid && server) {
+            makeAction(
+                {
+                    action: "open_notification_options",
+                    server,
+                },
+                undefined,
+                undefined,
+                //<ChevronRight size={24} />,
+            );
+
+            if (server.channels[0])
+                makeAction(
+                    {
+                        action: "create_invite",
+                        target: server.channels[0],
+                    },
+                    "create_invite",
+                );
+
+            if (
+                serverPermissions & Permission.ChangeNickname ||
+                serverPermissions & Permission.ChangeAvatar
+            )
+                makeAction(
+                    {
+                        action: "edit_identity",
+                        target: server.member!,
+                    },
+                    "edit_identity",
+                );
+
+            if (serverPermissions & Permission.ManageServer)
+                makeAction(
+                    {
+                        action: "open_server_settings",
+                        id: server._id,
+                    },
+                    "open_server_settings",
+                );
+
+            // workaround to move this above the delete/leave button
+            makeAction({ action: "copy_id", id: sid }, "copy_sid");
+
+            pushDivider();
+            if (userId == server.owner) {
+                makeAction(
+                    { action: "delete_server", target: server },
+                    "delete_server",
+                    undefined,
+                    undefined,
+                    "var(--error)",
+                );
+            } else {
+                /*
+                                makeAction(
+                                    {
+                                        action: "report",
+                                        target: server,
+                                    },
+                                    "report_server",
+                                    undefined,
+                                    undefined,
+                                    "var(--error)",
+                                );*/
+
+                makeAction(
+                    { action: "leave_server", target: server },
+                    "leave_server",
+                    undefined,
+                    undefined,
+                    "var(--error)",
+                );
+            }
         }
     }
 

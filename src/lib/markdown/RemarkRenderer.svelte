@@ -8,6 +8,7 @@
     import { remarkTimestamps } from "./plugins/timestamps";
     import { remarkHtmlToText } from "./plugins/toText";
     import remarkRehype from "remark-rehype";
+    import remarkGfm from "remark-gfm";
     import { handlers } from "./hast";
     import rehypePrism from "rehype-prism";
     import "./prism";
@@ -51,6 +52,7 @@
         .use(remarkChannel)
         .use(remarkEmoji)
         .use(remarkTimestamps)
+        .use(remarkGfm)
         .use(remarkHtmlToText)
         // Mdast to Hast
         .use(remarkRehype, { handlers, })

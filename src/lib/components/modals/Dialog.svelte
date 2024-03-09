@@ -4,7 +4,7 @@
     import { Button, ContentDialog } from "fluent-svelte";
     import H4 from "../atoms/heading/H4.svelte";
     import { cx } from "@emotion/css";
-    export let open = false,
+    export let open = true,
         disabled = false,
         nonDismissable = false,
         title: string | undefined = undefined,
