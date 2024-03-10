@@ -15,6 +15,7 @@
     #383544
     */
     --background-dark: #1a1a1e;
+    --background-dark-rgb: 26, 26, 30;
 
     --background: #181923;
     --background-rgb: 24, 25, 35;
@@ -402,17 +403,14 @@ div.TitlebarBase {
 
 .menu-flyout {
     min-width: 190px;
-    font-weight: 500;
-    padding: 6px 8px;
+    font-weight: 500 !important;
+    padding: 3px 3px !important;
     user-select: none;
-    font-size: 0.875rem;
-    color: var(--secondary-foreground);
-    border-radius: var(--border-radius);
-    background-color: rgba(
-        var(--primary-background-rgb),
-        max(var(--min-opacity), 0.9)
-    );
-    backdrop-filter: blur(10px);
+    font-size: 0.875rem !important;
+    color: var(--secondary-foreground) !important;
+    border-radius: var(--border-radius-inner) !important;
+    background-color: rgba( var(--background-dark-rgb), max(0, 0.8) ) !important;
+    backdrop-filter: blur(16px);
     box-shadow: 0px 0px 8px 8px rgba(0, 0, 0, 0.05);
 }
 
