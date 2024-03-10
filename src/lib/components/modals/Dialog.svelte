@@ -1,9 +1,10 @@
 <!--Experimental: Replace Modal by ContentDialog-->
 <script lang="ts">
     import type { Action } from "$lib/types/Modal";
-    import { Button, ContentDialog } from "fluent-svelte";
+    import { ContentDialog } from "fluent-svelte";
     import H4 from "../atoms/heading/H4.svelte";
     import { cx } from "@emotion/css";
+    import Button from "../atoms/Button.svelte";
     export let open = true,
         disabled = false,
         nonDismissable = false,
@@ -42,7 +43,7 @@
     $: registerOnConfirm(confirm);
 </script>
 
-<ContentDialog {open} {title}>
+<ContentDialog {open} {title} {...$$restProps}>
     <H4><slot name="description" /></H4>
     <slot />
     {#if actions.length}
@@ -50,7 +51,6 @@
             {#each actions as action}
                 <Button
                     props={{ disabled, ...action }}
-                    variant={action.confirmation ? 'accent' : 'standard'}
                     on:click={async () => {
                         if (await action.onClick()) closeModal();
                     }}

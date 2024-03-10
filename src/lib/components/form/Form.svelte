@@ -35,6 +35,7 @@
                 <FormElement id={key} />
             {/each}
         </slot>
+        <slot />
         {#if submitBtn}
             <Button props={{type: "submit", disabled, ...submitBtn}}>
                 <slot name="submit">Submit</slot>

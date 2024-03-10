@@ -11,6 +11,7 @@ import type { HTMLButtonAttributes, HTMLSelectAttributes } from "svelte/elements
 import type { CheckBoxProps, ColorSelectProps, InputBoxProps, RadioProps, TextAreaProps } from "./Inputs";
 import { setContext, type SvelteComponent } from "svelte";
 import type { Action, Modal, ModalProps } from "./Modal";
+import type { SvelteElement } from "$lib/markdown/runtime/svelteRuntime";
 
 /**
  * Available input types
@@ -63,7 +64,7 @@ type Metadata = {
         };
     };
     textarea: { value: string; props: TextAreaProps };
-    custom: { value: never; props: { element: SvelteComponent } };
+    custom: { value: never; props: { element: SvelteElement } };
 };
 
 /**

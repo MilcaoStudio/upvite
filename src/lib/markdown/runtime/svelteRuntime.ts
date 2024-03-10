@@ -4,7 +4,7 @@ const hasOwnProperty = Object.prototype.hasOwnProperty;
 let __DEV__ = true;
 const enableRefAsProp = false;
 
-export type SvelteNode = string | boolean | number | SvelteElement | null;
+export type SvelteNode = string | boolean | number | SvelteElement | null | undefined;
 export type SvelteElement = {
     _store: { validated: boolean },
     type: string | ComponentType,
@@ -24,7 +24,7 @@ let CurrentOwner: {
     }
 };
 
-type Config = {
+type Props = {
     [x: string]: any,
     ref?: HTMLElement,
     children?: SvelteNode[],
@@ -51,7 +51,7 @@ function error(format: string, ...args: string[]) {
     printWarning('error', format, args);
 }
 
-function hasValidRef(config: Config) {
+function hasValidRef(config: Props) {
     {
         if (hasOwnProperty.call(config, 'ref')) {
             const getter: { isWarning: boolean } | undefined = Object.getOwnPropertyDescriptor(config, 'ref')?.get as any;
@@ -68,7 +68,7 @@ function isValidElementType(type: string | Function) {
 }
 
 export function svelteDevWithDynamicChildren(type: string | Function,
-    config: Config,
+    config: Props,
 ) {
     if (__DEV__) {
         const isStaticChildren = false;
@@ -78,7 +78,7 @@ export function svelteDevWithDynamicChildren(type: string | Function,
 
 export function svelteDevWithStaticChildren(
     type: string | Function,
-    config: Config,
+    config: Props,
 ) {
     if (__DEV__) {
         const isStaticChildren = true;
@@ -124,8 +124,8 @@ function SvelteElement(type: string | Function, _ref: HTMLElement | undefined, _
     return element as SvelteElement
 }
 
-export function svelteProd(type: string | Function, config: Config) {
-    let propName: keyof Config;
+export function svelteProd(type: string | Function, config: Props) {
+    let propName: keyof Props;
     const props: Record<string, any> = {};
     let ref;
     if (hasValidRef(config)) {
@@ -145,7 +145,7 @@ export function svelteProd(type: string | Function, config: Config) {
     return SvelteElement(type, ref, CurrentOwner.current, props);
 }
 
-export function svelteDEV(type: string | Function, config: Config, isStaticChildren: boolean) {
+export function svelteDEV(type: string | Function, config: Props, isStaticChildren: boolean) {
     if (__DEV__) {
         if (!isValidElementType(type)) {
             let info = '';
@@ -187,7 +187,7 @@ export function svelteDEV(type: string | Function, config: Config, isStaticChild
             }
         }
 
-        let propName: keyof Config;
+        let propName: keyof Props;
         // Reserved names are extracted
         const props: Record<string, any> = {};
         let ref;
@@ -237,7 +237,7 @@ function validateChildKeys(node: SvelteNode | SvelteNode[]) {
     }
 }
 
-function isValidElement(object: Object | null): object is SvelteElement {
+function isValidElement(object: any): object is SvelteElement {
     return typeof object == "object" && object != null
 }
 
@@ -258,7 +258,7 @@ function getComponentNameFromType(type: any): string | null {
     return null
 }
 
-export function createElement(type: string | ComponentType, config: Config, ...children: SvelteNode[]) {
+export function createElement(type: string | ComponentType, config: Props | null, ...children: SvelteNode[]) {
     if (__DEV__) {
         if (!isValidElementType(type)) {
             let info = '';

@@ -8,6 +8,7 @@
     import "../styles/app.css";
     import '../styles/overlap.css';
     import "../styles/atoms.css";
+    import "../styles/animations.css"
     import "fluent-svelte/theme.css";
     import 'tippy.js/dist/tippy.css';
 

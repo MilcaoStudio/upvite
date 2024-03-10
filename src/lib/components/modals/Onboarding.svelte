@@ -12,7 +12,7 @@
 </script>
 
 <ModalForm
-  props={props}
+  {...props}
   callback={async ({username})=>{
     loading = true;
     props.callback(''+username, true).then(()=>{

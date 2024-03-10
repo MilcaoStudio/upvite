@@ -8,8 +8,11 @@ import CreateServer from "./CreateServer.svelte";
 import { determineLink } from "$lib/links";
 import { state } from "$lib/State";
 import { goto } from "$app/navigation";
+import Confirmation from "./Confirmation.svelte";
 import ClipboardModal from "./ClipboardModal.svelte";
 import LinkWarning from "./LinkWarning.svelte";
+import CreateChannel from "./CreateChannel.svelte";
+import DeleteMessage from "./DeleteMessage.svelte";
 
 export class ModalController {
     @observable stack: Modal[] = [];
@@ -127,9 +130,17 @@ export class ModalController {
 }
 
 export const modalController = new ModalController({
-    onboarding: Onboarding,
-    user_profile: UserProfile,
-    create_server: CreateServer,
+    block_user: Confirmation,
     clipboard: ClipboardModal,
+    close_dm: Confirmation,
+    create_channel: CreateChannel,
+    create_server: CreateServer,
+    delete_bot: Confirmation,
+    delete_channel: Confirmation,
+    delete_message: DeleteMessage,
+    delete_server: Confirmation,
     link_warning: LinkWarning,
+    onboarding: Onboarding,
+    unfriend_user: Confirmation,
+    user_profile: UserProfile,
 });

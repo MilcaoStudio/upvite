@@ -20,10 +20,21 @@
     let dispatch = createEventDispatcher();
 
     $: buttonStyle = css`
-        z-index: 1;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        align-items:center;
+        box-sizing:border-box;
+        display:inline-flex;
+        font-weight:400;
+        justify-content:center;
+        line-height:20px;
+        outline:none;
+        padding-block:4px 6px;
+        padding-inline:11px;
+        position:relative;
+        transition:var(--fds-control-faster-duration) ease background;
+        -webkit-user-select:none;
+        -moz-user-select:none;
+        -ms-user-select:none;
+        user-select:none;
 
         flex-shrink: 0;
         font-weight: 500;
@@ -33,7 +44,7 @@
 
         border: none;
         cursor: pointer;
-        border-radius: var(--border-radius);
+        border-radius: var(--fds-control-corner-radius);
 
         ${compact == 'icon' ? 'height: 38px; width: 38px;' :
                 compact ? 'min-width: 96px; font-size: 15px; height: 32px; padding: 2px 12px;' :
@@ -41,6 +52,9 @@
         }
         &:disabled {
             cursor: not-allowed;
+        }
+        &:focus-visible {
+            box-shadow:var(--fds-focus-stroke);
         }
         ${(()=>{switch(palette){
             case 'secondary':
@@ -117,6 +131,6 @@
     
 </script>
 
-<button {...props} on:click={()=>dispatch('click')}>
+<button class={buttonStyle} {...props} on:click={()=>dispatch('click')}>
     <slot />
 </button>
