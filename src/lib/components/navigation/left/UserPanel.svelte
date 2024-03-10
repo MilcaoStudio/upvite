@@ -11,8 +11,14 @@ import { css, cx } from "@emotion/css";
         display: flex;
         justify-content: space-between;
         padding: 12px 8px;
-        background: var(--tertiary-background);
-        border-radius: var(--border-radius) var(--border-radius) 0px 0px;
+        background: rgba(var(--primary-background-rgb), max(0, 0.35) );
+        border-radius: var(--border-radius-inner);
+        -webkit-backdrop-filter: blur(20px);
+        backdrop-filter: blur(4px);
+        width: 100%;
+        z-index: 20;
+        bottom: 0;
+        position: absolute;
 
         .user {
             display: flex;

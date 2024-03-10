@@ -10,13 +10,15 @@
         "Header",
         css`
             ${withTransparency
-                ? `background-color: rgba(
+                ? ` 
+                    backdrop-filter: blur(10px);
+                    width: calc(100% - 20px);
+                    z-index: 20;
+                    position: absolute;
+                background-color: rgba(
                       var(--${palette}-header-rgb),
-                      max(var(--min-opacity), 1)
+                      max(var(--min-opacity), 0.75)
                   );
-                  backdrop-filter: blur(20px);
-
-                  z-index: 20;
               `
                 : `background-color: var(--${palette}-header);`}
             ${withBackground
@@ -37,7 +39,8 @@
         flex-shrink: 1;
         padding: 6px 8px;
         margin: 6px 8px;
-        border-radius: var(--border-radius);
+        border-radius: var(--border-radius-inner);
+        border: 3px solid var(--secondary-header);
         font-weight: 600;
         user-select: none;
         height: var(--header-height);

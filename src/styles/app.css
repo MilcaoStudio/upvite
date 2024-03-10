@@ -79,6 +79,7 @@
     --scrollbar-thickness-ff: thin;
     --border-radius: 16px;
     --border-radius-inner: 12px;
+    --border-radius-small: 8px;
     --border-radius-half: 50%;
     --border-radius-user-icon: var(--border-radius-half);
     --border-radius-channel-icon: var(--border-radius-half);
@@ -433,7 +434,7 @@ div.TitlebarBase {
 .menu-flyout button:not([data-disabled="true"]):hover {
     background-color: rgba(
         var(--secondary-background-rgb),
-        max(var(--min-opacity), 0.75)
+        max(var(--min-opacity), 0.5)
     );
     backdrop-filter: blur(10px);
 }
@@ -443,4 +444,20 @@ div.TitlebarBase {
     font-size: 0.65rem;
     text-align: right;
     color: var(--tertiary-foreground);
+}
+
+.blur-background{
+    backdrop-filter: blur(20px);
+    width: calc(100% - 20px);
+    z-index: 20;
+    position: absolute;
+    /*background-color: rgba( 56, 64, 93, max(0, 0.75) );*/
+}
+
+.content-dialog{
+    -webkit-backdrop-filter: blur(20px) !important;
+    backdrop-filter: blur(3px) !important;
+    z-index: 20 !important;
+    background-color: rgba( 24,25,35, max(0, 0.6) ) !important;
+
 }
