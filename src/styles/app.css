@@ -425,6 +425,7 @@ div.TitlebarBase {
     white-space: nowrap;
     border-radius: calc(var(--border-radius) / 2);
     border: unset;
+    background: transparent;
 }
 
 .menu-flyout button:not([data-disabled="true"]) {
