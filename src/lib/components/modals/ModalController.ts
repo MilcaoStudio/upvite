@@ -11,6 +11,7 @@ import { goto } from "$app/navigation";
 import Confirmation from "./Confirmation.svelte";
 import ClipboardModal from "./ClipboardModal.svelte";
 import LinkWarning from "./LinkWarning.svelte";
+import CreateChannel from "./CreateChannel.svelte";
 import DeleteMessage from "./DeleteMessage.svelte";
 
 export class ModalController {
@@ -132,6 +133,7 @@ export const modalController = new ModalController({
     block_user: Confirmation,
     clipboard: ClipboardModal,
     close_dm: Confirmation,
+    create_channel: CreateChannel,
     create_server: CreateServer,
     delete_bot: Confirmation,
     delete_channel: Confirmation,
