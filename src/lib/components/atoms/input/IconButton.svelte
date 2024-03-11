@@ -18,6 +18,9 @@
             place-items: center;
 
             transition: 0.1s ease all;
+            background: var(--secondary-header);
+            border-radius: var(--border-radius-inner);
+            padding: 6px;
 
             svg {
                 transition: 0.2s ease transform;

@@ -14,8 +14,8 @@
     /* MAYBE SOME USEFUL COLORS
     #383544
     */
-    --background-dark: #1a1a1e;
-    --background-dark-rgb: 26, 26, 30;
+    --background-dark: #111119;
+    --background-dark-rgb: 17, 17, 25;
 
     --background: #181923;
     --background-rgb: 24, 25, 35;
@@ -35,8 +35,8 @@
     --secondary-header: #3a425c;
     --secondary-header-rgb: 41,44,65;
 
-    --tertiary-background: #4c546d;
-    --tertiary-background-rgb: 24,25,35;
+    --tertiary-background: #414464;
+    --tertiary-background-rgb: 65, 68, 100;
     
     --tertiary-foreground: #71798f;
     --tertiary-foreground-rgb: 24,25,35;

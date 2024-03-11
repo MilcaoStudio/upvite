@@ -5,7 +5,7 @@
     import Appearance from '$lib/components/settings/personal/appearance.svelte';
     import Profile from '$lib/components/settings/personal/profile.svelte';
     import Scroller from '$lib/components/settings/common/scroller.svelte';
-    import Item from '$lib/components/settings/common/item.svelte';
+    import Item from '$lib/components/settings/common/buttonSimple.svelte';
     import Category from '$lib/components/settings/common/category.svelte';
 
     import type { ComponentType } from 'svelte';
