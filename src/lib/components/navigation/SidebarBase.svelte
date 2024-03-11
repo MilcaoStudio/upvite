@@ -11,6 +11,7 @@
             var(--background-rgb)
         );
         backdrop-filter: blur(20px);
+        background: var(--background-dark);
     }
 </style>
 
