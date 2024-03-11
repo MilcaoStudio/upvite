@@ -7,6 +7,7 @@ import { state } from "$lib/State";
 import { injectWindow, takeError } from "$lib";
 import { ObservableMap, action, computed, makeAutoObservable, observable } from "mobx";
 import { goto } from "$app/navigation";
+import { building } from "$app/environment";
 /**
  * Current lifecycle state
  */
@@ -543,13 +544,13 @@ export class ClientController {
     }
 }
 
-export const clientController = new ClientController;
+export const clientController = building ? null : new ClientController;
 /**
  * Get the currently active session.
  * @returns Session
  */
 export function useSession() {
-    return clientController.activeSession
+    return clientController?.activeSession
 }
 
 /**
@@ -558,7 +559,7 @@ export function useSession() {
  * @returns Revolt.js Client
  */
 export function useClient() {
-    return clientController.availableClient
+    return clientController?.availableClient
 }
 
 /**
@@ -566,5 +567,5 @@ export function useClient() {
  * @returns Revolt.js Client
  */
 export function useApi() {
-    return clientController.anonymousClient.api
+    return clientController?.anonymousClient.api
 }
