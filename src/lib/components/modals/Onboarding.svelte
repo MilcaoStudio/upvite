@@ -2,7 +2,7 @@
     import { takeError } from "$lib";
     import type { ModalProps } from "$lib/types/Modal";
     import { _ } from "svelte-i18n";
-    import ModalForm from "./ModalForm.svelte";
+    import DialogForm from "./DialogForm.svelte";
 
     // export let props: ModalProps<"onboarding"> = $props();
     export let props: ModalProps<"onboarding">
@@ -11,7 +11,8 @@
     $: error && console.error(error);
 </script>
 
-<ModalForm
+<DialogForm
+  nonDismissable
   {...props}
   callback={async ({username})=>{
     loading = true;
@@ -23,10 +24,10 @@
             loading = false;
         });
   }}
+  title="Welcome to Uprising!"
   schema={{username: "text"}}
   data={{username: {field: 'User name'}}}
-  submit={{children: 'Looks good!'}}>
-<svelte:fragment slot="title">Welcome to Uprising!</svelte:fragment>
+  submit={{children: 'Looks good!'}} closable=false>
 <p slot="description">
   It's time to choose a username.
   <br>
@@ -34,4 +35,4 @@
   <br>
   You can change it at any time in your User Settings.
 </p>
-</ModalForm>
+</DialogForm>

@@ -43,7 +43,7 @@
     $: registerOnConfirm(confirm);
 </script>
 
-<ContentDialog {open} {title} {...$$restProps}>
+<ContentDialog {open} {title} {...$$restProps} closable={!nonDismissable} >
     <H4><slot name="description" /></H4>
     <slot />
     {#if actions.length}
