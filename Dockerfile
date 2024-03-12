@@ -19,8 +19,6 @@ COPY --from=install /temp/dev/node_modules node_modules
 COPY . .
 
 # build app
-ARG API_URL=http://localhost:8000
-ENV PUBLIC_API_URL=$API_URL
 ENV NODE_ENV=production
 RUN bun run build
 

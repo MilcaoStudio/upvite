@@ -2,11 +2,10 @@ import { Client, type API } from "revolt.js";
 import { modalController } from "../components/modals/ModalController";
 import type Auth from "$lib/stores/Auth";
 import { detect } from "detect-browser";
-import { PUBLIC_API_URL } from "$env/static/public";
+import { env } from "$env/dynamic/public"
 import { state } from "$lib/State";
 import { injectWindow, takeError } from "$lib";
 import { ObservableMap, action, computed, makeAutoObservable, observable } from "mobx";
-import { goto } from "$app/navigation";
 import { building } from "$app/environment";
 /**
  * Current lifecycle state
@@ -110,7 +109,7 @@ export default class Session {
             unreads: true,
             autoReconnect: false,
             onPongTimeout: "EXIT",
-            apiURL: apiUrl ?? PUBLIC_API_URL,
+            apiURL: apiUrl ?? env.PUBLIC_API_URL,
         });
 
         this.client.addListener("dropped", this.onDropped);
@@ -293,8 +292,11 @@ export class ClientController {
     private current: string | null;
 
     constructor() {
+        if (!env.PUBLIC_API_URL) {
+            throw ReferenceError("PUBLIC_API_URL environment variable is undefined. PUBLIC_API_URL is mandatory for client controller.");
+        }
         this.apiClient = new Client({
-            apiURL: PUBLIC_API_URL,
+            apiURL: env.PUBLIC_API_URL,
         });
 
         // ! FIXME: loop until success infinitely
