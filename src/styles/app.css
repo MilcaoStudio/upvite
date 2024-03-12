@@ -410,8 +410,8 @@ div.TitlebarBase {
     font-size: 0.875rem !important;
     color: var(--secondary-foreground) !important;
     border-radius: var(--border-radius-inner) !important;
-    background-color: rgba( var(--background-dark-rgb), max(0, 0.8) ) !important;
-    backdrop-filter: blur(16px);
+    background-color: rgba( 17, 17, 25, max(0, 0.7) ) !important;
+    backdrop-filter: blur(10px);
     box-shadow: 0px 0px 8px 8px rgba(0, 0, 0, 0.05);
 }
 
@@ -444,6 +444,7 @@ div.TitlebarBase {
     font-size: 0.65rem;
     text-align: right;
     color: var(--tertiary-foreground);
+    border-radius: var(--border-radius-inner) !important;
 }
 
 .blur-background{
@@ -456,8 +457,9 @@ div.TitlebarBase {
 
 .content-dialog{
     -webkit-backdrop-filter: blur(20px) !important;
-    backdrop-filter: blur(3px) !important;
+    backdrop-filter: blur(20px) !important;
     z-index: 20 !important;
-    background-color: rgba( 24,25,35, max(0, 0.6) ) !important;
+    background-color: rgba( var(--primary-background-rgb), max(0, 0.5) ) !important;
+    border-radius: var(--border-radius) !important;
 
 }
