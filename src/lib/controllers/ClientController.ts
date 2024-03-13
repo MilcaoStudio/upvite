@@ -367,7 +367,7 @@ export class ClientController {
      * @returns Revolt.js Client
      */
     @computed get availableClient() {
-        return this.activeSession?.client ?? this.apiClient;
+        return this.activeSession?.client ?? this.apiClient!;
     }
 
     /**

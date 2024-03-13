@@ -18,28 +18,37 @@
         registerOnConfirm: (fn: () => void) => () => void = (fn) => fn;
 
     let closing = false;
-    const Base = cx('Base',css`
-        ${closing ? "animation-name: fadeOut" : "animation-name: fadeIn"}
+    const Base = cx(
+        "Base",
+        css`
+            ${closing ? "animation-name: fadeOut" : "animation-name: svelte-1qibxfp-menu-open"}
 
-        > div {
-            ${closing ? "animation-name: zoomOut" : ""}
-        }
-    `);
+            > div {
+                ${closing ? "animation-name: zoomOut" : ""}
+            }
+        `,
+    );
 
-    const Container = cx('Container', css`
-        max-width: min(calc(100vw - 20px), ${maxWidth || "450px"});
-        max-height: min(calc(100vh - 20px), ${maxHeight || "650px"});
-        ${!maxWidth ? "width: 100%;" : ""}
-        ${!transparent
-            ? "overflow: hidden; background: var(--secondary-header); border-radius: var(--border-radius);"
-            : ""}
-    `);
-    const Title = cx('Title');
-    const Content = cx('Content', css`
-        padding: ${padding ? "0 1rem 1rem" : ""};
-        ${!transparent ? "background: var(--secondary-header);" : ""}
-    `);
-    const Actions = cx('Actions');
+    const Container = cx(
+        "Container",
+        css`
+            max-width: min(calc(100vw - 20px), ${maxWidth || "450px"});
+            max-height: min(calc(100vh - 20px), ${maxHeight || "650px"});
+            ${!maxWidth ? "width: 100%;" : ""}
+            ${!transparent
+                ? "overflow: hidden; background: var(--secondary-header); border-radius: var(--border-radius);"
+                : ""}
+        `,
+    );
+    const Title = cx("Title");
+    const Content = cx(
+        "Content",
+        css`
+            padding: ${padding ? "0 1rem 1rem" : ""};
+            ${!transparent ? "background: var(--secondary-header);" : ""}
+        `,
+    );
+    const Actions = cx("Actions");
 
     $: closeModal = function () {
         if (!closing) {
@@ -80,30 +89,32 @@
     on:click={() => !nonDismissable && closeModal()}
     on:keydown={() => !nonDismissable && closeModal()}
 >
-    <div
-        class={Container}
-        role="none"
-        on:click|stopPropagation
-        on:keydown|stopPropagation
-    >
-        <div class={Title}>
-            <H2><slot name="title" /></H2>
-            <H4><slot name="description" /></H4>
-        </div>
-        <div class={Content}><slot /></div>
-        {#if actions.length}
-            <div class={Actions}>
-                {#each actions as action}
-                    <Button
-                        props={{ disabled, ...action }}
-                        on:click={async () => {
-                            if (await action.onClick()) closeModal();
-                        }}
-                    >
-                        {action.children}
-                    </Button>
-                {/each}
+    <slot name="override">
+        <div
+            class={Container}
+            role="none"
+            on:click|stopPropagation
+            on:keydown|stopPropagation
+        >
+            <div class={Title}>
+                <H2><slot name="title" /></H2>
+                <H4><slot name="description" /></H4>
             </div>
-        {/if}
-    </div>
+            <div class={Content}><slot /></div>
+            {#if actions.length}
+                <div class={Actions}>
+                    {#each actions as action}
+                        <Button
+                            props={{ disabled, ...action }}
+                            on:click={async () => {
+                                if (await action.onClick()) closeModal();
+                            }}
+                        >
+                            {action.children}
+                        </Button>
+                    {/each}
+                </div>
+            {/if}
+        </div>
+    </slot>
 </div>

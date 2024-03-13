@@ -2,10 +2,8 @@
     import { state } from "$lib/State";
     import { useClient } from "$lib/controllers/ClientController";
     import type { API, User } from "revolt.js";
-    import { routeInformation } from "../context/history";
     import fallback from "$lib/assets/user.png";
     import IconBase from "../IconBase.svelte";
-    import { createEventDispatcher } from "svelte";
     import { page } from "$app/stores";
 
     export function useStatusColor(user?: User) {
@@ -38,7 +36,6 @@
         url: string | undefined = undefined,
         onClick: ((e: MouseEvent)=>void) | null = null;
     const client = useClient();
-    const dispatcher = createEventDispatcher();
     $: if (masquerade?.avatar) {
         url = client.proxyFile(masquerade.avatar);
     } else if (override) {
