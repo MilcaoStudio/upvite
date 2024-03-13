@@ -17,22 +17,22 @@ type SessionState = "Ready" | "Connecting" | "Online" | "Disconnected" | "Offlin
  */
 type Transition =
     | {
-          action: "LOGIN";
-          apiUrl?: string;
-          session: SessionPrivate;
-          configuration?: API.RevoltConfig;
+        action: "LOGIN";
+        apiUrl?: string;
+        session: SessionPrivate;
+        configuration?: API.RevoltConfig;
 
-          knowledge: "new" | "existing";
-      }
+        knowledge: "new" | "existing";
+    }
     | {
-          action:
-              | "SUCCESS"
-              | "DISCONNECT"
-              | "RETRY"
-              | "LOGOUT"
-              | "ONLINE"
-              | "OFFLINE";
-      };
+        action:
+        | "SUCCESS"
+        | "DISCONNECT"
+        | "RETRY"
+        | "LOGOUT"
+        | "ONLINE"
+        | "OFFLINE";
+    };
 
 export default class Session {
     state: SessionState = navigator.onLine ? "Ready" : "Offline";
@@ -274,7 +274,7 @@ export class ClientController {
     /**
      * API client
      */
-    private apiClient: Client;
+    private apiClient: Client | null = null;
 
     /**
      * Server configuration
@@ -292,17 +292,20 @@ export class ClientController {
     private current: string | null;
 
     constructor() {
+        if (!building) {
+            this.apiClient = new Client({
+                apiURL: env.PUBLIC_API_URL,
+            });
+
+            this.apiClient
+                .fetchConfiguration()
+                .then(() => (this.configuration = this.apiClient!.configuration!));
+        }
         if (!env.PUBLIC_API_URL) {
             throw ReferenceError("PUBLIC_API_URL environment variable is undefined. PUBLIC_API_URL is mandatory for client controller.");
         }
-        this.apiClient = new Client({
-            apiURL: env.PUBLIC_API_URL,
-        });
 
-        // ! FIXME: loop until success infinitely
-        this.apiClient
-            .fetchConfiguration()
-            .then(() => (this.configuration = this.apiClient.configuration!));
+
 
         this.configuration = null;
         this.sessions = observable.map();
@@ -356,7 +359,7 @@ export class ClientController {
      * @returns API Client
      */
     @computed get anonymousClient() {
-        return this.apiClient;
+        return this.apiClient!
     }
 
     /**
@@ -375,7 +378,7 @@ export class ClientController {
         return this.configuration;
     }
 
-    @computed get isLoggedIn(){
+    @computed get isLoggedIn() {
         return !!this.current
     }
     /**
@@ -460,7 +463,7 @@ export class ClientController {
         }
 
         // Try to login with given credentials
-        let session = await this.apiClient.api.post("/auth/session/login", {
+        let session = await this.apiClient!.api.post("/auth/session/login", {
             ...credentials,
             friendly_name,
         });
@@ -479,12 +482,12 @@ export class ClientController {
                         }),
                     );
 
-                if (typeof mfa_response === "undefined") {
+                if (!mfa_response) {
                     break;
                 }
 
                 try {
-                    session = await this.apiClient.api.post(
+                    session = await this.apiClient!.api.post(
                         "/auth/session/login",
                         {
                             mfa_response,
@@ -546,13 +549,13 @@ export class ClientController {
     }
 }
 
-export const clientController = building ? null : new ClientController;
+export const clientController = new ClientController;
 /**
  * Get the currently active session.
  * @returns Session
  */
 export function useSession() {
-    return clientController?.activeSession
+    return clientController.activeSession
 }
 
 /**
@@ -561,7 +564,7 @@ export function useSession() {
  * @returns Revolt.js Client
  */
 export function useClient() {
-    return clientController?.availableClient
+    return clientController.availableClient
 }
 
 /**
@@ -569,5 +572,5 @@ export function useClient() {
  * @returns Revolt.js Client
  */
 export function useApi() {
-    return clientController?.anonymousClient.api
+    return clientController.anonymousClient.api
 }
