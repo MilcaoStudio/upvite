@@ -11,6 +11,7 @@
     import SidebarBase from "$lib/components/navigation/SidebarBase.svelte";
     import ServerSidebar from "$lib/components/navigation/left/ServerSidebar.svelte";
     import ServerListSidebar from "$lib/components/navigation/left/ServerListSidebar.svelte";
+    import { autorun } from "mobx";
     const client = useClient();
 
     export let data: LayoutData;
@@ -42,7 +43,10 @@
 
     $: channel = client.channels.get(id);
     $: document.title = `#${channel?.name ?? ""} - ${server?.name ?? ""} | Uprising`
-    const open = isTouchscreenDevice || state.layout.getSectionState(SIDEBAR_CHANNELS, true);
+    let open = false;
+    $: autorun(()=>{
+        open = isTouchscreenDevice || state.layout.getSectionState(SIDEBAR_CHANNELS, true);
+    });
 </script>
 
 <UprisingApp>
