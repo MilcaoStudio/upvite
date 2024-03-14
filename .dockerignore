@@ -1,6 +1,7 @@
 node_modules
 Dockerfile*
 docker-compose*
+.svelte-kit
 .dockerignore
 .git
 .gitignore
