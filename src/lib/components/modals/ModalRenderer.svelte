@@ -16,6 +16,10 @@
   let stack: SvelteComponent[] = [];
   autorun(() => {
     for (const modal of modalController.stack) {
+      if (!(modal.type in modalController.components)) {
+        console.warn(modal.type, "constructor not found. Skipped.");
+        continue;
+      }
       // Warning: this hack may fail in futures svelte versions.
       const component = stack.find((comp)=>comp.$$.ctx.filter((c: any) => c.key == modal.key).length);
       if (component) {
