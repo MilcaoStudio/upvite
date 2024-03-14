@@ -13,7 +13,7 @@
             el.component = InputBox;
             el.props = {
                 value: v as string,
-                'on:change': (ev: Event & {currentTarget: HTMLInputElement})=>onChange?.(ev.currentTarget?.value),
+                onChange: (ev: Event & {currentTarget: HTMLInputElement})=>onChange?.(ev.currentTarget?.value),
                 ..._props
             }
             break;
@@ -28,9 +28,9 @@
     {#if field}
     <div>
         <Category>{field}</Category>
-        <svelte:component this={el.component} props={el.props} />
+        <svelte:component this={el.component} {...el.props} />
     </div>
     {:else}
-    <svelte:component this={el.component} props={el.props} />
+    <svelte:component this={el.component} {...el.props} />
     {/if}
 {/key}

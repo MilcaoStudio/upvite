@@ -11,6 +11,8 @@
     import "../styles/animations.css"
     import "fluent-svelte/theme.css";
     import 'tippy.js/dist/tippy.css';
+    import "../styles/buttons.css";
+    
 
     let ready = false;
     if (browser) {
@@ -19,6 +21,7 @@
 </script>
 
 {#if ready}
+    
     <Locale>
         <slot />
         <Binder />
@@ -27,3 +30,4 @@
 {:else}
     <Preloader type="spinner" />
 {/if}
+

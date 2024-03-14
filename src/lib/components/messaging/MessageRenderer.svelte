@@ -34,7 +34,7 @@
             }
         `,
     );
-    const client = useClient();
+    const client = useClient()!;
     const userId = client.user!._id;
     const queue = state.queue;
     let render: SvelteNode[] = [];

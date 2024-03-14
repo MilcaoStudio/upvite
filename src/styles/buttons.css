@@ -1,0 +1,23 @@
+.edit{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.button-base{
+    border: none;
+    padding: 6px 6px;
+    border-radius: var(--border-radius-small);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(var(--background-rgb), 0.6);
+    transition: 0.12s ease-in all;
+}
+
+.button-base:hover{
+    background-color: var(--background);
+}
+.button-base:active{
+    background: var(--tertiary-foreground);
+}

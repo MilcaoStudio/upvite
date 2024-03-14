@@ -123,6 +123,7 @@
 
   const source = Languages[lang];
   $: loadLanguage = async function (locale: string) {
+    await waitLocale(locale);
     if (locale == "en") {
       // If English, make sure to restore everything to defaults.
       // Use what we already have.
@@ -160,8 +161,6 @@
   $: source && loadLanguage(lang);
   $: definitions && setContext('dictionary', definitions);
   $: document.body.style.direction = source.rtl ? "rtl" : "";
-
-  waitLocale();
 </script>
 
 <slot />

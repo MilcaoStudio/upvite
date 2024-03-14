@@ -28,7 +28,7 @@
     
 </script>
 
-<form on:submit|preventDefault={submit}>
+<form on:submit|preventDefault>
     <Column>
         <slot name="field">
             {#each keys as key}

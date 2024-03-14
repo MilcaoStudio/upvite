@@ -21,8 +21,9 @@
             children: "Cancel",
             palette: "plain",
         }];
-    const values = getInitialValues(schema, defaults);
+    let values: MapFormToValues<FormTemplate> = getInitialValues(schema, defaults);
     let error = '', processing = false;
+    
     async function onSubmit() {
         try {
             processing = true;
@@ -34,6 +35,10 @@
             return false
         }
     }
+
+    function onChange(data: MapFormToData<FormTemplate>, key: string) {
+        values[key] = data[key] as string;
+    }
 </script>
 
 <Dialog {...$$restProps} {title} disabled={processing} actions={[
@@ -44,9 +49,9 @@
         ...submit,
     },
     ...actions,
-]} open>
+]}>
     <svelte:fragment slot="description"><slot name="description" /></svelte:fragment>
-    <Form schema={schema} data={data} defaults={defaults} submitBtn={submitBtn} observed={values}>
+    <Form schema={schema} data={data} defaults={defaults} submitBtn={submitBtn} observed={values} {onChange} >
         <svelte:fragment slot="submit">{submitBtn?.children}</svelte:fragment>
         {#each Object.keys(schema) as key}
             {#if schema[key] == "custom"}

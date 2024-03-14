@@ -10,9 +10,13 @@
         width: 100%;
         height: 100%;
         object-fit: cover;
+        
+
 
         ${borderRadius ? `border-radius: var(${borderRadius});` : ``}
+
         ${hover ? `&:hover .icon { filter: brightness(0.8); }` : ``}
+        
     }
     `)
 </script>
