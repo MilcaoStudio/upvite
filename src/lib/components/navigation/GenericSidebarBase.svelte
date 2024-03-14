@@ -1,8 +1,6 @@
 <script lang="ts">
-    import { isTouchscreenDevice } from "$lib";
     import { css, cx } from "@emotion/css";
 
-    export let mobilePadding = false;
     const Base = cx("GenericSidebar", css`
         width: 232px;
         display: flex;
