@@ -25,6 +25,7 @@ RUN bun run build
 # copy production dependencies and source code into final image
 FROM base AS release
 COPY --from=install /temp/prod/node_modules node_modules
+COPY --from=prerelease /usr/scr/upvite/. .
 COPY --from=prerelease /usr/src/upvite/package.json .
 # run the app
 USER bun
