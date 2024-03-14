@@ -1,25 +1,53 @@
 <script lang="ts">
-    import '../../../styles/modal.css'
-    import { connect } from "svelte-mobx";
-    import { modalController } from "./ModalController";
-    import type { SvelteComponent } from "svelte";
-    const { autorun } = connect();
-    function keyDown(event: KeyboardEvent) {
-    if (event.key == 'Escape') {
-      modalController.pop('close');
-    } else if (event.key == 'Enter') {
-      if (event.target instanceof HTMLSelectElement) { return }
-      modalController.pop('confirm');
+  import "../../../styles/modal.css";
+  import { modalController } from "./ModalController";
+  import { onDestroy, type SvelteComponent } from "svelte";
+  import { autorun } from "mobx";
+  function keyDown(event: KeyboardEvent) {
+    if (event.key == "Escape") {
+      modalController.pop("close");
+    } else if (event.key == "Enter") {
+      if (event.target instanceof HTMLSelectElement) {
+        return;
+      }
+      modalController.pop("confirm");
     }
   }
   let stack: SvelteComponent[] = [];
-  $: autorun(()=>{
-    stack.forEach(comp=>comp.$destroy());
-    stack = modalController.stack.filter(modal=>modalController.components[modal.type]).map(modal=>{
-      const Component = modalController.components[modal.type];
-      return new Component({target: document.body, props: {props: {...modal, onClose: ()=>modalController.remove(modal.key || '')}}});
+  autorun(() => {
+    for (const modal of modalController.stack) {
+      const component = stack.find(
+        (comp) => comp.$$.ctx[0] && comp.$$.ctx[0].key == modal.key,
+      );
+      if (component) {
+        component.$set({
+          props: {
+            ...modal,
+            onClose: () => modalController.remove(modal.key || ""),
+          },
+        });
+      } else {
+        stack.push(
+          new modalController.components[modal.type]({
+            target: document.body,
+            props: {
+              props: {
+                ...modal,
+                onClose: () => modalController.remove(modal.key || ""),
+              },
+            },
+          }),
+        );
+      }
     }
-  )});
+    return () => {
+      stack.forEach((comp) => comp.$destroy);
+      stack = [];
+    };
+  });
+  onDestroy(() => {
+    stack.forEach((comp) => comp.$destroy());
+  });
 </script>
 
 <svelte:document on:keydown={keyDown} />

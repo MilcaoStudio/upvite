@@ -17,24 +17,25 @@
     $: closeModal = function () {
         if (open) {
             setTimeout(function () {
+                open = false;
                 onClose(true);
             }, 200);
         }
-        open = false;
         console.log("[closeModal] Closing modal");
     };
-    $: {
-        if (signal == "confirm") {
-            confirm();
-        } else if (signal) {
-            const cannotClose = signal == "close" && nonDismissable;
-            if (!cannotClose) {
-                closeModal();
-            }
+    $: if (signal == "confirm") {
+        signal = undefined;
+        confirm();
+    } else if (signal) {
+        const cannotClose = signal == "close" && nonDismissable;
+        if (!cannotClose) {
+            closeModal();
         }
     }
     async function confirm() {
-        if (await actions.find((x) => x.confirmation)?.onClick?.()) {
+        const action = actions.find((x) => x.confirmation);
+        const success = await action?.onClick?.();
+        if (success) {
             closeModal();
             console.log("[confirm] Closing modal");
         }
@@ -43,7 +44,7 @@
     $: registerOnConfirm(confirm);
 </script>
 
-<ContentDialog {open} {title} {...$$restProps} closable={!nonDismissable} >
+<ContentDialog bind:open {title} {...$$restProps} closable={!nonDismissable}>
     <H4><slot name="description" /></H4>
     <slot />
     {#if actions.length}

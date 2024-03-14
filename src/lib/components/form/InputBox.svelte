@@ -2,9 +2,7 @@
     import { css, cx } from "@emotion/css";
     import type { ChangeEventHandler, HTMLInputAttributes, KeyboardEventHandler } from "svelte/elements";
 
-    export let props: HTMLInputAttributes & {
-        palette?: "primary" | "secondary";
-    } = { palette: "primary" }, onChange: ChangeEventHandler<HTMLInputElement> = function(){};
+    export let palette: "primary" | "secondary" = "primary", onChange: ChangeEventHandler<HTMLInputElement> = function(){};
     $: InputBox = cx(
         "InputBox",
         css`
@@ -19,7 +17,7 @@
             outline: none;
             transition: 0.1s ease-in-out all;
             ${
-                props.palette == "primary"
+                palette == "primary"
                     ? `
                 color: var(--foreground);
                 background: var(--primary-background);
@@ -37,7 +35,7 @@
             }
             &:hover {
                 background: ${
-                    props.palette == "primary"
+                    palette == "primary"
                         ? "var(--secondary-background)"
                         : "var(--hover)"
                 };
@@ -48,6 +46,6 @@
 
 <!--TextBox is not recommended because it does not listen to change events-->
 <div class="text-box-container">
-    <input class={InputBox} {...props} {...$$restProps} on:change={props["on:change"]} on:change={onChange} on:keyup={onChange} />
+    <input class={InputBox} {...$$restProps} on:change={onChange} on:keyup={onChange}  />
     <div class="text-box-underline" />
 </div>
