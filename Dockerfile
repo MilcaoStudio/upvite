@@ -26,8 +26,10 @@ RUN bun run build
 FROM base AS release
 COPY --from=install /temp/prod/node_modules node_modules
 RUN mkdir -p build
+COPY --from=prerelease /usr/src/upvite/build ./build
 COPY --from=prerelease /usr/src/upvite/package.json .
 # run the app
 USER bun
 EXPOSE 3000/tcp
-ENTRYPOINT ["bun", "run", "preview"]
+RUN cd build
+ENTRYPOINT ["bun", "index.js"]
