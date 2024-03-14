@@ -1,6 +1,6 @@
 <script lang="ts">
     import { css, cx } from "@emotion/css";
-    import type { ChangeEventHandler, HTMLInputAttributes, KeyboardEventHandler } from "svelte/elements";
+    import type { ChangeEventHandler } from "svelte/elements";
 
     export let palette: "primary" | "secondary" = "primary", onChange: ChangeEventHandler<HTMLInputElement> = function(){};
     $: InputBox = cx(
