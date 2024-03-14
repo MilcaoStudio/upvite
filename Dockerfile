@@ -29,5 +29,4 @@ COPY --from=prerelease /usr/src/upvite/package.json .
 # run the app
 USER bun
 EXPOSE 3000/tcp
-RUN cd build
-ENTRYPOINT ["bun", "index.js"]
+ENTRYPOINT ["bun", "run"]
