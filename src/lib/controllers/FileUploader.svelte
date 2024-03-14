@@ -172,15 +172,9 @@
         <button
             class={cx(
                 "image",
-                style.desaturateDefault && previewURL == null && "desaturate",
+                style.desaturateDefault && previewURL == null && "desaturate", "button-base"
             )}
-            style:background-image={style.type == "icon"
-                ? `url('${
-                      previewURL || style.previewURL || style.defaultPreview
-                  }')`
-                : style.previewURL
-                  ? `linear-gradient( rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5) ), url('${style.previewURL}')`
-                  : "none"}
+            
             style:width={style.width}
             style:height={style.height}
             on:click={onClick}
@@ -213,3 +207,11 @@
 <!--TODO-->
 {/if}
 
+
+<style>
+    .modify > span{
+        color: var(--secondary-foreground);
+        font-weight: 600;
+        font-size: 0.876rem;
+    }
+</style>

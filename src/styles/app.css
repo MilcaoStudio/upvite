@@ -459,7 +459,7 @@ div.TitlebarBase {
     -webkit-backdrop-filter: blur(20px) !important;
     backdrop-filter: blur(20px) !important;
     z-index: 20 !important;
-    background-color: rgba( var(--primary-background-rgb), max(0, 0.5) ) !important;
+    background-color: rgba( 17, 17, 25, max(0, 0.62) ) !important;
     border-radius: var(--border-radius) !important;
 
 }

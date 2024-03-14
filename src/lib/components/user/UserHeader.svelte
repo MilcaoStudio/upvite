@@ -24,8 +24,12 @@
 </script>
 <div class="userHeader" style="--banner-url: url({backgroundURL})">
     <div class="profile">
-        <UserIcon target={user} size={80} animate status />
-        {user?.username}
+        <div>
+            <UserIcon target={user} size={80} animate status />
+            <h2>{user?.username}</h2>
+
+        </div>
+        
         <IconButton
             ><svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -62,18 +66,19 @@
         overflow-y: auto;
         font-size: 0.9375rem;
         display: flex;
-        background-image: linear-gradient(
-                rgba(0, 0, 0, 0.5),
-                rgba(0, 0, 0, 0.2)
-            ),
-            var(--banner-url);
+        background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.35), rgba(var(--secondary-background-rgb), 1)), var(--banner-url);
         flex-direction: column;
+        max-width: 620px;
+        max-height: 200px;
+        height: 100vh;
         background-size: cover;
         background-position: center;
+        border-radius: 0px var(--border-radius-inner) 0px var(--border-radius-inner);
     }
     .profile {
         display: flex;
-        align-items: center;
+        gap: 16px;
         justify-content: space-between;
+        align-items: baseline;
     }
 </style>
