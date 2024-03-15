@@ -52,6 +52,7 @@
       if (!stacked.has(key)) {
         console.info("Destroy", key);
         setTimeout(()=>value?.$destroy(), 200);
+        components.delete(key);
       }
     }
     

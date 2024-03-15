@@ -43,7 +43,7 @@
     $: registerOnConfirm(confirm);
 </script>
 
-<ContentDialog bind:open {title} {...$$restProps} closable={!nonDismissable} on:close={()=>modalController.pop("close")}>
+<ContentDialog bind:open {title} {...$$restProps} closable={!nonDismissable} on:close={closeModal}>
     <H4><slot name="description" /></H4>
     <slot />
     {#if actions.length}
