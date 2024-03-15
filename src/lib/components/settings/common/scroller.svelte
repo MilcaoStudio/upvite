@@ -10,13 +10,14 @@
 <style>
 
     .container{
-        min-width: 218px;
+        width: 218px;
         padding: 70px 8px;
         display: flex;
         gap: 2px;
         flex-direction: column;
 
     }
+    
 
     .scroller-y{
 
@@ -24,8 +25,11 @@
         transition: visibility .1s;
         max-height: 100vh; /* Ajusta según sea necesario */
         overflow-x: hidden;
-        min-width: 232px;
-        direction: ltr  /*ltr  rtl*/
+        flex: 1 0 218px;
+        direction: ltr;  /*ltr  rtl*/
+        display: flex;
+        justify-content: flex-end;
+        
     }
 
 </style>

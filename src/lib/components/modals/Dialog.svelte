@@ -5,6 +5,7 @@
     import H4 from "../atoms/heading/H4.svelte";
     import { cx } from "@emotion/css";
     import Button from "../atoms/Button.svelte";
+    import { modalController } from "./ModalController";
     export let open = true,
         disabled = false,
         nonDismissable = false,
@@ -15,12 +16,10 @@
         registerOnClose: (fn: () => void) => () => void = (fn) => fn,
         registerOnConfirm: (fn: () => void) => () => void = (fn) => fn;
     $: closeModal = function () {
-        if (open) {
-            setTimeout(function () {
-                open = false;
-                onClose(true);
-            }, 200);
-        }
+        setTimeout(function () {
+            open = false;
+            onClose(true);
+        }, 200);
         console.log("[closeModal] Closing modal");
     };
     $: if (signal == "confirm") {
@@ -44,7 +43,7 @@
     $: registerOnConfirm(confirm);
 </script>
 
-<ContentDialog bind:open {title} {...$$restProps} closable={!nonDismissable}>
+<ContentDialog bind:open {title} {...$$restProps} closable={!nonDismissable} on:close={closeModal}>
     <H4><slot name="description" /></H4>
     <slot />
     {#if actions.length}

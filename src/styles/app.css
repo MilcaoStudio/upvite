@@ -42,6 +42,7 @@
     --tertiary-foreground-rgb: 24,25,35;
 
     --accent: #8097de;
+    --accent-dark: #5e74b8;
     --acent: #476fe9;
     --accent-rgb: 172, 252, 217;
     --accent-contrast: #131313;
@@ -462,4 +463,25 @@ div.TitlebarBase {
     background-color: rgba( 17, 17, 25, max(0, 0.62) ) !important;
     border-radius: var(--border-radius) !important;
 
+}
+
+.checkbox:checked{
+    background-color: var(--accent-dark) !important;
+}
+
+.info-bar-icon{
+    -webkit-margin-before: 0px !important; 
+    align-self: flex-start !important;
+    display: flex !important;
+    /* flex: 0 0 auto; */
+    height: 100% !important;
+    min-height: 48px !important;
+    margin-block-start: 0px !important;
+    align-items: center !important;
+
+}
+
+.info-bar{
+    border-radius: var(--border-radius-small) !important;
+    background-color: rgba(var(--tertiary-background-rgb), max(0.7, 0.6)) !important;
 }

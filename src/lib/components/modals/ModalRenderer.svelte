@@ -13,47 +13,56 @@
       modalController.pop("confirm");
     }
   }
-  let stack: SvelteComponent[] = [];
+  let components: Map<string, SvelteComponent | null> = new Map;
+  let stacked = new Set;
   autorun(() => {
+    stacked.clear();
     for (const modal of modalController.stack) {
-      if (!(modal.type in modalController.components)) {
-        console.warn(modal.type, "constructor not found. Skipped.");
-        continue;
-      }
-      // Warning: this hack may fail in futures svelte versions.
-      const component = stack.find((comp)=>comp.$$.ctx.filter((c: any) => c.key == modal.key).length);
-      if (component) {
-        // Modify props like signal without destroying the component.
-        component.$set({
-          props: {
-            ...modal,
-            onClose: () => modalController.remove(modal.key || ""),
-          },
-        });
+      const { key, type, ...props } = modal;
+      // Component is rendered?
+      const comp = components.get(key || "");
+
+      stacked.add(key);
+      if (comp) {
+        // Update the component
       } else {
-        // Creates new modal
-        console.info("Rendering modal", modal.key);
-        stack.push(
-          new modalController.components[modal.type]({
+        // Component is registered?
+        if (!(type in modalController.components)) {
+          continue;
+        }
+        // Render component
+        const Constructor = modalController.components[type];
+        components.set(
+          key ?? "",
+          new Constructor({
             target: document.body,
             props: {
               props: {
-                ...modal,
-                onClose: () => modalController.remove(modal.key || ""),
+                ...props,
+                type,
+                onClose: () => modalController.remove(key ?? ""),
               },
             },
           }),
         );
       }
     }
+    // Destroy component
+    for (const [key, value] of components.entries()) {
+      if (!stacked.has(key)) {
+        console.info("Destroy", key);
+        setTimeout(()=>value?.$destroy(), 200);
+        components.delete(key);
+      }
+    }
     
-    console.info(stack.length,"components stacked");
-    return () => {
-      stack.forEach((comp) => comp.$destroy);
-    };
   });
+
+  // Prevents memory leaks
   onDestroy(() => {
-    stack.forEach((comp) => comp.$destroy());
+    for (const comp of components.values()) {
+      comp?.$destroy();
+    }
   });
 </script>
 
