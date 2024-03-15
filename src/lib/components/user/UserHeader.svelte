@@ -22,7 +22,7 @@
         placeholderProfile?.background && (backgroundURL = client.generateFileURL(placeholderProfile.background, {width: 1000}, true))
     }
 </script>
-<div class="userHeader" style="--banner-url: url({backgroundURL})">
+<div class="userHeader" style="--banner-url: {backgroundURL ? `url(${backgroundURL})` : ""}">
     <div class="profile">
         <div>
             <UserIcon target={user} size={80} animate status />

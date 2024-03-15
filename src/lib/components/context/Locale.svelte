@@ -158,9 +158,11 @@
     definitions = defn;
   };
 
-  $: source && loadLanguage(lang);
   $: definitions && setContext('dictionary', definitions);
   $: document.body.style.direction = source.rtl ? "rtl" : "";
 </script>
 
-<slot />
+{#await loadLanguage($locale || "en") then }
+  <slot />
+{/await}
+
