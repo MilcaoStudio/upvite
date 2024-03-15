@@ -5,31 +5,31 @@ import { defineConfig } from 'vite';
 
 function getGitRevision() {
   try {
-      const rev = readFileSync(".git/HEAD").toString().trim();
-      if (rev.indexOf(":") == -1) {
-          return rev
-      }
+    const rev = readFileSync(".git/HEAD").toString().trim();
+    if (rev.indexOf(":") == -1) {
+      return rev
+    }
 
-      return readFileSync(`.git/${rev.substring(5)}`)
-          .toString()
-          .trim()
+    return readFileSync(`.git/${rev.substring(5)}`)
+      .toString()
+      .trim()
   } catch (err) {
-      console.error("Failed to get Git revision.");
-      return "?"
+    console.error("Failed to get Git revision.");
+    return "?"
   }
 }
 
 function getGitBranch() {
   try {
-      const rev = readFileSync(".git/HEAD").toString().trim();
-      if (rev.indexOf(":") == -1) {
-          return "DETACHED"
-      }
+    const rev = readFileSync(".git/HEAD").toString().trim();
+    if (rev.indexOf(":") == -1) {
+      return "DETACHED"
+    }
 
-      return rev.split("/").pop();
+    return rev.split("/").pop();
   } catch (err) {
-      console.error("Failed to get Git branch.");
-      return "?"
+    console.error("Failed to get Git branch.");
+    return "?"
   }
 }
 
@@ -45,6 +45,9 @@ export default defineConfig({
       __GIT_BRANCH__: getGitBranch(),
       __APP_VERSION__: getVersion(),
       preventAssignment: true,
-  }),
+    }),
   ],
-});
+  resolve: {
+    preserveSymlinks: true,
+  },
+},);
