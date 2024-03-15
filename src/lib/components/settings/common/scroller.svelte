@@ -17,6 +17,7 @@
         flex-direction: column;
 
     }
+    
 
     .scroller-y{
 

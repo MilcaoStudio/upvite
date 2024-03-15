@@ -1,4 +1,5 @@
 <script lang="ts">
+
     import { goto } from "$app/navigation";
     import UprisingApp from "$lib/components/UprisingApp.svelte";
     import Appearance from "$lib/components/settings/personal/appearance.svelte";
@@ -238,6 +239,17 @@
                 <svelte:component this={Pages[tab]} />
             {/if}
         </ScrollerContent>
+        
+        <!-- svelte-ignore a11y-click-events-have-key-events -->
+        <!-- svelte-ignore a11y-click-events-have-key-events -->
+        <!-- svelte-ignore a11y-no-static-element-interactions -->
+        <button class="close" on:click={() => {exitSettings()}}>
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#ef4444" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path d="M18 6l-12 12" />
+                <path d="M6 6l12 12" />
+              </svg>
+            </button>
     </div>
 </UprisingApp>
 
@@ -257,6 +269,39 @@
     }
     .version a:hover {
         text-decoration: underline;
+    }
+    svg{
+        width: 20px;
+        height: 20px;
+    }
+    .close{
+        position: absolute;
+        background-color: var(--background);
+        width: 38px;
+        height: 38px;
+        top: 0px;
+        right: 0px;
+        margin: 16px;
+        border-radius: var(--border-radius-half);
+        border: solid 2px var(--tertiary-foreground);
+        display:flex;
+        align-items: center;
+        justify-content: center;
+        transition: 0.12s all ease-in;
+    }
+    .close:hover {
+        background-color: var(--primary-header);
+    }
+    .close:active{
+        background-color: var(--background-dark) ;
+    }
+    .close:hover svg{
+        stroke: var(--foreground);
+    }
+    .close svg{
+        width: 32px;
+        height: 32px;
+        stroke: var(--tertiary-foreground);
     }
 
 </style>

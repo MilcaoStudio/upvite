@@ -11,7 +11,7 @@
 
     .container{
         min-width: 218px;
-        width:100vw;
+        width:100%;
         padding: 30px 8px;
         display: flex;
         gap: 2px;
