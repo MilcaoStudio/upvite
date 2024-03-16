@@ -1,48 +1,25 @@
 <script>
+    import { state } from "$lib/State";
     import InDevelopment from "$lib/components/atoms/inDevelopment.svelte";
-import RadioLanguage from "$lib/components/atoms/input/RadioLanguage.svelte";
-    import Emoji from "$lib/markdown/plugins/Emoji.svelte";
-
+    import RadioLanguage from "$lib/components/atoms/input/RadioLanguage.svelte";
+    import { Languages } from "external/lang/Languages";
+    let group = state.locale.getLanguage();
+    function update() {
+        state.locale.setLanguage(group);
+    }
 </script>
 
-
-
-
 <div class="base">
-    <InDevelopment></InDevelopment>
-
-    <RadioLanguage>
-        <div slot="svg"><Emoji match="🇨🇱"></Emoji></div>
-        Xhileno
-    </RadioLanguage>
-
-    <RadioLanguage>
-        <div slot="svg"><Emoji match="🇭🇹"></Emoji></div>
-        Haitiano
-    </RadioLanguage>
-
-    <RadioLanguage>
-        <div slot="svg"><Emoji match="🇦🇷"></Emoji></div>
-        Racista/femboy
-    </RadioLanguage>
-
-    <RadioLanguage>
-        <div slot="svg"><Emoji match="🇸🇪"></Emoji></div>
-        Mojang Studios
-    </RadioLanguage>
-    
-    <RadioLanguage>
-        <div slot="svg"><Emoji match="🇪🇸"></Emoji></div>
-        Español (castellano)
-    </RadioLanguage>
-
-    <RadioLanguage>
-        <div slot="svg"><Emoji match="🇨🇱"></Emoji></div>
-        Haitiano (chileno)
-    </RadioLanguage>
+    <InDevelopment />
+    {#each Object.entries(Languages) as [locale, entry]}
+        <RadioLanguage bind:group value={locale} >
+            <div slot="svg">
+                {entry.emoji}
+            </div>
+            {entry.display}
+        </RadioLanguage>
+    {/each}
 </div>
-
-
 
 <style>
     .base{
