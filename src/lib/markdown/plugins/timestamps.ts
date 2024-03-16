@@ -1,8 +1,7 @@
 import type { Handler } from "mdast-util-to-hast";
 
-import { dayjs } from "$lib/components/context/Locale.svelte"
-
 import { createComponent } from "./remarkRegex";
+import { dayjs } from "$lib/i18n";
 
 export const timestampHandler: Handler = (s, { match, arg1 }) => {
     if (isNaN(match)) return { type: "text", value: match };

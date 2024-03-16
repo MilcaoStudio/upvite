@@ -1,7 +1,7 @@
 import { sveltekit } from '@sveltejs/kit/vite';
 import replace from "@rollup/plugin-replace";
 import { readFileSync } from 'fs';
-import { defineConfig } from 'vite';
+import { defineConfig, searchForWorkspaceRoot } from 'vite';
 
 function getGitRevision() {
   try {
@@ -47,6 +47,14 @@ export default defineConfig({
       preventAssignment: true,
     }),
   ],
+  server: {
+    fs: {
+      allow: [
+        searchForWorkspaceRoot(process.cwd()),
+        "external"
+      ]
+    }
+  },
   resolve: {
     preserveSymlinks: true,
   },

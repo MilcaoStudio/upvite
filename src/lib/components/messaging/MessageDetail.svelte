@@ -1,10 +1,10 @@
 <script lang="ts">
     import { getContext } from "svelte";
-    import { dayjs, type Dictionary } from "../context/Locale.svelte";
     import type { Message } from "revolt.js";
     import { decodeTime } from "ulid";
     import Tooltip from "../atoms/Tooltip.svelte";
     import { t } from "svelte-i18n";
+    import { dayjs, type Dictionary } from "$lib/i18n";
 
     export let message: Message, position: "left" | "top";
     const dict = getContext<Dictionary>('dictionary');

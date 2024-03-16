@@ -1,8 +1,9 @@
 import { action, computed, makeAutoObservable } from "mobx";
 
-import { Languages, Language } from "../../../external/lang/Languages";
+import { Languages, Language } from "external/lang/Languages";
 import type Persistent from "$lib/types/Persistent";
 import type Syncable from "$lib/types/Syncable";
+import type { Nullable } from "revolt.js";
 
 export interface Data {
     lang: Language;
@@ -13,16 +14,16 @@ export interface Data {
  * @param lang Language to find
  * @returns Matched Language
  */
-export function findLanguage(lang?: string): Language {
+export function findLanguage(lang?: Nullable<string>): Language {
     if (!lang) {
-        if (typeof navigator === "undefined") {
+        if (typeof navigator == "undefined") {
             lang = Language.ENGLISH;
         } else {
             lang = navigator.language;
         }
     }
 
-    const code = lang.replace("-", "_");
+    const code = lang!.replace("-", "_");
     const short = code.split("_")[0];
 
     const values = [];
@@ -30,8 +31,8 @@ export function findLanguage(lang?: string): Language {
         const value = Language[key as keyof typeof Language];
 
         // Skip alternative/joke languages
-        if (Languages[value].cat === "const") continue;
-        if (Languages[value].cat === "alt") continue;
+        if (Languages[value].cat == "const") continue;
+        if (Languages[value].cat == "alt") continue;
 
         values.push(value);
         if (value.startsWith(code)) {
