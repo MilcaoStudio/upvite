@@ -1,6 +1,6 @@
 <script lang="ts">
+    import { dayjs } from "$lib/i18n";
     import TextSvelte from "$lib/i18n/TextSvelte.svelte";
-    import { dayjs } from "../context/Locale.svelte";
     import { _ } from "svelte-i18n";
     import {
         clientController,

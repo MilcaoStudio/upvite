@@ -1,9 +1,10 @@
 import { action, computed, makeAutoObservable } from "mobx";
 
-import { Languages, Language } from "external/lang/Languages";
+import { Language, Languages } from "../../lang/Languages";
 import type Persistent from "$lib/types/Persistent";
 import type Syncable from "$lib/types/Syncable";
 import type { Nullable } from "revolt.js";
+
 
 export interface Data {
     lang: Language;

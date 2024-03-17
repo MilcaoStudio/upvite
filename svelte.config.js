@@ -8,9 +8,6 @@ const config = {
 	preprocess: vitePreprocess(),
 
 	kit: {
-		alias: {
-			"external/*": "./external/*"
-		},
 		adapter: adapter()
 	}
 };

@@ -1,12 +1,12 @@
-import { browser } from '$app/environment'
+import { browser, building } from '$app/environment'
 import { init, json, register, unwrapFunctionStore } from 'svelte-i18n'
 
 import dayJS from "dayjs";
 import calendar from "dayjs/plugin/calendar";
 import format from "dayjs/plugin/localizedFormat";
 import update from "dayjs/plugin/updateLocale";
-import definition from "external/lang/en.json";
-import { Language, Languages } from "external/lang/Languages";
+import definition from "../../lang/en.json";
+import { Language, Languages } from "../../lang/Languages";
 import defaultsDeep from 'lodash.defaultsdeep';
 
 export const dayjs = dayJS;
@@ -79,11 +79,14 @@ export function transformLanguage(source: Dictionary) {
   return obj;
 }
 
-for (const language in Languages) {
-	try {
-		register(language, () => /* @vite-ignore dynamic import */ import(`/external/lang/${language}.json`));
-	} catch (err) {
-		console.error("Error registering", language, err);
+// speeds up building
+if (!building) {
+	for (const language in Languages) {
+		try {
+			register(language, () => import(`../../lang/${language}.json`));
+		} catch (err) {
+			console.error("Error registering", language, err);
+		}
 	}
 }
 
