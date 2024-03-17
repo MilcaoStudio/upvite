@@ -43,6 +43,8 @@
 
     p{
         margin: 0px;
+        display: flex;
+        align-items: center;
     }
 
 </style>
