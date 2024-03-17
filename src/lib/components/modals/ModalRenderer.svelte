@@ -51,7 +51,7 @@
     for (const [key, value] of components.entries()) {
       if (!stacked.has(key)) {
         console.info("Destroy", key);
-        setTimeout(()=>value?.$destroy(), 200);
+        setTimeout(()=>value?.$destroy(), 30);
         components.delete(key);
       }
     }
