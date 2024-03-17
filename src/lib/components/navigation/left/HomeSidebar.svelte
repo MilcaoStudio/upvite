@@ -8,7 +8,12 @@
     import { t } from "svelte-i18n";
     import ConditionalLink from "$lib/components/atoms/ConditionalLink.svelte";
     import ButtonItem from "../items/ButtonItem.svelte";
-    import { BxHome, BxNotepad, BxPlus, BxsUserDetail } from "svelte-boxicons";
+    //import { BxHome, BxNotepad, BxPlus, BxsUserDetail } from "svelte-boxicons";
+    import BxHome from "svelte-boxicons/BxHome.svelte";
+    import BxNotepad from "svelte-boxicons/BxNotepad.svelte";
+    import BxPlus from "svelte-boxicons/BxPlus.svelte";
+    import BxsUserDetail from "svelte-boxicons/BxsUserDetail.svelte";
+
     import Category from "$lib/components/atoms/Category.svelte";
     import { modalController } from "$lib/components/modals/ModalController";
     import placeholder from "../items/placeholder.svg";
@@ -79,7 +84,7 @@
     });
 </script>
 
-<GenericSidebarBase mobilePadding>
+<GenericSidebarBase >
     <div class={Navbar}>
         {$t("app.home.directs")}
     </div>

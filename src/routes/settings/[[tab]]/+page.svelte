@@ -22,12 +22,21 @@
     } from "$lib/revision";
     import { useClient } from "$lib/controllers/ClientController";
     import { LIBRARY_VERSION } from "revolt.js";
+    import { BxsUserAccount } from "svelte-boxicons";
+    import Account from "$lib/components/settings/personal/account.svelte";
+    import Chat from "$lib/components/settings/personal/chat.svelte";
+    import Notifications from "$lib/components/settings/personal/notifications.svelte";
+    import Devmode from "$lib/components/settings/personal/devmode.svelte";
     
     const Pages: Record<string, ComponentType> = {
+        Account: Account,
         Profile: Profile,
         Appearance: Appearance,
-        Tf2: Tf2,
-        Language: Language
+        Notifications: Notifications,
+        Chat: Chat,
+        Language: Language,
+        Devmode: Devmode,
+        Tf2: Tf2
     }
     const client = useClient();
     export let data;
@@ -55,7 +64,16 @@
 <UprisingApp>
     <div class="flex-column">
         <Scroller>
-            <Category>User preferences</Category>
+            <Category>User settings</Category>
+            <Item href="Account" active={tab == "Account"}>
+                <svg slot="svg" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-lock">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                    <path d="M5 13a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v6a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-6z" />
+                    <path d="M11 16a1 1 0 1 0 2 0a1 1 0 0 0 -2 0" />
+                    <path d="M8 11v-4a4 4 0 1 1 8 0v4" />
+                  </svg>
+                Account
+            </Item>
             <Item href="Profile" active={tab == "Profile"}>
                 <svg
                     slot="svg"
@@ -77,6 +95,10 @@
                 >
                 Profile</Item
             >
+
+
+
+            <Category>User preferences</Category>
             <Item href="Appearance" active={tab == "Appearance"}>
                 <svg
                     slot="svg"
@@ -243,17 +265,27 @@
         <!-- svelte-ignore a11y-click-events-have-key-events -->
         <!-- svelte-ignore a11y-click-events-have-key-events -->
         <!-- svelte-ignore a11y-no-static-element-interactions -->
-        <button class="close" on:click={() => {exitSettings()}}>
-            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#ef4444" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                <path d="M18 6l-12 12" />
-                <path d="M6 6l12 12" />
-              </svg>
-            </button>
+        <div class="baseCloseButton">
+            <button class="close" on:click={() => {exitSettings()}}>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#ef4444" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                    <path d="M18 6l-12 12" />
+                    <path d="M6 6l12 12" />
+                  </svg>
+                </button>
+        </div>
+        
     </div>
 </UprisingApp>
 
 <style>
+    .baseCloseButton{
+        position: absolute;
+        right: 0px;
+        height: 100vh;
+        width: 64px;
+        background-color: var(--secondary-background);
+    }
     .flex-column {
         display: flex;
         flex-direction: row;

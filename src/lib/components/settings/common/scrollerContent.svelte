@@ -29,6 +29,8 @@
         height: 100vh;
         direction: ltr /*ltr rtl*/;
         flex: 1 1 800px;
+        margin-right: 64px;
+        
 
     }
 

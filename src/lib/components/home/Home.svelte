@@ -1,5 +1,11 @@
 <script lang="ts">
-    import { BxHome, BxPlusCircle, BxCompass, BxRightArrowCircle, BxGroup, BxMoney } from 'svelte-boxicons'
+    //import { BxHome, BxPlusCircle, BxCompass, BxRightArrowCircle, BxGroup, BxMoney } from 'svelte-boxicons'
+    import BxHome from "svelte-boxicons/BxHome.svelte";
+    import BxPlusCircle from "svelte-boxicons/BxPlusCircle.svelte";
+    import BxCompass from "svelte-boxicons/BxCompass.svelte";
+    import BxRightArrowCircle from "svelte-boxicons/BxRightArrowCircle.svelte";
+    import BxGroup from "svelte-boxicons/BxGroup.svelte";
+    import BxMoney from "svelte-boxicons/BxMoney.svelte";
     import { css, cx } from "@emotion/css";
     import { useClient } from "$lib/controllers/ClientController";
     import { isTouchscreenDevice } from "$lib";

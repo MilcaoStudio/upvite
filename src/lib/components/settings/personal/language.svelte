@@ -2,7 +2,8 @@
     import { state } from "$lib/State";
     import InDevelopment from "$lib/components/atoms/inDevelopment.svelte";
     import RadioLanguage from "$lib/components/atoms/input/RadioLanguage.svelte";
-    import { Languages } from "external/lang/Languages";
+
+    import { Languages } from "../../../../lang/Languages";
     let group = state.locale.getLanguage();
     function update() {
         state.locale.setLanguage(group);

@@ -1,6 +1,7 @@
 <script lang="ts">
     import type { Channel, User } from "revolt.js";
-    import { BxAt, BxHash } from "svelte-boxicons";
+    import BxAt from "svelte-boxicons/BxAt.svelte";
+    import BxHash from "svelte-boxicons/BxHash.svelte";
     import PageHeader from "../atoms/PageHeader.svelte";
     import type { ComponentType } from "svelte";
     import ChannelName from "./ChannelName.svelte";
