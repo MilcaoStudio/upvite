@@ -5,7 +5,6 @@
     import H4 from "../atoms/heading/H4.svelte";
     import { cx } from "@emotion/css";
     import Button from "../atoms/Button.svelte";
-    import { modalController } from "./ModalController";
     export let open = true,
         disabled = false,
         nonDismissable = false,
@@ -19,7 +18,7 @@
         setTimeout(function () {
             open = false;
             onClose(true);
-        }, 200);
+        }, 10);
         console.log("[closeModal] Closing modal");
     };
     $: if (signal == "confirm") {
