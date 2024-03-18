@@ -110,7 +110,10 @@ export default class State {
             }
         }
         await this.save();
-        clientController.hydrate(this.auth)
+        clientController.hydrate(this.auth);
+
+        // Post-hydration, init plugins.
+        this.plugins.init();
     }
 
     @action onPacket(packet: ClientboundNotification) {

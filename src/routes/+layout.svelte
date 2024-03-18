@@ -12,12 +12,15 @@
     import "fluent-svelte/theme.css";
     import 'tippy.js/dist/tippy.css';
     import "../styles/buttons.css";
+    import { afterUpdate } from "svelte";
     
 
     let ready = false;
     if (browser) {
         state.hydrate().then(() => (ready = true));
     }
+
+    afterUpdate(()=>{state.plugins.onUpdate()});
 </script>
 
 {#if ready}

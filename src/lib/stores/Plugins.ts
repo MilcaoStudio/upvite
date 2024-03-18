@@ -60,6 +60,7 @@ type Plugin = {
 type Instance = {
     format: 1;
     onUnload?: () => void;
+    onUpdate?: () => void;
 };
 
 // Example plugin:
@@ -111,7 +112,8 @@ export default class Plugins implements Persistent<Data> {
             modal: modalController,
             api: clientController.availableClient.api,
             channel,
-            server
+            server,
+            user: clientController.availableClient.user
         }
     }
 
@@ -253,6 +255,10 @@ export default class Plugins implements Persistent<Data> {
                 enabled: false,
             });
         }
+    }
+
+    onUpdate() {
+        this.instances.forEach(instance => instance.onUpdate?.());
     }
 
     /**
