@@ -11,7 +11,7 @@
     } from "$lib/controllers/ClientController.js";
     import { Button } from "fluent-svelte";
     import { API } from "revolt.js";
-    import { BxArrowBack } from "svelte-boxicons";
+    import BxArrowBack from "svelte-boxicons/BxArrowBack.svelte";
     import { _ } from "svelte-i18n";
     import "../../../styles/invite.css";
     import TextSvelte from "$lib/i18n/TextSvelte.svelte";

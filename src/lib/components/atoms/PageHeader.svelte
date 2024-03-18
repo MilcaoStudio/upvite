@@ -7,7 +7,6 @@
     import Header from "./Header.svelte";
     import HamburgerAction from './HamburgerAction.svelte'
     import { connect } from "svelte-mobx";
-    //import { BxChevronLeft, BxChevronRight} from 'svelte-boxicons'
     import BxChevronLeft from "svelte-boxicons/BxChevronLeft.svelte";
     import BxChevronRight from "svelte-boxicons/BxChevronRight.svelte";
 

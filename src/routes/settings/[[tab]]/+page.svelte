@@ -22,7 +22,6 @@
     } from "$lib/revision";
     import { useClient } from "$lib/controllers/ClientController";
     import { LIBRARY_VERSION } from "revolt.js";
-    import { BxsUserAccount } from "svelte-boxicons";
     import Account from "$lib/components/settings/personal/account.svelte";
     import Chat from "$lib/components/settings/personal/chat.svelte";
     import Notifications from "$lib/components/settings/personal/notifications.svelte";

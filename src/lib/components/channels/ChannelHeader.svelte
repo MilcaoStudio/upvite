@@ -11,7 +11,7 @@
     import HeaderActions from "./HeaderActions.svelte";
 
     export let channel: Channel;
-    let icon: ComponentType, recipient: User | undefined;
+    let icon: ComponentType, recipient: User | null = null;
     switch (channel.channel_type) {
         case "TextChannel":
             icon = BxHash;

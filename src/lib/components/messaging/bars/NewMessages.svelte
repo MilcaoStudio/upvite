@@ -8,7 +8,7 @@
     import { goto } from "$app/navigation";
     import { translate } from "$lib/i18n";
     import { t } from "svelte-i18n";
-    import { BxUpArrowAlt } from "svelte-boxicons";
+    import BxUpArrowAlt from "svelte-boxicons/BxUpArrowAlt.svelte";
 
 
     export let channel: Channel, lastId: string | undefined = undefined;

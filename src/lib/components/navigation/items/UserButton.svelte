@@ -5,11 +5,13 @@
     import Username from "../../user/Username.svelte";
     import Tooltip from "../../atoms/Tooltip.svelte";
     import { t } from "svelte-i18n";
-    import { BxCrown, BxX } from "svelte-boxicons";
+    //import { BxCrown, BxX } from "svelte-boxicons";
     import { isTouchscreenDevice } from "$lib";
     import { IconButton } from "fluent-svelte";
     import { modalController } from "../../modals/ModalController";
     import "./Item.css"
+    import BxCrown from "svelte-boxicons/BxCrown.svelte";
+    import BxX from "svelte-boxicons/BxX.svelte";
 
     export let active = false,
         alert: "unread" | "mention" | null = null,

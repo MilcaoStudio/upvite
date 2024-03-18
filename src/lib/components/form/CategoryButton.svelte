@@ -1,6 +1,5 @@
 <script lang="ts">
     import { css, cx } from "@emotion/css";
-    //import { BxChevronRight, BxLinkExternal } from 'svelte-boxicons'
     import BxChevronRight from "svelte-boxicons/BxChevronRight.svelte";
     import BxLinkExternal from "svelte-boxicons/BxLinkExternal.svelte";
 

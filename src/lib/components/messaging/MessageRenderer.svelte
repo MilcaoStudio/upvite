@@ -8,7 +8,7 @@
     import JSXRender from "../JSXRender.svelte";
     import Start from "./Start.svelte";
     import Preloader from "../indicators/Preloader.svelte";
-    import { BxX } from "svelte-boxicons";
+    import BxX from "svelte-boxicons/BxX.svelte";
     import TextSvelte from "$lib/i18n/TextSvelte.svelte";
     import { decodeTime } from "ulid";
     import MessageDivider from "../indicators/MessageDivider.svelte";

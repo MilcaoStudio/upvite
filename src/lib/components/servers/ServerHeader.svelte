@@ -2,8 +2,7 @@
     import { css, cx } from "@emotion/css";
     import type { Server } from "revolt.js";
     import Tooltip from "../atoms/Tooltip.svelte";
-    import { BxCheck } from "svelte-boxicons";
-    import LineDivider from "../atoms/LineDivider.svelte";
+    import BxCheck  from "svelte-boxicons/BxCheck.svelte";
 
     export let server: Server, background = false;
     const ServerBanner = cx('ServerBanner', css`

@@ -9,7 +9,7 @@
     } from "$lib/types/FileUpload";
     import { modalController } from "$lib/components/modals/ModalController";
     import Preloader from "$lib/components/indicators/Preloader.svelte";
-    import { BxPencil } from "svelte-boxicons";
+    import BxPencil from "svelte-boxicons/BxPencil.svelte";
     import { determineFileSize, takeError } from "$lib";
     import { cx } from "@emotion/css";
     import { t } from "svelte-i18n";

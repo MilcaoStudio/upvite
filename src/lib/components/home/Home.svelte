@@ -1,5 +1,4 @@
 <script lang="ts">
-    //import { BxHome, BxPlusCircle, BxCompass, BxRightArrowCircle, BxGroup, BxMoney } from 'svelte-boxicons'
     import BxHome from "svelte-boxicons/BxHome.svelte";
     import BxPlusCircle from "svelte-boxicons/BxPlusCircle.svelte";
     import BxCompass from "svelte-boxicons/BxCompass.svelte";

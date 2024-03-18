@@ -6,7 +6,7 @@
     import IconBase from "../IconBase.svelte";
     import { page } from "$app/stores";
 
-    export function useStatusColor(user?: User) {
+    export function useStatusColor(user: User | null) {
         const theme = state.settings.theme;
 
         return user?.online && user?.status?.presence != "Invisible"
@@ -22,7 +22,7 @@
 </script>
 
 <script lang="ts">
-    export let target: User | undefined = undefined,
+    export let target: User | null = null,
         attachment: any = undefined,
         size: number,
         status = false,

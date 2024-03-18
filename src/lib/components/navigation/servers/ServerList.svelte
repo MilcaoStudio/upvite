@@ -69,7 +69,7 @@
         on:finalize={useCustomReorder(reorder)}
     >
         {#each servers as server (server._id)}
-            <Item item={server} />
+            <Item item={server} {permit} />
         {/each}
     </div>
     <ListFooter {createServer}/>

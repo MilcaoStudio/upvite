@@ -6,7 +6,9 @@
         clientController,
         useClient,
     } from "$lib/controllers/ClientController";
-    import { BxHappyBeaming, BxSend, BxShieldX } from "svelte-boxicons";
+    import BxHappyBeaming from "svelte-boxicons/BxHappyBeaming.svelte";
+    import BxSend from "svelte-boxicons/BxSend.svelte";
+    import BxShieldX from "svelte-boxicons/BxShieldX.svelte";
     import type { DraftObject } from "$lib/stores/Draft";
     import { state } from "$lib/State";
     import { internalEmit, internalSubscribe } from "$lib/InternalEmitter";

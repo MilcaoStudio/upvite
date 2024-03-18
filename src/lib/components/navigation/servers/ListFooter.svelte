@@ -2,7 +2,7 @@
     import Tooltip from "$lib/components/atoms/Tooltip.svelte";
     import { PersonPicture } from "fluent-svelte";
     import { ItemContainer } from "./Item.svelte";
-    import { BxPlus } from "svelte-boxicons";
+    import BxPlus from "svelte-boxicons/BxPlus.svelte";
     export let createServer: ()=>void;
 </script>
 

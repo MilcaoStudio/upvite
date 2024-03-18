@@ -8,7 +8,6 @@
     import { t } from "svelte-i18n";
     import ConditionalLink from "$lib/components/atoms/ConditionalLink.svelte";
     import ButtonItem from "../items/ButtonItem.svelte";
-    //import { BxHome, BxNotepad, BxPlus, BxsUserDetail } from "svelte-boxicons";
     import BxHome from "svelte-boxicons/BxHome.svelte";
     import BxNotepad from "svelte-boxicons/BxNotepad.svelte";
     import BxPlus from "svelte-boxicons/BxPlus.svelte";
