@@ -9,7 +9,25 @@ import type Persistent from "$lib/types/Persistent";
 import localforage from "localforage";
 import { action, computed, makeAutoObservable, ObservableMap } from "mobx";
 
-type Plugin = {
+type Plugin = PluginInfo & {
+    
+    /**
+     * Entrypoint
+     *
+     * Valid Javascript code, must be function which returns object.
+     *
+     * ```typescript
+     * function (state: State) {
+     *   return {
+     *     onUnload: () => {}
+     *   }
+     * }
+     * ```
+     */
+    entrypoint: string;
+};
+
+export type PluginInfo = {
     /**
      * Plugin Format Revision
      */
@@ -33,29 +51,13 @@ type Plugin = {
      * This should be a valid URL slug, i.e. cool-plugin.
      */
     id: string;
-
-    /**
-     * Entrypoint
-     *
-     * Valid Javascript code, must be function which returns object.
-     *
-     * ```typescript
-     * function (state: State) {
-     *   return {
-     *     onUnload: () => {}
-     *   }
-     * }
-     * ```
-     */
-    entrypoint: string;
-
     /**
      * Whether this plugin is enabled
      *
      * @default true
      */
     enabled?: boolean;
-};
+}
 
 type Instance = {
     format: 1;
@@ -122,9 +124,10 @@ export default class Plugins implements Persistent<Data> {
     }
 
     // lexisother: https://github.com/revoltchat/revite/pull/571#discussion_r836824601
-    list() {
+    @computed list(): PluginInfo[] {
         return [...this.plugins.values()].map(
-            ({ namespace, id, version, enabled }) => ({
+            ({ format, namespace, id, version, enabled }) => ({
+                format,
                 namespace,
                 id,
                 version,
@@ -153,11 +156,10 @@ export default class Plugins implements Persistent<Data> {
 
     /**
      * Get plugin by id
-     * @param namespace Namespace
-     * @param id Plugin Id
+     * @param id namespace/id
      */
-    @computed get(namespace: string, id: string) {
-        return this.plugins.get(`${namespace}/${id}`);
+    @computed get(id: string) {
+        return this.plugins.get(id);
     }
 
     /**
@@ -216,7 +218,7 @@ export default class Plugins implements Persistent<Data> {
      * @param id Plugin Id
      */
     load(namespace: string, id: string) {
-        const plugin = this.get(namespace, id);
+        const plugin = this.get(`${namespace}/${id}`);
         if (!plugin) throw "Unknown plugin!";
 
         try {
@@ -243,7 +245,7 @@ export default class Plugins implements Persistent<Data> {
      * @param id Plugin Id
      */
     unload(namespace: string, id: string) {
-        const plugin = this.get(namespace, id);
+        const plugin = this.get(`${namespace}/${id}`);
         if (!plugin) throw "Unknown plugin!";
 
         const ns = `${plugin.namespace}/${plugin.id}`;
