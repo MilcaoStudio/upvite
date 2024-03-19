@@ -35,13 +35,13 @@
             > div {
                 display: grid;
                 min-height: ${minHeight}px;
+                max-height: calc(${lineHeight} * ${maxRows});
                 &::after {
                     content: attr(data-value) " ";
                     white-space: pre-wrap;
                     visibility: hidden;
                     grid-row: 1;
                     grid-column: 1;
-                    max-height: calc(${lineHeight} * ${maxRows});
                 }
 
                 textarea {

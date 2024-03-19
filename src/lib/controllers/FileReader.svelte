@@ -2,26 +2,33 @@
     import { takeError } from "$lib";
     import { modalController } from "$lib/components/modals/ModalController";
     import { grabFiles } from "$lib/types/FileUpload";
-    import Import from "svelte-boxicons/BxDownload.svelte";
-    export let onChange: ((file: File)=>void) | null = null, accept = "*", maxFileSize = 5_000;
+    import Import from "svelte-boxicons/BxUpload.svelte";
+    export let onChange: ((file: File) => void) | null = null,
+        accept = "*",
+        maxFileSize = 5_000;
 
     function onClick() {
-        grabFiles(maxFileSize, (files)=>{
-            try {
-                onChange?.(files[0])
-            } catch (err) {
-                return modalController.push({
+        grabFiles(
+            maxFileSize,
+            (files) => {
+                try {
+                    onChange?.(files[0]);
+                } catch (err) {
+                    return modalController.push({
+                        type: "error",
+                        error: takeError(err),
+                    });
+                } finally {
+                }
+            },
+            () =>
+                modalController.push({
                     type: "error",
-                    error: takeError(err),
-                });
-            } finally {
-
-            }
-        }, () =>
-        modalController.push({
-            type: "error",
-            error: "FileTooLarge",
-        }), false, accept)
+                    error: "FileTooLarge",
+                }),
+            false,
+            accept,
+        );
     }
 
     // Let the browser know we can drop files.
@@ -30,7 +37,6 @@
     }
     // File dropping.
     function drop(e: DragEvent) {
-        
         const dropped = e.dataTransfer?.files;
         if (dropped) {
             const item = dropped[0];
@@ -70,15 +76,20 @@
     }
 </script>
 
-<svelte:document on:paste={paste} on:dragover|preventDefault|stopPropagation={dragover} on:drop|preventDefault={drop} />
+<svelte:document
+    on:paste={paste}
+    on:dragover|preventDefault|stopPropagation={dragover}
+    on:drop|preventDefault={drop}
+/>
 
 <button class="import" on:click={onClick}>
-    <Import size={16} /> Importar
+    <Import size={16} />
+    <slot>Import from file</slot>
 </button>
 
 <style>
     .import {
-        max-width: 150px;
+        padding: 6px 12px;
         border-radius: 8px;
         background-color: green;
     }

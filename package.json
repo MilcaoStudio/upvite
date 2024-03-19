@@ -94,6 +94,7 @@
     "svelte-tippy": "^1.3.2",
     "tippy.js": "^6.3.7",
     "ulid": "^2.3.0",
-    "unified": "^11.0.4"
+    "unified": "^11.0.4",
+    "w3c-css-validator": "^1.3.2"
   }
 }
