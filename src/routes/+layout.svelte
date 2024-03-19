@@ -13,6 +13,7 @@
     import 'tippy.js/dist/tippy.css';
     import "../styles/buttons.css";
     import { afterUpdate } from "svelte";
+    import Theme from "$lib/components/context/Theme.svelte";
     
 
     let ready = false;
@@ -30,6 +31,7 @@
         <Binder />
         <ModalRenderer />
     </Locale>
+    <Theme />
 {:else}
     <Preloader type="spinner" />
 {/if}
