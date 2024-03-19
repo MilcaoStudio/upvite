@@ -29,6 +29,7 @@
         direction: ltr;  /*ltr  rtl*/
         display: flex;
         justify-content: flex-end;
+        flex-wrap: wrap;
         
     }
 

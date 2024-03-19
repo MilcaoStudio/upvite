@@ -1,7 +1,7 @@
 <!--Experimental: Replace Modal by ContentDialog-->
 <script lang="ts">
     import type { Action } from "$lib/types/Modal";
-    import { ContentDialog } from "fluent-svelte";
+    import { ContentDialog }  from "fluent-svelte";
     import H4 from "../atoms/heading/H4.svelte";
     import { cx } from "@emotion/css";
     import Button from "../atoms/Button.svelte";
