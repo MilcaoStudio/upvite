@@ -18,10 +18,10 @@
         hideBorder = false,
         forceFocus = false,
         onChange: ChangeEventHandler<HTMLTextAreaElement>,
-        onKeyUp: KeyboardEventHandler<HTMLTextAreaElement>,
-        onKeyDown: KeyboardEventHandler<HTMLTextAreaElement>,
-        onFocus: FocusEventHandler<HTMLTextAreaElement>,
-        onBlur: () => void;
+        onKeyUp: KeyboardEventHandler<HTMLTextAreaElement> | null = null,
+        onKeyDown: KeyboardEventHandler<HTMLTextAreaElement> | null = null,
+        onFocus: FocusEventHandler<HTMLTextAreaElement> | null = null,
+        onBlur: (() => void) | null = null;
     let ref: HTMLTextAreaElement | undefined;
     let ghost: HTMLDivElement;
 
@@ -34,14 +34,18 @@
             padding: var(--message-box-padding);
             > div {
                 display: grid;
+                min-height: ${minHeight}px;
                 &::after {
                     content: attr(data-value) " ";
                     white-space: pre-wrap;
                     visibility: hidden;
                     grid-row: 1;
                     grid-column: 1;
-                    min-height: ${minHeight}px;
                     max-height: calc(${lineHeight} * ${maxRows});
+                }
+
+                textarea {
+                    min-height: ${minHeight}px;
                 }
             }
         `,
@@ -103,7 +107,7 @@
             onChange={(ev) => onChange?.(ev)}
             onKeyUp={(ev) => {
                 growUp();
-                onKeyUp(ev);
+                onKeyUp?.(ev);
             }}
             {onKeyDown}
             {onFocus}
