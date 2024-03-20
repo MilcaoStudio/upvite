@@ -13,6 +13,7 @@
     import Username from "../user/Username.svelte";
     import Markdown from "$lib/markdown/Markdown.svelte";
     import ContextMenu from "../context/ContextMenu.svelte";
+    import Attachment from "./attachments/Attachment.svelte";
     export let message: MessageType & {
             webhook?: { name: string; avatar?: string };
         },
@@ -124,7 +125,12 @@
                 {#if queued?.error}
                     <Category>{$_(queued.error)}</Category>
                 {/if}
-                <!--Attachments-->
+                {#if message.attachments}
+                    {#each message.attachments as attachment}
+                        <Attachment {attachment} />
+                    {/each}
+                {/if}
+                
                 <!--Embeds-->
                 <!--Reactions-->
                 <!--MessageOverlaybar-->
