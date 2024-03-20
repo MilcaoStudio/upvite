@@ -1,4 +1,3 @@
-import type { CancelTokenSource } from "axios";
 import type { Channel, User } from "revolt.js";
 
 export type UploadState =
@@ -8,7 +7,7 @@ export type UploadState =
               type: "uploading";
               files: File[];
               percent: number;
-              cancel: CancelTokenSource;
+              cancel: AbortController;
           }
         | { type: "sending"; files: File[] }
         | { type: "failed"; files: File[]; error: string };

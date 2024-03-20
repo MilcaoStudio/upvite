@@ -16,10 +16,11 @@
     import type { Reply } from "$lib/stores/MessageQueue";
     import TextAreaAutoSize from "../atoms/TextAreaAutoSize.svelte";
     import type { Channel } from "revolt.js";
-    import type {
-        EmojiCategory,
-        EmojiInfo,
-        UploadState,
+    import {
+        CAN_UPLOAD_AT_ONCE,
+        type EmojiCategory,
+        type EmojiInfo,
+        type UploadState,
     } from "$lib/types/messaging";
     import { css, cx } from "@emotion/css";
     import {
@@ -35,6 +36,7 @@
     import { RevoltEmojiDictionary } from "revkit";
     import { autorun } from "mobx";
     import FileUploader from "$lib/controllers/FileUploader.svelte";
+    import { uploadFile } from "$lib/types/FileUpload";
 
     export let channel: Channel;
     const client = useClient();
@@ -182,6 +184,9 @@
         if (uploadState.type == "uploading" || uploadState.type == "sending")
             return;
         const content = state.draft.get(channel._id)?.content?.trim() ?? "";
+        if (uploadState.type != "none") {
+            return sendFile(content);
+        }
         if (!content.length) return;
         internalEmit("NewMessages", "hide");
         stopTyping();
@@ -251,6 +256,93 @@
                 });
             } catch (error) {
                 state.queue.fail(nonce, takeError(error));
+            }
+        }
+    }
+
+    async function sendFile(content: string) {
+        // Typescript does not like overlaps
+        if (uploadState.type == "attached" || uploadState.type == "failed") {
+            const attachments: string[] = [];
+            const abortController = new AbortController();
+            const files = uploadState.files;
+            stopTyping();
+            uploadState = {
+                type: "uploading",
+                files,
+                percent: 0,
+                cancel: abortController,
+            };
+
+            try {
+                for (
+                    let i = 0;
+                    i < files.length && i < CAN_UPLOAD_AT_ONCE;
+                    i++
+                ) {
+                    const file = files[i];
+                    attachments.push(
+                        await uploadFile(
+                            client.configuration!.features.autumn.url,
+                            "attachments",
+                            file,
+                            {
+                                onDownloadProgress(event) {
+                                    uploadState = {
+                                        type: "uploading",
+                                        files,
+                                        percent: Math.round(
+                                            (i * 100 +
+                                                (100 * event.loaded) /
+                                                    (event.total || 1)) /
+                                                Math.min(
+                                                    files.length,
+                                                    CAN_UPLOAD_AT_ONCE,
+                                                ),
+                                        ),
+                                        cancel: abortController
+                                    };
+                                },
+                                signal: abortController.signal
+                            },
+                        ),
+                    );
+                }
+            } catch (err) {
+                if (err instanceof Error && err.message == "cancel") {
+                    uploadState = {type: "attached", files};
+                    console.error(err);
+                } else {
+                    uploadState = {type: "failed", files, error: takeError(err)};
+                }
+
+                console.error("[MessageBox] Error uploading files",err);
+
+                // Stops function
+                return;
+            }
+
+            uploadState = {type: "sending", files};
+            const nonce = ulid();
+            try {
+                await channel.sendMessage({
+                    content,
+                    nonce,
+                    replies,
+                    attachments,
+                })
+            } catch (err) {
+                uploadState = {type: "failed", files, error: takeError(err)};
+                return;
+            }
+
+            setMessage();
+            replies = [];
+            // state.settings.sounds.playSound("outbound");
+            if (files.length > CAN_UPLOAD_AT_ONCE) {
+                uploadState = {type: "attached", files: files.slice(CAN_UPLOAD_AT_ONCE)}
+            } else {
+                uploadState = {type: "none"}
             }
         }
     }
@@ -356,7 +448,7 @@
                             uploadState.type == "sending",
                         cancel() {
                             uploadState.type == "uploading" &&
-                                uploadState.cancel.cancel("cancel");
+                                uploadState.cancel.abort("cancel");
                         },
                     }}
                     behavior={{
