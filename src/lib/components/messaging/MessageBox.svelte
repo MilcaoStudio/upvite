@@ -34,6 +34,7 @@
     import Picker from "../atoms/media/Picker.svelte";
     import { RevoltEmojiDictionary } from "revkit";
     import { autorun } from "mobx";
+    import FileUploader from "$lib/controllers/FileUploader.svelte";
 
     export let channel: Channel;
     const client = useClient();
@@ -42,7 +43,7 @@
     let typing = 0;
 
     let value = "";
-    $: autorun(()=>{
+    $: autorun(() => {
         value = state.draft.get(channel._id)?.content ?? "";
     });
     const Base = cx(
@@ -338,6 +339,46 @@
 {:else}
     <Autocomplete {...autoCompleteProps} />
     <div class={Base}>
+        {#if channel.havePermission("UploadFiles")}
+            <div class={Action}>
+                <FileUploader
+                    fileType="attachments"
+                    maxFileSize={20_000_000}
+                    remove={async () => {
+                        uploadState = { type: "none" };
+                    }}
+                    style={{
+                        size: 24,
+                        type: "attachment",
+                        attached: uploadState.type != "none",
+                        uploading:
+                            uploadState.type == "uploading" ||
+                            uploadState.type == "sending",
+                        cancel() {
+                            uploadState.type == "uploading" &&
+                                uploadState.cancel.cancel("cancel");
+                        },
+                    }}
+                    behavior={{
+                        type: "multi",
+                        append(files) {
+                            if (!files.length) return;
+                            if (uploadState.type == "none") {
+                                uploadState = { type: "attached", files };
+                            } else {
+                                uploadState = {
+                                    type: "attached",
+                                    files: [...uploadState.files, ...files],
+                                };
+                            }
+                        },
+                        onChange(files) {
+                            uploadState = { type: "attached", files };
+                        },
+                    }}
+                />
+            </div>
+        {/if}
         <TextAreaAutoSize
             maxRows={20}
             id="message"
@@ -356,39 +397,38 @@
                     return send();
                 }
 
+                if (onKeyDown(e)) return;
 
-            if (onKeyDown(e)) return;
-
-            if (
-                !e.shiftKey &&
-                !e.isComposing &&
-                e.key == "Enter" &&
-                !isTouchscreenDevice
-            ) {
-                e.preventDefault();
-                return send();
-            }
-        }}
-        {onFocus}
-        {onBlur}
-        disabled={uploadState.type == "uploading" ||
-            uploadState.type == "sending"}
-    />
-    <div class={Action}>
-        <Flyout offset={24} alignment="end">
-            <IconButton>
-                <BxHappyBeaming size={24} />
-            </IconButton>
-            <Picker
-                {categories}
-                {emojis}
-                onSelect={(emoji) => append(`:${emoji}:`, "mention")}
-                slot="override"
-            />
-        </Flyout>
+                if (
+                    !e.shiftKey &&
+                    !e.isComposing &&
+                    e.key == "Enter" &&
+                    !isTouchscreenDevice
+                ) {
+                    e.preventDefault();
+                    return send();
+                }
+            }}
+            {onFocus}
+            {onBlur}
+            disabled={uploadState.type == "uploading" ||
+                uploadState.type == "sending"}
+        />
+        <div class={Action}>
+            <Flyout offset={24} alignment="end">
+                <IconButton>
+                    <BxHappyBeaming size={24} />
+                </IconButton>
+                <Picker
+                    {categories}
+                    {emojis}
+                    onSelect={(emoji) => append(`:${emoji}:`, "mention")}
+                    slot="override"
+                />
+            </Flyout>
+        </div>
+        <div class={Action}>
+            <BxSend size={20} on:click={send} />
+        </div>
     </div>
-    <div class={Action}>
-        <BxSend size={20} on:click={send} />
-    </div>
-</div>
 {/if}

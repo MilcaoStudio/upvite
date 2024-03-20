@@ -14,6 +14,8 @@
     import { cx } from "@emotion/css";
     import { t } from "svelte-i18n";
     import { translate } from "$lib/i18n";
+    import IconButton from "$lib/components/atoms/input/IconButton.svelte";
+    import Plus from "svelte-boxicons/BxPlus.svelte";
 
     const client = useClient()!;
     export let fileType:
@@ -205,8 +207,14 @@
             </span>
         </div>
     </div>
-{:else}
-<!--TODO-->
+{:else if style.type == "attachment"}
+    <IconButton onClick={()=>{
+        if (uploading && style.type == "attachment") return style.cancel();
+        if (style.type == "attachment" && style.attached) return remove();
+        onClick();
+    }} rotate={uploading || style.attached ? "45deg" : undefined}>
+        <Plus size={style.size} />
+    </IconButton>
 {/if}
 
 
