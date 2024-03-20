@@ -8,6 +8,7 @@ import { clientController } from "$lib/controllers/ClientController";
 import type Persistent from "$lib/types/Persistent";
 import localforage from "localforage";
 import { action, computed, makeAutoObservable, ObservableMap } from "mobx";
+import type { Channel, Nullable, Server } from "revolt.js";
 
 type Plugin = PluginInfo & {
     
@@ -62,7 +63,7 @@ export type PluginInfo = {
 type Instance = {
     format: 1;
     onUnload?: () => void;
-    onUpdate?: () => void;
+    onUpdate?: (ctx: unknown) => void;
 };
 
 // Example plugin:
@@ -97,7 +98,7 @@ export default class Plugins implements Persistent<Data> {
     }
 
     @computed get ctx() {
-        let channel = null, server = null;
+        let channel: Channel | undefined, server: Server | undefined;
         page.subscribe(p => {
             const channel_id = p.params.channel;
             const server_id = p.params.server;
@@ -113,6 +114,7 @@ export default class Plugins implements Persistent<Data> {
             state: state,
             modal: modalController,
             api: clientController.availableClient.api,
+            configuration: clientController.availableClient.configuration,
             channel,
             server,
             user: clientController.availableClient.user
@@ -260,7 +262,7 @@ export default class Plugins implements Persistent<Data> {
     }
 
     onUpdate() {
-        this.instances.forEach(instance => instance.onUpdate?.());
+        this.instances.forEach(instance => instance.onUpdate?.(this.ctx));
     }
 
     /**

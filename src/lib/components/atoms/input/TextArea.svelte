@@ -5,6 +5,7 @@
     import type { ChangeEventHandler, FocusEventHandler, KeyboardEventHandler } from "svelte/elements";
 
     export let code = false,
+        tabSize = 4,
         padding = "var(--textarea-padding)",
         lineHeight = "var(--textarea-line-height)",
         hideBorder = false,
@@ -24,6 +25,7 @@
       font-size: 14px;
       color: var(--foreground);
       background: var(--secondary-background);
+      tab-size: ${tabSize};
       padding: ${padding};
       line-height: ${lineHeight};
       grid-area: 1 / 1 / 2 / 2;

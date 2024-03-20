@@ -2,6 +2,7 @@
     import { state } from "$lib/State";
     import type { PluginInfo } from "$lib/stores/Plugins";
     import { Checkbox } from "fluent-svelte";
+    import { onDestroy } from "svelte";
 
     const plugins = state.plugins;
     export let plugin: PluginInfo;
@@ -18,6 +19,7 @@
     }
     let source = plugins.get(`${plugin.namespace}/${plugin.id}`)?.entrypoint;
     let url = source && URL.createObjectURL(new Blob([source], {type: "text/plain"}));
+    onDestroy(()=>url && URL.revokeObjectURL(url));
 </script>
 
 <Checkbox bind:checked on:change={onChange}>{plugin.namespace}/{plugin.id} {plugin.version}</Checkbox>

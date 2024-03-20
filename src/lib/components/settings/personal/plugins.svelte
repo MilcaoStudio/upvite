@@ -1,7 +1,5 @@
 <script lang="ts">
-    import { takeError } from "$lib";
     import { state } from "$lib/State";
-    import InDevelopment from "$lib/components/atoms/inDevelopment.svelte";
     import PluginCheck from "$lib/components/atoms/input/PluginCheck.svelte";
     import FileReader from "$lib/controllers/FileReader.svelte";
     import type { PluginInfo } from "$lib/stores/Plugins";
@@ -36,7 +34,7 @@ Add a plugin
             enabled: typeof object.enabled == "undefined" || object.enabled,
         })
     } catch (err) {
-        console.error(takeError(err));
+        console.error(err);
     }
 }}>
 Import from JSON
