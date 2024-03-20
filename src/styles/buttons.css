@@ -21,3 +21,41 @@
 .button-base:active{
     background: var(--tertiary-foreground);
 }
+
+.small > span{
+    color: var(--secondary-foreground);
+    font-weight: 600;
+    font-size: 0.876rem;
+    margin-right: 16px;
+}
+.flex-button{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    transition: all 0.15s ease-in-out;
+    gap: 6px;
+    padding: 7px !important;
+    border:none;
+    border-radius: var(--border-radius);
+    color: var(--secondary-foreground);
+    background-color: var(--background);
+    
+}
+/* Estilo de hover cuando el Item está activo */
+.flex-button:active{
+    background-color: var(--tertiary-background) !important;
+    color: var(--foreground) !important;  /* Cambia el color del texto */
+    filter: none !important;
+}
+
+.flex-button:hover{
+    background-color: var(--tertiary-background);
+
+
+}
+.flex-button > span span {
+    margin: 0px;
+    display: flex;
+    color: var(--foreground);
+    align-items: center;
+}

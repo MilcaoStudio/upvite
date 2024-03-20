@@ -30,6 +30,7 @@
         display: flex;
         justify-content: flex-end;
         flex-wrap: wrap;
+        max-width: 720px;
         
     }
 

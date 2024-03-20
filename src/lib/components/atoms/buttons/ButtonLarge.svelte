@@ -1,4 +1,4 @@
-<div class="base">
+<button class="base">
     <div class="iconContainer">
 
         <slot name="svg">
@@ -12,20 +12,25 @@
     </div>
     <div class="content">
         <h2 class="title">
-            aaaaaaaaa
+            <slot name="title">
+      
+                aaaaaaaaaa
+            </slot>
+            
         </h2>
         <div class="text">
-            <p>holaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</p>
+            <slot name="content">
+                <p>holaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</p>
+            </slot>
         </div>
     </div>
     <div class="click">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-select">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-chevron-right">
             <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-            <path d="M3 3m0 2a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2z" />
-            <path d="M9 11l3 3l3 -3" />
+            <path d="M9 6l6 6l-6 6" />
           </svg>
     </div>
-</div>
+</button>
 
 
 <style>
@@ -49,7 +54,18 @@
         border-radius: var(--border-radius);
         align-items: center;
         padding: 0px 12px 0px 12px;
+        transition: 0.125s ease-in all;
+        border:none;
         
+        
+    }
+    .base:hover{
+        background-color: rgba(var(--background-dark-rgb), max(0.85 , 0.8));
+        filter:grayscale( 0.3) ;
+    }
+    .base:active{
+        filter:saturate(1.2);
+        background: var(--primary-background);
     }
     .content{
         flex-direction: column;
@@ -57,6 +73,10 @@
         -webkit-box-flex: 1;
         flex-grow: 1;
         gap: 6px;
+        align-items: baseline;
+        white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     }
 
     .base >div div{
@@ -72,7 +92,10 @@
         -webkit-box-orient: vertical;
         -webkit-line-clamp: 2;
         overflow: hidden;
-    }
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        }
     .text{
         font-size: 0.9375rem;
         font-weight: 400;
@@ -80,5 +103,9 @@
         -webkit-box-orient: vertical;
         -webkit-line-clamp: 2;
         overflow: hidden;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     }
 </style>

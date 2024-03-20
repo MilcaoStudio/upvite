@@ -26,6 +26,7 @@
     import Chat from "$lib/components/settings/personal/chat.svelte";
     import Notifications from "$lib/components/settings/personal/notifications.svelte";
     import Devmode from "$lib/components/settings/personal/devmode.svelte";
+    import { fade } from "svelte/transition";
     
     const Pages: Record<string, ComponentType> = {
         Account: Account,
@@ -257,7 +258,8 @@
             <h1>{tab}</h1>
 
             {#if tab}
-                <svelte:component this={Pages[tab]} />
+
+                <svelte:component  this={Pages[tab]} />
             {/if}
         </ScrollerContent>
         
