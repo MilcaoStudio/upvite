@@ -18,6 +18,7 @@
     import type { Channel } from "revolt.js";
     import {
         CAN_UPLOAD_AT_ONCE,
+        ATTACHMENT_SIZE_LIMIT,
         type EmojiCategory,
         type EmojiInfo,
         type UploadState,
@@ -36,7 +37,9 @@
     import { RevoltEmojiDictionary } from "revkit";
     import { autorun } from "mobx";
     import FileUploader from "$lib/controllers/FileUploader.svelte";
-    import { uploadFile } from "$lib/types/FileUpload";
+    import { grabFiles, uploadFile } from "$lib/types/FileUpload";
+    import FilePreview from "./bars/FilePreview.svelte";
+    import { modalController } from "../modals/ModalController";
 
     export let channel: Channel;
     const client = useClient();
@@ -300,29 +303,33 @@
                                                     CAN_UPLOAD_AT_ONCE,
                                                 ),
                                         ),
-                                        cancel: abortController
+                                        cancel: abortController,
                                     };
                                 },
-                                signal: abortController.signal
+                                signal: abortController.signal,
                             },
                         ),
                     );
                 }
             } catch (err) {
                 if (err instanceof Error && err.message == "cancel") {
-                    uploadState = {type: "attached", files};
+                    uploadState = { type: "attached", files };
                     console.error(err);
                 } else {
-                    uploadState = {type: "failed", files, error: takeError(err)};
+                    uploadState = {
+                        type: "failed",
+                        files,
+                        error: takeError(err),
+                    };
                 }
 
-                console.error("[MessageBox] Error uploading files",err);
+                console.error("[MessageBox] Error uploading files", err);
 
                 // Stops function
                 return;
             }
 
-            uploadState = {type: "sending", files};
+            uploadState = { type: "sending", files };
             const nonce = ulid();
             try {
                 await channel.sendMessage({
@@ -330,9 +337,9 @@
                     nonce,
                     replies,
                     attachments,
-                })
+                });
             } catch (err) {
-                uploadState = {type: "failed", files, error: takeError(err)};
+                uploadState = { type: "failed", files, error: takeError(err) };
                 return;
             }
 
@@ -340,9 +347,12 @@
             replies = [];
             // state.settings.sounds.playSound("outbound");
             if (files.length > CAN_UPLOAD_AT_ONCE) {
-                uploadState = {type: "attached", files: files.slice(CAN_UPLOAD_AT_ONCE)}
+                uploadState = {
+                    type: "attached",
+                    files: files.slice(CAN_UPLOAD_AT_ONCE),
+                };
             } else {
-                uploadState = {type: "none"}
+                uploadState = { type: "none" };
             }
         }
     }
@@ -430,12 +440,47 @@
     </div>
 {:else}
     <Autocomplete {...autoCompleteProps} />
+    <FilePreview
+        state={uploadState}
+        addFile={() => {
+            uploadState.type == "attached" &&
+                grabFiles(
+                    ATTACHMENT_SIZE_LIMIT,
+                    (files) => {
+                        if (uploadState.type == "none") {
+                            return;
+                        }
+                        uploadState = {
+                            type: "attached",
+                            files: [...uploadState.files, ...files],
+                        };
+                    },
+                    () =>
+                        modalController.push({
+                            type: "error",
+                            error: "FileTooLarge",
+                        }),
+                    true,
+                );
+        }}
+        removeFile={(index) => {
+            if (uploadState.type != "attached") return;
+            if (uploadState.files.length == 1) {
+                uploadState = { type: "none" };
+            } else {
+                uploadState = {
+                    type: "attached",
+                    files: uploadState.files.filter((_, i) => index != i),
+                };
+            }
+        }}
+    />
     <div class={Base}>
         {#if channel.havePermission("UploadFiles")}
             <div class={Action}>
                 <FileUploader
                     fileType="attachments"
-                    maxFileSize={20_000_000}
+                    maxFileSize={ATTACHMENT_SIZE_LIMIT}
                     remove={async () => {
                         uploadState = { type: "none" };
                     }}
