@@ -290,7 +290,7 @@
             position: relative;
       
             background-color: var(--fds-focus-stroke-inner);
-            margin: 6px 6px;
+            margin: 3px 6px;
             border-radius: var(--border-radius-inner);
             ${detached
                 ? `
