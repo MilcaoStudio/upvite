@@ -195,6 +195,7 @@
         internalEmit("NewMessages", "hide");
         stopTyping();
         setMessage();
+        const messageReplies = replies;
         replies = [];
         const nonce = ulid();
 
@@ -247,7 +248,7 @@
                 author: client.user!._id,
 
                 content,
-                replies,
+                replies: messageReplies,
             });
 
             defer(() => renderer.jumpToBottom(SMOOTH_SCROLL_ON_RECEIVE));
@@ -256,7 +257,7 @@
                 await channel.sendMessage({
                     content,
                     nonce,
-                    replies,
+                    replies: messageReplies,
                 });
             } catch (error) {
                 state.queue.fail(nonce, takeError(error));

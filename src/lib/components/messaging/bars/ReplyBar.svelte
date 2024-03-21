@@ -98,7 +98,6 @@
                             {:else if message.content}
                                 <Markdown
                                     content={message.content
-                                        .slice(0, 50)
                                         .replace(/\n/g, " ")}
                                 />
                             {/if}
