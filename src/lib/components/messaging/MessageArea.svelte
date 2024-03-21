@@ -5,8 +5,8 @@
     import { getRenderer } from "$lib/rendered/Singleton";
     import type { ScrollState } from "$lib/rendered/types";
     import { autorun, runInAction } from "mobx";
-    import type { Channel, Message } from "revolt.js";
-    import { onMount, setContext } from "svelte";
+    import type { Channel } from "revolt.js";
+    import { onDestroy, onMount, setContext } from "svelte";
     import { modalController } from "../modals/ModalController";
 
     export const MESSAGE_AREA_PADDING = 82;
@@ -16,6 +16,9 @@
     import Preloader from "../indicators/Preloader.svelte";
     import MessageRenderer from "./MessageRenderer.svelte";
     import Start from "./Start.svelte";
+    import { _autoAction } from "mobx";
+    import { afterNavigate, beforeNavigate } from "$app/navigation";
+    import { page } from "$app/stores";
 
     export let lastId: string | undefined = undefined,
         messageId: string | null = null,
@@ -26,6 +29,8 @@
     let ref: HTMLDivElement;
     let width: number;
     let height: number;
+
+    let highlight: string | undefined;
 
     // ? Current channel state.
     const renderer = getRenderer(channel);
@@ -104,6 +109,7 @@
     );
 
     // it works?
+
     autorun(() => setScrollState(renderer.scrollState));
 
     onMount(() => {
@@ -120,14 +126,29 @@
                 });
             }
         } else {
-            renderer.init();
+            if (messageId) {
+                highlight = messageId;
+                renderer.init(messageId);
+            } else {
+                renderer.init();
+            }
         }
     });
 
-    $: messageId && renderer.init(messageId);
+    // Highlights message on navigation
+    beforeNavigate((nav) => {
+        const params = nav.to?.params;
+        if (!params || !params.message) return;
+
+        // Prevents searching message from another channel
+        if (params.channel == channel._id) {
+            highlight = params.message;
+            renderer.init(params.message);
+        }
+    });
 
     // ? If we are waiting for network, try again.
-    $: autorun(()=>{
+    $: autorun(() => {
         switch (session.state) {
             case "Online":
                 if (renderer.state == "WAITING_FOR_NETWORK") {
@@ -143,7 +164,7 @@
                 renderer.markStale();
                 break;
         }
-    })
+    });
 
     // ? When the container is scrolled.
     // ? Also handle StayAtBottom
@@ -210,7 +231,10 @@
             <Preloader type="ring" />
         {/if}
         {#if renderer.state == "RENDER"}
-            <MessageRenderer {lastId} {renderer} />
+            <!--Force renderer update on highlight-->
+            {#key highlight}
+                <MessageRenderer {lastId} {renderer} {highlight} />
+            {/key}
         {/if}
         {#if renderer.state == "EMPTY"}
             <Start {channel} />
