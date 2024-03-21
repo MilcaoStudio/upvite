@@ -368,6 +368,8 @@
           }
         }
       }
+
+      makeAction({action: "copy_id", id: user._id}, "copy_uid");
     }
     const { queued, message, attachment } = data;
     if (queued) {
@@ -497,6 +499,8 @@
           makeAction({ action: "copy_link", link });
         }
       }
+
+      makeAction({action: "copy_id", id: message._id}, "copy_mid");
     }
 
     if (attachment) {
@@ -608,6 +612,7 @@
               );
             break;
         }
+        makeAction({action: "copy_id", id: channel._id}, "copy_cid");
       }
       if (sid && server) {
         makeAction(
