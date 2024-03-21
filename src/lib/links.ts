@@ -1,4 +1,5 @@
-import { building } from "$app/environment";
+import { browser, building } from "$app/environment";
+
 /**
  * Type of link
  */
@@ -14,7 +15,7 @@ type LinkType =
  * Allowed origins for relative navigation
  */
 const ALLOWED_ORIGINS = [
-    building ? "localhost" : location.hostname,
+    browser ? globalThis.location.hostname : "localhost",
     "rolt.chat",
     // TODO: include domains
 ];

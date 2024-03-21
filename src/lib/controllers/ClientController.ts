@@ -6,7 +6,7 @@ import { env } from "$env/dynamic/public"
 import { state } from "$lib/State";
 import { injectWindow, takeError } from "$lib";
 import { ObservableMap, action, computed, makeAutoObservable, observable } from "mobx";
-import { building } from "$app/environment";
+import { browser, building } from "$app/environment";
 /**
  * Current lifecycle state
  */
@@ -292,7 +292,11 @@ export class ClientController {
     private current: string | null;
 
     constructor() {
-        if (!building) {
+        if (browser) {
+            if (!env.PUBLIC_API_URL) {
+                throw ReferenceError("PUBLIC_API_URL environment variable is undefined. PUBLIC_API_URL is mandatory for client controller.");
+            }
+
             this.apiClient = new Client({
                 apiURL: env.PUBLIC_API_URL,
             });
@@ -301,11 +305,6 @@ export class ClientController {
                 .fetchConfiguration()
                 .then(() => (this.configuration = this.apiClient!.configuration!));
         }
-        if (!env.PUBLIC_API_URL) {
-            throw ReferenceError("PUBLIC_API_URL environment variable is undefined. PUBLIC_API_URL is mandatory for client controller.");
-        }
-
-
 
         this.configuration = null;
         this.sessions = observable.map();

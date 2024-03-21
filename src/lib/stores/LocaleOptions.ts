@@ -4,6 +4,7 @@ import { Language, Languages } from "../../lang/Languages";
 import type Persistent from "$lib/types/Persistent";
 import type Syncable from "$lib/types/Syncable";
 import type { Nullable } from "revolt.js";
+import { building } from "$app/environment";
 
 
 export interface Data {
@@ -16,13 +17,8 @@ export interface Data {
  * @returns Matched Language
  */
 export function findLanguage(lang?: Nullable<string>): Language {
-    if (!lang) {
-        if (typeof navigator == "undefined") {
-            lang = Language.ENGLISH;
-        } else {
-            lang = navigator.language;
-        }
-    }
+    lang = lang || typeof navigator == "undefined" ? Language.ENGLISH : navigator.language || "en";
+    console.info("Finding", lang);
 
     const code = lang!.replace("-", "_");
     const short = code.split("_")[0];
@@ -62,7 +58,11 @@ export default class LocaleOptions
      * Construct new LocaleOptions store.
      */
     constructor() {
-        this.lang = findLanguage();
+        if (building) {
+            this.lang = Language.ENGLISH;
+        } else {
+            this.lang = findLanguage();
+        }
         makeAutoObservable(this);
     }
 
