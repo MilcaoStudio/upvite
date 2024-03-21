@@ -15,10 +15,13 @@
     import Message from "./Message.svelte";
     import { css, cx } from "@emotion/css";
     import { autorun } from "mobx";
-    import { createElement, type SvelteNode } from "$lib/markdown/runtime/svelteRuntime";
+    import {
+        createElement,
+        type SvelteNode,
+    } from "$lib/markdown/runtime/svelteRuntime";
 
     export let lastId: string | undefined = undefined,
-        //highlight: string | undefined = undefined,
+        highlight: string | undefined = undefined,
         renderer: ChannelRenderer;
 
     const Blocked = cx(
@@ -110,79 +113,78 @@
         blocked = 0;
     }
 
-    autorun(()=>{
+    autorun(() => {
         render = [];
         for (const message of renderer.messages) {
-        if (previous) {
-            compare(
-                message._id,
-                message.author_id,
-                message.masquerade,
-                previous._id,
-                previous.author_id,
-                previous.masquerade,
-            );
-        }
-
-        if (message.author?.relationship == "Blocked") {
-            blocked++;
-        } else {
-            if (blocked > 0) pushBlocked();
-
-            render.push(createElement(Message, { message, head }));
-        }
-
-        previous = message;
-        }
-        if (blocked > 0) pushBlocked();
-    });
-    
-    autorun(()=>{
-        const nonces = renderer.messages.map((x) => x.nonce);
-        if (renderer.atBottom) {
-        for (const message of queue.get(
-            renderer.channel._id,
-        )) {
-            if (nonces.includes(message.id)) continue;
-
             if (previous) {
                 compare(
-                    message.id,
-                    userId!,
-                    null,
+                    message._id,
+                    message.author_id,
+                    message.masquerade,
                     previous._id,
                     previous.author_id,
                     previous.masquerade,
                 );
-
-                previous = {
-                    _id: message.id,
-                    author_id: userId!,
-                } as IMessage;
             }
 
-            console.info('Unknown message incoming...', JSON.stringify(message.data));
+            if (message.author?.relationship == "Blocked") {
+                blocked++;
+            } else {
+                if (blocked > 0) pushBlocked();
 
-            render.push(
-                createElement(Message, {
-                    message: new IMessage(client, {
-                        ...message.data,
-                        replies: message.data.replies.map((x: any) => x.id),
+                render.push(
+                    createElement(Message, {
+                        message,
+                        head,
+                        highlight: highlight == message._id,
                     }),
-                    queued: message,
-                    head,
-                }),
-            );
+                );
+            }
+
+            previous = message;
         }
-    } else {
-        render.push(createElement(Preloader, {type: 'ring'}))
-    }
-    })
-    
+        if (blocked > 0) pushBlocked();
+    });
+
+    autorun(() => {
+        const nonces = renderer.messages.map((x) => x.nonce);
+        if (renderer.atBottom) {
+            for (const message of queue.get(renderer.channel._id)) {
+                if (nonces.includes(message.id)) continue;
+
+                if (previous) {
+                    compare(
+                        message.id,
+                        userId!,
+                        null,
+                        previous._id,
+                        previous.author_id,
+                        previous.masquerade,
+                    );
+
+                    previous = {
+                        _id: message.id,
+                        author_id: userId!,
+                    } as IMessage;
+                }
+
+                console.info("Message created:", JSON.stringify(message.data));
+
+                render.push(
+                    createElement(Message, {
+                        message: new IMessage(client, {
+                            ...message.data,
+                            replies: message.data.replies.map((x: any) => x.id),
+                        }),
+                        queued: message,
+                        head,
+                    }),
+                );
+            }
+        }
+    });
 </script>
 
 {#each render as node}
-        <JSXRender {node} />
+    <JSXRender {node} />
 {/each}
-
-

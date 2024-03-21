@@ -14,6 +14,7 @@
     import Markdown from "$lib/markdown/Markdown.svelte";
     import ContextMenu from "../context/ContextMenu.svelte";
     import Attachment from "./attachments/Attachment.svelte";
+    import MessageReply from "./attachments/MessageReply.svelte";
     export let message: MessageType & {
             webhook?: { name: string; avatar?: string };
         },
@@ -61,6 +62,11 @@
 
 <div class={Wrapper} id={message._id}>
     <!--TODO: Reply-->
+    {#if !hideReply && message.reply_ids}
+        {#each message.reply_ids as id, index}
+            <MessageReply {index} {id} channel={message.channel} mentions={message.mention_ids ?? []} />
+        {/each}
+    {/if}
     <ContextMenu
         data={{ message, contextualChannel: message.channel_id, queued }}
     >
