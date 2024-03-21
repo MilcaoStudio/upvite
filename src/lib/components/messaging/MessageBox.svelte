@@ -40,6 +40,7 @@
     import { grabFiles, uploadFile } from "$lib/types/FileUpload";
     import FilePreview from "./bars/FilePreview.svelte";
     import { modalController } from "../modals/ModalController";
+    import ReplyBar from "./bars/ReplyBar.svelte";
 
     export let channel: Channel;
     const client = useClient();
@@ -474,6 +475,11 @@
                 };
             }
         }}
+    />
+    <ReplyBar
+        {channel}
+        {replies}
+        setReplies={(_replies) => (replies = _replies)}
     />
     <div class={Base}>
         {#if channel.havePermission("UploadFiles")}

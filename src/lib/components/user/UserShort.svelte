@@ -5,7 +5,7 @@
     import UserIcon from "./UserIcon.svelte";
     import Username from "./Username.svelte";
 
-    export let user: User | undefined = undefined, size = 20, prefixAt = false, masquerade: API.Masquerade | undefined = undefined, showServerIdentity = false;
+    export let user: User | undefined = undefined, size = 20, prefixAt = false, masquerade: API.Masquerade | null = null, showServerIdentity = false;
     const openProfile = () => user &&
         modalController.push({ type: "user_profile", user_id: user._id });
     const handleUserClick = (e: MouseEvent) => {

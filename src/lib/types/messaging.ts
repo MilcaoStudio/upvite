@@ -14,6 +14,7 @@ export type UploadState =
 // ! FIXME: add to app config and load from app config
 export const CAN_UPLOAD_AT_ONCE = 5;
 export const ATTACHMENT_SIZE_LIMIT = 20_000_000;
+export const MAX_REPLIES = 5;
 
 export type AutoCompleteState =
     | { type: "none" }
