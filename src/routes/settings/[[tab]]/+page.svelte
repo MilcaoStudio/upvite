@@ -281,11 +281,15 @@
 
 <style>
     .baseCloseButton{
-        position: absolute;
         right: 0px;
         height: 100vh;
         width: 64px;
         background-color: var(--secondary-background);
+        max-width: 650px;
+        display: flex;
+        flex: 1 1 64px;
+        flex-direction: column;
+        align-items: stretch;
     }
     .flex-column {
         display: flex;
@@ -308,19 +312,16 @@
         height: 22px;
     }
     .close{
-        position: absolute;
         background-color: var(--background);
         width: 38px;
         height: 38px;
-        top: 0px;
-        right: 0px;
         margin: 16px;
         border-radius: var(--border-radius-half);
         border: solid 2px var(--tertiary-foreground);
-        display:flex;
+        display: flex;
         align-items: center;
         justify-content: center;
-        transition: 0.12s all ease-in;
+        transition: .12s all ease-in;
     }
     .close:hover {
         background-color: var(--primary-header);
