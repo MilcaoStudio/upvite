@@ -7,7 +7,6 @@
     import type { ChannelRenderer } from "$lib/rendered/Singleton";
     import JSXRender from "../JSXRender.svelte";
     import Start from "./Start.svelte";
-    import Preloader from "../indicators/Preloader.svelte";
     import BxX from "svelte-boxicons/BxX.svelte";
     import TextSvelte from "$lib/i18n/TextSvelte.svelte";
     import { decodeTime } from "ulid";
@@ -42,11 +41,12 @@
     const queue = state.queue;
     let render: SvelteNode[] = [];
 
+    /*
     $: if (renderer) {
         render.unshift(createElement(Start, { channel: renderer.channel }));
     } else {
         render.unshift(createElement(Preloader, { type: "ring" }));
-    }
+    }*/
 
     let previous: IMessage | undefined;
     let head = true;
@@ -185,6 +185,9 @@
     });
 </script>
 
+{#if renderer.atTop}
+    <Start channel={renderer.channel} />
+{/if}
 {#each render as node}
     <JSXRender {node} />
 {/each}
