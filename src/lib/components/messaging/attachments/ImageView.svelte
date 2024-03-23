@@ -5,10 +5,8 @@
     import { cx } from "@emotion/css";
     import type { API } from "revolt.js";
 
-    export let attachment: API.File;
-    const client = useClient();
+    export let attachment: API.File, src = "";
     let loading = ImageState.Loading;
-    let url = client.generateFileURL(attachment);
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -16,10 +14,10 @@
 <img
     alt={attachment.filename}
     class={cx("image", { loading: loading != ImageState.Loaded})}
-    src={url}
+    {src}
     loading="lazy"
     on:click={() => modalController.push({ type: "image_viewer", attachment })}
-    on:mousedown={(ev) => ev.button == 1 && window.open(url, "blank_")}
+    on:mousedown={(ev) => ev.button == 1 && window.open(src, "blank_")}
     on:error={() => ImageState.Error}
     on:load={() => ImageState.Loaded}
 />

@@ -71,3 +71,9 @@ export type EmojiTable = {
      */
     activeCategories: EmojiCategory[];
 };
+
+export enum ImageState {
+    Loading,
+    Loaded,
+    Error,
+}
