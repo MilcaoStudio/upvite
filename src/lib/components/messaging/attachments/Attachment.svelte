@@ -3,23 +3,21 @@
     import { useClient } from "$lib/controllers/ClientController";
     import { cx } from "@emotion/css";
     import type { API } from "revolt.js";
+    import SizedGrid from "./SizedGrid.svelte";
+    import ImageView from "./ImageView.svelte";
+    import AttachmentActions from "./AttachmentActions.svelte";
 
     const client = useClient();
     export let attachment: API.File,
         hasContent = false;
     let { filename, metadata } = attachment;
-    let type = metadata.type;
     let spoiler = filename.startsWith("SPOILER_");
     const style = getComputedStyle(document.documentElement);
     let MAX_ATTACHMENT_WIDTH = parseInt(
-        style.getPropertyValue(
-            "--attachment-max-width",
-        ),
+        style.getPropertyValue("--attachment-max-width"),
     );
     let MAX_ATTACHMENT_HEIGHT = parseInt(
-        style.getPropertyValue(
-            "--attachment-max-height",
-        ),
+        style.getPropertyValue("--attachment-max-height"),
     );
     let url = client.generateFileURL(
         attachment,
@@ -28,16 +26,17 @@
     );
 </script>
 
-{#if type == "Audio"}
+{#if metadata.type == "Audio"}
     <div class="attachment audio" data-has-content={hasContent}>
-        <!--<AttachmentActions {attachment}/>-->
+        <AttachmentActions {attachment}/>
         <audio src={url} controls preload="metadata" />
     </div>
-{:else if type == "Image"}
+{:else if metadata.type == "Image"}
     <ContextMenu data={{ attachment }}>
-        <!--<SizedGrid ... />-->
-        <div
-            class={cx(
+        <SizedGrid
+            width={metadata.width}
+            height={metadata.height}
+            className={cx(
                 {
                     margin: hasContent,
                 },
@@ -45,54 +44,43 @@
                     spoiler: spoiler,
                 },
             )}
-            style="width:{metadata.type == 'Image' &&
-                Math.min(metadata.width, MAX_ATTACHMENT_WIDTH)}px;height:{metadata.type == "Image" && Math.min(metadata.height, MAX_ATTACHMENT_HEIGHT)}px;"
         >
-            <img
-                alt={filename}
-                src={url}
-                width="100%"
-                height="100%"
-            />
+            <ImageView {attachment} />
             <!--TODO: Spoiler layer-->
-        </div>
+        </SizedGrid>
     </ContextMenu>
-{:else if type == "Text"}
+{:else if metadata.type == "Text"}
     <div class="attachment text" data-has-content={hasContent}>
         <!--<TextFile {attachment} />-->
         <a href={url}>{filename}</a>
-        <!--<AttachmentActions {attachment}/>-->
+        <AttachmentActions {attachment}/>
     </div>
-{:else if type == "Video"}
+{:else if metadata.type == "Video"}
     <div
         class={cx({ margin: hasContent }, "container")}
-        style="--width: {metadata.type == 'Video' && metadata.width}px;"
+        style="--width: {metadata.width}px;"
     >
-        <!--<AttachmentActions {attachment}/>-->
-        <!--<SizedGrid ... />-->
-        <div class={cx({ spoiler: spoiler }, "attachment")}>
+        <AttachmentActions {attachment}/>
+        <SizedGrid
+            width={metadata.width}
+            height={metadata.height}
+            className={cx({ spoiler })}
+        >
             <!-- svelte-ignore a11y-media-has-caption -->
             <video
                 src={url}
                 controls
-                width={Math.min(
-                    metadata.type == "Video" ? metadata.width : 0,
-                    MAX_ATTACHMENT_WIDTH,
-                )}
-                height={Math.min(
-                    metadata.type == "Video" ? metadata.height : 0,
-                    MAX_ATTACHMENT_HEIGHT,
-                )}
+                width={metadata.width}
+                height={metadata.height}
                 on:mousedown={(ev) =>
                     ev.button == 1 && window.open(url, "_blank")}
             />
             <!--TODO: Spoiler layer-->
-        </div>
+        </SizedGrid>
     </div>
 {:else}
     <div class="attachment file" data-has-content={hasContent}>
-        <!--<AttachmentActions {attachment}/>-->
-        <a href={url}>{filename}</a>
+        <AttachmentActions {attachment}/>
     </div>
 {/if}
 
@@ -125,6 +113,7 @@
         overflow: hidden;
         width: fit-content;
     }
+
     .container > :first-child {
         width: min(var(--attachment-max-width), 100%, var(--width));
     }
@@ -144,14 +133,8 @@
         width: var(--attachment-default-width);
     }
 
-    .image {
-        cursor: pointer;
-        width: 100%;
-        height: 100%;
-    }
-
-    .image.loading {
-        background: var(--background);
+    .margin {
+        margin-top: 4px;
     }
 
     .text {
