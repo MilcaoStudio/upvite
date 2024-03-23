@@ -6,6 +6,8 @@
     import SizedGrid from "./SizedGrid.svelte";
     import ImageView from "./ImageView.svelte";
     import AttachmentActions from "./AttachmentActions.svelte";
+    import { state } from "$lib/State";
+    import TextView from "./TextView.svelte";
 
     const client = useClient();
     export let attachment: API.File,
@@ -19,9 +21,10 @@
     let MAX_ATTACHMENT_HEIGHT = parseInt(
         style.getPropertyValue("--attachment-max-height"),
     );
+    let { shrinkMedia } = state.network.get("media")!
     let url = client.generateFileURL(
         attachment,
-        { width: MAX_ATTACHMENT_WIDTH * 1.5 },
+        { width: shrinkMedia ? MAX_ATTACHMENT_WIDTH / 2 : MAX_ATTACHMENT_WIDTH * 1.5},
         true,
     );
 </script>
@@ -45,14 +48,13 @@
                 },
             )}
         >
-            <ImageView {attachment} />
+            <ImageView {attachment} src={url} />
             <!--TODO: Spoiler layer-->
         </SizedGrid>
     </ContextMenu>
 {:else if metadata.type == "Text"}
     <div class="attachment text" data-has-content={hasContent}>
-        <!--<TextFile {attachment} />-->
-        <a href={url}>{filename}</a>
+        <TextView {attachment} />
         <AttachmentActions {attachment}/>
     </div>
 {:else if metadata.type == "Video"}
@@ -124,7 +126,7 @@
         border-radius: var(--border-radius);
     }
 
-    .file > div {
+    .file > :global(div) {
         padding: 12px;
         max-width: 100%;
         user-select: none;
@@ -142,14 +144,5 @@
         overflow: hidden;
         grid-auto-columns: unset;
         max-width: var(--attachment-max-text-width);
-    }
-
-    .text .textContent {
-        height: 140px;
-        padding: 12px;
-        overflow-x: auto;
-        overflow-y: auto;
-        border-radius: 0;
-        background: var(--secondary-header);
     }
 </style>

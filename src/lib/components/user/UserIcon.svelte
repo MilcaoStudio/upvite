@@ -36,6 +36,7 @@
         url: string | undefined = undefined,
         onClick: ((e: MouseEvent)=>void) | null = null;
     const client = useClient();
+    let { shrinkMedia } = state.network.get("media")!
     $: if (masquerade?.avatar) {
         url = client.proxyFile(masquerade.avatar);
     } else if (override) {
@@ -59,7 +60,7 @@
         url =
             client.generateFileURL(
                 override ?? target?.avatar ?? attachment ?? undefined,
-                { max_side: 256 },
+                { max_side: shrinkMedia ? 64 : 256 },
                 animate,
             ) ?? (target ? target.defaultAvatarURL : fallback);
     }

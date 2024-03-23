@@ -18,6 +18,7 @@ import Changelog from "./stores/Changelog";
 import type Syncable from "./types/Syncable";
 import Plugins from "./stores/Plugins";
 import LocaleOptions from "./stores/LocaleOptions";
+import NetworkOptions from "./stores/NetworkOptions";
 
 export default class State {
     private persistent: [string, Persistent<unknown>][] = [];
@@ -27,6 +28,7 @@ export default class State {
     queue = new MessageQueue;
     layout = new Layout;
     locale = new LocaleOptions;
+    network = new NetworkOptions;
     notifications: NotificationOptions;
     ordering: Ordering;
     plugins: Plugins;
