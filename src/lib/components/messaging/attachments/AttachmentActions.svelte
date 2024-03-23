@@ -69,8 +69,6 @@
         <span class="fileSize">
             {`${metadata.width}x${metadata.height}`} ({filesize})
         </span>
-        <span>{filename}</span>
-        <span class="fileSize">{filesize}</span>
         <a
             href={download_url}
             class="downloadIcon"
