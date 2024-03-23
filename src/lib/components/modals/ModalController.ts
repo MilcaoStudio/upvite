@@ -13,6 +13,7 @@ import ClipboardModal from "./ClipboardModal.svelte";
 import LinkWarning from "./LinkWarning.svelte";
 import CreateChannel from "./CreateChannel.svelte";
 import DeleteMessage from "./DeleteMessage.svelte";
+import ModifyAccount from "./ModifyAccount.svelte";
 
 export class ModalController {
     @observable stack: Modal[] = [];
@@ -139,6 +140,7 @@ export const modalController = new ModalController({
     delete_channel: Confirmation,
     delete_message: DeleteMessage,
     delete_server: Confirmation,
+    modify_account: ModifyAccount,
     link_warning: LinkWarning,
     onboarding: Onboarding,
     unfriend_user: Confirmation,

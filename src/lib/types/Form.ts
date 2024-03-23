@@ -18,6 +18,7 @@ import type { SvelteElement } from "$lib/markdown/runtime/svelteRuntime";
  */
 export type Type =
     | "text"
+    | "password"
     | "checkbox"
     | "colour"
     | "combo"
@@ -45,6 +46,7 @@ type Choice = {
  */
 type Metadata = {
     text: { value: string; props: InputBoxProps };
+    password: { value: string; props: InputBoxProps };
     checkbox: { value: boolean; props: CheckBoxProps };
     colour: {
         value: string;

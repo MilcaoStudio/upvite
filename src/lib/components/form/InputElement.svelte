@@ -18,6 +18,15 @@
             }
             break;
         }
+        case "password": {
+            el.component = InputBox;
+            el.props = {
+                value: v as string,
+                type: "password",
+                onChange: (ev: Event & {currentTarget: HTMLInputElement})=>onChange?.(ev.currentTarget?.value),
+                ..._props
+            }
+        }
         default:
             break;
     }
