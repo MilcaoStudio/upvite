@@ -101,9 +101,9 @@
                     <CategoryButton action="chevron" icon={BxCompass} description={$_('app.home.discover_desc')}>{$_('app.home.discover')}</CategoryButton>
                 </a>
                 {#if client.servers.get(
-                    "01HQ1BJ1W6NRJV8R0WWGGR5F0P",
+                    "01HRSZB6J5PW9D2XGBZVZAKGFA",
                 ) }
-                    <a href="/server/01HQ1BJ1W6NRJV8R0WWGGR5F0P">
+                    <a href="/server/01HRSZB6J5PW9D2XGBZVZAKGFA">
                         <CategoryButton action="chevron" icon={BxRightArrowCircle} description={$_('app.home.goto-testers_desc')}>
                             {$_('app.home.goto-testers')}
                         </CategoryButton>
