@@ -1,12 +1,25 @@
+import { browser } from "$app/environment";
 import { mapToRecord } from "$lib";
 import type Persistent from "$lib/types/Persistent";
 import { ObservableMap, action, computed, makeAutoObservable, observable } from "mobx";
 
+/**
+ * SMALL = Smartphones
+ * MEDIUM = Tablets
+ * LARGE = PC, consoles
+ */
+export enum Viewport {
+    SMALL,
+    MEDIUM,
+    LARGE,
+    //EXTRA_LARGE,
+}
 export interface Data {
     lastSection?: "home" | "server";
     lastHomePath?: string;
     lastOpened?: Record<string, string>;
     openSections?: Record<string, boolean>;
+    viewport?: Viewport;
 }
 
 export const SIDEBAR_MEMBERS = "sidebar_members";
@@ -20,47 +33,53 @@ export const SECTION_NSFW = "nsfw";
  * back and forth between different parts of the app.
  */
 export default class Layout implements Persistent<Data> {
-     /**
-     * The last 'major section' that the user had open.
-     * This is either the home tab or a channel ID (for a server channel).
-     */
-     @observable public lastSection: "home" | "discover" | string;
+    /**
+    * The last 'major section' that the user had open.
+    * This is either the home tab or a channel ID (for a server channel).
+    */
+    @observable public lastSection: "home" | "discover" | string;
 
-     /**
-      * The last path the user had open in the home tab.
-      */
-     private lastHomePath: string;
- 
-     /**
-      * Volatile last discover path.
-      */
-     private lastDiscoverPath: string;
- 
-     /**
-      * Map of last channels viewed in servers.
-      */
-     private lastOpened: ObservableMap<string, string>;
- 
-     /**
-      * Map of section IDs to their current state.
-      */
-     private openSections: ObservableMap<string, boolean>;
- 
-     /**
-      * Construct new Layout store.
-      */
-     constructor() {
+    /**
+     * The last path the user had open in the home tab.
+     */
+    private lastHomePath: string;
+
+    /**
+     * Volatile last discover path.
+     */
+    private lastDiscoverPath: string;
+
+    /**
+     * Map of last channels viewed in servers.
+     */
+    private lastOpened: ObservableMap<string, string>;
+
+    /**
+     * Map of section IDs to their current state.
+     */
+    private openSections: ObservableMap<string, boolean>;
+
+    private viewport: Viewport | undefined;
+
+    /**
+     * Construct new Layout store.
+     */
+    constructor() {
         this.lastSection = "home";
         this.lastHomePath = "/";
         this.lastDiscoverPath = "/discover/servers";
         this.lastOpened = new ObservableMap();
         this.openSections = new ObservableMap();
 
+        if (browser) {
+            this.setViewport();
+        }
+
         this.getLastHomePath = this.getLastHomePath.bind(this);
 
         makeAutoObservable(this);
     }
-    
+
     get id(): string {
         return 'layout'
     }
@@ -71,6 +90,7 @@ export default class Layout implements Persistent<Data> {
             lastHomePath: this.lastHomePath,
             lastOpened: mapToRecord(this.lastOpened),
             openSections: mapToRecord(this.openSections),
+            viewport: this.viewport,
         };
     }
 
@@ -93,6 +113,10 @@ export default class Layout implements Persistent<Data> {
             Object.keys(data.openSections).forEach((key) =>
                 this.openSections.set(key, data.openSections![key]),
             );
+        }
+
+        if (data.viewport) {
+            this.viewport = data.viewport;
         }
     }
 
@@ -145,8 +169,8 @@ export default class Layout implements Persistent<Data> {
             (this.lastSection === "discover"
                 ? this.lastDiscoverPath
                 : this.lastSection === "home"
-                ? this.lastHomePath
-                : this.getServerPath(this.lastSection)!) ??
+                    ? this.lastHomePath
+                    : this.getServerPath(this.lastSection)!) ??
             this.lastHomePath ??
             "/"
         )
@@ -204,5 +228,22 @@ export default class Layout implements Persistent<Data> {
      */
     @action toggleSectionState(id: string, def?: boolean) {
         this.setSectionState(id, !this.getSectionState(id, def), def);
+    }
+
+    /**
+     * Gets the viewport category according to window's width
+     * @returns Viewport if defined, otherwise undefined
+     */
+    @computed getViewport() {
+        return this.viewport
+    }
+
+    @action setViewport(width = window.visualViewport?.width) {
+        this.viewport = width && (
+            width > 1200 ?
+                Viewport.LARGE :
+                width > 768 ?
+                    Viewport.MEDIUM :
+                    Viewport.SMALL);
     }
 }

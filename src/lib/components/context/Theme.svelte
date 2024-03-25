@@ -347,11 +347,15 @@ export const PRESETS: Record<string, Theme> = {
     });
 
     // TODO: Change --app-height on resize
+    function onResize() {
+    }
 
     let variables = theme.computeVariables();
     $: autorun(() => {
         variables = theme.computeVariables();
-    })
+    });
+
+    state.layout.setViewport();
 </script>
 
 {@html `<style>${css}</style>`}

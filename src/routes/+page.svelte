@@ -8,9 +8,13 @@
     import HomeSidebar from "$lib/components/navigation/left/HomeSidebar.svelte";
     import ServerListSidebar from "$lib/components/navigation/left/ServerListSidebar.svelte";
     import CheckAuth from "$lib/controllers/CheckAuth.svelte";
-    import { SIDEBAR_CHANNELS } from "$lib/stores/Layout";
+    import { SIDEBAR_CHANNELS, Viewport } from "$lib/stores/Layout";
+    import { autorun } from "mobx";
 
-    let open = isTouchscreenDevice || state.layout.getSectionState(SIDEBAR_CHANNELS, true);
+    let open = state.layout.getSectionState(SIDEBAR_CHANNELS, state.layout.getViewport() != Viewport.SMALL);
+    $: autorun(()=>{
+        open = state.layout.getSectionState(SIDEBAR_CHANNELS, state.layout.getViewport() != Viewport.SMALL);
+    });
     $: state.layout.setLastHomePath($page.url.pathname);
 </script>
 

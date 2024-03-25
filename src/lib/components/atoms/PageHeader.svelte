@@ -11,8 +11,8 @@
     import BxChevronRight from "svelte-boxicons/BxChevronRight.svelte";
 
     import type { ComponentType } from "svelte";
+    import { autorun } from "mobx";
     export let withBackground = false, withTransparency = false, noBurger = false, icon: ComponentType;
-    const { autorun } = connect()
     const IconContainer = cx('IconContainer', css`
     display: flex;
     align-items: center;
@@ -33,11 +33,11 @@
     const layout = state.layout;
     let visible: boolean;
     $: autorun(()=>{
-        visible = layout.getSectionState(SIDEBAR_CHANNELS, true);
+        visible = layout.getSectionState(SIDEBAR_CHANNELS, false);
     });
     $: pathname = $page.url.pathname;
     function toggleState(){
-        layout.toggleSectionState(SIDEBAR_CHANNELS, true)
+        layout.toggleSectionState(SIDEBAR_CHANNELS, visible)
     }
 </script>
 
