@@ -1,24 +1,74 @@
 <script lang="ts">
-    import UserIcon from "../user/UserIcon.svelte";
     import IconButton from "../atoms/input/IconButton.svelte";
-
-    import { goto } from "$app/navigation";
     import Modal from "./Modal.svelte";
     import type { ModalProps } from "$lib/types/Modal";
-    import { useClient, useSession } from "$lib/controllers/ClientController";
-    import { API, UserPermission } from "revolt.js";
+    import { useSession } from "$lib/controllers/ClientController";
     import UserHeader from "../user/UserHeader.svelte";
+    import Edit from "svelte-boxicons/BxEdit.svelte";
+    import Envelope from "svelte-boxicons/BxEnvelope.svelte";
+    import X from "svelte-boxicons/BxX.svelte";
     export let props: ModalProps<"user_profile">;
     const session = useSession()!;
     const client = session.client!;
     const user = client.users.get(props.user_id);
-    
 </script>
 
 <Modal {...props}>
     <div class="container" slot="override">
         <div class="userProfile">
-            <UserHeader {user} placeholderProfile={props.placeholderProfile} />
+            <UserHeader {user} placeholderProfile={props.placeholderProfile}>
+                <svelte:fragment slot="action">
+                    {#if user?.relationship == "User"}
+                        <IconButton
+                            href="/settings/Profile"
+                            onClick={props.onClose}
+                        >
+                            <Edit size={24} />
+                        </IconButton>
+                    {:else if user?.relationship == "Friend" || user?.bot}
+                        <IconButton
+                            href="/open/{user._id}"
+                            onClick={props.onClose}
+                        >
+                            <Envelope size={24} />
+                        </IconButton>
+                    {:else if user?.relationship == "Outgoing"}
+                        <IconButton onClick={() => user.removeFriend()}>
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-user-plus" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                                <path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0"/>
+                                <path d="M 18 21 L 22 16"/>
+                                <path d="M 18 16 L 22 21"/>
+                                <path d="M6 21v-2a4 4 0 0 1 4 -4h4"/>
+                              </svg>
+                        </IconButton>
+                    {:else}
+                        <IconButton onClick={() => user?.addFriend()}>
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                class="icon icon-tabler icons-tabler-outline icon-tabler-user-plus"
+                                ><path
+                                    stroke="none"
+                                    d="M0 0h24v24H0z"
+                                    fill="none"
+                                /><path
+                                    d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0"
+                                /><path d="M16 19h6" /><path
+                                    d="M19 16v6"
+                                /><path d="M6 21v-2a4 4 0 0 1 4 -4h4" />
+                            </svg>
+                        </IconButton>
+                    {/if}
+                </svelte:fragment>
+            </UserHeader>
             <div class="userContent">
                 <div class="">
                     <div class="category"></div>
