@@ -6,17 +6,32 @@
     import UserHeader from "../user/UserHeader.svelte";
     import Edit from "svelte-boxicons/BxEdit.svelte";
     import Envelope from "svelte-boxicons/BxEnvelope.svelte";
-    import X from "svelte-boxicons/BxX.svelte";
+    import { API, UserPermission } from "revolt.js";
+    import { mapError } from "$lib";
+    import H3 from "../atoms/heading/H3.svelte";
+    import { t } from "svelte-i18n";
+    import Markdown from "$lib/markdown/Markdown.svelte";
+
     export let props: ModalProps<"user_profile">;
     const session = useSession()!;
     const client = session.client!;
     const user = client.users.get(props.user_id);
+    let profile: API.UserProfile | undefined;
+    $: {
+        if (session.state == "Online" && !profile) {
+            if (user?.permission! & UserPermission.ViewProfile) {
+                user?.fetchProfile()
+                    .then((p) => (profile = p))
+                    .catch(mapError);
+            }
+        }
+    }
 </script>
 
 <Modal {...props}>
     <div class="container" slot="override">
         <div class="userProfile">
-            <UserHeader {user} placeholderProfile={props.placeholderProfile}>
+            <UserHeader {user} placeholderProfile={props.placeholderProfile} {profile}>
                 <svelte:fragment slot="action">
                     {#if user?.relationship == "User"}
                         <IconButton
@@ -72,7 +87,12 @@
             <div class="userContent">
                 <div class="">
                     <div class="category"></div>
-                    <div class="content"></div>
+                    <div class="content">
+                        {#if profile?.content}
+                            <H3>BIO</H3>
+                            <Markdown content={profile.content} />
+                        {/if}
+                    </div>
                 </div>
             </div>
         </div>
@@ -112,5 +132,10 @@
             var(--tertiary-background-rgb),
             max(0, 0.7)
         ) !important;
+    }
+
+    .content {
+        padding: 1rem;
+        font-size: 14px;
     }
 </style>

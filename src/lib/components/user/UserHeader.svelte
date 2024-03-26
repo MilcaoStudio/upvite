@@ -3,20 +3,11 @@
     import { UserPermission, type API, User } from "revolt.js";
     import UserIcon from "./UserIcon.svelte";
     export let user: User | undefined,
-        placeholderProfile: API.UserProfile | undefined;
+        placeholderProfile: API.UserProfile | undefined = undefined, profile: API.UserProfile | undefined;
     const session = useSession()!;
     const client = useClient();
     let backgroundURL: string | undefined;
-    let profile: API.UserProfile | undefined;
-    $: {
-        if (session.state == "Online" && !profile) {
-            if (user?.permission! & UserPermission.ViewProfile) {
-                user?.fetchProfile()
-                    .then((p) => (profile = p))
-                    .catch(() => {});
-            }
-        }
-    }
+    
     $: if (profile && profile.background) {
         backgroundURL = client.generateFileURL(
             profile.background,
