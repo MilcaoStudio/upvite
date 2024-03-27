@@ -41,6 +41,7 @@
         modalController.push({
             type: "user_profile",
             user_id: message.author_id,
+            contextualServer: message.channel?.server_id ?? undefined
         });
     }
 

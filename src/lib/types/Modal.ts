@@ -101,6 +101,7 @@ export type Modal = {
     | {
           type: "user_profile";
           user_id: string;
+          contextualServer?: string;
           isPlaceholder?: boolean;
           placeholderProfile?: API.UserProfile;
       }

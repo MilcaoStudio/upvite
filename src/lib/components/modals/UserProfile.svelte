@@ -26,6 +26,13 @@
             }
         }
     }
+
+    $: server = props.contextualServer && client.servers.get(props.contextualServer);
+    let roles: API.Role[] = [];
+    $: if (server && user) {
+        server.fetchMember(user).then(member => member.orderedRoles ?? []).then(or => roles = or.map(r => r[1]));
+    }
+    
 </script>
 
 <Modal {...props}>
@@ -88,6 +95,14 @@
                 <div class="">
                     <div class="category"></div>
                     <div class="content">
+                        {#if server}
+                            <H3>Roles</H3>
+                            {#each roles as role}
+                                <div class="role">
+                                    <span class="colour" style="--colour: {role.colour}" /> {role.name}
+                                </div>
+                            {/each}
+                        {/if}
                         {#if profile?.content}
                             <H3>BIO</H3>
                             <Markdown content={profile.content} />
@@ -137,5 +152,13 @@
     .content {
         padding: 1rem;
         font-size: 14px;
+    }
+
+    .colour {
+        display: inline-block;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: var(--colour, gray);
     }
 </style>
