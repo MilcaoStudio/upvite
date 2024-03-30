@@ -15,6 +15,7 @@
     import ContextMenu from "../context/ContextMenu.svelte";
     import Attachment from "./attachments/Attachment.svelte";
     import MessageReply from "./attachments/MessageReply.svelte";
+    import Embed from "./embed/Embed.svelte";
     export let message: MessageType & {
             webhook?: { name: string; avatar?: string };
         },
@@ -142,7 +143,11 @@
                         {/each}
                     {/if}
 
-                    <!--Embeds-->
+                    {#if message.embeds}
+                        {#each message.embeds as embed}
+                            <Embed {embed} />
+                        {/each}
+                    {/if}
                     <!--Reactions-->
                     <!--MessageOverlaybar-->
                 </div>
