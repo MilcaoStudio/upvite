@@ -5,13 +5,16 @@
     import Plugins from "./plugins.svelte";
     import { state } from "$lib/State";
 
-    let checked = state.network.get("media")?.shrinkMedia;
-    $: state.network.set("media", {shrinkMedia: checked});
+    let media = state.network.get("media");
+    let shrinkMedia = media?.shrinkMedia;
+    let autoplay = media?.autoplay;
+    $: state.network.set("media", {shrinkMedia, autoplay});
 
 </script>
 
 <InDevelopment></InDevelopment>
 <H3>Ahorro de datos</H3>
-<Checkbox bind:checked>Reducir tamaño de multimedia </Checkbox>
+<Checkbox bind:checked={shrinkMedia}>Reducir tamaño de multimedia </Checkbox>
+<Checkbox bind:checked={autoplay}>Reproducir GIFs automáticamente</Checkbox>
 
 <Plugins />

@@ -7,6 +7,7 @@ export interface Data {
 
 interface MediaOptions {
     shrinkMedia: boolean;
+    autoplay: boolean;
 }
 
 export default class NetworkOptions implements Persistent<Data> {
@@ -14,7 +15,7 @@ export default class NetworkOptions implements Persistent<Data> {
     private mediaOptions: MediaOptions;
 
     constructor(){
-        this.mediaOptions = { shrinkMedia: false };
+        this.mediaOptions = { shrinkMedia: false, autoplay: true };
         makeAutoObservable(this);
     }
 
