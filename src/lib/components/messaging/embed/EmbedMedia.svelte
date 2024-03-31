@@ -8,11 +8,21 @@
         width = 0,
         height: number;
     let client = useClient();
-    let autoplay = state.network.get("media")?.autoplay ;
+    let autoplay = state.network.get("media")?.autoplay;
+    
 </script>
 
 {#if embed.type == "Website"}
-    {#if embed.video}
+    {#if embed.special?.type == "YouTube"}
+        <iframe
+            title="YouTube"
+            {height}
+            loading="lazy"
+            src="http://www.youtube-nocookie.com/embed/{embed.special.id}?modestbranding=1&hl={state.locale.getLanguage()}&start={embed.special.timestamp ?? 0}"
+            frameborder="0"
+            allowfullscreen
+        />
+    {:else if embed.video}
         <video
             class="image"
             style:width="{width}px"
@@ -22,6 +32,8 @@
             controls={embed.special?.type != "GIF"}
             autoplay={embed.special?.type == "GIF" && autoplay}
             muted={embed.special?.type == "GIF" ? true : undefined}
+            on:click={(ev) =>
+                ev.currentTarget.paused && ev.currentTarget.play()}
         />
     {:else if embed.image}
         <!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -52,5 +64,11 @@
         cursor: pointer;
         object-fit: contain;
         border-radius: var(--border-radius);
+    }
+
+    iframe {
+        border: none;
+        border-radius: var(--border-radius);
+        width: 100%;
     }
 </style>

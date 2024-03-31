@@ -104,6 +104,12 @@
     --attachment-max-height: 360px;
     --attachment-default-width: 400px;
     --attachment-max-text-width: 800px;
+
+    --embed-max-width: 640px;
+    --embed-max-height: 480px;
+    --embed-padding: 24px;
+    --embed-max-preview-size: 150px;
+
     --bottom-navigation-height: 50px;
 
     --scrollbar-thumb: #383544;
