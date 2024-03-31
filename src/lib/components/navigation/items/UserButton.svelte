@@ -5,13 +5,13 @@
     import Username from "../../user/Username.svelte";
     import Tooltip from "../../atoms/Tooltip.svelte";
     import { t } from "svelte-i18n";
-    //import { BxCrown, BxX } from "svelte-boxicons";
     import { isTouchscreenDevice } from "$lib";
     import { IconButton } from "fluent-svelte";
     import { modalController } from "../../modals/ModalController";
     import "./Item.css"
     import BxCrown from "svelte-boxicons/BxCrown.svelte";
     import BxX from "svelte-boxicons/BxX.svelte";
+    import type { MouseEventHandler } from "svelte/elements";
 
     export let active = false,
         alert: "unread" | "mention" | null = null,
@@ -20,11 +20,14 @@
         muted = false,
         user: User,
         context: Channel | undefined = undefined,
-        channel: Channel | undefined = undefined;
+        channel: Channel | undefined = undefined,
+        onClick: MouseEventHandler<HTMLDivElement> | null = null;
 </script>
 
+<!-- svelte-ignore a11y-no-static-element-interactions -->
 <div
     {...$$restProps}
+    on:click={onClick}
     class={cx("item", "user")}
     data-active={active}
     data-margin={margin}

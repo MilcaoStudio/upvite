@@ -3,7 +3,9 @@
 
     export let borderRadius = '--border-radius', hover = false, onClick: ((e: MouseEvent)=>void) | null = null;
     export let ref: SVGElement | null = null;
-    const IconBase = cx('IconBase', css`
+    let className = "";
+    export {className as class};
+    const IconBase = cx('IconBase', className, css`
     flex-shrink: 0;
     cursor: pointer;
     img {

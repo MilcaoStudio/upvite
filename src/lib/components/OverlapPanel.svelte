@@ -90,18 +90,14 @@
 
 {#if docked}
     <div class="docked" style:width style:height>
-        {#if docked & 1 && leftPanel}
-            <svelte:component this={leftPanel.component}>
-                <slot name="left" />
-            </svelte:component>
+        {#if docked & 1}
+            <slot name="left" />
         {/if}
         <div class="main">
             <slot />
         </div>
-        {#if docked & 2 && rightPanel}
-            <svelte:component this={rightPanel.component}>
-                <slot name="right" />
-            </svelte:component>
+        {#if docked & 2}
+            <slot name="right" />
         {/if}
     </div>
 {:else}

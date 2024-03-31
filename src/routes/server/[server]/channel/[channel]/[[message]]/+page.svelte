@@ -12,6 +12,7 @@
     import ServerSidebar from "$lib/components/navigation/left/ServerSidebar.svelte";
     import ServerListSidebar from "$lib/components/navigation/left/ServerListSidebar.svelte";
     import { autorun } from "mobx";
+    import ServerMemberSidebar from "$lib/components/navigation/right/ServerMemberSidebar.svelte";
     const client = useClient();
 
     export let data: LayoutData;
@@ -63,5 +64,6 @@
             <TextChannel {channel} {message} />
         {/if}
     {/key}
+    <ServerMemberSidebar {channel} slot="right" />
 </UprisingApp>
 

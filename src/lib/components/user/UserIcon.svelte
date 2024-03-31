@@ -85,7 +85,7 @@
         class="icon"
         mask={mask ?? (status ? "url(#user)" : undefined)}
     >
-        <img src={url} alt="avatar" draggable={false} loading="lazy" />
+        <img src={url} height={size} alt="avatar" draggable={false} loading="lazy" />
     </foreignObject>
     {#if status}
     <circle

@@ -34,10 +34,10 @@
     {/if}
     <OverlapPanel
         width="100vw"
-        height={(/*alert && statusBar ? "calc(" : "") +
-            (window.isNative && !window.native.getConfig().frame
+        height={(/*alert && statusBar ? "calc(" : "") + 
+            (*/window.isNative && !window.native.getConfig().frame
                 ? "calc(var(--app-height) - var(--titlebar-height))"
-                :*/ "var(--app-height)") +
+                : "var(--app-height)") +
             (/*alert && statusBar ? " - 40px)" :*/ "")}
         leftPanel={inSpecial
             ? undefined
@@ -50,10 +50,10 @@
             showIf: fixedBottomNav ? ShowIf.Always : ShowIf.Left,
             height: 50,
         }}
-        docked={Docked.Left}
+        docked={Docked.Both}
     >
         <svelte:fragment slot="left"><slot name="left" /></svelte:fragment>
-        <svelte:fragment slot="right"><slot name="right" /></svelte:fragment>
         <slot />
+        <svelte:fragment slot="right"><slot name="right" /></svelte:fragment>
     </OverlapPanel>
 </div>

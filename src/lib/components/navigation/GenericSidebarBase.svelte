@@ -15,6 +15,6 @@
     `)
 </script>
 
-<div class={Base}>
+<div class={Base} {...$$restProps}>
     <slot />
 </div>
