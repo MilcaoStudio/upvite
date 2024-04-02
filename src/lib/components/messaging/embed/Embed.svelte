@@ -9,7 +9,7 @@
 
     export let embed: API.Embed;
     let client = useClient();
-    let shrinkMedia = state.network.get("media")?.shrinkMedia;
+    let shrinkMedia = state.network.media.shrinkMedia;
     let root = getComputedStyle(document.documentElement);
     let maxWidth = parseInt(root.getPropertyValue("--embed-max-width")) / (shrinkMedia ? 2 : 1);
     let maxHeight = parseInt(root.getPropertyValue("--embed-max-height")) / (shrinkMedia ? 2 : 1);
@@ -93,6 +93,7 @@
                                     alt="embed icon"
                                     src={client.proxyFile(embed.icon_url)}
                                     draggable="false"
+                                    crossorigin="anonymous"
                                 />
                             {/if}
                             <div class="site">{embed.title}</div>
@@ -111,9 +112,10 @@
                                 <img
                                     loading="lazy"
                                     class="favicon"
-                                    alt="embed icon"
+                                    alt=""
                                     src={client.proxyFile(embed.icon_url)}
                                     draggable="false"
+                                    crossorigin="anonymous"
                                 />
                             {/if}
                             <div class="site">{embed.site_name}</div>

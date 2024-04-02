@@ -36,7 +36,7 @@
         url: string | undefined = undefined,
         onClick: ((e: MouseEvent)=>void) | null = null;
     const client = useClient();
-    let { shrinkMedia } = state.network.get("media")!
+    let { shrinkMedia } = state.network.media;
     $: if (masquerade?.avatar) {
         url = client.proxyFile(masquerade.avatar);
     } else if (override) {

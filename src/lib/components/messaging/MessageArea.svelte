@@ -19,6 +19,7 @@
     import { _autoAction } from "mobx";
     import { afterNavigate, beforeNavigate } from "$app/navigation";
     import { page } from "$app/stores";
+    import { state } from "$lib/State";
 
     export let lastId: string | undefined = undefined,
         messageId: string | null = null,
@@ -33,7 +34,7 @@
     let highlight: string | undefined;
 
     // ? Current channel state.
-    const renderer = getRenderer(channel);
+    const renderer = getRenderer(channel, state);
 
     // ? avoid re-renders
     let scrollState: ScrollState = { type: "Free" };

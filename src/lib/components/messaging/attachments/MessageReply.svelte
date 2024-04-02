@@ -7,12 +7,13 @@
     import UserShort from "$lib/components/user/UserShort.svelte";
     import BxFile from "svelte-boxicons/BxFile.svelte";
     import Markdown from "$lib/markdown/Markdown.svelte";
+    import { state } from "$lib/State";
 
     export let index: number,
         channel: Channel | undefined = undefined,
         id: string,
         mentions: string[];
-    $: view = channel && getRenderer(channel);
+    $: view = channel && getRenderer(channel, state);
     let message: Message | undefined;
 
     $: {

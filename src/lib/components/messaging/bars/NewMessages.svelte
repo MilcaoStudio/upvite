@@ -9,6 +9,7 @@
     import { translate } from "$lib/i18n";
     import { t } from "svelte-i18n";
     import BxUpArrowAlt from "svelte-boxicons/BxUpArrowAlt.svelte";
+    import { state } from "$lib/State";
 
 
     export let channel: Channel, lastId: string | undefined = undefined;
@@ -26,7 +27,7 @@
         } catch (err) {}
     }
 
-    const renderer = getRenderer(channel);
+    const renderer = getRenderer(channel, state);
 </script>
 
 <svelte:document on:keydown={onKeyDown} />

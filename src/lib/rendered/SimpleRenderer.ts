@@ -3,13 +3,13 @@ import { runInAction } from "mobx";
 import { SMOOTH_SCROLL_ON_RECEIVE } from "./Singleton";
 import type { RendererRoutines } from "./types";
 
-const MAX_MESSAGES = 100;
+const MAX_MESSAGES = 150;
 export const SimpleRenderer: RendererRoutines = {
     init: async (renderer, nearby, smooth) => {
         if (renderer.channel.client.websocket.connected) {
             if (nearby)
                 renderer.channel
-                    .fetchMessagesWithUsers({ nearby, limit: 100 })
+                    .fetchMessagesWithUsers({ nearby, limit: renderer.limit })
                     .then(({ messages }) => {
                         messages.sort((a, b) => a._id.localeCompare(b._id));
 
@@ -27,7 +27,7 @@ export const SimpleRenderer: RendererRoutines = {
                     });
             else
                 renderer.channel
-                    .fetchMessagesWithUsers({})
+                    .fetchMessagesWithUsers({limit: renderer.limit})
                     .then(({ messages }) => {
                         messages.reverse();
 
@@ -102,6 +102,7 @@ export const SimpleRenderer: RendererRoutines = {
         const { messages: data } =
             await renderer.channel.fetchMessagesWithUsers({
                 before: renderer.messages[0]._id,
+                limit: renderer.limit,
             });
 
         runInAction(() => {
@@ -113,7 +114,7 @@ export const SimpleRenderer: RendererRoutines = {
             data.reverse();
             renderer.messages = [...data, ...renderer.messages];
 
-            if (data.length < 50) {
+            if (data.length < renderer.limit) {
                 renderer.atTop = true;
             }
 

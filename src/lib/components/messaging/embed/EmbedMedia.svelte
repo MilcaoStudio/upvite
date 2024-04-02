@@ -8,7 +8,7 @@
         width = 0,
         height: number;
     let client = useClient();
-    let autoplay = state.network.get("media")?.autoplay;
+    let autoplay = state.network.media.autoplay;
     
 </script>
 

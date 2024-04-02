@@ -3,6 +3,7 @@ import { action, computed, makeAutoObservable } from "mobx";
 
 export interface Data {
     media: MediaOptions;
+    channel: ChannelOptions;
 }
 
 interface MediaOptions {
@@ -10,12 +11,20 @@ interface MediaOptions {
     autoplay: boolean;
 }
 
+interface ChannelOptions {
+    messagesLimit: number;
+}
+
+type Value<T extends keyof Data> = Data[T];
+
 export default class NetworkOptions implements Persistent<Data> {
 
     private mediaOptions: MediaOptions;
+    private channelOptions: ChannelOptions;
 
     constructor(){
         this.mediaOptions = { shrinkMedia: false, autoplay: true };
+        this.channelOptions = { messagesLimit: 100 };
         makeAutoObservable(this);
     }
 
@@ -26,25 +35,34 @@ export default class NetworkOptions implements Persistent<Data> {
     toJSON() {
         return {
             media: this.mediaOptions,
+            channel: this.channelOptions,
         }
     }
 
-    @computed get(key: string) {
+    @computed get media() {
+        return this.mediaOptions;
+    }
+
+    @computed get channel() {
+        return this.channelOptions;
+    }
+
+    @action set(key: "media" | "channel", value: Partial<MediaOptions|ChannelOptions>) {
         switch(key) {
             case "media":
-                return this.mediaOptions;
-        }
-    }
-
-    @action set(key: string, value: Partial<MediaOptions>) {
-        if (key == "media") {
-            this.mediaOptions = {...this.mediaOptions, ...value}
+                this.mediaOptions = {...this.mediaOptions, ...value};
+                break;
+            case "channel":
+                this.channelOptions = {...this.channelOptions, ...value};
         }
     }
 
     @action hydrate(data: Data): void {
         if (data.media) {
             this.mediaOptions = data.media;
+        }
+        if (data.channel) {
+            this.channelOptions = data.channel;
         }
     }
 

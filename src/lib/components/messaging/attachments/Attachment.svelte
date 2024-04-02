@@ -21,7 +21,7 @@
     let MAX_ATTACHMENT_HEIGHT = parseInt(
         style.getPropertyValue("--attachment-max-height"),
     );
-    let { shrinkMedia } = state.network.get("media")!
+    let { shrinkMedia } = state.network.media;
     let url = client.generateFileURL(
         attachment,
         { width: shrinkMedia ? MAX_ATTACHMENT_WIDTH / 2 : MAX_ATTACHMENT_WIDTH * 1.5},

@@ -3,6 +3,7 @@ import type { Channel, Message, Nullable } from "revolt.js";
 
 import { SimpleRenderer } from "./SimpleRenderer";
 import type { RendererRoutines, ScrollState } from "./types";
+import type State from "$lib/State";
 
 export const SMOOTH_SCROLL_ON_RECEIVE = false;
 
@@ -14,6 +15,7 @@ export class ChannelRenderer {
     atTop: Nullable<boolean> = null;
     atBottom: Nullable<boolean> = null;
     messages: Message[] = [];
+    limit: number;
 
     currentRenderer: RendererRoutines = SimpleRenderer;
 
@@ -22,8 +24,9 @@ export class ChannelRenderer {
     scrollPosition = 0;
     scrollAnchored = false;
 
-    constructor(channel: Channel) {
+    constructor(channel: Channel, currentState: State) {
         this.channel = channel;
+        this.limit = currentState.network.channel.messagesLimit;
 
         makeAutoObservable(this, {
             channel: false,
@@ -210,10 +213,10 @@ export class ChannelRenderer {
 
 const renderers: Record<string, ChannelRenderer> = {};
 
-export function getRenderer(channel: Channel) {
+export function getRenderer(channel: Channel, currentState: State) {
     let renderer = renderers[channel._id];
     if (!renderer) {
-        renderer = new ChannelRenderer(channel);
+        renderer = new ChannelRenderer(channel, currentState);
         renderers[channel._id] = renderer;
     }
 
