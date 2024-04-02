@@ -24,7 +24,8 @@
         queued: QueuedMessage | undefined = undefined,
         highlight = false,
         contrast = false,
-        hideReply = false;
+        hideReply = false,
+        compact = false;
     const Wrapper = cx(
         "Wrapper",
         css`
@@ -90,8 +91,8 @@
                     : undefined}
                 failed={typeof queued?.error != "undefined"}
             >
-                <MessageInfo click={typeof head != "undefined"}>
-                    {#if head}
+                <MessageInfo click={typeof head != "undefined"} showAlways={compact}>
+                    {#if head && !compact}
                         <ContextMenu
                             data={{
                                 user: user?._id,
@@ -113,8 +114,20 @@
                         <MessageDetail {message} position="left" />
                     {/if}
                 </MessageInfo>
+                {#if compact}
+                        <span class="detail" style:margin-right=".5rem">
+                            <Username
+                                {user}
+                                class="author"
+                                showServerIdentity
+                                onClick={handleUserClick}
+                                masquerade={message.masquerade}
+                                override={message.webhook?.name}
+                            />
+                        </span>
+                {/if}
                 <div class="MessageContent">
-                    {#if head}
+                    {#if head && !compact}
                         <span class="detail">
                             <Username
                                 {user}

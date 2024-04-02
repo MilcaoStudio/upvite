@@ -136,7 +136,7 @@
                     createElement(Message, {
                         message,
                         head,
-                        highlight: highlight == message._id,
+                        highlight: highlight == message._id
                     }),
                 );
             }
