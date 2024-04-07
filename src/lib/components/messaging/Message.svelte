@@ -20,12 +20,12 @@
             webhook?: { name: string; avatar?: string };
         },
         head = false,
-        replacement: string | undefined = undefined,
         queued: QueuedMessage | undefined = undefined,
         highlight = false,
         contrast = false,
         hideReply = false,
         compact = false;
+    
     const Wrapper = cx(
         "Wrapper",
         css`
@@ -57,7 +57,6 @@
 
     let mouseHover = false;
     let reactionOpen = false;
-    $: replacement && (mouseHover = false);
 </script>
 
 <div class={Wrapper} id={message._id}>
@@ -140,11 +139,10 @@
                             <MessageDetail {message} position="top" />
                         </span>
                     {/if}
-                    {#if replacement}
-                        {replacement}
-                    {:else}
+                    <!-- Slot default for message editor or markdown -->
+                    <slot>
                         <Markdown {content} />
-                    {/if}
+                    </slot>
 
                     <!--InviteList-->
                     {#if queued?.error}

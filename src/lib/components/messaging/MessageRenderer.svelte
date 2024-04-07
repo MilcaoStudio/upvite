@@ -13,11 +13,15 @@
     import MessageDivider from "../indicators/MessageDivider.svelte";
     import Message from "./Message.svelte";
     import { css, cx } from "@emotion/css";
-    import { autorun } from "mobx";
+    import { autorun, runInAction, spy } from "mobx";
     import {
         createElement,
+        type SvelteElement,
         type SvelteNode,
     } from "$lib/markdown/runtime/svelteRuntime";
+    import MessageEditor from "./MessageEditor.svelte";
+    import { internalEmit, internalSubscribe } from "$lib/InternalEmitter";
+    import Markdown from "$lib/markdown/Markdown.svelte";
 
     export let lastId: string | undefined = undefined,
         highlight: string | undefined = undefined,
@@ -39,7 +43,7 @@
     const client = useClient()!;
     const userId = client.user!._id;
     const queue = state.queue;
-    let render: SvelteNode[] = [];
+    let render: SvelteElement[] = [];
 
     /*
     $: if (renderer) {
@@ -51,6 +55,12 @@
     let previous: IMessage | undefined;
     let head = true;
     let divided = false;
+    let editing: string | null = null;
+
+    function stopEditing() {
+        editing = null;
+        internalEmit("TextArea", "focus", "message");
+    }
 
     function compare(
         current: string,
@@ -113,7 +123,34 @@
         blocked = 0;
     }
 
-    autorun(() => {
+    $: autorun(() => {
+        function editLast() {
+            if (renderer.state != "RENDER") return;
+            for (let i = renderer.messages.length - 1; i >= 0; i--) {
+                if (renderer.messages[i].author_id == userId) {
+                    editing = renderer.messages[i]._id;
+                    internalEmit("MessageArea", "jump_to_bottom");
+                    return;
+                }
+            }
+        }
+
+        const subs = [
+            internalSubscribe("MessageRenderer", "edit_last", editLast),
+            internalSubscribe(
+                "MessageRenderer",
+                "edit_message",
+                (e) => (editing = e as string),
+            ),
+        ];
+        return () => subs.forEach((unsub) => unsub());
+    });
+
+    $: autorun(renderMessages);
+
+    $: renderMessages(), editing;
+
+    function renderMessages() {
         render = [];
         for (const message of renderer.messages) {
             if (previous) {
@@ -133,18 +170,38 @@
                 if (blocked > 0) pushBlocked();
 
                 render.push(
-                    createElement(Message, {
-                        message,
-                        head,
-                        highlight: highlight == message._id
-                    }),
+                    createElement(
+                        Message,
+                        {
+                            message,
+                            head,
+                            highlight: highlight == message._id,
+                        },
+                        // FIXME: can this be faster?
+                        editing == message._id ? createElement(MessageEditor, {message, onFinish: stopEditing}) : createElement(Markdown, {content: message.content})
+                    ),
                 );
             }
 
             previous = message;
         }
         if (blocked > 0) pushBlocked();
-    });
+    }
+    //$: editing && spy((ev)=>ev.spyReportStart);
+    /*
+    $: {
+        const messageIndex = render.findIndex(
+            (m) => m.type == Message && m.props?.message._id == editing,
+        );
+        if (messageIndex != -1) {
+            const messageRef = render[messageIndex];
+            // Copies props from ref into new element
+            render[messageIndex] = createElement(Message, messageRef.props, createElement(MessageEditor, {
+                    message: messageRef.props?.message,
+                    onFinish: stopEditing,
+                }),);
+        }
+    }*/
 
     autorun(() => {
         const nonces = renderer.messages.map((x) => x.nonce);
