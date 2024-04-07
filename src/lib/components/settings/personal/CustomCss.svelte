@@ -4,16 +4,19 @@
     import H3 from "$lib/components/atoms/heading/H3.svelte";
     import FileReader from "$lib/controllers/FileReader.svelte";
     import FileWriter from "$lib/controllers/FileWriter.svelte";
+    import { autorun } from "mobx";
     import { t } from "svelte-i18n";
     import { validateText } from "w3c-css-validator";
 
     let theme = state.settings.theme;
-    let value = theme.getCSS();
+    $: value = theme.getCSS();
+    $: disabled = value?.trim() == theme.getCSS()?.trim();
     let enableValidator = true;
     let showWarnings = true;
     let syncRef: HTMLButtonElement | null = null;
     function sync() {
         theme.setCSS(value?.trim());
+        disabled = true;
     }
 </script>
 
@@ -46,7 +49,7 @@
 {/if}
 
 <div class="Actions">
-    <button bind:this={syncRef} disabled={theme.getCSS()?.trim() == value?.trim()} on:click={sync}
+    <button bind:this={syncRef} {disabled} on:click={sync}
         >Apply changes</button
     >
     <FileReader
