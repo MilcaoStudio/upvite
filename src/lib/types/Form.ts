@@ -36,7 +36,7 @@ export function emptyValue(type: Type) {
 /**
  * Multi or single-select choice entry
  */
-type Choice = {
+export type Choice = {
     value: string,
     name: string
 };
