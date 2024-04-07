@@ -28,7 +28,7 @@
         SMOOTH_SCROLL_ON_RECEIVE,
         getRenderer,
     } from "$lib/rendered/Singleton";
-    import { defer, isTouchscreenDevice, takeError } from "$lib";
+    import { debounce, defer, isTouchscreenDevice, takeError } from "$lib";
     import Autocomplete, { useAutoComplete } from "../Autocomplete.svelte";
     import PermissionTooltip from "../atoms/PermissionTooltip.svelte";
     import { Flyout } from "fluent-svelte";
@@ -125,7 +125,7 @@
     // Tests for code block delimiters (``` at start of line)
     const RE_CODE_DELIMITER = new RegExp("^```", "gm");
 
-    const renderer = getRenderer(channel);
+    const renderer = getRenderer(channel, state);
 
     function startTyping() {
         if (typeof typing == "number" && +new Date() < typing) return;
@@ -140,6 +140,7 @@
         }
     }
 
+    $: debounceStopTyping = debounce(stopTyping, 1000);
     function stopTyping(force?: boolean) {
         if (force || typing) {
             const ws = client.websocket;
@@ -543,6 +544,12 @@
 
                 if (onKeyDown(e)) return;
 
+                if (e.key == "ArrowUp" && !state.draft.has(channel._id)) {
+                    e.preventDefault();
+                    internalEmit("MessageRenderer", "edit_last");
+                    return;
+                }
+
                 if (
                     !e.shiftKey &&
                     !e.isComposing &&
@@ -552,6 +559,25 @@
                     e.preventDefault();
                     return send();
                 }
+
+                if (e.key == "Escape") {
+                    if (replies.length) {
+                        replies = replies.slice(0, -1);
+                    } else if (
+                        uploadState.type == "attached" &&
+                        uploadState.files.length
+                    ) {
+                        uploadState = {
+                            type:
+                                uploadState.files.length > 1
+                                    ? "attached"
+                                    : "none",
+                            files: uploadState.files.slice(0, -1),
+                        };
+                    }
+                }
+
+                debounceStopTyping(true);
             }}
             {onFocus}
             {onBlur}
