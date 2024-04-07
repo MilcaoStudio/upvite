@@ -169,8 +169,10 @@
     <img
         class="embed image"
         alt="external"
-        style:width={size.width}
-        style:heigth={size.height}
+        style:width="{size.width}px"
+        style:height="{size.height}px"
+        style:max-width="{maxWidth}px"
+        style:max-height="{maxHeight}px"
         src={client.proxyFile(embed.url)}
         loading="lazy"
         on:click={() =>
@@ -185,8 +187,10 @@
     <!-- svelte-ignore a11y-media-has-caption -->
     <video
         class="embed image"
-        style:width={size.width}
-        style:height={size.height}
+        style:width="{size.width}px"
+        style:height="{size.height}px"
+        style:max-width="{maxWidth}px"
+        style:max-height="{maxHeight}px"
         src={client.proxyFile(embed.url)}
         controls
     />
