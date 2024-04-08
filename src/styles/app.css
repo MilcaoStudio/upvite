@@ -490,3 +490,12 @@ div.TitlebarBase {
     border-radius: var(--border-radius-small) !important;
     background-color: rgba(var(--tertiary-background-rgb), max(0.7, 0.6)) !important;
 }
+
+.ComboBox{
+    box-shadow: 0 0 0 1.5pt var(--foreground) !important;
+    transition: 0.15s ease-in-out all !important;
+}
+.ComboBox:hover, .ComboBox:active{
+    box-shadow: 0 0 0 1.5pt var(--accent) !important;
+    transition: 0.15s ease-in-out all !important;
+}

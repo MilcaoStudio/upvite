@@ -8,8 +8,8 @@
         flex-direction: column;
         background: var(--secondary-background);
         border-radius: var(--border-radius-inner);
-        margin: 6px 0px 6px 0px;
-        overflow: hidden;
+        margin: 6px;
+        overflow-x: hidden;
         position: relative;
 
     `)
