@@ -62,7 +62,7 @@
 
                 setTimeout(
                     () =>
-                        ref.scrollTo({
+                        ref?.scrollTo({
                             behavior: "smooth",
                             top: ref.scrollHeight,
                         }),
@@ -75,7 +75,7 @@
 
                 setScrollState({ type: "Free" });
             } else if (scrollState.type == "OffsetTop") {
-                ref.scrollTo({
+                ref?.scrollTo({
                     behavior: "instant",
                     top: Math.max(
                         101,
@@ -88,7 +88,7 @@
                 });
                 setScrollState({ type: "Free" });
             } else if (scrollState.type == "ScrollTop") {
-                ref.scrollTo({ behavior: "instant", top: scrollState.y });
+                ref?.scrollTo({ behavior: "instant", top: scrollState.y });
                 setScrollState({ type: "Free" });
             }
 
