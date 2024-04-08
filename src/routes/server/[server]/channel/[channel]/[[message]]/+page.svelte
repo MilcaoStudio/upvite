@@ -1,4 +1,3 @@
-<!---TODO--->
 <script lang="ts">
     import { goto } from "$app/navigation";
     import { state } from "$lib/State";
@@ -7,7 +6,7 @@
     import { useClient } from "$lib/controllers/ClientController";
     import type { LayoutData } from "./$types";
     import { isTouchscreenDevice } from "$lib";
-    import { SIDEBAR_CHANNELS } from "$lib/stores/Layout";
+    import { SIDEBAR_CHANNELS, Viewport } from "$lib/stores/Layout";
     import SidebarBase from "$lib/components/navigation/SidebarBase.svelte";
     import ServerSidebar from "$lib/components/navigation/left/ServerSidebar.svelte";
     import ServerListSidebar from "$lib/components/navigation/left/ServerListSidebar.svelte";
@@ -44,17 +43,18 @@
 
     $: channel = client.channels.get(id);
     $: document.title = `#${channel?.name ?? ""} - ${server?.name ?? ""} | Uprising`
-    let open = false;
+    let openLeft = false;
     $: autorun(()=>{
-        open = isTouchscreenDevice || state.layout.getSectionState(SIDEBAR_CHANNELS, true);
+        openLeft = isTouchscreenDevice || state.layout.getSectionState(SIDEBAR_CHANNELS, true);
     });
+    let openRight = state.layout.getViewport() != Viewport.SMALL;
 </script>
 
 <UprisingApp>
     <SidebarBase slot="left">
         <ServerListSidebar />
         {#key channel}
-            {#if open && server}
+            {#if openLeft && server}
                 <ServerSidebar {server} {channel} />
             {/if}
         {/key}
@@ -64,6 +64,10 @@
             <TextChannel {channel} {message} />
         {/if}
     {/key}
-    <ServerMemberSidebar {channel} slot="right" />
+    <svelte:fragment slot="right">
+        {#if openRight}
+            <ServerMemberSidebar {channel} />
+        {/if}
+    </svelte:fragment>
 </UprisingApp>
 
