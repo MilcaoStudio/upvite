@@ -9,6 +9,7 @@
     import { useStatusColor } from "../user/UserIcon.svelte";
     import { modalController } from "../modals/ModalController";
     import HeaderActions from "./HeaderActions.svelte";
+    import Markdown from "$lib/markdown/Markdown.svelte";
 
     export let channel: Channel;
     let icon: ComponentType, recipient: User | null = null;
@@ -44,11 +45,11 @@
             <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
             <span class="desc" role="complementary" on:click={()=>modalController.push({type: "channel_info", channel})} on:keydown={()=>modalController.push({type: "channel_info", channel})}>
                 <!--Markdown here-->
-                {channel.description.split("\n")[0] ?? ""}
+                <Markdown content={channel.description} />
             </span>
         {/if}
     </div>
-    <HeaderActions />
+    <HeaderActions {channel} />
 </PageHeader>
 <style>
     div.Info {
