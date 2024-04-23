@@ -27,23 +27,24 @@
     import Notifications from "$lib/components/settings/personal/notifications.svelte";
     import Devmode from "$lib/components/settings/personal/devmode.svelte";
     import { fade } from "svelte/transition";
+    import { Viewport } from "$lib/stores/Layout.js";
     
     const Pages: Record<string, ComponentType> = {
-        Account: Account,
-        Profile: Profile,
-        Appearance: Appearance,
-        Notifications: Notifications,
-        Chat: Chat,
-        Language: Language,
-        Devmode: Devmode,
-        Tf2: Tf2
+        account: Account,
+        profile: Profile,
+        appearance: Appearance,
+        notifications: Notifications,
+        chat: Chat,
+        language: Language,
+        devmode: Devmode,
+        tf2: Tf2
     }
     const client = useClient();
     export let data;
     let closing = false;
     $: tab = data.tab;
-    if (!tab) {
-        goto("/settings/Profile");
+    if (!tab && state.layout.getViewport() != Viewport.SMALL) {
+        goto("/settings/profile");
     }
 
     function exitSettings() {
@@ -65,7 +66,7 @@
     <div class="flex-column">
         <Scroller>
             <Category>User settings</Category>
-            <Item href="Account" active={tab == "Account"}>
+            <Item href="account" active={tab == "account"}>
                 <svg slot="svg" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-lock">
                     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                     <path d="M5 13a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v6a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-6z" />
@@ -74,7 +75,7 @@
                   </svg>
                 Account
             </Item>
-            <Item href="Profile" active={tab == "Profile"}>
+            <Item href="profile" active={tab == "profile"}>
                 <svg
                     slot="svg"
                     xmlns="http://www.w3.org/2000/svg"
@@ -99,7 +100,7 @@
 
 
             <Category>User preferences</Category>
-            <Item href="Appearance" active={tab == "Appearance"}>
+            <Item href="appearance" active={tab == "appearance"}>
                 <svg
                     slot="svg"
                     xmlns="http://www.w3.org/2000/svg"
@@ -124,7 +125,7 @@
                 >
                 Appearance</Item
             >
-            <Item href="Notifications" active={tab == "Notifications"}>
+            <Item href="notifications" active={tab == "notifications"}>
                 <svg
                     slot="svg"
                     xmlns="http://www.w3.org/2000/svg"
@@ -143,7 +144,7 @@
                 >
                 Notifications</Item
             >
-            <Item href="Chat" active={tab == "Chat"}>
+            <Item href="chat" active={tab == "chat"}>
                 <svg
                     slot="svg"
                     xmlns="http://www.w3.org/2000/svg"
@@ -164,7 +165,7 @@
                 >
                 Chat</Item
             >
-            <Item href="Language" active={tab == "Language"}>
+            <Item href="language" active={tab == "language"}>
                 <svg
                     slot="svg"
                     xmlns="http://www.w3.org/2000/svg"
@@ -185,7 +186,7 @@
                 >
                 Language</Item
             >
-            <Item href="Devmode" active={tab == "Devmode"}>
+            <Item href="devmode" active={tab == "devmode"}>
                 <svg
                     slot="svg"
                     xmlns="http://www.w3.org/2000/svg"
@@ -206,7 +207,7 @@
                 >
                 Dev mode</Item
             >
-            <Item href="Tf2" active={tab == "TF2"}>
+            <Item href="tf2" active={tab == "tF2"}>
                 <svg
                     slot="svg"
                     xmlns="http://www.w3.org/2000/svg"
