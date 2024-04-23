@@ -26,7 +26,7 @@
 	display: grid;
 	overflow-x: scroll;
 	overflow-y: hidden;
-	grid-template-rows: 1;
+	grid-template-rows: 1fr;
 	-ms-scroll-snap-type: x mandatory;
 	scroll-snap-type: x mandatory;
 	scrollbar-width: none;

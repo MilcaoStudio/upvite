@@ -41,6 +41,7 @@
             typeof bottomNav?.showIf == "undefined"
                 ? ShowIf.Both
                 : bottomNav.showIf;
+        console.log("ShowIf", showIf);
         if (showIf & ShowIf.Always) {
             bEl.style.top = "";
             return;
@@ -130,7 +131,7 @@
         </div>
         {#if bottomNav}
             <div class="nav" style:bottom={height}>
-                <div bind:this={bottomNavRef} style:width style:height>
+                <div bind:this={bottomNavRef} style:height={height} style:width>
                     <svelte:component this={bottomNav.component} />
                 </div>
             </div>

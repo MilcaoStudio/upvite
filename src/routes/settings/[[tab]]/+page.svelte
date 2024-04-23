@@ -29,6 +29,7 @@
     import { Viewport } from "$lib/stores/Layout.js";
     import SettingsMenu from "$lib/components/settings/common/SettingsMenu.svelte";
     import { t } from "svelte-i18n";
+    import { autorun } from "mobx";
 
     const Pages: Record<string, ComponentType> = {
         account: Account,
@@ -45,7 +46,10 @@
     let closing = false;
     $: tab = data.tab;
 
-    let isVertical = true;
+    let isVertical = state.layout.getViewport() == Viewport.SMALL;
+    $: autorun(() => {
+        isVertical = state.layout.getViewport() == Viewport.SMALL;
+    });
     if (!tab && !isVertical) {
         goto("/settings/profile");
     }
