@@ -38,8 +38,9 @@
     }
 </script>
 
-<ChannelHeader {channel} />
+
 <div class="ChannelMain" data-component="channel">
+    <ChannelHeader {channel} />
     <!--<ErrorBoundary section="renderer">-->
         <div class="ChannelContent">
             <NewMessages {channel} {lastId} />
@@ -54,9 +55,6 @@
                 <MessageBox channel={channel} />-->
         </div>
     <!--</ErrorBoundary>-->
-    {#if !isTouchscreenDevice && layout.getSectionState(SIDEBAR_MEMBERS, true)}
-        <RightSidebar />
-    {/if}
 </div>
 
 <style>
