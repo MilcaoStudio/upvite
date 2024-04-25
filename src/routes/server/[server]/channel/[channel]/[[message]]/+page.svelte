@@ -7,9 +7,6 @@
     import type { LayoutData } from "./$types";
     import { isTouchscreenDevice } from "$lib";
     import { SIDEBAR_CHANNELS, Viewport } from "$lib/stores/Layout";
-    import SidebarBase from "$lib/components/navigation/SidebarBase.svelte";
-    import ServerSidebar from "$lib/components/navigation/left/ServerSidebar.svelte";
-    import ServerListSidebar from "$lib/components/navigation/left/ServerListSidebar.svelte";
     import { autorun } from "mobx";
     import ServerMemberSidebar from "$lib/components/navigation/right/ServerMemberSidebar.svelte";
     const client = useClient();
@@ -42,32 +39,13 @@
     }
 
     $: channel = client.channels.get(id);
-    $: document.title = `#${channel?.name ?? ""} - ${server?.name ?? ""} | Uprising`
-    let openLeft = false;
-    $: autorun(()=>{
-        openLeft = isTouchscreenDevice || state.layout.getSectionState(SIDEBAR_CHANNELS, true);
-    });
-    let openRight = state.layout.getViewport() != Viewport.SMALL;
 </script>
 
 <UprisingApp>
-    <SidebarBase slot="left">
-        <ServerListSidebar />
-        {#key channel}
-            {#if openLeft && server}
-                <ServerSidebar {server} {channel} />
-            {/if}
-        {/key}
-    </SidebarBase>
     {#key channel}
         {#if channel}
             <TextChannel {channel} {message} />
         {/if}
     {/key}
-    <svelte:fragment slot="right">
-        {#if openRight}
-            <ServerMemberSidebar {channel} />
-        {/if}
-    </svelte:fragment>
 </UprisingApp>
 

@@ -8,7 +8,7 @@
     import { isTouchscreenDevice } from "$lib";
     import { useStatusColor } from "../user/UserIcon.svelte";
     import { modalController } from "../modals/ModalController";
-    import HeaderActions from "./HeaderActions.svelte";
+    import HeaderActions from "./actions/HeaderActions.svelte";
     import Markdown from "$lib/markdown/Markdown.svelte";
 
     export let channel: Channel;

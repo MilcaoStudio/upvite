@@ -8,12 +8,14 @@
     import LeftSidebar from "./navigation/LeftSidebar.svelte";
     import RightSidebar from "./navigation/RightSidebar.svelte";
     import BottomNavigation from "./navigation/BottomNavigation.svelte";
+    import { state } from "$lib/State";
+    import { Viewport } from "$lib/stores/Layout";
 
     // Make true on worker alert
     // let showStatusBar = false;
     let path: string, fixedBottomNav: boolean, inChannel: boolean, inServer: boolean, inSpecial: boolean;
     $: {
-        path = $navigating?.to?.url.pathname || "";
+        path = $page.url.pathname;
         fixedBottomNav =
             path === "/" ||
             path === "/settings" ||
@@ -25,7 +27,8 @@
             (path.startsWith("/friends") && isTouchscreenDevice) ||
             path.startsWith("/invite") ||
             path.includes("/settings");
-    }
+    };
+    let isVertical = state.layout.getViewport() == Viewport.SMALL;
 </script>
 
 <div class="app-container">
@@ -50,10 +53,8 @@
             showIf: fixedBottomNav ? ShowIf.Always : ShowIf.Left,
             height: 50,
         }}
-        docked={Docked.Both}
+        docked={isVertical ? Docked.None: Docked.Both}
     >
-        <svelte:fragment slot="left"><slot name="left" /></svelte:fragment>
         <slot />
-        <svelte:fragment slot="right"><slot name="right" /></svelte:fragment>
     </OverlapPanel>
 </div>
