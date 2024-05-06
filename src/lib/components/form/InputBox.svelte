@@ -1,8 +1,11 @@
 <script lang="ts">
     import { css, cx } from "@emotion/css";
+    import { t } from "svelte-i18n";
     import type { ChangeEventHandler } from "svelte/elements";
 
-    export let palette: "primary" | "secondary" = "primary", onChange: ChangeEventHandler<HTMLInputElement> = function(){};
+    export let palette: "primary" | "secondary" = "primary", onChange: ChangeEventHandler<HTMLInputElement> = function(){}, type: HTMLInputElement["type"];
+    let showPassword = false;
+    $: revealText = showPassword ? $t("app.special.modals.actions.hide") : $t("app.special.modals.actions.reveal");
     $: InputBox = cx(
         "InputBox",
         css`
@@ -42,10 +45,36 @@
             }
         }`,
     );
+
+    function togglePasswordReveal() {
+        showPassword = !showPassword;
+        // "spy" type does not exist, then any browser has to render this type as "text" type
+        type = showPassword ? "spy" : "password";
+    }
 </script>
 
 <!--TextBox is not recommended because it does not listen to change events-->
 <div class="text-box-container">
-    <input class={InputBox} {...$$restProps} on:change={onChange} on:keyup={onChange}  />
+    <input class={InputBox} {type} {...$$restProps} on:change={onChange} on:keyup={onChange}  />
+    {#if type == "password" || type == "spy"}
+        <!-- svelte-ignore a11y-no-static-element-interactions -->
+        <!-- svelte-ignore a11y-missing-attribute -->
+        <span class="eye">
+            <a on:click={togglePasswordReveal} on:keydown={togglePasswordReveal}>{revealText}</a>
+        </span>
+        
+    {/if}
     <div class="text-box-underline" />
 </div>
+
+<style>
+    .text-box-container {
+        position: relative;
+    }
+    .eye {
+        position: absolute;
+        right: 0px;
+        top: 0px;
+        padding: 0.75rem;
+    }
+</style>
