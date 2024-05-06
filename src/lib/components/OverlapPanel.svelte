@@ -115,6 +115,7 @@
                 <svelte:component
                     this={leftPanel.component}
                     style={`height: ${height};`}
+                    snap
                 >
                     <slot name="left" />
                 </svelte:component>
@@ -124,6 +125,7 @@
                 <svelte:component
                     this={rightPanel.component}
                     style={`height: ${height};`}
+                    snap
                 >
                     <slot name="right" />
                 </svelte:component>

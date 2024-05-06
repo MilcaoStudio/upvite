@@ -9,6 +9,7 @@
     import { page } from "$app/stores";
     import { useClient } from "$lib/controllers/ClientController";
 
+    export let snap = false;
     $: channel_id = $page.params.channel;
     $: server_id = $page.params.server;
     let client = useClient();
@@ -21,19 +22,19 @@
           : `Uprising`;
     let openLeft = state.layout.getSectionState(
         SIDEBAR_CHANNELS,
-        state.layout.getViewport() != Viewport.SMALL,
+        true,
     );
     $: autorun(() => {
         openLeft = state.layout.getSectionState(
             SIDEBAR_CHANNELS,
-            state.layout.getViewport() != Viewport.SMALL,
+            true,
         );
     });
 </script>
 
 <SidebarBase>
     <ServerListSidebar />
-    {#if openLeft}
+    {#if openLeft || snap}
         {#if server && channel}
             {#key channel}
                 <ServerSidebar {server} {channel} />

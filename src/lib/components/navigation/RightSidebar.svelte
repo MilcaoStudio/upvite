@@ -7,6 +7,7 @@
     import GroupMemberSidebar from "./right/GroupMemberSidebar.svelte";
     import ServerMemberSidebar from "./right/ServerMemberSidebar.svelte";
 
+    export let snap = false;
     let client = useClient();
     $: server_id = $page.params.server;
     $: server = client.servers.get(server_id);
@@ -16,7 +17,7 @@
     $: channel = client.channels.get(channel_id);
 </script>
 
-{#if openRight}
+{#if openRight || snap}
    {#if server}
         <ServerMemberSidebar {channel} />
     {:else if channel}
