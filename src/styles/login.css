@@ -181,9 +181,8 @@
     }
 
     .login .form {
-        border: unset;
+        padding: 1rem;
         margin-inline-start: 0;
-        padding: 0;
         max-width: unset;
         box-shadow: unset;
     }

@@ -2,7 +2,7 @@
     color-scheme: dark;
     background-color: var(--primary-background);
 
-    --app-height: 100vh;
+    --app-height: 100svh;
     --light: false;
 
     --text-size: 14px;
@@ -242,7 +242,6 @@ foreignObject > svg {
 .app-container {
     background-size: cover;
     background-position: center;
-    position: fixed;
 }
 
 .status-bar {
