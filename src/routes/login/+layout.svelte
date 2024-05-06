@@ -1,6 +1,6 @@
 <script lang="ts">
     import CheckAuth from '$lib/controllers/CheckAuth.svelte';
-    import '../../styles/login.css'
+    import '../../styles/login.css';
 </script>
 
 <CheckAuth>

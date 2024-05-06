@@ -2,7 +2,6 @@
   import LoginForm from '$lib/components/form/LoginForm.svelte';
   import { clientController } from '$lib/controllers/ClientController';
   import { _ } from 'svelte-i18n';
-
 </script>
 
 <LoginForm page="login" callback={clientController.login}>

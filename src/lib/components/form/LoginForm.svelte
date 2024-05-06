@@ -50,7 +50,7 @@
         {:else}
         <div class="title">{$_('login.successful_registration')}</div>
         {/if}
-        <a href="/login">{$_('login.remembered')}</a>
+        <a href="/">{$_('login.remembered')}</a>
     </div>
     {:else if loading}
         <Preloader type='spinner'/>
