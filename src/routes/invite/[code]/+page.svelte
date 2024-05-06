@@ -125,7 +125,7 @@
                     variant="standard"
                     on:click={async () => {
                         if (!session) {
-                            return goto("/");
+                            return goto("/login?invite=" + invite.code);
                         }
                         processing = true;
                         try {
