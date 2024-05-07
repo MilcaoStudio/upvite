@@ -1,20 +1,14 @@
 <script lang="ts">
     import { internalSubscribe } from "$lib/InternalEmitter";
-    import { state } from "$lib/State";
     import { reaction } from "mobx";
     import type { Channel } from "revolt.js";
     import ChannelHeader from "./ChannelHeader.svelte";
-    import { ErrorBoundary } from "$lib/error/errorBoundary";
     import NewMessages from "../messaging/bars/NewMessages.svelte";
-    import { isTouchscreenDevice } from "$lib";
-    import { SIDEBAR_MEMBERS } from "$lib/stores/Layout";
-    import RightSidebar from "../navigation/RightSidebar.svelte";
     import MessageArea from "../messaging/MessageArea.svelte";
     import MessageBox from "../messaging/MessageBox.svelte";
     import JumpToBottom from "../messaging/bars/JumpToBottom.svelte";
 
     export let channel: Channel, message: string | null = null;
-    const layout = state.layout;
 
     let lastId: string | undefined;
     internalSubscribe("NewMessages", "hide", ()=>lastId = undefined)
@@ -47,12 +41,6 @@
             <MessageArea {channel} {lastId} messageId={message} />
             <JumpToBottom {channel} />
             <MessageBox {channel} />
-            <!--<VoiceHeader id={channel._id} />
-                <NewMessages channel={channel} {lastId} />
-                <MessageArea channel={channel} {lastId} messageId={message} />
-                <TypingIndicator channel={channel} />
-                <JumpToBottom channel={channel} />
-                <MessageBox channel={channel} />-->
         </div>
     <!--</ErrorBoundary>-->
 </div>
@@ -64,6 +52,7 @@
         min-height: 0;
         overflow: hidden;
         flex-direction: row;
+        position: relative;
     }
 
     div.ChannelContent {
