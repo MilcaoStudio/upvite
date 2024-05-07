@@ -18,15 +18,14 @@
         path = $page.url.pathname;
         fixedBottomNav =
             path === "/" ||
-            path === "/settings" ||
+            path.startsWith("/settings") ||
             path.startsWith("/friends") ||
             path.startsWith("/discover");
         inChannel = path.includes("/channel");
         inServer = path.includes("/server");
         inSpecial =
             (path.startsWith("/friends") && isTouchscreenDevice) ||
-            path.startsWith("/invite") ||
-            path.includes("/settings");
+            path.startsWith("/invite");
     };
     let isVertical = state.layout.getViewport() == Viewport.SMALL;
 </script>
