@@ -48,7 +48,7 @@
             <Username {user} showServerIdentity />
         </div>
         <div class="subText">
-            {#if typeof channel?.last_message?.content == "string" && alert}
+            {#if channel?.last_message?.content}
                 {channel.last_message.content.slice(0, 32)}
             {:else}
                 <!--<UserStatus user={user} tooltip />-->

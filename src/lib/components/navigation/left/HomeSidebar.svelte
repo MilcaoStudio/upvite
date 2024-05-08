@@ -22,6 +22,8 @@
     import JsxRender from "$lib/components/JSXRender.svelte";
     import IconButton from "$lib/components/atoms/input/IconButton.svelte";
     import UserPanel from "./UserPanel.svelte";
+    import { autorun } from "mobx";
+    import type { Channel } from "revolt.js";
 
     const Navbar = cx(
         "Navbar",
@@ -39,11 +41,12 @@
     $: pathname = $page.url.pathname;
     $: channel_id = $page.params.channel;
     $: channel = client.channels.get(channel_id);
-    let channels = [...client.channels.values()].filter(
+    let channels: Channel[] = [];
+    $: autorun(() => channels = [...client.channels.values()].filter(
         (x) =>
             (x.channel_type == "DirectMessage" && x.active) ||
             x.channel_type == "Group",
-    );
+    ));
     channels.sort((b, a) =>
         a.last_message_id_or_past.localeCompare(b.last_message_id_or_past),
     );
@@ -65,7 +68,7 @@
             ConditionalLink,
             {
                 active: channel._id == channel_id,
-                href: `channel/${channel._id}`,
+                href: `/channel/${channel._id}`,
             },
             createElement(ChannelButton, {
                 user,

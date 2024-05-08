@@ -10,6 +10,9 @@
     import { modalController } from "../modals/ModalController";
     import HeaderActions from "./actions/HeaderActions.svelte";
     import Markdown from "$lib/markdown/Markdown.svelte";
+    import BxPhoneCall from "svelte-boxicons/BxPhoneCall.svelte";
+    import BxNotepad from "svelte-boxicons/BxNotepad.svelte";
+    import { t } from "svelte-i18n";
 
     export let channel: Channel;
     let icon: ComponentType, recipient: User | null = null;
@@ -19,12 +22,16 @@
             break;
         // case "DirectMessage":
         // case "Group":
-        // case "VoiceChannel":
-        // case "SavedMessages":
+        case "VoiceChannel":
+            icon = BxPhoneCall;
+            break;
+        case "SavedMessages":
+            icon = BxNotepad;
+            break;
         default:
             icon = BxAt;
-            break;
     }
+    document.title = (channel.channel_type == "SavedMessages" ? $t('app.navigation.tabs.saved') : channel.server ? `#${channel.name} - ${channel.server.name}` : channel.recipient ? `${channel.recipient.username}` : `${channel.name}`) + " | Uprising";
 </script>
 
 <PageHeader {icon} withTransparency>
