@@ -6,7 +6,7 @@ import { env } from "$env/dynamic/public"
 import { state } from "$lib/State";
 import { injectWindow, takeError } from "$lib";
 import { ObservableMap, action, computed, makeAutoObservable, observable } from "mobx";
-import { browser, building } from "$app/environment";
+import { browser } from "$app/environment";
 /**
  * Current lifecycle state
  */

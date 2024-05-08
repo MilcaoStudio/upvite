@@ -5,7 +5,7 @@
     const api = useApi();
 </script>
 
-<LoginForm page="resend"
+<LoginForm type="resend"
     callback={async (data) => {
         await api.post("/auth/account/reverify", data);
     }}

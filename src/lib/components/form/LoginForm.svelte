@@ -11,7 +11,7 @@
         password: string;
     }
 
-    export let page: "create" | "login" | "send_reset" | "reset" | "resend";
+    export let type: "create" | "login" | "send_reset" | "reset" | "resend";
     export let callback: (fields: {
         email: string;
         password: string;
@@ -58,33 +58,33 @@
     <div class="formModal">
         <div class="welcome">
             <div class="title">
-                {$_(page == 'create' ? 'login.welcome2' : 'login.welcome')}
+                {$_(type == 'create' ? 'login.welcome2' : 'login.welcome')}
             </div>
             <div class="subtitle">
-                {$_(page == 'create' ? 'login.subtitle2' : 'login.subtitle')}
+                {$_(type == 'create' ? 'login.subtitle2' : 'login.subtitle')}
                 <div>(app.uprising.chat)</div>
             </div>
         </div>
         <form on:submit|preventDefault={onSubmit}>
-            {#if page != 'reset'}
+            {#if type != 'reset'}
                 <FormField type='email' showOverline bind:value={email} />
             {/if}
-            {#if page == 'login' || page == 'create' || page == 'reset'}
+            {#if type == 'login' || type == 'create' || type == 'reset'}
                 <FormField type='password' showOverline bind:value={password} />
             {/if}
             {#if error}
                 <div>
-                    {$_(`login.error.${page}`)}
+                    {$_(`login.error.${type}`)}
                 </div>
             {/if}
             <Button>
-                {$_(page == 'create'
+                {$_(type == 'create'
                 ? 'login.register'
-                : page == 'login'
+                : type == 'login'
                 ? 'login.title'
-                : page === 'reset'
+                : type === 'reset'
                 ? 'login.set_password'
-                : page === 'resend'
+                : type === 'resend'
                 ? 'login.resend'
                 : 'login.reset')}
             </Button>

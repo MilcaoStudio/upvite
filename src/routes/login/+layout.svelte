@@ -1,6 +1,9 @@
 <script lang="ts">
     import CheckAuth from '$lib/controllers/CheckAuth.svelte';
+    import { setContext } from 'svelte';
     import '../../styles/login.css';
+    import { page } from '$app/stores';
+    setContext("invite", $page.url.searchParams.get("invite"));
 </script>
 
 <CheckAuth>

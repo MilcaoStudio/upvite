@@ -5,7 +5,7 @@
     const client = useClient();
 </script>
 
-<LoginForm page="create" callback={(data) =>client.register(data).then(_=>clientController.login(data))}>
+<LoginForm type="create" callback={(data) =>client.register(data).then(_=>clientController.login(data))}>
    <span class="create">
     {$_('login.existing')+' '}
     <a href="/login">{$_('login.title')}</a>

@@ -4,7 +4,7 @@
   import { _ } from 'svelte-i18n';
 </script>
 
-<LoginForm page="login" callback={clientController.login}>
+<LoginForm type="login" callback={clientController.login}>
   <span class="create">
     {$_('login.new') + ' '}
     <a href="/login/create">

@@ -4,7 +4,7 @@
     const api = useApi();
 </script>
 
-<LoginForm page="send_reset"
+<LoginForm type="send_reset"
     callback={async (data) => {
         await api.post("/auth/account/reset_password", data);
     }}
