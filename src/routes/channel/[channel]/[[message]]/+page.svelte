@@ -5,7 +5,7 @@
     import TextChannel from "$lib/components/channels/TextChannel.svelte";
     import Preloader from "$lib/components/indicators/Preloader.svelte";
     import { useClient } from "$lib/controllers/ClientController";
-        const client = useClient();
+    const client = useClient();
     export let data;
     let { channel_id, message_id } = data;
 
