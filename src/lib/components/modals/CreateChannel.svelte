@@ -31,7 +31,7 @@
     name: { field: $t("app.main.servers.channel_name") },
     type: {
       field: $t("app.main.servers.channel_type"),
-      choices: [
+      options: [
         { name: $t("app.main.servers.text_channel"), value: "Text" },
         { name: $t("app.main.servers.voice_channel"), value: "Voice" },
       ],
