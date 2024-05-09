@@ -17,6 +17,7 @@
         type SvelteElement,
     } from "$lib/markdown/runtime/svelteRuntime";
     import UserPanel from "./UserPanel.svelte";
+    import { autorun } from "mobx";
 
     export let server: Server, channel: Channel | undefined;
     const ServerBase = cx(
@@ -31,7 +32,6 @@
             margin: 6px 0px 6px 0px;
             overflow: hidden;
             position: relative;
-
         `,
     );
     const ServerList = cx(
@@ -49,8 +49,42 @@
 
     const client = useClient();
     $: channel && state.layout.setLastOpened(server._id, channel._id);
-    const uncategorised = new Set(server.channel_ids);
-    const elements: SvelteElement[] = [];
+    let uncategorised = new Set<string>();
+    let elements: SvelteElement[] = [];
+    autorun(() => {
+        uncategorised = new Set(server.channel_ids);
+        elements = [];
+        if (server.categories) {
+            for (const category of server.categories) {
+                const channels: SvelteElement[] = [];
+                for (const id of category.channels) {
+                    uncategorised.delete(id);
+                    const channel = addChannel(id);
+                    channel && channels.push(channel);
+                }
+                elements.push(
+                    createElement(
+                        CollapsibleSection,
+                        {
+                            id: category.id,
+                            defaultValue: true,
+                            summary: createElement(
+                                Category,
+                                {},
+                                category.title,
+                            ),
+                        },
+                        ...channels,
+                    ),
+                );
+            }
+        }
+        for (const id of Array.from(uncategorised).reverse()) {
+            const channelElement = addChannel(id);
+            channelElement && elements.unshift(channelElement);
+        }
+    });
+
     function addChannel(id: string) {
         const entry = client.channels.get(id);
         if (!entry) {
@@ -91,32 +125,6 @@
                 muted: state.notifications.isMuted(entry),
             }),
         );
-    }
-    if (server.categories) {
-        for (const category of server.categories) {
-            const channels: SvelteElement[] = [];
-            for (const id of category.channels) {
-                uncategorised.delete(id);
-                const channel = addChannel(id);
-                channel && channels.push(channel);
-            }
-            elements.push(
-                createElement(
-                    CollapsibleSection,
-                    {
-                        id: category.id,
-                        defaultValue: true,
-                        summary: createElement(Category, {}, category.title),
-                    },
-                    ...channels,
-                ),
-            );
-        }
-    }
-
-    for (const id of Array.from(uncategorised).reverse()) {
-        const channel = addChannel(id);
-        channel && elements.unshift(channel);
     }
 </script>
 
