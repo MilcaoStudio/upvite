@@ -67,3 +67,16 @@
         <span>{$t("app.main.channel.misc.failed_load")}</span>
     </Reply>
 {/if}
+
+<style>
+    .user {
+        flex-shrink: 0;
+    }
+    .content {
+        white-space: nowrap;
+    }
+    .content :global(*) {
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+</style>

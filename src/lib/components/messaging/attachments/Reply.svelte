@@ -88,13 +88,7 @@
         border-top: 2px solid var(--message-box);
         align-self: flex-end;
     }
-
-    .Reply * {
-        overflow: hidden;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-    }
-
+    
     .Reply > :global(svg:first-child) {
         flex-shrink: 0;
         transform: scaleX(-1);
