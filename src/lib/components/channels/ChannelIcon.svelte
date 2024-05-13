@@ -3,7 +3,8 @@
     import type { API, Channel, Nullable } from "revolt.js";
     import IconBase from "../IconBase.svelte";
     import BxHash from "svelte-boxicons/BxHash.svelte";
-    import BxAt from "svelte-boxicons/BxAt.svelte";
+    import BxGroup from "svelte-boxicons/BxGroup.svelte";
+    import fallback from "$lib/assets/group.png";
 
     export let server = false,
         size: number,
@@ -80,18 +81,18 @@
     >
         <foreignObject x="0" y="0" width="32" height="32" class="icon">
             <img
-                src={iconURL}
+                src={iconURL ?? fallback}
                 height={size}
                 alt="icon"
                 draggable={false}
                 loading="lazy"
             />
         </foreignObject>
-        <foreignObject width="16" height="16">
+        <foreignObject width="16" height="16" x="16" y="16">
             {#if isServerChannel}
                 <BxHash size={16} />
-            {:else}
-                <BxAt size={16} />
+            {:else if iconURL}
+                <BxGroup size={16} />
             {/if}
         </foreignObject>
     </IconBase>
