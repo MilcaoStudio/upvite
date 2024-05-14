@@ -22,6 +22,7 @@
     import MessageEditor from "./MessageEditor.svelte";
     import { internalEmit, internalSubscribe } from "$lib/InternalEmitter";
     import Markdown from "$lib/markdown/Markdown.svelte";
+    import SystemMessage from "./SystemMessage.svelte";
 
     export let lastId: string | undefined = undefined,
         highlight: string | undefined = undefined,
@@ -164,7 +165,10 @@
                 );
             }
 
-            if (message.author?.relationship == "Blocked") {
+            // System messages
+            if (message.author_id == "00000000000000000000000000") {
+                render.push(createElement(SystemMessage, {message, highlight: highlight == message._id}))
+            } else if (message.author?.relationship == "Blocked") {
                 blocked++;
             } else {
                 if (blocked > 0) pushBlocked();

@@ -1,5 +1,5 @@
 <script>
-    export let gap = "8px",
+    export let gap = "",
         centred = false,
         grow = false;
 </script>

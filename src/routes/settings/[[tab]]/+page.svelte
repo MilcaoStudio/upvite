@@ -1,6 +1,4 @@
 <script lang="ts">
-    import { goto } from "$app/navigation";
-    import UprisingApp from "$lib/components/UprisingApp.svelte";
     import Appearance from "$lib/components/settings/personal/appearance.svelte";
     import Profile from "$lib/components/settings/personal/profile.svelte";
     import Scroller from "$lib/components/settings/common/scroller.svelte";
@@ -25,12 +23,12 @@
     import Chat from "$lib/components/settings/personal/chat.svelte";
     import Notifications from "$lib/components/settings/personal/notifications.svelte";
     import Devmode from "$lib/components/settings/personal/devmode.svelte";
-    import { fade } from "svelte/transition";
     import { Viewport } from "$lib/stores/Layout.js";
     import SettingsMenu from "$lib/components/settings/common/SettingsMenu.svelte";
     import { t } from "svelte-i18n";
     import { autorun } from "mobx";
     import Row from "$lib/components/atoms/layout/Row.svelte";
+    import CloseButton from "$lib/components/settings/common/CloseButton.svelte";
 
     const Pages: Record<string, ComponentType> = {
         account: Account,
@@ -44,7 +42,7 @@
     };
     const client = useClient();
     export let data;
-    let closing = false;
+
     $: tab = data.tab;
 
     let isVertical = state.layout.getViewport() == Viewport.SMALL;
@@ -54,21 +52,7 @@
     $: if (!tab && !isVertical) {
         tab = "account";
     }
-
-    function exitSettings() {
-        closing = true;
-        setTimeout(() => goto(state.layout.getLastPath()), 200);
-    }
-
-    function keyDown(ev: KeyboardEvent) {
-        if (ev.key == "Escape") {
-            if (modalController.isVisible) return;
-            exitSettings();
-        }
-    }
 </script>
-
-<svelte:body on:keydown={keyDown} />
 
 <Row>
     {#if isVertical}
@@ -311,7 +295,7 @@
     {:else}
         <Scroller>
             <Category>User settings</Category>
-            <Item onClick={()=>tab = "account"} active={tab == "account"}>
+            <Item onClick={() => (tab = "account")} active={tab == "account"}>
                 <svg
                     slot="svg"
                     xmlns="http://www.w3.org/2000/svg"
@@ -334,7 +318,7 @@
                 </svg>
                 Account
             </Item>
-            <Item onClick={()=>tab = "profile"} active={tab == "profile"}>
+            <Item onClick={() => (tab = "profile")} active={tab == "profile"}>
                 <svg
                     slot="svg"
                     xmlns="http://www.w3.org/2000/svg"
@@ -357,7 +341,10 @@
             >
 
             <Category>User preferences</Category>
-            <Item onClick={()=>tab = "appearance"} active={tab == "appearance"}>
+            <Item
+                onClick={() => (tab = "appearance")}
+                active={tab == "appearance"}
+            >
                 <svg
                     slot="svg"
                     xmlns="http://www.w3.org/2000/svg"
@@ -382,7 +369,10 @@
                 >
                 Appearance</Item
             >
-            <Item onClick={()=>tab = "notifications"} active={tab == "notifications"}>
+            <Item
+                onClick={() => (tab = "notifications")}
+                active={tab == "notifications"}
+            >
                 <svg
                     slot="svg"
                     xmlns="http://www.w3.org/2000/svg"
@@ -401,7 +391,7 @@
                 >
                 Notifications</Item
             >
-            <Item onClick={()=>tab = "chat"} active={tab == "chat"}>
+            <Item onClick={() => (tab = "chat")} active={tab == "chat"}>
                 <svg
                     slot="svg"
                     xmlns="http://www.w3.org/2000/svg"
@@ -422,7 +412,7 @@
                 >
                 Chat</Item
             >
-            <Item onClick={()=>tab = "language"} active={tab == "language"}>
+            <Item onClick={() => (tab = "language")} active={tab == "language"}>
                 <svg
                     slot="svg"
                     xmlns="http://www.w3.org/2000/svg"
@@ -443,7 +433,7 @@
                 >
                 Language</Item
             >
-            <Item onClick={()=>tab = "devmode"} active={tab == "devmode"}>
+            <Item onClick={() => (tab = "devmode")} active={tab == "devmode"}>
                 <svg
                     slot="svg"
                     xmlns="http://www.w3.org/2000/svg"
@@ -464,7 +454,7 @@
                 >
                 Dev mode</Item
             >
-            <Item onClick={()=>tab = "tf2"} active={tab == "tf2"}>
+            <Item onClick={() => (tab = "tf2")} active={tab == "tf2"}>
                 <svg
                     slot="svg"
                     xmlns="http://www.w3.org/2000/svg"
@@ -512,56 +502,17 @@
             </div>
         </Scroller>
         <ScrollerContent>
-            <h1>{$t(`app.settings.pages.${tab}.title`, {default: tab})}</h1>
+            <h1>{$t(`app.settings.pages.${tab}.title`, { default: tab })}</h1>
 
             {#if tab}
                 <svelte:component this={Pages[tab]} />
             {/if}
         </ScrollerContent>
-        <!-- svelte-ignore a11y-click-events-have-key-events -->
-        <!-- svelte-ignore a11y-click-events-have-key-events -->
-        <!-- svelte-ignore a11y-no-static-element-interactions -->
-        <div class="baseCloseButton">
-            <button
-                class="close"
-                on:click={() => {
-                    exitSettings();
-                }}
-            >
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    class="icon icon-tabler icon-tabler-x"
-                    width="44"
-                    height="44"
-                    viewBox="0 0 24 24"
-                    stroke-width="1.5"
-                    stroke="#ef4444"
-                    fill="none"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                >
-                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                    <path d="M18 6l-12 12" />
-                    <path d="M6 6l12 12" />
-                </svg>
-            </button>
-        </div>
+        <CloseButton />
     {/if}
 </Row>
 
 <style>
-    .baseCloseButton {
-        right: 0px;
-        height: 100vh;
-        width: 64px;
-        background-color: var(--secondary-background);
-        max-width: 650px;
-        display: flex;
-        flex: 1 1 64px;
-        flex-direction: column;
-        align-items: stretch;
-    }
-
     .version {
         margin-top: 1rem;
         font-size: 12px;
@@ -576,31 +527,5 @@
     svg {
         width: 22px;
         height: 22px;
-    }
-    .close {
-        background-color: var(--background);
-        width: 38px;
-        height: 38px;
-        margin: 16px;
-        border-radius: var(--border-radius-half);
-        border: solid 2px var(--tertiary-foreground);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: 0.12s all ease-in;
-    }
-    .close:hover {
-        background-color: var(--primary-header);
-    }
-    .close:active {
-        background-color: var(--background-dark);
-    }
-    .close:hover svg {
-        stroke: var(--foreground);
-    }
-    .close svg {
-        width: 32px;
-        height: 32px;
-        stroke: var(--tertiary-foreground);
     }
 </style>
