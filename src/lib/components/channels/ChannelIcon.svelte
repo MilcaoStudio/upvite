@@ -11,7 +11,7 @@
         target: Channel | null = null,
         attachment: Nullable<API.File> = null,
         animate = false;
-    $: radius = Math.floor(size / 2);
+    let badge = 18;
     const client = useClient();
     $: iconURL = client.generateFileURL(
         target?.icon ?? attachment ?? undefined,
@@ -89,11 +89,9 @@
                 loading="lazy"
             />
         </foreignObject>
-        <foreignObject width={radius} height={radius} x={radius} y={radius}>
-            {#if isServerChannel}
-                <BxHash size={radius} />
-            {:else if iconURL}
-                <BxGroup size={radius} />
+        <foreignObject width={badge} height={badge} x={size - badge} y={size - badge}>
+            {#if isServerChannel && iconURL}
+                <BxHash size={badge} />
             {/if}
         </foreignObject>
     </IconBase>
