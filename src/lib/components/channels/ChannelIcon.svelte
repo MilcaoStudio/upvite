@@ -5,6 +5,7 @@
     import BxHash from "svelte-boxicons/BxHash.svelte";
     import BxGroup from "svelte-boxicons/BxGroup.svelte";
     import fallback from "$lib/assets/group.png";
+    import { autorun } from "mobx";
 
     export let server = false,
         size: number,
@@ -18,6 +19,12 @@
         { max_side: 256 },
         animate,
     );
+
+    $: autorun(() => iconURL = client.generateFileURL(
+        target?.icon ?? attachment ?? undefined,
+        { max_side: 256 },
+        animate,
+    ));
     $: isServerChannel =
         server ||
         (target &&
