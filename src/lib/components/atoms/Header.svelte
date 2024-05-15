@@ -11,14 +11,13 @@
         css`
             ${withTransparency
                 ? ` 
-                    backdrop-filter: blur(10px);
+                    -webkit-backdrop-filter: blur(10px);
+                    backdrop-filter: blur(20px);
                     width: calc(100% - 20px);
                     z-index: 20;
                     position: absolute;
-                background-color: rgba(
-                      var(--${palette}-header-rgb),
-                      max(var(--min-opacity), 0.75)
-                  );
+                    background-color: rgba( 56, 64, 93, max(0, 0.3) );
+                };
               `
                 : `background-color: var(--${palette}-header);`}
             ${withBackground
@@ -40,7 +39,6 @@
         padding: 6px 8px;
         margin: 6px 8px;
         border-radius: var(--border-radius-inner);
-        border: 3px solid var(--secondary-header);
         font-weight: 600;
         user-select: none;
         height: var(--header-height);

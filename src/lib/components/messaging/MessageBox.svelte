@@ -58,10 +58,12 @@
             z-index: 1;
             display: flex;
             align-items: center;
-            background: var(--secondary-header);
             gap: 12px;
             padding: 0px 12px 0px 12px;
             margin: 0px 6px 6px 6px;
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            background-color: rgba(var(--secondary-header-rgb), max(0, 0.86) );
             border-radius: var(--border-radius-inner);
             textarea {
                 font-size: var(--text-size);

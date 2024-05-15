@@ -13,7 +13,7 @@
 </script>
 
 <div class="Friend">
-    <UserIcon target={user} size={60} onClick={()=>modalController.push({type: "user_profile", user_id: user._id})}/>
+    <UserIcon target={user} size={38} onClick={()=>modalController.push({type: "user_profile", user_id: user._id})}/>
     <Username {user} />
     <div class="Actions">
         <IconButton shape="circle" onClick={()=>{
@@ -40,14 +40,18 @@
 
 <style>
     .Friend {
-        border: 1px solid var(--secondary-foreground);
+        border: 1px solid rgb(var(--secondary-background-rgb), 0.9);
         border-radius: var(--border-radius);
-        padding: 12px;
         display: flex;
-        flex-direction: column;
         text-align: center;
+        align-items: center;
+        padding: 2px 0px 2px 16px;
+        gap: 12px;
     }
     .Friend > :global(*) {
-        margin: auto;
+        
+    }
+    .Actions{
+        margin-left: auto;
     }
 </style>

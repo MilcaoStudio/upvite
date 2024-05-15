@@ -24,11 +24,13 @@
   const ItemContainer = cx(
     "ItemContainer",
     css`
+      margin-top: auto;
       width: 56px;
       padding-left: 7px;
       padding-right: 7px;
       padding-bottom: 6px;
       cursor: pointer;
+      
       ${head ? `padding-top: 6px;` : ``}
     `
   );

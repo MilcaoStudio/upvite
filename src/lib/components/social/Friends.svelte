@@ -153,11 +153,11 @@
 
     .grid[data-mobile="true"] {
         padding-bottom: var(--bottom-navigation-height);
+    padding-top: var(--header-height);
     }
 
     .UserGrid {
         display: flex;
-        flex-wrap: wrap;
-        gap: 32px;
+        flex-direction: column;
     }
 </style>
