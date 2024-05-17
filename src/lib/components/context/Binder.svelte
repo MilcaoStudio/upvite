@@ -1,10 +1,13 @@
 <script>
     import { state } from "$lib/State";
     import { clientController } from "$lib/controllers/ClientController";
-    import { connect } from "svelte-mobx";
-    const { autorun } = connect();
+    import { autorun } from "mobx";
+    import { onDestroy } from "svelte";
+    let dispose = ()=>{};
     $: autorun(()=>{
-        state.registerListeners(clientController.readyClient);
+        dispose();
+        dispose = state.registerListeners(clientController.readyClient);
         console.log('[Binder.svelte] listeners registered!');
     });
+    onDestroy(dispose);
 </script>

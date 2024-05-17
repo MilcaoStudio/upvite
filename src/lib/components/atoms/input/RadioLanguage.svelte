@@ -1,9 +1,8 @@
-<script>
-	import TitleBar from './../../TitleBar.svelte';
-    import { Checkbox } from "fluent-svelte";
-import RadioBase from "./RadioBase.svelte";
+<script lang="ts">
+    import RadioBase from "./RadioBase.svelte";
     import Emoji from '$lib/markdown/plugins/Emoji.svelte';
-
+    import { RadioButton } from "fluent-svelte";
+    export let value: string | undefined = undefined, group: string;
 </script>
 
 
@@ -27,10 +26,9 @@ import RadioBase from "./RadioBase.svelte";
             </div>
         </div>
     </div>
-    <Checkbox></Checkbox>
-    
-    
+    <RadioButton bind:group {value} />
 </RadioBase>
+
 
 
 <style>

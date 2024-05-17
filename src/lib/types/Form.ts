@@ -18,6 +18,7 @@ import type { SvelteElement } from "$lib/markdown/runtime/svelteRuntime";
  */
 export type Type =
     | "text"
+    | "password"
     | "checkbox"
     | "colour"
     | "combo"
@@ -35,7 +36,7 @@ export function emptyValue(type: Type) {
 /**
  * Multi or single-select choice entry
  */
-type Choice = {
+export type Choice = {
     value: string,
     name: string
 };
@@ -45,6 +46,7 @@ type Choice = {
  */
 type Metadata = {
     text: { value: string; props: InputBoxProps };
+    password: { value: string; props: InputBoxProps };
     checkbox: { value: boolean; props: CheckBoxProps };
     colour: {
         value: string;
@@ -203,3 +205,5 @@ export type ModalFormProps<T extends FormTemplate, M extends Modal["type"]> = Ex
          */
         actions?: Action[];
 };
+
+export type SwitchState = "Allow" | "Deny" | "Neutral";

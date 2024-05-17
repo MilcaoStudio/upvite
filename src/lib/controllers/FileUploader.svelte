@@ -9,11 +9,13 @@
     } from "$lib/types/FileUpload";
     import { modalController } from "$lib/components/modals/ModalController";
     import Preloader from "$lib/components/indicators/Preloader.svelte";
-    import { BxPencil } from "svelte-boxicons";
+    import BxPencil from "svelte-boxicons/BxPencil.svelte";
     import { determineFileSize, takeError } from "$lib";
     import { cx } from "@emotion/css";
     import { t } from "svelte-i18n";
     import { translate } from "$lib/i18n";
+    import IconButton from "$lib/components/atoms/input/IconButton.svelte";
+    import Plus from "svelte-boxicons/BxPlus.svelte";
 
     const client = useClient()!;
     export let fileType:
@@ -165,6 +167,7 @@
             "uploader",
             { ["icon"]: style.type == "icon" },
             { ["banner"]: style.type == "banner" },
+            "flex",
         )}
         style:align-items={style.type == "icon" ? "center" : "none"}
         data-uploading={uploading}
@@ -172,6 +175,7 @@
         <button
             class={cx(
                 "image",
+
                 style.desaturateDefault && previewURL == null && "desaturate", "button-base"
             )}
             
@@ -189,7 +193,7 @@
                 </div>
             {/if}
         </button>
-        <div class="modify">
+        <div class="small">
             <!-- svelte-ignore a11y-click-events-have-key-events -->
             <!-- svelte-ignore a11y-no-static-element-interactions -->
             <!-- replace to button ? -->
@@ -203,15 +207,53 @@
             </span>
         </div>
     </div>
-{:else}
-<!--TODO-->
+{:else if style.type == "attachment"}
+    <IconButton onClick={()=>{
+        if (uploading && style.type == "attachment") return style.cancel();
+        if (style.type == "attachment" && style.attached) return remove();
+        onClick();
+    }} rotate={uploading || style.attached ? "45deg" : undefined}>
+        <Plus size={style.size} />
+    </IconButton>
 {/if}
 
 
 <style>
-    .modify > span{
+    .small > span{
         color: var(--secondary-foreground);
         font-weight: 600;
         font-size: 0.876rem;
+        margin-right: 16px;
+    }
+    .flex{
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        transition: all 0.15s ease-in-out;
+        gap: 6px;
+        padding: 7px;
+        border:none;
+        border-radius: var(--border-radius);
+        color: var(--secondary-foreground);
+        background-color: var(--background);
+        
+    }
+    /* Estilo de hover cuando el Item está activo */
+    .flex:active{
+        background-color: var(--secondary-background) !important;
+        color: var(--foreground) !important;  /* Cambia el color del texto */
+        filter: none !important;
+    }
+
+    .flex:hover{
+        background-color: var(--tertiary-background);
+
+
+    }
+    span {
+        margin: 0px;
+        display: flex;
+        color: var(--foreground);
+        align-items: center;
     }
 </style>

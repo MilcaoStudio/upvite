@@ -4,7 +4,7 @@
     import Bar from "./Bar.svelte";
     import { internalEmit } from "$lib/InternalEmitter";
     import { t } from "svelte-i18n";
-    import { BxDownArrowAlt } from "svelte-boxicons";
+    import BxDownArrowAlt from "svelte-boxicons/BxDownArrowAlt.svelte";
 
     export let channel: Channel;
     let renderer = getRenderer(channel);

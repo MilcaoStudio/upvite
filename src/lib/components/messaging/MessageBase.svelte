@@ -20,6 +20,7 @@
             padding: 0.125rem;
             flex-direction: row;
             padding-inline-end: 16px;
+            align-items: flex-start;
             ${isTouchscreenDevice ? `user-select: none;` : ``}
             ${contrast
                 ? `
@@ -77,10 +78,6 @@
 
             &:hover {
                 background: var(--hover);
-
-                time {
-                    opacity: 1;
-                }
 
                 .system-message-icon {
                     display: none;

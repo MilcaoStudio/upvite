@@ -1,6 +1,8 @@
 <script lang="ts">
     import { css, cx } from "@emotion/css";
-    import { BxChevronRight, BxLinkExternal } from 'svelte-boxicons'
+    import BxChevronRight from "svelte-boxicons/BxChevronRight.svelte";
+    import BxLinkExternal from "svelte-boxicons/BxLinkExternal.svelte";
+
     export let disabled = false,
         account = false, icon: ConstructorOfATypedSvelteComponent, description = '', onClick=function(){}, action: 'chevron' | 'external' | ConstructorOfATypedSvelteComponent = 'chevron';
     $: CategoryButton = cx(

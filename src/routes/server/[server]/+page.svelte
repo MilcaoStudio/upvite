@@ -2,8 +2,7 @@
     import { goto } from "$app/navigation";
     import { state } from "$lib/State";
     import UprisingApp from "$lib/components/UprisingApp.svelte";
-  import Preloader from "$lib/components/indicators/Preloader.svelte";
-  import SidebarBase from "$lib/components/navigation/SidebarBase.svelte";
+    import Preloader from "$lib/components/indicators/Preloader.svelte";
     import { useClient } from "$lib/controllers/ClientController";
     import type { LayoutData } from "./$types";
     const client = useClient();
@@ -29,7 +28,5 @@
 </script>
 
 <UprisingApp>
-    <SidebarBase slot="left">
-    </SidebarBase>
     <Preloader type="ring" />
 </UprisingApp>

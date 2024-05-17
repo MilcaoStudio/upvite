@@ -1,12 +1,14 @@
 <script lang="ts">
+    import { dayjs } from "$lib/i18n";
     import TextSvelte from "$lib/i18n/TextSvelte.svelte";
-    import { dayjs } from "../context/Locale.svelte";
     import { _ } from "svelte-i18n";
     import {
         clientController,
         useClient,
     } from "$lib/controllers/ClientController";
-    import { BxHappyBeaming, BxSend, BxShieldX } from "svelte-boxicons";
+    import BxHappyBeaming from "svelte-boxicons/BxHappyBeaming.svelte";
+    import BxSend from "svelte-boxicons/BxSend.svelte";
+    import BxShieldX from "svelte-boxicons/BxShieldX.svelte";
     import type { DraftObject } from "$lib/stores/Draft";
     import { state } from "$lib/State";
     import { internalEmit, internalSubscribe } from "$lib/InternalEmitter";
@@ -14,17 +16,19 @@
     import type { Reply } from "$lib/stores/MessageQueue";
     import TextAreaAutoSize from "../atoms/TextAreaAutoSize.svelte";
     import type { Channel } from "revolt.js";
-    import type {
-        EmojiCategory,
-        EmojiInfo,
-        UploadState,
+    import {
+        CAN_UPLOAD_AT_ONCE,
+        ATTACHMENT_SIZE_LIMIT,
+        type EmojiCategory,
+        type EmojiInfo,
+        type UploadState,
     } from "$lib/types/messaging";
     import { css, cx } from "@emotion/css";
     import {
         SMOOTH_SCROLL_ON_RECEIVE,
         getRenderer,
     } from "$lib/rendered/Singleton";
-    import { defer, isTouchscreenDevice, takeError } from "$lib";
+    import { debounce, defer, isTouchscreenDevice, takeError } from "$lib";
     import Autocomplete, { useAutoComplete } from "../Autocomplete.svelte";
     import PermissionTooltip from "../atoms/PermissionTooltip.svelte";
     import { Flyout } from "fluent-svelte";
@@ -32,6 +36,11 @@
     import Picker from "../atoms/media/Picker.svelte";
     import { RevoltEmojiDictionary } from "revkit";
     import { autorun } from "mobx";
+    import FileUploader from "$lib/controllers/FileUploader.svelte";
+    import { grabFiles, uploadFile } from "$lib/types/FileUpload";
+    import FilePreview from "./bars/FilePreview.svelte";
+    import { modalController } from "../modals/ModalController";
+    import ReplyBar from "./bars/ReplyBar.svelte";
 
     export let channel: Channel;
     const client = useClient();
@@ -40,7 +49,7 @@
     let typing = 0;
 
     let value = "";
-    $: autorun(()=>{
+    $: autorun(() => {
         value = state.draft.get(channel._id)?.content ?? "";
     });
     const Base = cx(
@@ -49,10 +58,12 @@
             z-index: 1;
             display: flex;
             align-items: center;
-            background: var(--secondary-header);
             gap: 12px;
             padding: 0px 12px 0px 12px;
             margin: 0px 6px 6px 6px;
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            background-color: rgba(var(--secondary-header-rgb), max(0, 0.86) );
             border-radius: var(--border-radius-inner);
             textarea {
                 font-size: var(--text-size);
@@ -116,7 +127,7 @@
     // Tests for code block delimiters (``` at start of line)
     const RE_CODE_DELIMITER = new RegExp("^```", "gm");
 
-    const renderer = getRenderer(channel);
+    const renderer = getRenderer(channel, state);
 
     function startTyping() {
         if (typeof typing == "number" && +new Date() < typing) return;
@@ -131,6 +142,7 @@
         }
     }
 
+    $: debounceStopTyping = debounce(stopTyping, 1000);
     function stopTyping(force?: boolean) {
         if (force || typing) {
             const ws = client.websocket;
@@ -179,10 +191,14 @@
         if (uploadState.type == "uploading" || uploadState.type == "sending")
             return;
         const content = state.draft.get(channel._id)?.content?.trim() ?? "";
+        if (uploadState.type != "none") {
+            return sendFile(content);
+        }
         if (!content.length) return;
         internalEmit("NewMessages", "hide");
         stopTyping();
         setMessage();
+        const messageReplies = replies;
         replies = [];
         const nonce = ulid();
 
@@ -235,7 +251,7 @@
                 author: client.user!._id,
 
                 content,
-                replies,
+                replies: messageReplies,
             });
 
             defer(() => renderer.jumpToBottom(SMOOTH_SCROLL_ON_RECEIVE));
@@ -244,10 +260,104 @@
                 await channel.sendMessage({
                     content,
                     nonce,
-                    replies,
+                    replies: messageReplies,
                 });
             } catch (error) {
                 state.queue.fail(nonce, takeError(error));
+            }
+        }
+    }
+
+    async function sendFile(content: string) {
+        // Typescript does not like overlaps
+        if (uploadState.type == "attached" || uploadState.type == "failed") {
+            const attachments: string[] = [];
+            const abortController = new AbortController();
+            const files = uploadState.files;
+            stopTyping();
+            uploadState = {
+                type: "uploading",
+                files,
+                percent: 0,
+                cancel: abortController,
+            };
+
+            try {
+                for (
+                    let i = 0;
+                    i < files.length && i < CAN_UPLOAD_AT_ONCE;
+                    i++
+                ) {
+                    const file = files[i];
+                    attachments.push(
+                        await uploadFile(
+                            client.configuration!.features.autumn.url,
+                            "attachments",
+                            file,
+                            {
+                                onDownloadProgress(event) {
+                                    uploadState = {
+                                        type: "uploading",
+                                        files,
+                                        percent: Math.round(
+                                            (i * 100 +
+                                                (100 * event.loaded) /
+                                                    (event.total || 1)) /
+                                                Math.min(
+                                                    files.length,
+                                                    CAN_UPLOAD_AT_ONCE,
+                                                ),
+                                        ),
+                                        cancel: abortController,
+                                    };
+                                },
+                                signal: abortController.signal,
+                            },
+                        ),
+                    );
+                }
+            } catch (err) {
+                if (err instanceof Error && err.message == "cancel") {
+                    uploadState = { type: "attached", files };
+                    console.error(err);
+                } else {
+                    uploadState = {
+                        type: "failed",
+                        files,
+                        error: takeError(err),
+                    };
+                }
+
+                console.error("[MessageBox] Error uploading files", err);
+
+                // Stops function
+                return;
+            }
+
+            uploadState = { type: "sending", files };
+            const nonce = ulid();
+            try {
+                await channel.sendMessage({
+                    content,
+                    nonce,
+                    replies,
+                    attachments,
+                });
+            } catch (err) {
+                uploadState = { type: "failed", files, error: takeError(err) };
+                return;
+            }
+
+            setMessage();
+            replies = [];
+            // state.settings.sounds.playSound("outbound");
+            if (files.length > CAN_UPLOAD_AT_ONCE) {
+                uploadState = {
+                    type: "attached",
+                    files: files.slice(CAN_UPLOAD_AT_ONCE),
+                };
+            } else {
+                uploadState = { type: "none" };
             }
         }
     }
@@ -335,7 +445,87 @@
     </div>
 {:else}
     <Autocomplete {...autoCompleteProps} />
+    <FilePreview
+        state={uploadState}
+        addFile={() => {
+            uploadState.type == "attached" &&
+                grabFiles(
+                    ATTACHMENT_SIZE_LIMIT,
+                    (files) => {
+                        if (uploadState.type == "none") {
+                            return;
+                        }
+                        uploadState = {
+                            type: "attached",
+                            files: [...uploadState.files, ...files],
+                        };
+                    },
+                    () =>
+                        modalController.push({
+                            type: "error",
+                            error: "FileTooLarge",
+                        }),
+                    true,
+                );
+        }}
+        removeFile={(index) => {
+            if (uploadState.type != "attached") return;
+            if (uploadState.files.length == 1) {
+                uploadState = { type: "none" };
+            } else {
+                uploadState = {
+                    type: "attached",
+                    files: uploadState.files.filter((_, i) => index != i),
+                };
+            }
+        }}
+    />
+    <ReplyBar
+        {channel}
+        {replies}
+        setReplies={(_replies) => (replies = _replies)}
+    />
     <div class={Base}>
+        {#if channel.havePermission("UploadFiles")}
+            <div class={Action}>
+                <FileUploader
+                    fileType="attachments"
+                    maxFileSize={ATTACHMENT_SIZE_LIMIT}
+                    remove={async () => {
+                        uploadState = { type: "none" };
+                    }}
+                    style={{
+                        size: 24,
+                        type: "attachment",
+                        attached: uploadState.type != "none",
+                        uploading:
+                            uploadState.type == "uploading" ||
+                            uploadState.type == "sending",
+                        cancel() {
+                            uploadState.type == "uploading" &&
+                                uploadState.cancel.abort("cancel");
+                        },
+                    }}
+                    behavior={{
+                        type: "multi",
+                        append(files) {
+                            if (!files.length) return;
+                            if (uploadState.type == "none") {
+                                uploadState = { type: "attached", files };
+                            } else {
+                                uploadState = {
+                                    type: "attached",
+                                    files: [...uploadState.files, ...files],
+                                };
+                            }
+                        },
+                        onChange(files) {
+                            uploadState = { type: "attached", files };
+                        },
+                    }}
+                />
+            </div>
+        {/if}
         <TextAreaAutoSize
             maxRows={20}
             id="message"
@@ -354,39 +544,63 @@
                     return send();
                 }
 
+                if (onKeyDown(e)) return;
 
-            if (onKeyDown(e)) return;
+                if (e.key == "ArrowUp" && !state.draft.has(channel._id)) {
+                    e.preventDefault();
+                    internalEmit("MessageRenderer", "edit_last");
+                    return;
+                }
 
-            if (
-                !e.shiftKey &&
-                !e.isComposing &&
-                e.key == "Enter" &&
-                !isTouchscreenDevice
-            ) {
-                e.preventDefault();
-                return send();
-            }
-        }}
-        {onFocus}
-        {onBlur}
-        disabled={uploadState.type == "uploading" ||
-            uploadState.type == "sending"}
-    />
-    <div class={Action}>
-        <Flyout offset={24} alignment="end">
-            <IconButton>
-                <BxHappyBeaming size={24} />
-            </IconButton>
-            <Picker
-                {categories}
-                {emojis}
-                onSelect={(emoji) => append(`:${emoji}:`, "mention")}
-                slot="override"
-            />
-        </Flyout>
+                if (
+                    !e.shiftKey &&
+                    !e.isComposing &&
+                    e.key == "Enter" &&
+                    !isTouchscreenDevice
+                ) {
+                    e.preventDefault();
+                    return send();
+                }
+
+                if (e.key == "Escape") {
+                    if (replies.length) {
+                        replies = replies.slice(0, -1);
+                    } else if (
+                        uploadState.type == "attached" &&
+                        uploadState.files.length
+                    ) {
+                        uploadState = {
+                            type:
+                                uploadState.files.length > 1
+                                    ? "attached"
+                                    : "none",
+                            files: uploadState.files.slice(0, -1),
+                        };
+                    }
+                }
+
+                debounceStopTyping(true);
+            }}
+            {onFocus}
+            {onBlur}
+            disabled={uploadState.type == "uploading" ||
+                uploadState.type == "sending"}
+        />
+        <div class={Action}>
+            <Flyout offset={24} alignment="end">
+                <IconButton>
+                    <BxHappyBeaming size={24} />
+                </IconButton>
+                <Picker
+                    {categories}
+                    {emojis}
+                    onSelect={(emoji) => append(`:${emoji}:`, "mention")}
+                    slot="override"
+                />
+            </Flyout>
+        </div>
+        <div class={Action}>
+            <BxSend size={20} on:click={send} />
+        </div>
     </div>
-    <div class={Action}>
-        <BxSend size={20} on:click={send} />
-    </div>
-</div>
 {/if}

@@ -18,7 +18,7 @@
             place-items: center;
 
             transition: 0.1s ease all;
-            background: var(--secondary-header);
+            //background: var(--secondary-header);
             border-radius: var(--border-radius-inner);
             padding: 6px;
 

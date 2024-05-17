@@ -1,4 +1,3 @@
-import type { CancelTokenSource } from "axios";
 import type { Channel, User } from "revolt.js";
 
 export type UploadState =
@@ -8,12 +7,14 @@ export type UploadState =
               type: "uploading";
               files: File[];
               percent: number;
-              cancel: CancelTokenSource;
+              cancel: AbortController;
           }
         | { type: "sending"; files: File[] }
         | { type: "failed"; files: File[]; error: string };
 // ! FIXME: add to app config and load from app config
 export const CAN_UPLOAD_AT_ONCE = 5;
+export const ATTACHMENT_SIZE_LIMIT = 20_000_000;
+export const MAX_REPLIES = 5;
 
 export type AutoCompleteState =
     | { type: "none" }
@@ -70,3 +71,9 @@ export type EmojiTable = {
      */
     activeCategories: EmojiCategory[];
 };
+
+export enum ImageState {
+    Loading,
+    Loaded,
+    Error,
+}

@@ -310,3 +310,52 @@ export const PRESETS: Record<string, Theme> = {
     },
 };
 </script>
+
+<script lang="ts">
+    import { state } from "$lib/State";
+    import { autorun } from "mobx";
+
+    const settings = state.settings;
+    const theme = settings.theme;
+    const root = document.documentElement.style;
+    let css = "";
+    $: autorun(() => {
+        css = theme.getCSS() ?? "";
+    });
+    autorun(() => {
+        const font = theme.getFont() ?? DEFAULT_FONT;
+        root.setProperty("--font", `"${font}"`);
+        try {
+            FONTS[font]?.load()
+        } catch (err) {
+            console.error(`Failed to load font: ${font}`)
+        }
+    });
+
+    autorun(()=> {
+        const font = theme.getMonospaceFont() ?? DEFAULT_MONO_FONT;
+        root.setProperty("--monospace-font", `"${font}"`);
+        try {
+            MONOSPACE_FONTS[font]?.load()
+        } catch (err) {
+            console.error(`Failed to load monospace font: ${font}`)
+        }
+    });
+
+    autorun(() => {
+        root.setProperty("--ligatures", settings.get("appearance:ligatures") ? "normal" : "none")
+    });
+
+    // TODO: Change --app-height on resize
+    function onResize() {
+    }
+
+    let variables = theme.computeVariables();
+    $: autorun(() => {
+        variables = theme.computeVariables();
+    });
+
+    state.layout.setViewport();
+</script>
+
+{@html `<style>${css}</style>`}

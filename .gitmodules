@@ -1,0 +1,3 @@
+[submodule "src/lang"]
+	path = src/lang
+	url = https://github.com/revoltchat/translations

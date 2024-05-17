@@ -10,21 +10,21 @@
         if (key) {
             const { [key]: field, ...restOfFields } = _fields;
             if (!field) return [input];
-            const values = input.split(`{{${key}}}`).map(v=>recursiceReplaceSlots(v, restOfFields)).flat();
+            const values = input.split(`{{${key}}}`).map(v=>recursiceReplaceSlots(v, restOfFields));
 
             for (let i = values.length - 1; i > 0; i -= 2) {
-                values.splice(i, 0, field);
+                values.splice(i, 0, [field]);
             }
-            return values
+            return values.flat();
         }
         return [input]
     }
 
-    $: value = $json(id)
+    $: definition = $json(id)
 </script>
 
-{#if typeof value == 'string'}
-    {#each recursiceReplaceSlots(value, fields) as fragment}
+{#if typeof definition == 'string'}
+    {#each recursiceReplaceSlots(definition, fields) as fragment}
         <Tree node={fragment} /> 
     {/each}
 {/if}

@@ -1,8 +1,9 @@
 :root {
     color-scheme: dark;
     background-color: var(--primary-background);
+    background: linear-gradient(30deg, var(--primary-background) 5%, var(--primary-header-rgb) 45%, var(--secondary-background) 100%);
 
-    --app-height: 100vh;
+    --app-height: 100svh;
     --light: false;
 
     --text-size: 14px;
@@ -86,7 +87,6 @@
     --border-radius-channel-icon: var(--border-radius-half);
     --border-radius-server-icon: var(--border-radius-half);
 
-
     --emoji-size: 32px;
 
     --header-height: 48px;
@@ -101,10 +101,16 @@
     --message-box-contrast: white;
     --message-box-contrast-rgb: 255,255,255;
     --message-box-padding: 8px 1px;
-    --attachment-max-width: 400px;
-    --attachment-max-height: 300px;
+    --attachment-max-width: 480px;
+    --attachment-max-height: 360px;
     --attachment-default-width: 400px;
     --attachment-max-text-width: 800px;
+
+    --embed-max-width: 640px;
+    --embed-max-height: 480px;
+    --embed-padding: 24px;
+    --embed-max-preview-size: 150px;
+
     --bottom-navigation-height: 50px;
 
     --scrollbar-thumb: #383544;
@@ -237,7 +243,6 @@ foreignObject > svg {
 .app-container {
     background-size: cover;
     background-position: center;
-    position: fixed;
 }
 
 .status-bar {
@@ -484,4 +489,13 @@ div.TitlebarBase {
 .info-bar{
     border-radius: var(--border-radius-small) !important;
     background-color: rgba(var(--tertiary-background-rgb), max(0.7, 0.6)) !important;
+}
+
+.ComboBox{
+    box-shadow: 0 0 0 1.5pt var(--foreground) !important;
+    transition: 0.15s ease-in-out all !important;
+}
+.ComboBox:hover, .ComboBox:active{
+    box-shadow: 0 0 0 1.5pt var(--accent) !important;
+    transition: 0.15s ease-in-out all !important;
 }

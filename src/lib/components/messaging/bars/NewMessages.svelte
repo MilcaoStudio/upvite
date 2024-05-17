@@ -1,14 +1,16 @@
 <script lang="ts">
     import { internalSubscribe } from "$lib/InternalEmitter";
-    import { dayjs } from "$lib/components/context/Locale.svelte"
     import { getRenderer } from "$lib/rendered/Singleton";
+    import { dayjs } from "$lib/i18n";
     import type { Channel } from "revolt.js";
     import { decodeTime } from "ulid";
     import Bar from "./Bar.svelte";
     import { goto } from "$app/navigation";
     import { translate } from "$lib/i18n";
     import { t } from "svelte-i18n";
-    import { BxUpArrowAlt } from "svelte-boxicons";
+    import BxUpArrowAlt from "svelte-boxicons/BxUpArrowAlt.svelte";
+    import { state } from "$lib/State";
+
 
     export let channel: Channel, lastId: string | undefined = undefined;
     let hidden = false, timeAgo = '';
@@ -25,7 +27,7 @@
         } catch (err) {}
     }
 
-    const renderer = getRenderer(channel);
+    const renderer = getRenderer(channel, state);
 </script>
 
 <svelte:document on:keydown={onKeyDown} />

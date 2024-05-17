@@ -15,28 +15,27 @@
 
 <style>
 
-    label{
-        
-        height: 32px;
-        padding: 10px;
-        border:none;
+    .content{
+        flex-direction: column;
         display: flex;
-        height: 45px;
-        padding: 0 8px;
-        background-color: rgba(var(--background-rgb), max(0.2, 0.7));
-        border-radius: var(--border-radius);
-        margin-top: 0;
-        transition: .1s ease background-color;
-
-
-        cursor: pointer;
-        user-select: none;
-        -webkit-box-align: center;
-        align-items: center;
-        border-radius: var(--border-radius-small);
-        transition: background-color 0.1s ease 0s;
-
+        -webkit-box-flex: 1;
+        flex-grow: 1;
+        gap: 3px;
     }
+    .content >div div{
+        gap: 8px;
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    }
+    .title{
+        font-size: 0.9375rem;
+        font-weight: 600;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        overflow: hidden;
+    } 
 
     .flex-button{
         display: flex;

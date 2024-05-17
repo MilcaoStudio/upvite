@@ -1,5 +1,10 @@
 <script lang="ts">
-    import { BxHome, BxPlusCircle, BxCompass, BxRightArrowCircle, BxGroup, BxMoney } from 'svelte-boxicons'
+    import BxHome from "svelte-boxicons/BxHome.svelte";
+    import BxPlusCircle from "svelte-boxicons/BxPlusCircle.svelte";
+    import BxCompass from "svelte-boxicons/BxCompass.svelte";
+    import BxRightArrowCircle from "svelte-boxicons/BxRightArrowCircle.svelte";
+    import BxGroup from "svelte-boxicons/BxGroup.svelte";
+    import BxMoney from "svelte-boxicons/BxMoney.svelte";
     import { css, cx } from "@emotion/css";
     import { useClient } from "$lib/controllers/ClientController";
     import { isTouchscreenDevice } from "$lib";
@@ -96,9 +101,9 @@
                     <CategoryButton action="chevron" icon={BxCompass} description={$_('app.home.discover_desc')}>{$_('app.home.discover')}</CategoryButton>
                 </a>
                 {#if client.servers.get(
-                    "01HQ1BJ1W6NRJV8R0WWGGR5F0P",
+                    "01HRSZB6J5PW9D2XGBZVZAKGFA",
                 ) }
-                    <a href="/server/01HQ1BJ1W6NRJV8R0WWGGR5F0P">
+                    <a href="/server/01HRSZB6J5PW9D2XGBZVZAKGFA">
                         <CategoryButton action="chevron" icon={BxRightArrowCircle} description={$_('app.home.goto-testers_desc')}>
                             {$_('app.home.goto-testers')}
                         </CategoryButton>

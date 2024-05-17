@@ -1,4 +1,3 @@
-<!---TODO--->
 <script lang="ts">
     import { goto } from "$app/navigation";
     import { state } from "$lib/State";
@@ -7,11 +6,9 @@
     import { useClient } from "$lib/controllers/ClientController";
     import type { LayoutData } from "./$types";
     import { isTouchscreenDevice } from "$lib";
-    import { SIDEBAR_CHANNELS } from "$lib/stores/Layout";
-    import SidebarBase from "$lib/components/navigation/SidebarBase.svelte";
-    import ServerSidebar from "$lib/components/navigation/left/ServerSidebar.svelte";
-    import ServerListSidebar from "$lib/components/navigation/left/ServerListSidebar.svelte";
+    import { SIDEBAR_CHANNELS, Viewport } from "$lib/stores/Layout";
     import { autorun } from "mobx";
+    import ServerMemberSidebar from "$lib/components/navigation/right/ServerMemberSidebar.svelte";
     const client = useClient();
 
     export let data: LayoutData;
@@ -42,22 +39,9 @@
     }
 
     $: channel = client.channels.get(id);
-    $: document.title = `#${channel?.name ?? ""} - ${server?.name ?? ""} | Uprising`
-    let open = false;
-    $: autorun(()=>{
-        open = isTouchscreenDevice || state.layout.getSectionState(SIDEBAR_CHANNELS, true);
-    });
 </script>
 
 <UprisingApp>
-    <SidebarBase slot="left">
-        <ServerListSidebar />
-        {#key channel}
-            {#if open && server}
-                <ServerSidebar {server} {channel} />
-            {/if}
-        {/key}
-    </SidebarBase>
     {#key channel}
         {#if channel}
             <TextChannel {channel} {message} />

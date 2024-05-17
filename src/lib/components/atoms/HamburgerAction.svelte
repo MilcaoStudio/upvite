@@ -1,16 +1,19 @@
 <script lang="ts">
-    import { isTouchscreenDevice } from "$lib";
-    import { BxMenu } from 'svelte-boxicons'
+    import { state } from "$lib/State";
+    import { Viewport } from "$lib/stores/Layout";
+    import Menu from "svelte-boxicons/BxMenu.svelte";
+
+    let isVertical = state.layout.getViewport() == Viewport.SMALL;
     function openSidebar() {
         document
-            .querySelector("#app > div > div > div")
+            .querySelector(".snap")
             ?.scrollTo({ behavior: "smooth", left: 0 });
     }
 </script>
 
-{#if isTouchscreenDevice}
+{#if isVertical}
     <!-- svelte-ignore a11y-no-static-element-interactions -->
     <div class="menu" on:click={openSidebar} on:keydown={openSidebar}>
-        <BxMenu size="27" />
+        <Menu size={27} />
     </div>
 {/if}

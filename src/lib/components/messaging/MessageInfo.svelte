@@ -1,7 +1,7 @@
 <script lang="ts">
     import { css, cx } from "@emotion/css";
 
-    export let click = false;
+    export let click = false, showAlways = false;
     const Info = cx('MessageInfo', css`
         width: 62px;
         display: flex;
@@ -29,10 +29,6 @@
             position: absolute;
         }
 
-        time {
-            opacity: 0;
-        }
-
         time, .edited {
             margin-top: 1px;
             cursor: default;
@@ -58,7 +54,9 @@
             margin-right: 0.5em;
             color: var(--tertiary-foreground);
         }
-        ${click ? `cursor: pointer;` : ``}`);
+        ${click ? `cursor: pointer;` : ``}`, !showAlways && css`
+        &:hover time { opacity: 1; }
+        time { opacity: 0; }`);
 </script>
 
 <div class={Info}>

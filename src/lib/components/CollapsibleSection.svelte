@@ -1,9 +1,9 @@
 <script lang="ts">
-    import { BxChevronDown } from "svelte-boxicons";
     import JSXRender from "./JSXRender.svelte";
     import Details from "$lib/Details.svelte";
     import { state } from "$lib/State";
     import type { SvelteNode } from "$lib/markdown/runtime/svelteRuntime";
+    import BxChevronDown from "svelte-boxicons/BxChevronDown.svelte";
 
     export let id: string,
         defaultValue: boolean,

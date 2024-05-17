@@ -8,24 +8,26 @@
     import LeftSidebar from "./navigation/LeftSidebar.svelte";
     import RightSidebar from "./navigation/RightSidebar.svelte";
     import BottomNavigation from "./navigation/BottomNavigation.svelte";
+    import { state } from "$lib/State";
+    import { Viewport } from "$lib/stores/Layout";
 
     // Make true on worker alert
     // let showStatusBar = false;
     let path: string, fixedBottomNav: boolean, inChannel: boolean, inServer: boolean, inSpecial: boolean;
     $: {
-        path = $navigating?.to?.url.pathname || "";
+        path = $page.url.pathname;
         fixedBottomNav =
             path === "/" ||
-            path === "/settings" ||
+            path.startsWith("/settings") ||
             path.startsWith("/friends") ||
             path.startsWith("/discover");
         inChannel = path.includes("/channel");
         inServer = path.includes("/server");
         inSpecial =
             (path.startsWith("/friends") && isTouchscreenDevice) ||
-            path.startsWith("/invite") ||
-            path.includes("/settings");
-    }
+            path.startsWith("/invite");
+    };
+    let isVertical = state.layout.getViewport() == Viewport.SMALL;
 </script>
 
 <div class="app-container">
@@ -34,10 +36,10 @@
     {/if}
     <OverlapPanel
         width="100vw"
-        height={(/*alert && statusBar ? "calc(" : "") +
-            (window.isNative && !window.native.getConfig().frame
+        height={(/*alert && statusBar ? "calc(" : "") + 
+            (*/window.isNative && !window.native.getConfig().frame
                 ? "calc(var(--app-height) - var(--titlebar-height))"
-                :*/ "var(--app-height)") +
+                : "var(--app-height)") +
             (/*alert && statusBar ? " - 40px)" :*/ "")}
         leftPanel={inSpecial
             ? undefined
@@ -50,10 +52,8 @@
             showIf: fixedBottomNav ? ShowIf.Always : ShowIf.Left,
             height: 50,
         }}
-        docked={Docked.Left}
+        docked={isVertical ? Docked.None: Docked.Both}
     >
-        <svelte:fragment slot="left"><slot name="left" /></svelte:fragment>
-        <svelte:fragment slot="right"><slot name="right" /></svelte:fragment>
         <slot />
     </OverlapPanel>
 </div>

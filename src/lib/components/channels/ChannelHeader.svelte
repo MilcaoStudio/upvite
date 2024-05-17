@@ -1,28 +1,37 @@
 <script lang="ts">
     import type { Channel, User } from "revolt.js";
-    import { BxAt, BxHash } from "svelte-boxicons";
+    import BxAt from "svelte-boxicons/BxAt.svelte";
+    import BxHash from "svelte-boxicons/BxHash.svelte";
     import PageHeader from "../atoms/PageHeader.svelte";
     import type { ComponentType } from "svelte";
     import ChannelName from "./ChannelName.svelte";
     import { isTouchscreenDevice } from "$lib";
     import { useStatusColor } from "../user/UserIcon.svelte";
     import { modalController } from "../modals/ModalController";
-    import HeaderActions from "./HeaderActions.svelte";
+    import HeaderActions from "./actions/HeaderActions.svelte";
+    import Markdown from "$lib/markdown/Markdown.svelte";
+    import BxPhoneCall from "svelte-boxicons/BxPhoneCall.svelte";
+    import BxNotepad from "svelte-boxicons/BxNotepad.svelte";
+    import { t } from "svelte-i18n";
 
     export let channel: Channel;
-    let icon: ComponentType, recipient: User | undefined;
+    let icon: ComponentType, recipient: User | null = null;
     switch (channel.channel_type) {
         case "TextChannel":
             icon = BxHash;
             break;
         // case "DirectMessage":
         // case "Group":
-        // case "VoiceChannel":
-        // case "SavedMessages":
+        case "VoiceChannel":
+            icon = BxPhoneCall;
+            break;
+        case "SavedMessages":
+            icon = BxNotepad;
+            break;
         default:
             icon = BxAt;
-            break;
     }
+    document.title = (channel.channel_type == "SavedMessages" ? $t('app.navigation.tabs.saved') : channel.server ? `#${channel.name} - ${channel.server.name}` : channel.recipient ? `${channel.recipient.username}` : `${channel.name}`) + " | Uprising";
 </script>
 
 <PageHeader {icon} withTransparency>
@@ -43,11 +52,11 @@
             <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
             <span class="desc" role="complementary" on:click={()=>modalController.push({type: "channel_info", channel})} on:keydown={()=>modalController.push({type: "channel_info", channel})}>
                 <!--Markdown here-->
-                {channel.description.split("\n")[0] ?? ""}
+                <Markdown content={channel.description} />
             </span>
         {/if}
     </div>
-    <HeaderActions />
+    <HeaderActions {channel} />
 </PageHeader>
 <style>
     div.Info {

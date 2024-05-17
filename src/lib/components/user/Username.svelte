@@ -3,7 +3,7 @@
     import { useClient } from "$lib/controllers/ClientController";
     import { css, cx } from "@emotion/css";
     import { API, User } from "revolt.js";
-    import { BxTimeFive } from "svelte-boxicons";
+    import BxTimeFive from "svelte-boxicons/BxTimeFive.svelte";
     import { t } from "svelte-i18n";
 
     export let user: User | null | undefined = undefined, prefixAt = false, masquerade: API.Masquerade | null = null, showServerIdentity: boolean | "both" = false, onClick: ((e: MouseEvent)=>void) | null = null;

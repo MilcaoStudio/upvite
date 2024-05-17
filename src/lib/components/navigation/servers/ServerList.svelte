@@ -37,8 +37,6 @@
                 width: 0;
                 height: 0;
             }
-
-            ${isTouchscreenDevice ? `padding-bottom: 50px;` : ""}
         `,
     );
     const Shadow = cx(
@@ -46,11 +44,12 @@
         css`
             height: 0;
             z-index: 1;
+            margin-top: auto;
             display: relative;
 
             div {
-                height: 12px;
-                margin-top: -12px;
+                height: 18px;
+                margin-top: -20px;
                 display: absolute;
                 background: linear-gradient(
                     to bottom,
@@ -64,15 +63,16 @@
 
 <div class={Base}>
     <ListHeader {client} {home} {permit} />
+    <ListFooter {createServer}/>
     <div
         use:dndzone={{ items: servers }}
         on:finalize={useCustomReorder(reorder)}
     >
         {#each servers as server (server._id)}
-            <Item item={server} />
+            <Item item={server} {permit} />
         {/each}
     </div>
-    <ListFooter {createServer}/>
+    
     <div class={Shadow}><div /></div>
     <!--TODO: Settings icon-->
 </div>

@@ -13,11 +13,15 @@ import ClipboardModal from "./ClipboardModal.svelte";
 import LinkWarning from "./LinkWarning.svelte";
 import CreateChannel from "./CreateChannel.svelte";
 import DeleteMessage from "./DeleteMessage.svelte";
+import ModifyAccount from "./ModifyAccount.svelte";
+import type { ComponentType } from "svelte";
+import CreateGroup from "./CreateGroup.svelte";
+import UserPicker from "./UserPicker.svelte";
 
 export class ModalController {
     @observable stack: Modal[] = [];
 
-    constructor(public components: Record<string, SvelteComponentConstructor<any, any>>) {
+    constructor(public components: Record<string, ComponentType>) {
 
         makeObservable(this);
         this.close = this.close.bind(this);
@@ -134,13 +138,16 @@ export const modalController = new ModalController({
     clipboard: ClipboardModal,
     close_dm: Confirmation,
     create_channel: CreateChannel,
+    create_group: CreateGroup,
     create_server: CreateServer,
     delete_bot: Confirmation,
     delete_channel: Confirmation,
     delete_message: DeleteMessage,
     delete_server: Confirmation,
+    modify_account: ModifyAccount,
     link_warning: LinkWarning,
     onboarding: Onboarding,
     unfriend_user: Confirmation,
+    user_picker: UserPicker,
     user_profile: UserProfile,
 });

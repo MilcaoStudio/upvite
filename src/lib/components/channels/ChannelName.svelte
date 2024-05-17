@@ -9,7 +9,7 @@
     {#if channel.channel_type == "SavedMessages"}
         {$_('app.navigation.tabs.saved')}
     {:else if channel.channel_type == "DirectMessage"}
-        {prefix && "@"}{channel.recipient?.username}
+        {prefix ? "@" : ""}{channel.recipient?.username}
     {:else if channel.channel_type == "TextChannel" && prefix}
         {`#${channel.name}`}
     {:else}

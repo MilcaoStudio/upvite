@@ -41,6 +41,7 @@
             typeof bottomNav?.showIf == "undefined"
                 ? ShowIf.Both
                 : bottomNav.showIf;
+        console.log("ShowIf", showIf);
         if (showIf & ShowIf.Always) {
             bEl.style.top = "";
             return;
@@ -90,18 +91,14 @@
 
 {#if docked}
     <div class="docked" style:width style:height>
-        {#if docked & 1 && leftPanel}
-            <svelte:component this={leftPanel.component}>
-                <slot name="left" />
-            </svelte:component>
+        {#if docked & 1}
+            <svelte:component this={leftPanel?.component} />
         {/if}
         <div class="main">
             <slot />
         </div>
-        {#if docked & 2 && rightPanel}
-            <svelte:component this={rightPanel.component}>
-                <slot name="right" />
-            </svelte:component>
+        {#if docked & 2}
+            <svelte:component this={rightPanel?.component} />
         {/if}
     </div>
 {:else}
@@ -118,6 +115,7 @@
                 <svelte:component
                     this={leftPanel.component}
                     style={`height: ${height};`}
+                    snap
                 >
                     <slot name="left" />
                 </svelte:component>
@@ -127,6 +125,7 @@
                 <svelte:component
                     this={rightPanel.component}
                     style={`height: ${height};`}
+                    snap
                 >
                     <slot name="right" />
                 </svelte:component>
@@ -134,7 +133,7 @@
         </div>
         {#if bottomNav}
             <div class="nav" style:bottom={height}>
-                <div bind:this={bottomNavRef} style:width style:height>
+                <div bind:this={bottomNavRef} style:height={height} style:width>
                     <svelte:component this={bottomNav.component} />
                 </div>
             </div>

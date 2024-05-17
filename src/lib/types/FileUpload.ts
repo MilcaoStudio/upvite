@@ -55,6 +55,7 @@ export function grabFiles(
     cb: (files: File[]) => void,
     tooLarge: () => void,
     multiple?: boolean,
+    accept?: string,
 ) {
     if (input) {
         input.remove();
@@ -62,7 +63,7 @@ export function grabFiles(
 
     input = document.createElement("input");
 
-    input.accept = "*";
+    input.accept = accept ?? "*";
     input.type = "file";
     input.multiple = multiple ?? false;
     input.style.display = "none";

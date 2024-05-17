@@ -6,7 +6,7 @@
     import IconBase from "../IconBase.svelte";
     import { page } from "$app/stores";
 
-    export function useStatusColor(user?: User) {
+    export function useStatusColor(user: User | null) {
         const theme = state.settings.theme;
 
         return user?.online && user?.status?.presence != "Invisible"
@@ -22,7 +22,7 @@
 </script>
 
 <script lang="ts">
-    export let target: User | undefined = undefined,
+    export let target: User | null = null,
         attachment: any = undefined,
         size: number,
         status = false,
@@ -36,6 +36,7 @@
         url: string | undefined = undefined,
         onClick: ((e: MouseEvent)=>void) | null = null;
     const client = useClient();
+    let { shrinkMedia } = state.network.media;
     $: if (masquerade?.avatar) {
         url = client.proxyFile(masquerade.avatar);
     } else if (override) {
@@ -59,7 +60,7 @@
         url =
             client.generateFileURL(
                 override ?? target?.avatar ?? attachment ?? undefined,
-                { max_side: 256 },
+                { max_side: shrinkMedia ? 64 : 256 },
                 animate,
             ) ?? (target ? target.defaultAvatarURL : fallback);
     }
@@ -84,7 +85,7 @@
         class="icon"
         mask={mask ?? (status ? "url(#user)" : undefined)}
     >
-        <img src={url} alt="avatar" draggable={false} loading="lazy" />
+        <img src={url} height={size} alt="avatar" draggable={false} loading="lazy" />
     </foreignObject>
     {#if status}
     <circle

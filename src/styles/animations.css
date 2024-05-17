@@ -62,3 +62,12 @@
     }
   }
   
+/** Used in ReplyBar */
+@keyframes bottomBounce {
+  0% {
+    transform: translateY(33px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}

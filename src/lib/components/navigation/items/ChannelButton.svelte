@@ -4,19 +4,36 @@
   import ChannelIcon from "../../channels/ChannelIcon.svelte";
   import ContextMenu from "$lib/components/context/ContextMenu.svelte";
   import "./Item.css";
+  import UserIcon from "$lib/components/user/UserIcon.svelte";
+  import { voiceState } from "$lib/voice/VoiceState";
+  import { autorun } from "mobx";
+  import Username from "$lib/components/user/Username.svelte";
+    import UserButton from "./UserButton.svelte";
 
   export let active = false,
     alert: "unread" | "mention" | undefined = undefined,
     alertCount = 0,
-    channel: Channel | undefined,
-    //user: User | undefined = undefined,
+    channel: Channel,
+    user: User | undefined = undefined,
     compact = false,
     muted = false;
+  let client = channel?.client;
+  let participants: User[] = [];
+  $: autorun(
+    () =>
+      (participants = Array.from(voiceState.participants.keys())
+        .map((id) => client.users.get(id))
+        .filter((u) => u) as User[]),
+  );
   const alerting = alert && !muted && !active;
 </script>
 
 {#if channel}
-  {#if channel.channel_type != "DirectMessage"}
+  {#if channel.channel_type == "DirectMessage" && user}
+    <ContextMenu data={{ channel: channel._id, unread: !!alert }}>
+      <UserButton {...{ active, alert, channel, user }} />
+    </ContextMenu>
+  {:else}
     <ContextMenu data={{ channel: channel._id, unread: !!alert }}>
       <div
         data-active={active}
@@ -32,6 +49,13 @@
         <div class="name">
           <div>{channel.name}</div>
         </div>
+        {#if channel.channel_type == "Group"}
+          <div class="subText">
+            {#if channel.last_message?.content}
+              {channel.last_message.content.slice(0, 32)}
+            {/if}
+          </div>
+        {/if}
         <div class="button">
           {#if alerting}
             <div class="alert" data-style={alert}>
@@ -41,6 +65,18 @@
           <!--TODO: Add leave group action for touchscreens-->
         </div>
       </div>
+      {#if channel.channel_type == "VoiceChannel"}
+        <div>
+          {#each participants as participant}
+            <li>
+              <UserIcon target={participant} size={20} /><Username
+                user={participant}
+                showServerIdentity
+              />
+            </li>
+          {/each}
+        </div>
+      {/if}
     </ContextMenu>
   {/if}
 {/if}

@@ -13,9 +13,11 @@
         | "accent"
         | "success"
         | "warning"
-        | "error"} = { compact: false, palette: 'primary' }
+        | "error"} = { compact: false, palette: 'primary' }, palette = "primary", onClick: (()=>void) | null = null
 
-    const { compact, palette } = props;
+    const { compact } = props;
+    
+    palette = props.palette || "primary";
 
     let dispatch = createEventDispatcher();
 
@@ -131,6 +133,6 @@
     
 </script>
 
-<button class={buttonStyle} {...props} on:click={()=>dispatch('click')}>
+<button class={buttonStyle} {...props} on:click={()=>dispatch('click')} on:click={onClick} {...$$restProps}>
     <slot />
 </button>

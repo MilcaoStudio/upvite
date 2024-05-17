@@ -1,133 +1,28 @@
-<script context="module" lang="ts">
-  import dayJS from "dayjs";
-  import calendar from "dayjs/plugin/calendar";
-  import format from "dayjs/plugin/localizedFormat";
-  import update from "dayjs/plugin/updateLocale";
-  import definition from "../../lang/en.json";
-  import { Language, Languages } from "$lib/lang/Languages";
-
-  export const dayjs = dayJS;
-  dayjs.extend(calendar);
-  dayjs.extend(format);
-  dayjs.extend(update);
-
-  export interface Dictionary {
-    dayjs?: {
-      defaults?: {
-        twelvehour?: string;
-        separator?: string;
-        date?: "traditional" | "simplified" | "ISO8601";
-      };
-      timeFormat?: string;
-    };
-    [key: string]:
-      | Record<string, Omit<Dictionary, "dayjs">>
-      | string
-      | undefined;
-  }
-
-  function findLanguage(lang?: Nullable<string>): Language {
-    if (!lang) {
-      if (!navigator) {
-        lang = Language.ENGLISH;
-      } else {
-        lang = navigator.language;
-      }
-    }
-    const code = lang.replace("-", "_");
-    const short = code.split("_")[0];
-
-    const values = [];
-    for (const key in Language) {
-      const value = Language[key as keyof typeof Language];
-
-      // Skip alternative/joke languages
-      if (Languages[value].cat == "const") continue;
-      if (Languages[value].cat == "alt") continue;
-
-      values.push(value);
-      if (value.startsWith(code)) {
-        return value as Language;
-      }
-    }
-
-    for (const value of values.reverse()) {
-      if (value.startsWith(short)) {
-        return value as Language;
-      }
-    }
-    return Language.ENGLISH;
-  }
-
-  /**
-   * Apply defaults and process dayjs entries for a langauge.
-   * @param source Dictionary definition to transform
-   * @returns Transformed dictionary definition
-   */
-  function transformLanguage(source: Dictionary) {
-    // Fallback untranslated strings to English (UK)
-    const obj = defaultsDeep(source, definition);
-
-    // Take relevant objects out, dayjs and defaults
-    // should exist given we just took defaults above.
-    const { dayjs } = obj;
-    const { defaults } = dayjs;
-
-    // Determine whether we are using 12-hour clock.
-    const twelvehour = defaults?.twelvehour
-      ? defaults.twelvehour === "yes"
-      : false;
-
-    // Determine what date separator we are using.
-    const separator: string = defaults?.date_separator ?? "/";
-
-    // Determine what date format we are using.
-    const date: "traditional" | "simplified" | "ISO8601" =
-      defaults?.date_format ?? "traditional";
-
-    // Available date formats.
-    const DATE_FORMATS = {
-      traditional: `DD${separator}MM${separator}YYYY`,
-      simplified: `MM${separator}DD${separator}YYYY`,
-      ISO8601: "YYYY-MM-DD",
-    };
-
-    // Replace data in dayjs object, make sure to provide fallbacks.
-    dayjs["sameElse"] = DATE_FORMATS[date] ?? DATE_FORMATS.traditional;
-    dayjs["timeFormat"] = twelvehour ? "hh:mm A" : "HH:mm";
-
-    // Replace {{time}} format string in dayjs strings with the time format.
-    Object.keys(dayjs)
-      .filter((k) => typeof dayjs[k] === "string")
-      .forEach(
-        (k) => (dayjs[k] = dayjs[k].replace(/{{time}}/g, dayjs["timeFormat"])),
-      );
-
-    return obj;
-  }
-</script>
-
 <script lang="ts">
-  import "$lib/i18n";
   import { dictionary, locale, waitLocale } from "svelte-i18n";
-  import type { Nullable } from "revolt.js";
   import { browser } from "$app/environment";
-  import defaultsDeep from "lodash.defaultsdeep";
-    import { setContext } from "svelte";
+  import { setContext } from "svelte";
+  import { Languages } from "../../../lang/Languages";
+  import { defaultDictionary, type Dictionary, transformLanguage, dayjs, defaultLocale } from "$lib/i18n";
+  import { state } from "$lib/State";
+  import { findLanguage } from "$lib/stores/LocaleOptions";
+    import { autorun } from "mobx";
+    
 
-  let definitions: Dictionary = definition;
-  let lang = Language.ENGLISH;
+  let definitions: Dictionary = defaultDictionary;
+  let lang = state.locale.getLanguage();
+  let source = Languages[lang];
+
   if (browser) {
     lang = findLanguage($locale);
   }
 
-  const source = Languages[lang];
   $: loadLanguage = async function (locale: string) {
     await waitLocale(locale);
     if (locale == "en") {
       // If English, make sure to restore everything to defaults.
       // Use what we already have.
-      const defn = transformLanguage(definition as Dictionary);
+      const defn = transformLanguage(defaultDictionary);
       definitions = defn;
       dayjs.locale("en");
       dayjs.updateLocale("en", { calendar: defn.dayjs });
@@ -158,11 +53,14 @@
     definitions = defn;
   };
 
+  $: autorun(()=>{
+    locale.set(state.locale.getLanguage())
+  })
   $: definitions && setContext('dictionary', definitions);
   $: document.body.style.direction = source.rtl ? "rtl" : "";
 </script>
 
-{#await loadLanguage($locale || "en") then }
+{#await loadLanguage($locale || defaultLocale) then }
   <slot />
 {/await}
 

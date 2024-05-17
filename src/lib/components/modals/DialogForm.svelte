@@ -12,7 +12,7 @@
     export let schema: FormTemplate,
         data: MapFormToData<any>,
         defaults: Partial<MapFormToValues<FormTemplate>> | undefined = undefined,
-        callback: (values: MapFormToValues<FormTemplate>)=>Promise<void>,
+        callback: (values: any)=>Promise<void>,
         title: string | undefined = undefined,
         submit: Omit<HTMLButtonAttributes, "type"> & ButtonProps & {children?: string} | undefined,
         submitBtn: Omit<HTMLButtonAttributes, "type"> & {children?: string} | undefined = undefined,

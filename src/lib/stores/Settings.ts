@@ -16,6 +16,7 @@ export interface ISettings {
     "appearance:ligatures": boolean;
     "appearance:seasonal": boolean;
     "appearance:transparency": boolean;
+    "appearance:compact_chat": boolean;
     "appearance:show_send_button": boolean;
     "appearance:show_account_age": boolean;
 
@@ -127,6 +128,7 @@ export default class Settings
             this.remove("appearance:emoji");
             this.remove("appearance:seasonal");
             this.remove("appearance:transparency");
+            this.remove("appearance:compact_chat");
         } else {
             this.remove("appearance:ligatures");
             this.remove("appearance:theme:base");
@@ -157,6 +159,7 @@ export default class Settings
                 "appearance:emoji",
                 "appearance:seasonal",
                 "appearance:transparency",
+                "appearance:compact_chat",
             ]),
             theme: this.pullKeys([
                 "appearance:ligatures",
