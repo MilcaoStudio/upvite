@@ -3,26 +3,28 @@
     import type { API, Channel, Nullable } from "revolt.js";
     import IconBase from "../IconBase.svelte";
     import BxHash from "svelte-boxicons/BxHash.svelte";
-    import BxGroup from "svelte-boxicons/BxGroup.svelte";
+    import BxMicrophone from "svelte-boxicons/BxMicrophone.svelte";
     import fallback from "$lib/assets/group.png";
     import { autorun } from "mobx";
+    import { state } from "$lib/State";
 
     export let server = false,
         size: number,
         target: Channel | null = null,
         attachment: Nullable<API.File> = null,
         animate = false;
-    let badge = 18;
+    let badge = Math.max(12, Math.floor(size / 4));
+    $: max_side = state.network.media.shrinkMedia ? 64 : 256;
     const client = useClient();
     $: iconURL = client.generateFileURL(
         target?.icon ?? attachment ?? undefined,
-        { max_side: 256 },
+        { max_side },
         animate,
     );
 
     $: autorun(() => iconURL = client.generateFileURL(
         target?.icon ?? attachment ?? undefined,
-        { max_side: 256 },
+        { max_side },
         animate,
     ));
     $: isServerChannel =
@@ -96,10 +98,14 @@
                 loading="lazy"
             />
         </foreignObject>
-        <foreignObject width={badge} height={badge} x={size - badge} y={size - badge}>
-            {#if isServerChannel && iconURL}
-                <BxHash size={badge} />
+        {#if iconURL}
+        <foreignObject class="ChannelBadge" width={badge} height={badge} x={size - badge} y={size - badge}>
+            {#if target?.channel_type == "TextChannel"}
+                <BxHash size={badge} strokeWidth={2} />
+            {:else if target?.channel_type == "VoiceChannel"}
+                <BxMicrophone size={badge} strokeWidth={2} />
             {/if}
         </foreignObject>
+        {/if}
     </IconBase>
 {/if}
