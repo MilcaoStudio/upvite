@@ -7,13 +7,16 @@
     import fallback from "$lib/assets/group.png";
     import { autorun } from "mobx";
     import { state } from "$lib/State";
+    import BxPhoneCall from "svelte-boxicons/BxPhoneCall.svelte";
+    import ImageIconBase from "../ImageIconBase.svelte";
 
     export let server = false,
         size: number,
         target: Channel | null = null,
         attachment: Nullable<API.File> = null,
-        animate = false;
-    let badge = Math.max(12, Math.floor(size / 4));
+        animate = false,
+        showBadge = false;
+    let badge = Math.max(16, Math.floor(size / 4));
     $: max_side = state.network.media.shrinkMedia ? 64 : 256;
     const client = useClient();
     $: iconURL = client.generateFileURL(
@@ -22,11 +25,14 @@
         animate,
     );
 
-    $: autorun(() => iconURL = client.generateFileURL(
-        target?.icon ?? attachment ?? undefined,
-        { max_side },
-        animate,
-    ));
+    $: autorun(
+        () =>
+            (iconURL = client.generateFileURL(
+                target?.icon ?? attachment ?? undefined,
+                { max_side },
+                animate,
+            )),
+    );
     $: isServerChannel =
         server ||
         (target &&
@@ -61,35 +67,51 @@
             />
         </svg>
     {:else}
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width={size}
-            height={size}
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            class="icon icon-tabler icons-tabler-outline icon-tabler-hash"
-        >
-            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-            <path d="M5 9l14 0" />
-            <path d="M5 15l14 0" />
-            <path d="M11 4l-4 16" />
-            <path d="M17 4l-4 16" />
-        </svg>
+        <div style="padding-left: 16px;">
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width={size}
+                height={size}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="icon icon-tabler icons-tabler-outline icon-tabler-hash"
+            >
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path d="M5 9l14 0" />
+                <path d="M5 15l14 0" />
+                <path d="M11 4l-4 16" />
+                <path d="M17 4l-4 16" />
+            </svg>
+        </div>
     {/if}
-{:else}
+{:else if showBadge}
     <IconBase
-        width={size}
+        width={size + badge}
         height={size}
-        {borderRadius}
         aria-hidden
-        viewBox="0 0 {size} {size}"
+        viewBox="0 0 {size + badge} {size}"
         {...$$restProps}
     >
-        <foreignObject x="0" y="0" width={size} height={size} class="icon">
+        {#if iconURL}
+            <foreignObject
+                class="ChannelBadge"
+                width={badge}
+                height={badge}
+                x="0"
+                y="4"
+            >
+                {#if target?.channel_type == "TextChannel"}
+                    <BxHash size={badge} strokeWidth={2} />
+                {:else if target?.channel_type == "VoiceChannel"}
+                    <BxPhoneCall size={badge} strokeWidth={2} />
+                {/if}
+            </foreignObject>
+        {/if}
+        <foreignObject x={badge} y="0" width={size} height={size} class="icon">
             <img
                 src={iconURL ?? fallback}
                 height={size}
@@ -98,14 +120,15 @@
                 loading="lazy"
             />
         </foreignObject>
-        {#if iconURL}
-        <foreignObject class="ChannelBadge" width={badge} height={badge} x={size - badge} y={size - badge}>
-            {#if target?.channel_type == "TextChannel"}
-                <BxHash size={badge} strokeWidth={2} />
-            {:else if target?.channel_type == "VoiceChannel"}
-                <BxMicrophone size={badge} strokeWidth={2} />
-            {/if}
-        </foreignObject>
-        {/if}
     </IconBase>
+{:else}
+    <ImageIconBase
+        alt="icon"
+        {borderRadius}
+        height={size}
+        src={iconURL ?? fallback}
+        draggable={false}
+        loading="lazy"
+        hover
+    />
 {/if}
