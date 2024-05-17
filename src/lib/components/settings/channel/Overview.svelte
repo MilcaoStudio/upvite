@@ -25,10 +25,11 @@
         }
         changes.nsfw = nsfw ?? false;
         channel.edit(changes).then((_) => (changed = false));
+        changed = false;
     }
 </script>
 
-<Row>
+<Row gap="32px">
     <div>
         <ChannelIcon size={80} target={channel} animate />
         <FileUploader
@@ -54,7 +55,7 @@
 
     <div>
         <h3>
-            {channel.channel_type === "Group"
+            {channel.channel_type == "Group"
                 ? $t("app.main.groups.name")
                 : $t("app.main.servers.channel_name")}
         </h3>

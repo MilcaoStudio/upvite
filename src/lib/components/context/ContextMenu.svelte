@@ -19,6 +19,7 @@
   import { Permission, UserPermission } from "revolt.js";
   import Tooltip from "../atoms/Tooltip.svelte";
   import { setContext } from "svelte";
+    import { goto } from "$app/navigation";
   const session = useSession()!;
   const client = session.client!;
   const userId = client.user?._id;
@@ -28,7 +29,7 @@
   let isOpen = false;
 
   async function onClick(data?: Action) {
-    console.log(data);
+    console.log("Context menu action", JSON.stringify(data));
     if (!data) {
       return;
     }
@@ -65,7 +66,7 @@
           break;
         case "mark_unread":
           {
-            const messages = getRenderer(data.message.channel!).messages;
+            const messages = getRenderer(data.message.channel!, state).messages;
             const index = messages.findIndex((x) => x._id == data.message._id);
 
             let unread_id = data.message._id;
@@ -104,6 +105,9 @@
           break;
         case "edit_message":
           internalEmit("MessageRenderer", "edit_message", data.id);
+          break;
+        case "open_channel_settings":
+          await goto(`/channel/${data.id}/settings`);
           break;
         case "open_file":
           window

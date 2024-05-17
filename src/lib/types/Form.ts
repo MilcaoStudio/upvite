@@ -205,3 +205,5 @@ export type ModalFormProps<T extends FormTemplate, M extends Modal["type"]> = Ex
          */
         actions?: Action[];
 };
+
+export type SwitchState = "Allow" | "Deny" | "Neutral";

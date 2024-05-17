@@ -42,7 +42,7 @@
                 <svelte:fragment slot="action">
                     {#if user?.relationship == "User"}
                         <IconButton
-                            href="/settings/Profile"
+                            href="/settings/profile"
                             onClick={props.onClose}
                         >
                             <Edit size={24} />
