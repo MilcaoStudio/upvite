@@ -16,6 +16,7 @@ import DeleteMessage from "./DeleteMessage.svelte";
 import ModifyAccount from "./ModifyAccount.svelte";
 import type { ComponentType } from "svelte";
 import CreateGroup from "./CreateGroup.svelte";
+import UserPicker from "./UserPicker.svelte";
 
 export class ModalController {
     @observable stack: Modal[] = [];
@@ -147,5 +148,6 @@ export const modalController = new ModalController({
     link_warning: LinkWarning,
     onboarding: Onboarding,
     unfriend_user: Confirmation,
+    user_picker: UserPicker,
     user_profile: UserProfile,
 });

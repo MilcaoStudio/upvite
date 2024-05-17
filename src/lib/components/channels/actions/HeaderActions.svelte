@@ -4,11 +4,15 @@
     import { state } from "$lib/State";
     import IconButton from "$lib/components/atoms/input/IconButton.svelte";
     import Group from "svelte-boxicons/BxGroup.svelte";
+    import UserPlus from "svelte-boxicons/BxUserPlus.svelte";
+    import Cog from "svelte-boxicons/BxCog.svelte";
     import { SIDEBAR_MEMBERS, Viewport } from "$lib/stores/Layout";
     import type { Channel } from "revolt.js";
+    import { modalController } from "$lib/components/modals/ModalController";
+
     //import VoiceActions from "./actions/VoiceActions.svelte";
 
-    export const channel: Channel | undefined = undefined;
+    export let channel: Channel;
     let isVertical = state.layout.getViewport() == Viewport.SMALL;
     function slideOpen() {
         if (!isVertical) return;
@@ -36,6 +40,22 @@
         
         <VoiceActions {channel} />
     {/if}-->
+    {#if channel.channel_type == "Group"}
+        <IconButton href="/channel/{channel._id}/settings">
+            <Cog size={24} />
+        </IconButton>
+        <IconButton
+            onClick={() =>
+                modalController.push({
+                    type: "user_picker",
+                    omit: channel.recipient_ids ?? [],
+                    callback: async (users) =>
+                        users.forEach((user) => channel.addMember(user)),
+                })}
+        >
+            <UserPlus size={24} />
+        </IconButton>
+    {/if}
     <IconButton onClick={openMembers}>
         <Group size={25} />
     </IconButton>
