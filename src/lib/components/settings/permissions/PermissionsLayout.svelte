@@ -2,6 +2,8 @@
     import type { Channel } from "revolt.js";
     import EditorForChannel from "./RoleEditorForChannel.svelte";
     import RoleList from "../permissions/RoleList.svelte";
+    import { modalController } from "$lib/components/modals/ModalController";
+    import RoleEditorForServer from "../server/RoleEditorForServer.svelte";
 
     export let channel: Channel | undefined = undefined,
         server = channel?.server;
@@ -10,11 +12,31 @@
 
 {#if server}
     <div class="PermissionsLayout">
-        <!-- TODO: Editor for server roles -->
-       <RoleList {server} rank={0} {selected} onSelect={(v)=>selected = v} showDefault />
         {#if channel}
+        <RoleList
+            {server}
+            rank={server.member?.ranking ?? Infinity}
+            {selected}
+            onSelect={(v) => (selected = v)}
+            showDefault
+        />
             <EditorForChannel {selected} {channel} />
-        {/if} 
+        {:else}
+            <RoleList
+                {server}
+                {selected}
+                rank={0}
+                onSelect={(v) => (selected = v)}
+                onCreateRole={(onSelect) =>
+                    modalController.push({
+                        type: "create_role",
+                        server,
+                        callback: onSelect,
+                    })}
+                showDefault
+            />
+            <RoleEditorForServer {selected} {server} />
+        {/if}
     </div>
 {:else if channel}
     <EditorForChannel {selected} {channel} />

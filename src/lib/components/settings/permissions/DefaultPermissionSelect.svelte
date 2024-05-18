@@ -1,19 +1,19 @@
 <script lang="ts">
-    import { type Permission, type Channel } from "revolt.js";
+    import { type Permission, type Channel, Server } from "revolt.js";
     import Long from "long";
     import { Checkbox } from "fluent-svelte";
     import { useClient } from "$lib/controllers/ClientController";
     import PermissionEntry from "./PermissionEntry.svelte";
 
     export let id: keyof typeof Permission,
-        target: Channel,
+        target: Channel | Server,
         permission: number,
         value: number,
         onChange: (value: number) => void;
     
     let checked = Long.fromNumber(value).and(permission).eq(permission);
     let lastChecked = checked;
-    let disabled = target.owner_id != useClient().user?._id;
+    let disabled = target instanceof Server ? !target.member?.hasPermission(target, "ManageRole")  : target.owner_id != useClient().user?._id;
     $: if (lastChecked != checked) {
         console.log(Long.fromNumber(value, false).xor(permission).toNumber());
         lastChecked = checked;

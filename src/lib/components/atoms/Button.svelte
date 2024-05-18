@@ -17,7 +17,7 @@
 
     const { compact } = props;
     
-    palette = props.palette || "primary";
+    palette = palette || props.palette || "primary";
 
     let dispatch = createEventDispatcher();
 
