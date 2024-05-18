@@ -109,6 +109,9 @@
         case "open_channel_settings":
           await goto(`/channel/${data.id}/settings`);
           break;
+        case "open_server_channel_settings":
+          await goto(`/server/${data.server}/channel/${data.id}/settings`);
+          break;
         case "open_file":
           window
             .open(client.generateFileURL(data.attachment), "_blank")
