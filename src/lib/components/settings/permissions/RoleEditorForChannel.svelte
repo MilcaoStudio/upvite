@@ -2,11 +2,11 @@
     import Button from "$lib/components/atoms/Button.svelte";
     import H1 from "$lib/components/atoms/heading/H1.svelte";
     import { translate } from "$lib/i18n";
-    import type { RoleOrDefault } from "$lib/types/Permissions";
+    import { getRoles, type RoleOrDefault } from "$lib/types/Permissions";
     import { isEqual } from "lodash";
-    import { API, Channel, DEFAULT_PERMISSION_DIRECT_MESSAGE } from "revolt.js";
+    import { API, Channel, DEFAULT_PERMISSION_DIRECT_MESSAGE, Permission } from "revolt.js";
     import { t } from "svelte-i18n";
-    import GroupPermissionList from "./GroupPermissionList.svelte";
+    import PermissionList from "./PermissionList.svelte";
 
     export let selected: string, channel: Channel;
     let currentRoles =
@@ -20,7 +20,7 @@
                           DEFAULT_PERMISSION_DIRECT_MESSAGE,
                   },
               ] as RoleOrDefault[])
-            : channel?.server?.orderedRoles?.map((role) => ({
+            : getRoles(channel.server!).map((role) => ({
                   ...role,
                   permissions: (role.id == "default"
                       ? channel.default_permissions
@@ -29,17 +29,29 @@
                       d: 0,
                   },
               }))!;
-    let currentRole = currentRoles.find((x) => x.id == selected)!;
-    let currentPermission = currentRole.permissions;
-    let currentValue = currentPermission;
+    $: currentRole = currentRoles.find((x) => x.id == selected)!;
+    $: currentPermission = currentRole.permissions;
+    $: currentValue = currentPermission;
     $: console.log(currentPermission, "=>", currentValue);
 
+    let items = new Set<keyof typeof Permission>([
+                "ReadMessageHistory",
+                "SendMessage",
+                "ManageMessages",
+                "InviteOthers",
+                "SendEmbeds",
+                "UploadFiles",
+                "Masquerade",
+                "React",
+                "ManageChannel",
+                "ManagePermissions",
+    ]);
+    $: channel.channel_type != "Group" && items.add("ViewChannel");
     function onChange(value: number | API.OverrideField) {
         currentValue = value;
     }
 
     function save() {
-        console.log(`Updating permissions ${currentValue} for ${channel._id}`);
         channel.setPermissions(
             selected,
             !currentValue || typeof currentValue == "number"
@@ -69,23 +81,10 @@
             {$t("app.special.modals.actions.save")}
         </Button>
     </div>
-    {#if typeof currentValue == "number"}
-        <GroupPermissionList
-            items={[
-                "ReadMessageHistory",
-                "SendMessage",
-                "ManageMessages",
-                "InviteOthers",
-                "SendEmbeds",
-                "UploadFiles",
-                "Masquerade",
-                "React",
-                "ManageChannel",
-                "ManagePermissions",
-            ]}
+        <PermissionList
+            {items}
             target={channel}
             value={currentValue}
             onChange={onChange}
         />
-    {/if}
 </div>

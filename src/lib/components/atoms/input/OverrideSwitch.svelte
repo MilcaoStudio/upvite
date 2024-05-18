@@ -21,7 +21,7 @@
     /
 </Switch>
 <Switch onClick={()=>onChange("Allow")} selected={state == "Allow"} state="Allow">
-    <Check size={20} />
+    <Check size={16} />
 </Switch>
 </div>
 
@@ -32,13 +32,14 @@
 
         display: flex;
         margin: 4px 0;
+        font-size: 14px;
         overflow: hidden;
-        border-radius: var(--border-radius);
+        border-radius: var(--border-radius-inner);
         background: var(--secondary-background);
         border: 1px solid var(--tertiary-background);
     }
 
-    div[aria-disabled] {
+    div[aria-disabled="true"] {
         pointer-events: none;
         opacity: 0.6;
     }

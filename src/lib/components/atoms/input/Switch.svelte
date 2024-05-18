@@ -36,6 +36,8 @@
 <style>
     .Switch {
         padding: 4px;
+        width: 32px;
+        text-align: center;
         cursor: pointer;
         transition: 0.2s ease all;
     }

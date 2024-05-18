@@ -1,4 +1,4 @@
-import type { API } from "revolt.js";
+import type { API, Server } from "revolt.js";
 
 export type RoleOrDefault = (
     | API.Role
@@ -10,3 +10,11 @@ export type RoleOrDefault = (
           rank?: number;
       }
 ) & { id: string };
+
+export function getRoles(server: Server): RoleOrDefault[] {
+    return [...server.orderedRoles, {
+        id: "default",
+        name: "Default",
+        permissions: server.default_permissions,
+    }]
+}
