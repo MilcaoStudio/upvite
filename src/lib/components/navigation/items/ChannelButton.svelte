@@ -44,7 +44,7 @@
         {...$$restProps}
       >
         <div class="avatar">
-          <ChannelIcon target={channel} size={compact ? 24 : 32} showBadge />
+          <ChannelIcon target={channel} size={compact ? 24 : 32} showBadge={channel.channel_type != "Group"} />
         </div>
         <div class="name">
           <div>{channel.name}</div>
