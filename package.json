@@ -1,6 +1,6 @@
 {
   "name": "upvite",
-  "version": "0.3.4",
+  "version": "0.3.4B",
   "private": true,
   "scripts": {
     "dev": "vite dev",
