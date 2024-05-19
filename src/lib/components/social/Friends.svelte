@@ -31,34 +31,35 @@
         ) == 0;
 </script>
 
-<PageHeader icon={UserDetail} withTransparency noBurger>
-    <div class="title">
-        {$t("app.navigation.tabs.friends")}
-    </div>
-    <div class="actions">
-        <Tooltip content="Create Group" placement="bottom">
-            <IconButton
-                onClick={() =>
-                    modalController.push({
-                        type: "create_group",
-                    })}
-            >
-                <MessageAdd size={24} />
-            </IconButton>
-        </Tooltip>
-        <Tooltip content="Add Friend" placement="bottom">
-            <IconButton
-                onClick={() =>
-                    modalController.push({
-                        type: "add_friend",
-                    })}
-            >
-                <UserPlus size={27} />
-            </IconButton>
-        </Tooltip>
-    </div>
-</PageHeader>
-<div data-scroll-offset="true" data-avoids-navigation="true">
+
+<div style="position: relative;" data-scroll-offset="true" data-avoids-navigation="true">
+    <PageHeader icon={UserDetail} withTransparency noBurger>
+        <div class="title">
+            {$t("app.navigation.tabs.friends")}
+        </div>
+        <div class="actions">
+            <Tooltip content="Create Group" placement="bottom">
+                <IconButton
+                    onClick={() =>
+                        modalController.push({
+                            type: "create_group",
+                        })}
+                >
+                    <MessageAdd size={24} />
+                </IconButton>
+            </Tooltip>
+            <Tooltip content="Add Friend" placement="bottom">
+                <IconButton
+                    onClick={() =>
+                        modalController.push({
+                            type: "add_friend",
+                        })}
+                >
+                    <UserPlus size={27} />
+                </IconButton>
+            </Tooltip>
+        </div>
+    </PageHeader>
     <div
         class="grid with-padding"
         data-empty={isEmpty}
@@ -140,6 +141,8 @@
     .grid {
         padding: 0 10px 10px;
         user-select: none;
+        padding-bottom: var(--bottom-navigation-height);
+        padding-top: var(--header-height);
     }
 
     .grid[data-empty="true"] {
@@ -151,10 +154,10 @@
         justify-content: center;
     }
 
-    .grid[data-mobile="true"] {
+    /*.grid[data-mobile="true"] {
         padding-bottom: var(--bottom-navigation-height);
-    padding-top: var(--header-height);
-    }
+        padding-top: var(--header-height);
+    }*/
 
     .UserGrid {
         display: flex;

@@ -141,7 +141,6 @@
         align-items: center;
         height: 100%;
         padding: 12px;
-        background-color: var(--primary-background);
     }
     .homeScreen h3 {
         margin: 20px 0;

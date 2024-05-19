@@ -1,8 +1,8 @@
 :root {
     color-scheme: dark;
-    background-color: var(--primary-background);
+    background-color: var(--secondary-background);
     background: linear-gradient(30deg, var(--primary-background) 5%, var(--primary-header-rgb) 45%, var(--secondary-background) 100%);
-
+    background-color: var(--background-dark-oled);
     --app-height: 100svh;
     --light: false;
 
@@ -15,6 +15,8 @@
     /* MAYBE SOME USEFUL COLORS
     #383544
     */
+    --background-dark-oled: #09090d;
+
     --background-dark: #111119;
     --background-dark-rgb: 17, 17, 25;
 
@@ -89,7 +91,7 @@
 
     --emoji-size: 32px;
 
-    --header-height: 48px;
+    --header-height: 50px;
     --header-height-rgb: undefined,undefined,undefined;
 
     --input-border-width: 2px;
@@ -126,6 +128,8 @@
 
     --min-opacity: 0;
     --min-opacity-rgb: 0,0,0;
+
+    --fds-text-primary: hsla(0, 0%, 100%, 100%) !important;
 }
 
 html {
@@ -467,6 +471,10 @@ div.TitlebarBase {
     z-index: 20 !important;
     background-color: rgba( 17, 17, 25, max(0, 0.62) ) !important;
     border-radius: var(--border-radius) !important;
+
+}
+.content-dialog-body{
+    background-color: transparent !important;
 
 }
 

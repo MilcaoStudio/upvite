@@ -23,12 +23,7 @@
         margin-right: -5px;
     }
 
-    ${!isTouchscreenDevice &&
-    css`
-        &:hover {
-            color: var(--foreground);
-        }
-    `}`);
+    `);
     const layout = state.layout;
     let visible: boolean;
     let isVertical = layout.getViewport() == Viewport.SMALL;
