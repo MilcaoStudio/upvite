@@ -165,9 +165,4 @@ div.button svg {
     .item.compact > div {
         gap: 20px;
     }
-
-    .item.compact > div > svg {
-        height: 24px;
-        width: 24px;
-    }
 }
