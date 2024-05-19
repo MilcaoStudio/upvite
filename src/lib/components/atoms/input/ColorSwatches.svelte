@@ -5,17 +5,16 @@
     import Row from "../layout/Row.svelte";
     import HueSlider from "./HueSlider.svelte";
     import Swatch from "./Swatch.svelte";
-    export let disabled = false, onChange: (color: string) => void;
-    let gradient = "None";
-    let selected: string[] = ["#000000"];
+  import GradientEditor from "./GradientEditor.svelte";
+    export let colour: string | null = null, disabled = false, onChange: (color: string) => void;
+    let gradient = "none";
     let hue = 0;
-    $: console.log(selected);
     let lightness_tones = ["20%", "40%", "50%", "60%", "80%", "90%"];
     function onGradientChange(value: string) {
         gradient = value;
     }
     function onSolidColorChange(value: string) {
-        selected[0] = value;
+        colour = value;
     }
 </script>
 
@@ -23,30 +22,30 @@
     props={{
         disabled,
         type: "combo",
-        value: "None",
+        value: colour?.startsWith("linear") ? "linear" : colour?.startsWith("radial") ? "radial" : colour?.startsWith("conic") ? "conic" : "none",
         options: [
-            { value: "None", name: "Solid color" },
-            { value: "Linear", name: "Linear gradient" },
-            { value: "Radial", name: "Radial Gradient" },
-            { value: "Conic", name: "Conic Gradient" },
+            { value: "none", name: "Solid Color" },
+            { value: "linear", name: "Linear Gradient" },
+            { value: "radial", name: "Radial Gradient" },
+            { value: "conic", name: "Conic Gradient" },
         ],
         onChange: onGradientChange,
     }}
 />
-{#if gradient == "None"}
+{#if gradient == "none"}
     <Row gap="16px" centred>
-        <div class="preview" style:background-color={selected[0]} />
+        <div class="preview" style:background={colour} />
         <Column centred>
-            <HueSlider {disabled} bind:value={hue}></HueSlider>
+            <HueSlider {disabled} bind:value={hue}>Hue</HueSlider>
             <Column>
                 <Row gap="8px">
                     {#each lightness_tones as light (light)}
                         <Swatch
                             hsl={[hue, "100%", light]}
                             onchange={onSolidColorChange}
-                            let:colour
+                            let:colour={bgColour}
                         >
-                            {#if selected[0] == colour}
+                            {#if colour == bgColour}
                                 <BxCheck size={18} />
                             {/if}
                         </Swatch>
@@ -57,9 +56,9 @@
                         <Swatch
                             hsl={[hue, "60%", light]}
                             onchange={onSolidColorChange}
-                            let:colour
+                            let:colour={bgColour}
                         >
-                            {#if selected[0] == colour}
+                            {#if colour == bgColour}
                                 <BxCheck size={18} />
                             {/if}
                         </Swatch>
@@ -67,6 +66,11 @@
                 </Row>
             </Column>
         </Column>
+    </Row>
+{:else}
+    <Row gap="8px" centred>
+        <div class="preview" style:background={colour} />
+        <GradientEditor />
     </Row>
 {/if}
 
