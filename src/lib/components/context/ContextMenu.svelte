@@ -29,7 +29,7 @@
   let isOpen = false;
 
   async function onClick(data?: Action) {
-    console.log("Context menu action", JSON.stringify(data));
+    console.log("Context menu action", data);
     if (!data) {
       return;
     }
