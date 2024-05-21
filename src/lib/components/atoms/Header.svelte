@@ -11,12 +11,13 @@
         css`
             ${withTransparency
                 ? ` 
-                    -webkit-backdrop-filter: blur(10px);
-                    backdrop-filter: blur(20px);
                     width: calc(100% - 20px);
                     z-index: 20;
                     position: absolute;
-                    background-color: rgba( 56, 64, 93, max(0, 0.3) );
+                    background-color: rgba( 56, 64, 93, max(0, 0.42) );
+                    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+                    backdrop-filter: blur(9px);
+                    -webkit-backdrop-filter: blur(9px);
                 };
               `
                 : `background-color: var(--${palette}-header);`}

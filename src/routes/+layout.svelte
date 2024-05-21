@@ -22,7 +22,10 @@
     }
 
     afterUpdate(()=>{state.plugins.onUpdate()});
+
 </script>
+
+
 
 {#if ready}
     
