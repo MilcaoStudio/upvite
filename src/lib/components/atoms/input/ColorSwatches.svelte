@@ -5,7 +5,8 @@
     import Row from "../layout/Row.svelte";
     import HueSlider from "./HueSlider.svelte";
     import Swatch from "./Swatch.svelte";
-  import GradientEditor from "./GradientEditor.svelte";
+    import GradientEditor, {getSteps} from "./GradientEditor.svelte";
+
     export let colour: string | null = null, disabled = false, onChange: (color: string) => void;
     let gradient = "none";
     let hue = 0;
@@ -70,7 +71,12 @@
 {:else}
     <Row gap="8px" centred>
         <div class="preview" style:background={colour} />
-        <GradientEditor />
+        {#if colour?.startsWith("linear-gradient")}
+            <GradientEditor steps={getSteps(colour) ?? []} />
+        {:else}
+            <GradientEditor  />
+        {/if}
+        
     </Row>
 {/if}
 

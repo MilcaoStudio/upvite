@@ -3,14 +3,14 @@
         stop?: number;
         colour: string;
     };
-    const stopRegex = /(\d+)%/;
+    const stopRegex = /(\d+)%$/;
     const colourRegex = /(hsl\(.+\))|(rgba?\(.+\))|(#[a-fA-F0-9]+)/i;
     export function asStep(value: string): GradientStep {
         let stop, colour = "#000000";
         const colourResults = colourRegex.exec(value);
         console.log(colourResults);
         if(colourResults){
-            colour = colourResults[1];
+            colour = colourResults[1] || colourResults[2] || colourResults[3];
         }
         const stopResults = stopRegex.exec(value);
         console.log(stopResults);
@@ -18,6 +18,23 @@
             stop = parseInt(stopResults[1]);
         }
         return {colour, stop}
+    }
+
+    const argumentsRegex = /.+\((.+)\)/;
+
+    export function getSteps(value: string): GradientStep[] | null {
+      let steps = new Array<GradientStep>;
+      const argumentsResults = argumentsRegex.exec(value);
+      if (!argumentsResults) {
+        return null;
+      }
+
+      const args = argumentsResults[1].split(",");
+      console.log(args);
+      // drop orientation
+      const colours = args.slice(1);
+      steps = colours.map(colour => asStep(colour));
+      return steps;
     }
 </script>
 

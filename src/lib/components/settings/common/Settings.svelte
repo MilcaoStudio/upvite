@@ -14,11 +14,13 @@
     import Category from "./category.svelte";
     import BxInfoCircle from "svelte-boxicons/BxInfoCircle.svelte";
     import BxListUl from "svelte-boxicons/BxListUl.svelte";
+    import BxCrown from "svelte-boxicons/BxCrown.svelte";
     import Button from "./buttonSimple.svelte";
 
     const icons: Record<string, ComponentType> = {
         overview: BxInfoCircle,
         permissions: BxListUl,
+        roles: BxCrown
     };
     export let pages: Record<string, ComponentType>,
         tab: string | undefined = undefined,
