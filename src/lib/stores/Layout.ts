@@ -242,7 +242,7 @@ export default class Layout implements Persistent<Data> {
         this.viewport = width && (
             width > 1200 ?
                 Viewport.LARGE :
-                width > 768 ?
+                width > 720 ?
                     Viewport.MEDIUM :
                     Viewport.SMALL);
     }

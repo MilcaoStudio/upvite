@@ -15,7 +15,7 @@
     cursor: pointer;
 
     font-size: 16px;
-    border-radius: var(--border-radius-small);
+    border-radius: var(--border-radius-inner);
     transition: 0.1s ease-in all;
 
     color: var(--tertiary-foreground);
