@@ -93,7 +93,7 @@ export default class Signaling extends EventEmitter<SignalingEvents> {
     }
 
     join(room_id: string, offer: RTCSessionDescriptionInit) {
-        return this.sendRequest(WSCommandType.Join, {room_id, offer})
+        return this.sendRequest(WSCommandType.Join, {room_id, offer,})
     }
 
     offer(description: RTCSessionDescriptionInit) {
@@ -144,7 +144,7 @@ export default class Signaling extends EventEmitter<SignalingEvents> {
     trickle(trickle: Trickle) {
         return this.sendRequest(WSCommandType.Trickle, {trickle})
     }
-    authenticate(token: string, roomId: string): Promise<AuthenticationResult> {
+    authenticate(token: string): Promise<AuthenticationResult> {
         return this.sendRequest(WSCommandType.Connect, { token });
     }
 

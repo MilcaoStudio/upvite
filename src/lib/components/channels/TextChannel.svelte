@@ -51,7 +51,7 @@
         display: flex;
         min-height: 0;
         overflow: hidden;
-        flex-direction: row;
+        flex-direction: column;
         position: relative;
     }
 

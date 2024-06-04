@@ -61,9 +61,10 @@ class VoiceStateReference {
         if (this.status != VoiceStatus.UNLOADED) return;
         this.status = VoiceStatus.LOADING;
 
+        const userId = useClient().user?._id ?? "guest";
         try {
             const { default: VoiceClient } = await import("./VoiceClient");
-            const client = new VoiceClient();
+            const client = new VoiceClient(userId);
 
             client.on("ready", this.syncState);
             client.on("startProduce", this.syncState);
@@ -73,6 +74,9 @@ class VoiceStateReference {
             client.on("userStartProduce", this.syncState);
             client.on("userStopProduce", this.syncState);
 
+            const voiceURL = useClient().configuration?.features.voso.url ?? "localhost:4000";
+            await client.connect(voiceURL);
+            await client.authenticate(userId);
             runInAction(() => {
                 if (!client.supported()) {
                     this.status = VoiceStatus.UNAVAILABLE;
@@ -98,19 +102,15 @@ class VoiceStateReference {
 
         try {
             //const call = await channel.joinCall();
-            const token = useClient().user?._id || "";
-            await this.client.connect("ws://localhost:4000");
+            
             /*
             await this.client.connect(
                 channel.client.configuration!.features.voso.ws,
                 channel._id,
             );
 */
-            runInAction(() => {
-                this.status = VoiceStatus.AUTHENTICATING;
-            });
-            await this.client.authenticate(token);
             //await this.client.authenticate(call.token);
+            await this.client.join(channel._id);
             this.syncState();
 
             runInAction(() => {
@@ -122,7 +122,7 @@ class VoiceStateReference {
             console.error(err);
 
             runInAction(() => {
-                this.status = VoiceStatus.READY;
+                this.status = VoiceStatus.UNAVAILABLE;
             });
 
             return channel;

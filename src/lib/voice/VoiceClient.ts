@@ -14,7 +14,7 @@ import {
 import { state } from "$lib/State";
 import Signaling from "./Signaling";
 import { clientController } from "$lib/controllers/ClientController";
-import { makeRemote, type RemoteStream } from "./Stream";
+import { LocalStream, makeRemote, type Constraints, type RemoteStream } from "./Stream";
 import { voiceState } from "./VoiceState";
 
 interface VoiceEvents {
@@ -45,6 +45,7 @@ export class Transport {
 
         if (role == Role.pub) {
             this.pc.createDataChannel(API_CHANNEL);
+            console.info("Create data channel System");
         }
 
         this.pc.onicecandidate = ({ candidate }) => {
@@ -69,7 +70,7 @@ export interface VoiceClientConfiguration extends RTCConfiguration {
 }
 
 export default class VoiceClient extends EventEmitter<VoiceEvents> {
-    private transports?: Transports<Role, Transport>;
+    private transports: Transports<Role, Transport> | null;
     private _supported: boolean;
     private config: VoiceClientConfiguration;
 
@@ -81,31 +82,54 @@ export default class VoiceClient extends EventEmitter<VoiceEvents> {
     consumers: Map<string, ConsumerList>;
     signaling: Signaling;
 
-    constructor() {
+    constructor(userId: string) {
         super();
         this._supported = true;
         this.config = {
             codec: 'vp8',
             iceServers: [
                 {
-                    urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302'],
+                    urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302', 'stun:stun.12connect.com:3478'],
                 },
+                {
+                    urls: "turn:193.106.248.88:3478",
+                    username: userId,
+                    credential: userId
+                }
             ],
         };
         this.signaling = new Signaling();
         this.participants = new Map();
         this.consumers = new Map();
         this.isDeaf = false;
+        const transports = {
+            [Role.pub]: new Transport(Role.pub, this.signaling, this.config),
+            [Role.sub]: new Transport(Role.sub, this.signaling, this.config),
+        };
 
+        transports[Role.sub].pc.ontrack = (ev: RTCTrackEvent) => {
+            const stream = ev.streams[0];
+            const remote = makeRemote(stream, this.transports![Role.sub]);
+
+            this.addTrack(ev.track, remote);
+        };
+
+        this.transports = transports;
         this.signaling.on(
             "data",
-            (data) => {
+            async (data) => {
                 switch (data.type) {
+                    case WSEventType.Answer: {
+                        console.log("Answer", data);
+                        const answer = data.sdp;
+                        await transports[Role.pub].pc.setRemoteDescription(answer);
+                        transports[Role.pub].candidates.forEach((c) => this.transports![Role.pub].pc.addIceCandidate(c));
+                        transports[Role.pub].pc.onnegotiationneeded = () => this.renegotiate(false);
+                        break;
+                    }
                     case WSEventType.Accept: {
                         console.log("Accept", data);
-                        data.user_ids.forEach((id: string) => {
-                            this.participants.set(id, {});
-                        });
+                        
                         // TODO: connect to available tracks (answer?)
                         this.emit("ready");
                         break;
@@ -121,7 +145,7 @@ export default class VoiceClient extends EventEmitter<VoiceEvents> {
                         break;
                     }
                     case WSEventType.UserJoin: {
-                        this.participants.set(data.id, {});
+                        this.participants.set(data.id, {room: data.room});
                         console.debug(data);
                         //state.settings.sounds.playSound("call_join");
                         // TODO: connect to user tracks (offer?)
@@ -213,21 +237,10 @@ export default class VoiceClient extends EventEmitter<VoiceEvents> {
         return this.signaling.connect(address);
     }
 
-    async join(roomId: string, userId: string) {
+    async join(roomId: string,) {
+        if (!this.transports) throw ReferenceError("No transports initialized");
         this.roomId = roomId;
-        this.userId = userId;
-        this.transports = {
-            [Role.pub]: new Transport(Role.pub, this.signaling, this.config),
-            [Role.sub]: new Transport(Role.sub, this.signaling, this.config),
-        };
-
-        this.transports[Role.sub].pc.ontrack = (ev: RTCTrackEvent) => {
-            const stream = ev.streams[0];
-            const remote = makeRemote(stream, this.transports![Role.sub]);
-
-            this.addTrack(ev.track, remote);
-        };
-
+        
         const apiReady = new Promise<void>((resolve) => {
             this.transports![Role.sub].pc.ondatachannel = (ev: RTCDataChannelEvent) => {
                 if (ev.channel.label == API_CHANNEL) {
@@ -248,14 +261,12 @@ export default class VoiceClient extends EventEmitter<VoiceEvents> {
             };
         });
 
+
         const offer = await this.transports[Role.pub].pc.createOffer();
         await this.transports[Role.pub].pc.setLocalDescription(offer);
         const answer = await this.signaling.join(roomId, offer);
         console.debug(answer);
-        await this.transports[Role.pub].pc.setRemoteDescription(answer);
-        this.transports[Role.pub].candidates.forEach((c) => this.transports![Role.pub].pc.addIceCandidate(c));
-        this.transports[Role.pub].pc.onnegotiationneeded = () => this.renegotiate(false);
-        return apiReady
+        this.participants.set(this.userId!, {audio: true, room: roomId});
     }
 
     disconnect(error?: VoiceError, ignoreDisconnected?: boolean) {
@@ -267,7 +278,7 @@ export default class VoiceClient extends EventEmitter<VoiceEvents> {
         this.roomId = undefined;
         if (this.transports) {
             Object.values(this.transports).forEach((t) => t.pc.close());
-            this.transports = undefined;
+            this.transports = null;
         }
 
         /*
@@ -281,14 +292,10 @@ export default class VoiceClient extends EventEmitter<VoiceEvents> {
         this.emit("close", error);
     }
 
-    /**@deprecated use join */
-    async authenticate(token: string) {
-        if (!this.roomId)
-            throw ERR_INVALID_STATE;
-        const result = await this.signaling.authenticate(token, this.roomId);
+    async authenticate(userId: string) {
+        const result = await this.signaling.authenticate(userId);
         console.info("[Voice client]", result);
         this.userId = result.userId;
-        //this.participants = result.partipants;
     }
 
     async negotiate(description: RTCSessionDescriptionInit) {

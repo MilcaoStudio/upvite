@@ -9,6 +9,7 @@
     style:gap
     style:align-items={centred ? "center" : ""}
     style:flex-grow={grow ? "1" : ""}
+    {...$$restProps}
 >
     <slot />
 </div>

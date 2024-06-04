@@ -10,7 +10,7 @@
     import type { Channel } from "revolt.js";
     import { modalController } from "$lib/components/modals/ModalController";
 
-    //import VoiceActions from "./actions/VoiceActions.svelte";
+    import VoiceActions from "./VoiceActions.svelte";
 
     export let channel: Channel;
     let isVertical = state.layout.getViewport() == Viewport.SMALL;
@@ -35,11 +35,10 @@
 
 <div class="Container">
     <!--TODO: Actions-->
-    <!--
+    
     {#if channel.channel_type == "VoiceChannel"}
-        
         <VoiceActions {channel} />
-    {/if}-->
+    {/if}
     {#if channel.channel_type == "Group"}
         <IconButton href="/channel/{channel._id}/settings">
             <Cog size={24} />

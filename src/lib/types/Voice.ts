@@ -119,6 +119,7 @@ export type Transports<T extends string | symbol | number, U> = {
 
 export enum WSEventType {
     Accept = "Accept",
+    Answer = "Answer",
     UserJoin = "UserJoin",
     UserLeft = "UserLeft",
 
@@ -188,6 +189,7 @@ export interface AuthenticationResult {
 
 export interface VoiceUser {
     audio?: boolean;
+    room: string,
     //video?: boolean,
     //saudio?: boolean,
     //svideo?: boolean,

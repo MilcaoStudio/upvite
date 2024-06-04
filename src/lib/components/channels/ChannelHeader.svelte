@@ -13,6 +13,8 @@
     import BxPhoneCall from "svelte-boxicons/BxPhoneCall.svelte";
     import BxNotepad from "svelte-boxicons/BxNotepad.svelte";
     import { t } from "svelte-i18n";
+    import { LocalStream, type Constraints } from "$lib/voice/Stream";
+    import VoiceUi from "./VoiceUI.svelte";
 
     export let channel: Channel;
     let icon: ComponentType, recipient: User | null = null;
@@ -58,6 +60,10 @@
     </div>
     <HeaderActions {channel} />
 </PageHeader>
+{#if channel.channel_type == "VoiceChannel"}
+    <VoiceUi {channel} />
+{/if}
+
 <style>
     div.Info {
         flex-grow: 1;

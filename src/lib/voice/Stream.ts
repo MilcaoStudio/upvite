@@ -371,8 +371,12 @@ export function makeRemote(stream: MediaStream, transport: Transport): RemoteStr
       if (transport.api.readyState != 'open') {
         // queue call if we aren't open yet
         transport.api.onopen = () => transport.api?.send(JSON.stringify(call));
+        console.log("Waiting to send message to api channel");
+        console.log(JSON.stringify(call));
       } else {
         transport.api.send(JSON.stringify(call));
+        console.error("Message sent to api channel");
+        console.log(JSON.stringify(call));
       }
     }
   };
