@@ -5,23 +5,26 @@
     import { VoiceStatus, voiceState } from "$lib/voice/VoiceState";
     import type { Channel } from "revolt.js";
     import { autorun } from "mobx";
+    import { internalEmit } from "$lib/InternalEmitter";
 
     export let channel: Channel;
-    let roomId: string | null = null;
-    $: autorun(()=> roomId = voiceState.roomId)
-    voiceState.loadVoice();
+    let linkedRoom: string | null = null;
+    let status = voiceState.status;
+    $: autorun(()=> linkedRoom = voiceState.roomId)
 </script>
 
-{#if voiceState.status >= VoiceStatus.READY}
-    {#if roomId == channel._id}
-        <IconButton onClick={voiceState.disconnect}>
+{#if $status >= VoiceStatus.RTC_CONNECTING}
+    {#if linkedRoom == channel._id}
+        <IconButton onClick={()=> {
+            internalEmit("voice", "leave");
+        }}>
             <PhoneOff size={22} color="red" />
         </IconButton>
     {:else}
         <IconButton
             onClick={async () => {
-                voiceState.disconnect();
-                voiceState.connect(channel);
+                voiceState.leave();
+                internalEmit("voice", "join")
             }}
         >
             <PhoneCall size={24} />
@@ -29,7 +32,7 @@
     {/if}
 {:else}
     <IconButton onClick={async () => {
-        voiceState.connect(channel);
+        internalEmit("voice", "join");
     }}>
         <PhoneCall size={24} />
     </IconButton>

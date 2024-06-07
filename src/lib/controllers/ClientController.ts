@@ -7,6 +7,7 @@ import { state } from "$lib/State";
 import { injectWindow, takeError } from "$lib";
 import { ObservableMap, action, computed, makeAutoObservable, observable } from "mobx";
 import { browser } from "$app/environment";
+import { voiceState } from "$lib/voice/VoiceState";
 /**
  * Current lifecycle state
  */
@@ -153,6 +154,7 @@ export default class Session {
             await this.client!.useExistingSession(data.session);
             this.user_id = this.client!.user!._id;
             state.auth.setSession(data.session);
+            voiceState.loadVoice(this.client!);
         } catch (err) {
             this.state = "Ready";
             throw err;

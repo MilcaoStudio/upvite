@@ -1,19 +1,20 @@
-import { action, makeAutoObservable, runInAction } from "mobx";
-import { Channel, type Nullable, toNullable } from "revolt.js";
+import { ObservableMap, action, makeAutoObservable, runInAction } from "mobx";
+import { Channel, type Nullable, toNullable, Client } from "revolt.js";
 
 import type { ProduceType, VoiceUser } from "../types/Voice";
 import type VoiceClient from "./VoiceClient";
-import { useClient, useSession } from "$lib/controllers/ClientController";
-import type { RemoteStream } from "./Stream";
+import type { LocalStream, RemoteStream } from "./Stream";
+import { get, writable, type Writable } from "svelte/store";
+import { injectWindow } from "$lib";
 
 export enum VoiceStatus {
-    LOADING = 0,
     UNAVAILABLE,
+    UNLOADED,
     ERRORED,
-    READY = 3,
-    CONNECTING = 4,
-    UNLOADED = 5,
+    LOADING,
+    CONNECTING,
     AUTHENTICATING,
+    READY,
     RTC_CONNECTING,
     CONNECTED,
     // RECONNECTING
@@ -26,20 +27,21 @@ class VoiceStateReference {
     client?: VoiceClient;
     connecting?: boolean;
 
-    status: VoiceStatus;
+    status: Writable<VoiceStatus>;
     roomId: Nullable<string>;
     participants: Map<string, VoiceUser>;
-    tracks: Map<string, RemoteStream>;
+    streams: ObservableMap<string, RemoteStream>;
 
     constructor() {
         this.roomId = null;
-        this.status = VoiceStatus.UNLOADED;
+        this.status = writable(VoiceStatus.UNLOADED);
         this.participants = new Map();
-        this.tracks = new Map;
+        this.streams = new ObservableMap;
 
         this.syncState = this.syncState.bind(this);
-        this.connect = this.connect.bind(this);
+        this.init = this.init.bind(this);
         this.disconnect = this.disconnect.bind(this);
+        this.leave = this.leave.bind(this);
 
         makeAutoObservable(this, {
             client: false,
@@ -57,14 +59,13 @@ class VoiceStateReference {
     }
 
     // This imports and constructs the voice client.
-    @action async loadVoice() {
-        if (this.status != VoiceStatus.UNLOADED) return;
-        this.status = VoiceStatus.LOADING;
+    @action async loadVoice(apiClient: Client) {
+        this.status.set(VoiceStatus.LOADING);
 
-        const userId = useClient().user?._id ?? "guest";
+        const userId = apiClient.user?._id ?? "guest";
         try {
             const { default: VoiceClient } = await import("./VoiceClient");
-            const client = new VoiceClient(userId);
+            const client = new VoiceClient();
 
             client.on("ready", this.syncState);
             client.on("startProduce", this.syncState);
@@ -74,75 +75,54 @@ class VoiceStateReference {
             client.on("userStartProduce", this.syncState);
             client.on("userStopProduce", this.syncState);
 
-            const voiceURL = useClient().configuration?.features.voso.url ?? "localhost:4000";
+            this.status.set(VoiceStatus.CONNECTING);
+            const voiceURL = apiClient.configuration?.features.voso.url ?? "localhost:4000";
             await client.connect(voiceURL);
+            this.client = client;
+            this.status.set(VoiceStatus.AUTHENTICATING);
             await client.authenticate(userId);
             runInAction(() => {
                 if (!client.supported()) {
-                    this.status = VoiceStatus.UNAVAILABLE;
+                    this.status.set(VoiceStatus.UNAVAILABLE);
                 } else {
-                    this.status = VoiceStatus.READY;
-                    this.client = client;
+                    this.status.set(VoiceStatus.READY);
                 }
             });
         } catch (err) {
             console.error("Failed to load voice library!", err);
             runInAction(() => {
-                this.status = VoiceStatus.UNAVAILABLE;
+                this.status.set(VoiceStatus.UNAVAILABLE);
             });
         }
     }
 
-    // Connect to a voice channel.
-    @action async connect(channel: Channel) {
+    /**
+     * Initialize transports
+     */
+    @action async init(local: LocalStream, target: string) {
         if (!this.client?.supported()) throw new Error("RTC is unavailable");
 
         this.connecting = true;
-        this.status = VoiceStatus.CONNECTING;
-
-        try {
-            //const call = await channel.joinCall();
-            
-            /*
-            await this.client.connect(
-                channel.client.configuration!.features.voso.ws,
-                channel._id,
-            );
-*/
-            //await this.client.authenticate(call.token);
-            await this.client.join(channel._id);
-            this.syncState();
-
-            runInAction(() => {
-                this.status = VoiceStatus.RTC_CONNECTING;
-            });
-
-            //await this.client.initializeTransports();
-        } catch (err) {
-            console.error(err);
-
-            runInAction(() => {
-                this.status = VoiceStatus.UNAVAILABLE;
-            });
-
-            return channel;
-        }
-
-        runInAction(() => {
-            this.status = VoiceStatus.CONNECTED;
-            this.connecting = false;
-        });
-
-        return channel;
+        this.status.set(VoiceStatus.RTC_CONNECTING);
+        await this.client.join(target, local);
+        this.status.set(VoiceStatus.CONNECTED);
     }
 
+    @action leave() {
+        this.connecting = false;
+        this.streams.clear();
+        this.client?.leave();
+        
+        this.syncState();
+        this.status.set(VoiceStatus.UNLOADED);
+    }
     // Disconnect from current channel.
     @action disconnect() {
         this.connecting = false;
-        this.status = VoiceStatus.READY;
 
         this.client?.disconnect();
         this.syncState();
+        this.status.set(VoiceStatus.UNLOADED);
     }
 
     isProducing(type: ProduceType) {
@@ -220,3 +200,4 @@ class VoiceStateReference {
 }
 
 export const voiceState = new VoiceStateReference();
+injectWindow("voiceState", voiceState);

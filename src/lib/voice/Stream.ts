@@ -23,7 +23,7 @@ const defaults: Constraints = {
   resolution: 'hd',
   codec: 'vp8',
   audio: true,
-  video: true,
+  video: false,
   simulcast: false,
 };
 
@@ -71,6 +71,7 @@ export class LocalStream extends MediaStream {
   constructor(stream: MediaStream, constraints: Constraints) {
     super(stream);
     this.constraints = constraints;
+    
   }
 
   private static computeAudioConstraints(constraints: Constraints): MediaTrackConstraints | boolean {
@@ -88,7 +89,7 @@ export class LocalStream extends MediaStream {
     return false
   }
 
-  private getTrack(kind: 'audio' | 'video') {
+  public getTrack(kind: 'audio' | 'video') {
     let tracks;
     if (kind === 'video') {
       tracks = this.getVideoTracks();
@@ -99,10 +100,10 @@ export class LocalStream extends MediaStream {
     return tracks.length > 0 ? this.getAudioTracks()[0] : undefined;
   }
 
-  private async getNewTrack(kind: 'audio' | 'video') {
+  public async getNewTrack(kind: 'audio' | 'video') {
     const stream = await navigator.mediaDevices.getUserMedia({
       [kind]:
-        kind === 'video'
+        kind == 'video'
           ? LocalStream.computeVideoConstraints(this.constraints)
           : LocalStream.computeAudioConstraints(this.constraints),
     });
@@ -115,7 +116,7 @@ export class LocalStream extends MediaStream {
         streams: [this],
         direction: 'sendonly',
       };
-      if (track.kind === 'video') {
+      if (track.kind == 'video') {
         if (this.encodingParams) {
           init.sendEncodings = this.encodingParams;
         } else if (this.constraints.simulcast) {
@@ -150,6 +151,7 @@ export class LocalStream extends MediaStream {
           init.sendEncodings = [VideoConstraints[this.constraints.resolution].encodings];
         }
       }
+      console.debug("[publishTrack] Add transceiver for peer connection");
       const transceiver = this.pc.addTransceiver(track, init);
       this.setPreferredCodec(transceiver, track.kind);
     }
@@ -158,11 +160,12 @@ export class LocalStream extends MediaStream {
   private setPreferredCodec(transceiver: RTCRtpTransceiver, kind: string) {
     if ('setCodecPreferences' in transceiver) {
       const cap = RTCRtpSender.getCapabilities(kind);
+      console.debug(cap?.codecs);
       if (!cap) return;
       let selCodec: RTCRtpCodecCapability | undefined;
-      if (this.constraints.preferredCodecProfile && kind === 'video') {
+      if (this.constraints.preferredCodecProfile && kind == 'video') {
         const allCodecProfiles = cap.codecs.filter(
-          (c) => c.mimeType.toLowerCase() === `video/${this.constraints.codec.toLowerCase()}`,
+          (c) => c.mimeType.toLowerCase() == `video/${this.constraints.codec.toLowerCase()}`,
         );
         if (!allCodecProfiles) {
           return;
@@ -178,11 +181,13 @@ export class LocalStream extends MediaStream {
       } else {
         selCodec = cap.codecs.find(
           (c) =>
-            c.mimeType.toLowerCase() === `video/${this.constraints.codec.toLowerCase()}` ||
-            c.mimeType.toLowerCase() === `audio/opus`,
+            c.mimeType.toLowerCase() == `video/${this.constraints.codec.toLowerCase()}` ||
+            c.mimeType.toLowerCase() == `audio/opus`,
         );
+        console.debug(selCodec);
       }
       if (selCodec) {
+        console.debug("Set codec for transceiver")
         transceiver.setCodecPreferences([selCodec]);
       }
     }

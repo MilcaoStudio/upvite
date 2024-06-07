@@ -76,8 +76,10 @@ export default class Signaling extends EventEmitter<SignalingEvents> {
     private parseData(event: MessageEvent) {
         if (typeof event.data != "string") return;
         const json = JSON.parse(event.data);
-        //const entry = this.pending.get(json.id);
-        console.debug("Received:", this.index, event.data);
+        this.emit("data", json);
+        
+        // Not applicable in current spec
+        /*
         const entry = this.pending.get(this.index);
         if (!entry) {
             this.emit("data", json);
@@ -86,18 +88,23 @@ export default class Signaling extends EventEmitter<SignalingEvents> {
 
         entry(json);
         this.index++;
+        */
     }
 
     answer(description: RTCSessionDescriptionInit) {
-        return this.sendRequest(WSCommandType.Answer, description);
+        return this.sendRequest(WSCommandType.Answer, {description});
     }
 
     join(room_id: string, offer: RTCSessionDescriptionInit) {
         return this.sendRequest(WSCommandType.Join, {room_id, offer,})
     }
 
+    leave() {
+        return this.sendRequest("Leave");
+    }
+
     offer(description: RTCSessionDescriptionInit) {
-        return this.sendRequest(WSCommandType.Offer, description)
+        return this.sendRequest(WSCommandType.Offer, {description})
     }
 
     // Connect -> Accept
@@ -119,11 +126,10 @@ export default class Signaling extends EventEmitter<SignalingEvents> {
 
             const finishedFn = (data: any) => {
                 this.removeListener("close", onClose);
-                if (data.error)
+                if (data.type == "Error")
                     reject({
-                        error: data.error,
-                        message: data.message,
-                        data: data.data,
+                        message: data.error,
+                        data: data,
                     });
                 resolve(data);
             };
@@ -135,17 +141,17 @@ export default class Signaling extends EventEmitter<SignalingEvents> {
                 type,
                 ...data,
             };
-            console.debug("Sent:", this.index);
+            console.debug("Sent:", json);
             ws.send(`${JSON.stringify(json)}\n`);
         });
     }
     /* eslint-enable @typescript-eslint/no-explicit-any */
 
     trickle(trickle: Trickle) {
-        return this.sendRequest(WSCommandType.Trickle, {trickle})
+        return this.sendRequest(WSCommandType.Trickle, trickle)
     }
-    authenticate(token: string): Promise<AuthenticationResult> {
-        return this.sendRequest(WSCommandType.Connect, { token });
+    authenticate(token: string, channels: string[]): Promise<AuthenticationResult> {
+        return this.sendRequest(WSCommandType.Connect, { token, room_ids: channels });
     }
 
     /**
