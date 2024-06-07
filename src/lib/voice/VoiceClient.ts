@@ -222,7 +222,7 @@ export default class VoiceClient extends EventEmitter<VoiceEvents> {
     }
 
     supported() {
-        return RTCPeerConnection != undefined;
+        return navigator.mediaDevices != undefined;
     }
     connect(address: string) {
         return this.signaling.connect(address);

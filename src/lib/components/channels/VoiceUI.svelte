@@ -14,6 +14,7 @@
     import BxVideoOff from "svelte-boxicons/BxVideoOff.svelte";
     import BxMicrophone from "svelte-boxicons/BxMicrophone.svelte";
     import BxMicrophoneOff from "svelte-boxicons/BxMicrophoneOff.svelte";
+    import { readable } from "svelte/store";
 
     export let channel: Channel;
     let client = useClient();
@@ -47,9 +48,10 @@
     }
 
     function init() {
-        requestUserMedia().then((media) =>
-            voiceState.init(media, channel._id)
-    );
+        if (!voiceState.client?.supported()) {
+            return;
+        }
+        requestUserMedia().then((media) => voiceState.init(media, channel._id));
     }
 
     async function requestUserMedia() {
@@ -65,23 +67,23 @@
     }
 </script>
 
-<div class="VoiceUi with-padding">
-    <Row centred gap="8px">
-        {#if user && ($status == VoiceStatus.RTC_CONNECTING || $status == VoiceStatus.CONNECTED)}
-            {#if localStream}
-                <VideoStream srcObject={localStream} {video} />
+{#if $status == VoiceStatus.CONNECTED}
+    <div class="VoiceUi with-padding">
+        <Row centred gap="8px">
+            {#if user}
+                {#if localStream}
+                    <VideoStream srcObject={localStream} {video} />
+                {/if}
             {/if}
-        {/if}
-        {#if streams}
-            {#each streams as stream}
-                <VideoStream srcObject={stream} {video} />
-            {/each}
-        {/if}
-    </Row>
-    {#if $status == VoiceStatus.CONNECTED}
+            {#if streams}
+                {#each streams as stream}
+                    <VideoStream srcObject={stream} {video} />
+                {/each}
+            {/if}
+        </Row>
         <Row centred gap="8px">
             <IconButton
-                onClick={() =>{
+                onClick={() => {
                     if (audio) {
                         localStream?.mute("audio");
                         audio = false;
@@ -115,15 +117,25 @@
                 {/if}
             </IconButton>
         </Row>
-    {/if}
-</div>
+    </div>
+{:else if $status == VoiceStatus.UNAVAILABLE}
+    <div class="with-padding">
+        <div class="error">
+            <h4>Voice service is unavailable.</h4>
+        </div>
+    </div>
+{/if}
 
 <style>
     .VoiceUi {
         background-color: black;
-        padding: 30px;
+        padding-bottom: 20px;
     }
     .with-padding {
-        padding-top: 80px;
+        padding-top: 40px;
+    }
+    .error {
+        background-color: var(--error);
+        text-align: center;
     }
 </style>

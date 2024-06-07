@@ -100,15 +100,22 @@ class VoiceStateReference {
      * Initialize transports
      */
     @action async init(local: LocalStream, target: string) {
-        if (!this.client?.supported()) throw new Error("RTC is unavailable");
+        if (!this.client?.supported()) {
+            this.status.set(VoiceStatus.UNAVAILABLE);
+            return;
+        }
 
         this.connecting = true;
         this.status.set(VoiceStatus.RTC_CONNECTING);
+        
         await this.client.join(target, local);
         this.status.set(VoiceStatus.CONNECTED);
     }
 
     @action leave() {
+        if (!this.client?.supported()) {
+            return;
+        }
         this.connecting = false;
         this.streams.clear();
         this.client?.leave();
