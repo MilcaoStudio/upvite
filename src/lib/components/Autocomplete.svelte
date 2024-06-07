@@ -347,7 +347,6 @@
                 <button
                     class:active={i == $state.selected}
                     on:mouseenter={() => {
-                        if ($state.type == "none") return;
                         (i != $state.selected || !$state.within) &&
                             state.update(_state=>({
                                 ..._state,
@@ -356,7 +355,6 @@
                             }));
                     }}
                     on:mouseleave={() =>
-                        $state.type != "none" &&
                         $state.within &&
                         state.update(_state =>({
                             ..._state,
@@ -376,14 +374,14 @@
             {#each $state.matches as match, i}
                 <button class:active={i == $state.selected}
                 on:mouseenter={()=>{
-                    $state.type != "none" && (i != $state.selected || !$state.within) && state.update(_state=>({
+                    (i != $state.selected || !$state.within) && state.update(_state=>({
                         ..._state,
                         selected: i,
                         within: true
                     }))
                 }}
                 on:mouseleave={()=>{
-                    $state.type != "none" && ($state.within) && state.update(_state=>({..._state, within: false}))
+                    $state.within && state.update(_state=>({..._state, within: false}))
                 }}>
                 <ChannelIcon size={24} target={match} />
                 {match.name}
