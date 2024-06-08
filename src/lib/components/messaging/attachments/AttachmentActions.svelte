@@ -7,17 +7,15 @@
     import BxImage from "svelte-boxicons/BxImage.svelte";
     import { determineFileSize } from "$lib";
     import { useClient } from "$lib/controllers/ClientController";
-    import type { API } from "revolt.js";
+    import type { File } from "revolt.js";
     import { detect } from "detect-browser";
     import IconButton from "$lib/components/atoms/input/IconButton.svelte";
 
-    export let attachment: API.File;
+    export let attachment: File;
     const client = useClient();
-    let { filename, metadata, size } = attachment;
-    let url = client.generateFileURL(attachment);
+    let { filename, metadata, url, humanReadableSize } = attachment;
     $: open_url = `${url}/${filename}`;
     $: download_url = url?.replace("attachments", "attachments/download");
-    let filesize = determineFileSize(size);
     let isFirefox = detect()?.name == "firefox";
 </script>
 
@@ -25,7 +23,7 @@
     <div class="actions">
         <HeadPhone size={18} class="iconType" />
         <span>{filename}</span>
-        <span class="fileSize">{filesize}</span>
+        <span class="fileSize">{humanReadableSize}</span>
         <a
             href={download_url}
             class="downloadIcon"
@@ -43,7 +41,7 @@
         <BxImage size={24} />
         <span>{filename}</span>
         <span class="fileSize">
-            {`${metadata.width}x${metadata.height}`} ({filesize})
+            {`${metadata.width}x${metadata.height}`} ({humanReadableSize})
         </span>
         <a href={open_url} class="iconType" target="_blank" rel="noreferrer">
             <IconButton>
@@ -67,7 +65,7 @@
         <BxVideo size={24} class="iconType" />
         <span>{filename}</span>
         <span class="fileSize">
-            {`${metadata.width}x${metadata.height}`} ({filesize})
+            {`${metadata.width}x${metadata.height}`} ({humanReadableSize})
         </span>
         <a
             href={download_url}
@@ -85,7 +83,7 @@
     <div class="actions">
         <BxFile size={24} class="iconType" />
         <span>{filename}</span>
-        <span class="fileSize">{filesize}</span>
+        <span class="fileSize">{humanReadableSize}</span>
         <a
             href={open_url}
             class="externalType"

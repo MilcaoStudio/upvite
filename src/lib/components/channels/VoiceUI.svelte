@@ -51,7 +51,7 @@
         if (!voiceState.client?.supported()) {
             return;
         }
-        requestUserMedia().then((media) => voiceState.init(media, channel._id));
+        requestUserMedia().then((media) => voiceState.init(media, channel.id));
     }
 
     async function requestUserMedia() {

@@ -2,7 +2,7 @@
     import ContextMenu from "$lib/components/context/ContextMenu.svelte";
     import { useClient } from "$lib/controllers/ClientController";
     import { cx } from "@emotion/css";
-    import type { API } from "revolt.js";
+    import type { File } from "revolt.js";
     import SizedGrid from "./SizedGrid.svelte";
     import ImageView from "./ImageView.svelte";
     import AttachmentActions from "./AttachmentActions.svelte";
@@ -10,10 +10,9 @@
     import TextView from "./TextView.svelte";
 
     const client = useClient();
-    export let attachment: API.File,
+    export let attachment: File,
         hasContent = false;
-    let { filename, metadata } = attachment;
-    let spoiler = filename.startsWith("SPOILER_");
+    let {filename, isSpoiler, metadata} = attachment;
     const style = getComputedStyle(document.documentElement);
     let MAX_ATTACHMENT_WIDTH = parseInt(
         style.getPropertyValue("--attachment-max-width"),
@@ -22,11 +21,7 @@
         style.getPropertyValue("--attachment-max-height"),
     );
     let { shrinkMedia } = state.network.media;
-    let url = client.generateFileURL(
-        attachment,
-        { width: shrinkMedia ? MAX_ATTACHMENT_WIDTH / 2 : MAX_ATTACHMENT_WIDTH * 1.5},
-        true,
-    );
+    let url = attachment.createFileURL({width: shrinkMedia ? MAX_ATTACHMENT_WIDTH / 2 : MAX_ATTACHMENT_WIDTH * 1.5}, true);
 </script>
 
 {#if metadata.type == "Audio"}
@@ -44,7 +39,7 @@
                     margin: hasContent,
                 },
                 {
-                    spoiler: spoiler,
+                    spoiler: isSpoiler,
                 },
             )}
         >
@@ -66,7 +61,7 @@
         <SizedGrid
             width={metadata.width}
             height={metadata.height}
-            className={cx({ spoiler })}
+            className={cx({ spoiler: isSpoiler })}
         >
             <!-- svelte-ignore a11y-media-has-caption -->
             <video

@@ -1,6 +1,6 @@
 <script lang="ts">
     import { useClient } from "$lib/controllers/ClientController";
-    import type { API, Channel, Nullable } from "revolt.js";
+    import type { API, Channel, File } from "revolt.js";
     import IconBase from "../IconBase.svelte";
     import BxHash from "svelte-boxicons/BxHash.svelte";
     import BxMicrophone from "svelte-boxicons/BxMicrophone.svelte";
@@ -13,31 +13,22 @@
     export let server = false,
         size: number,
         target: Channel | null = null,
-        attachment: Nullable<API.File> = null,
+        attachment: File | null = null,
         animate = false,
         showBadge = false;
     let badge = Math.max(16, Math.floor(size / 4));
     $: max_side = state.network.media.shrinkMedia ? 64 : 256;
     const client = useClient();
-    $: iconURL = client.generateFileURL(
-        target?.icon ?? attachment ?? undefined,
-        { max_side },
-        animate,
-    );
+    $: iconURL = target?.icon?.createFileURL({ max_side }, animate) ?? attachment?.createFileURL({max_side}, animate);
 
     $: autorun(
-        () =>
-            (iconURL = client.generateFileURL(
-                target?.icon ?? attachment ?? undefined,
-                { max_side },
-                animate,
-            )),
+        () => iconURL = target?.icon?.createFileURL({ max_side }, animate) ?? attachment?.createFileURL({max_side}, animate)
     );
     $: isServerChannel =
         server ||
         (target &&
-            (target.channel_type == "TextChannel" ||
-                target.channel_type == "VoiceChannel"));
+            (target.type == "TextChannel" ||
+                target.type == "VoiceChannel"));
     // The border radius of the channel icon, if it's a server-channel it should be square (undefined).
     let borderRadius: string | undefined = "--border-radius-channel-icon";
     if (isServerChannel) {
@@ -46,7 +37,7 @@
 </script>
 
 {#if !iconURL && isServerChannel}
-    {#if target?.channel_type == "VoiceChannel"}
+    {#if target?.type == "VoiceChannel"}
         <svg
             xmlns="http://www.w3.org/2000/svg"
             width={size}
@@ -104,9 +95,9 @@
                 x="0"
                 y="4"
             >
-                {#if target?.channel_type == "TextChannel"}
+                {#if target?.type == "TextChannel"}
                     <BxHash size={badge} strokeWidth={2} />
-                {:else if target?.channel_type == "VoiceChannel"}
+                {:else if target?.type == "VoiceChannel"}
                     <BxPhoneCall size={badge} strokeWidth={2} />
                 {/if}
             </foreignObject>

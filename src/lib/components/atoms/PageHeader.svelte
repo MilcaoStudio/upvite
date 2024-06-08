@@ -1,6 +1,5 @@
 <script lang="ts">
     import { page } from "$app/stores";
-    import { isTouchscreenDevice } from "$lib";
     import { state } from "$lib/State";
     import { SIDEBAR_CHANNELS, Viewport } from "$lib/stores/Layout";
     import { css, cx } from "@emotion/css";

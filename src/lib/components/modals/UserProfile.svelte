@@ -6,11 +6,11 @@
     import UserHeader from "../user/UserHeader.svelte";
     import Edit from "svelte-boxicons/BxEdit.svelte";
     import Envelope from "svelte-boxicons/BxEnvelope.svelte";
-    import { API, UserPermission } from "revolt.js";
     import { mapError } from "$lib";
     import H3 from "../atoms/heading/H3.svelte";
-    import { t } from "svelte-i18n";
     import Markdown from "$lib/markdown/Markdown.svelte";
+    import { API } from "revolt.js";
+    import { UserPermission } from "revolt.js/lib/esm/permissions/definitions";
 
     export let props: ModalProps<"user_profile">;
     const session = useSession()!;
@@ -28,9 +28,9 @@
     }
 
     $: server = props.contextualServer && client.servers.get(props.contextualServer);
-    let roles: API.Role[] = [];
+    let roles: {name?: string, colour?: string | null}[] = [];
     $: if (server && user) {
-        server.fetchMember(user).then(member => member.orderedRoles ?? []).then(or => roles = or.map(r => r[1]));
+        server.fetchMember(user).then(member => member.orderedRoles ?? []).then(or => roles = or);
     }
     
 </script>
@@ -49,7 +49,7 @@
                         </IconButton>
                     {:else if user?.relationship == "Friend" || user?.bot}
                         <IconButton
-                            href="/open/{user._id}"
+                            href="/open/{user.id}"
                             onClick={props.onClose}
                         >
                             <Envelope size={24} />

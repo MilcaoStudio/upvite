@@ -14,19 +14,16 @@
     internalSubscribe("NewMessages", "hide", ()=>lastId = undefined)
     internalSubscribe("NewMessages", "mark", (id)=>{if (typeof id == 'string') lastId = id})
     $: {
-        lastId = channel.unread
-                ? channel.client.unreads?.getUnread(channel._id)?.last_id ?? undefined
-                : undefined;
+        lastId = channel.lastMessageId;
         const checkUnread = () =>
             channel.unread &&
-            channel.client.unreads!.markRead(
-                channel._id,
-                channel.last_message_id!,
+            channel.ack(
+                channel.lastMessageId,
                 true,
             );
         checkUnread();
         reaction(
-            () => channel.last_message_id,
+            () => channel.lastMessageId,
             () => checkUnread(),
         );
     }

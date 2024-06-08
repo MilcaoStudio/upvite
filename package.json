@@ -91,7 +91,7 @@
     "remark-parse": "^11.0.0",
     "remark-rehype": "^11.1.0",
     "revkit": "^1.1.14",
-    "revolt.js": "6.0.20-patch.2",
+    "revolt.js": "^7.0.1",
     "svelte-dnd-action": "^0.9.39",
     "svelte-i18n": "^4.0.0",
     "svelte-mobx": "^1.0.0",

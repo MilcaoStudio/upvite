@@ -64,8 +64,7 @@
         emojis: Record<string | "default", EmojiInfo[]>,
         onSelect: (emoji: string) => void = function () {};
     // Take a ref of container
-    let ref: HTMLDivElement | null = null;
-    let baseRef = null;
+    let baseRef: HTMLDivElement | null;
     // Keep track of user queries
     let query = "";
     // Keep track of "active" emoji (on hover)
@@ -170,9 +169,10 @@
     }
 </script>
 
-<Column class={Base} gap="0" bind:this={baseRef}>
+<Column class={Base} gap="0" bind:ref={baseRef}>
     <Column class="controls">
         <InputBox
+            type="text"
             autoFocus
             value={query}
             onChange={(e) => (query = e.currentTarget.value)}
@@ -200,7 +200,7 @@
             {#each generated.activeCategories as cat}
                 <button
                     class={EmojiContainer}
-                    on:click={() => ref?.scrollIntoView({ behavior: "smooth" })}
+                    on:click={() => baseRef?.scrollIntoView({ behavior: "smooth" })}
                 >
                     <div class="category icon">
                         {#if cat.emoji}

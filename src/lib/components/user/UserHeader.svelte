@@ -1,6 +1,6 @@
 <script lang="ts">
     import { useClient, useSession } from "$lib/controllers/ClientController";
-    import { UserPermission, type API, User } from "revolt.js";
+    import { type API, User } from "revolt.js";
     import UserIcon from "./UserIcon.svelte";
     export let user: User | undefined,
         placeholderProfile: API.UserProfile | undefined = undefined, profile: API.UserProfile | undefined;
@@ -9,11 +9,7 @@
     let backgroundURL: string | undefined;
     
     $: if (profile && profile.background) {
-        backgroundURL = client.generateFileURL(
-            profile.background,
-            { width: 1000 },
-            true,
-        );
+        backgroundURL = profile.background.createFileURL()
     } else {
         placeholderProfile?.background &&
             (backgroundURL = client.generateFileURL(

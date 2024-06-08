@@ -3,7 +3,7 @@
 
     let className = "";
     export {className as class}
-    export let gap = '8px', group = '16px', centred = false, grow = false;
+    export let gap = '8px', group = '16px', centred = false, grow = false, ref = undefined;
     $: style = css`
             display: flex;
             flex-direction: column;
@@ -14,6 +14,6 @@
         }`;
 </script>
 
-<div class={cx('Column', className, style)}>
+<div class={cx('Column', className, style)} bind:this={ref}>
     <slot />
 </div>

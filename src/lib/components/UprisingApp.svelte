@@ -3,8 +3,6 @@
     import { isTouchscreenDevice } from "$lib";
     import OverlapPanel, { Docked, ShowIf } from "./OverlapPanel.svelte";
     import TitleBar from "./TitleBar.svelte";
-    import ChannelView from "./channels/ChannelView.svelte";
-    import Home from "./home/Home.svelte";
     import LeftSidebar from "./navigation/LeftSidebar.svelte";
     import RightSidebar from "./navigation/RightSidebar.svelte";
     import BottomNavigation from "./navigation/BottomNavigation.svelte";

@@ -1,10 +1,11 @@
 <script lang="ts">
     import { css, cx } from "@emotion/css";
+    import type { ComponentType } from "svelte";
     import BxChevronRight from "svelte-boxicons/BxChevronRight.svelte";
     import BxLinkExternal from "svelte-boxicons/BxLinkExternal.svelte";
 
     export let disabled = false,
-        account = false, icon: ConstructorOfATypedSvelteComponent, description = '', onClick=function(){}, action: 'chevron' | 'external' | ConstructorOfATypedSvelteComponent = 'chevron';
+        account = false, icon: ComponentType, description = '', onClick=function(){}, action: 'chevron' | 'external' | ConstructorOfATypedSvelteComponent = 'chevron';
     $: CategoryButton = cx(
         "CategoryButton",
         css`

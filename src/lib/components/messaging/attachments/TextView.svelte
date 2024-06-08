@@ -3,20 +3,20 @@
     import Preloader from "$lib/components/indicators/Preloader.svelte";
     import { useClient } from "$lib/controllers/ClientController";
     import axios from "axios";
-    import type { API } from "revolt.js";
+    import type { File } from "revolt.js";
     import { t } from "svelte-i18n";
 
     const fileCache: { [key: string]: string } = {};
     const client = useClient();
-    export let attachment: API.File;
-    $: url = client.generateFileURL(attachment)!;
-    let gated = attachment.size > 100_000;
+    export let attachment: File;
+    $: url = attachment.url;
+    let gated = attachment.size ?? 0 > 100_000;
     let content = "";
     let loading = false;
     $: {
         if (!content || !loading || !gated) {
             loading = true;
-            const cached = fileCache[attachment._id];
+            const cached = fileCache[attachment.id];
             if (cached) {
                 content = cached;
                 loading = false;
@@ -25,13 +25,13 @@
                     .get(url, { transformResponse: [] })
                     .then((res) => {
                         content = res.data;
-                        fileCache[attachment._id] = res.data;
+                        fileCache[attachment.id] = res.data;
                         loading = false;
                     })
                     .catch(() => {
                         console.error(
                             "Failed to load text file. [",
-                            attachment._id,
+                            attachment.id,
                             "]",
                         );
                         loading = false;

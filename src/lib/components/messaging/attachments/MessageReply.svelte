@@ -8,6 +8,7 @@
     import BxFile from "svelte-boxicons/BxFile.svelte";
     import Markdown from "$lib/markdown/Markdown.svelte";
     import { state } from "$lib/State";
+    import { useClient } from "$lib/controllers/ClientController";
 
     export let index: number,
         channel: Channel | undefined = undefined,
@@ -17,7 +18,7 @@
     let message: Message | undefined;
 
     $: {
-        const msg = channel?.client.messages.get(id);
+        const msg = useClient().messages.get(id);
         if (msg) {
             message = msg;
         } else {
@@ -33,7 +34,7 @@
     <Reply head={!index}>
         {#if message.author?.relationship == "Blocked"}
             {$t("app.main.channel.misc.blocked_user")}
-        {:else if message.author_id == "00000000000000000000000000"}
+        {:else if message.authorId == "00000000000000000000000000"}
             <!--TODO: system message-->
             <div></div>
         {:else}
@@ -43,7 +44,7 @@
                     showServerIdentity
                     user={message.author}
                     masquerade={message.masquerade}
-                    prefixAt={mentions.includes(message.author_id)}
+                    prefixAt={mentions.includes(message.authorId ?? "")}
                 />
             </div>
             <a class="content" href={message.path}>

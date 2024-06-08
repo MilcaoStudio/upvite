@@ -36,18 +36,18 @@
 <div class="Container">
     <!--TODO: Actions-->
     
-    {#if channel.channel_type == "VoiceChannel"}
+    {#if channel.type == "VoiceChannel"}
         <VoiceActions {channel} />
     {/if}
-    {#if channel.channel_type == "Group"}
-        <IconButton href="/channel/{channel._id}/settings">
+    {#if channel.type == "Group"}
+        <IconButton href="/channel/{channel.id}/settings">
             <Cog size={24} />
         </IconButton>
         <IconButton
             onClick={() =>
                 modalController.push({
                     type: "user_picker",
-                    omit: channel.recipient_ids ?? [],
+                    omit: [...channel.recipientIds.values()],
                     callback: async (users) =>
                         users.forEach((user) => channel.addMember(user)),
                 })}

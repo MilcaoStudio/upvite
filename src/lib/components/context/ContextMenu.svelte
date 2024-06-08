@@ -16,13 +16,16 @@
   import { state } from "$lib/State";
   import { takeError } from "$lib";
   import JsxRender from "../JSXRender.svelte";
-  import { Permission, UserPermission } from "revolt.js";
   import Tooltip from "../atoms/Tooltip.svelte";
   import { setContext } from "svelte";
-    import { goto } from "$app/navigation";
+  import { goto } from "$app/navigation";
+  import {
+    Permission,
+    UserPermission,
+  } from "revolt.js/lib/esm/permissions/definitions";
   const session = useSession()!;
   const client = session.client!;
-  const userId = client.user?._id;
+  const userId = client.user?.id;
   export let data: ContextMenuData;
   let lastDivider = false;
   let elements: SvelteElement[] = [];
@@ -40,38 +43,33 @@
           break;
         case "copy_message_link":
           {
-            let pathname = `/channel/${data.message.channel_id}/${data.message._id}`;
+            let pathname = `/channel/${data.message.channelId}/${data.message.id}`;
             const channel = data.message.channel;
             if (
-              channel?.channel_type == "TextChannel" ||
-              channel?.channel_type == "VoiceChannel"
+              channel?.type == "TextChannel" ||
+              channel?.type == "VoiceChannel"
             ) {
-              pathname = `/server/${channel.server_id}${pathname}`;
+              pathname = `/server/${channel.serverId}${pathname}`;
             }
             modalController.writeText(origin + pathname);
           }
           break;
         case "mark_as_read":
           {
-            if (data.channel.channel_type == "SavedMessages") {
+            if (data.channel.type == "SavedMessages") {
               return;
             }
-            client?.unreads!.markRead(
-              data.channel._id,
-              data.channel.last_message_id!,
-              true,
-              true
-            );
+            await data.channel.ack(data.channel.lastMessageId, true);
           }
           break;
         case "mark_unread":
           {
             const messages = getRenderer(data.message.channel!, state).messages;
-            const index = messages.findIndex((x) => x._id == data.message._id);
+            const index = messages.findIndex((x) => x.id == data.message.id);
 
-            let unread_id = data.message._id;
+            let unread_id = data.message.id;
             if (index > 0) {
-              unread_id = messages[index - 1]._id;
+              unread_id = messages[index - 1].id;
             }
             internalEmit("NewMessages", "mark", unread_id);
             data.message.channel?.ack(unread_id, true);
@@ -113,16 +111,12 @@
           await goto(`/server/${data.server}/channel/${data.id}/settings`);
           break;
         case "open_file":
-          window
-            .open(client.generateFileURL(data.attachment), "_blank")
-            ?.focus();
+          window.open(data.attachment.url, "_blank")?.focus();
           break;
         case "save_file":
           window.open(
-            client
-              .generateFileURL(data.attachment)
-              ?.replace("attachments", "attachments/download"),
-            window.native ? "_blank" : "_self"
+            data.attachment.downloadURL,
+            window.native ? "_blank" : "_self",
           );
           break;
         case "open_link":
@@ -168,7 +162,7 @@
         case "view_profile":
           modalController.push({
             type: "user_profile",
-            user_id: data.user._id,
+            user_id: data.user.id,
           });
       }
     } catch (err) {
@@ -191,7 +185,7 @@
     locale?: string,
     disabled?: boolean,
     tip?: SvelteNode,
-    color?: string
+    color?: string,
   ) {
     lastDivider = false;
     elements.push(
@@ -201,10 +195,10 @@
         createElement(
           "span",
           { style: `color: ${color}` },
-          $t(`app.context_menu.${locale ?? action.action}`)
+          $t(`app.context_menu.${locale ?? action.action}`),
         ),
-        (tip && createElement("div", { class: "tip" }, tip)) || null
-      )
+        (tip && createElement("div", { class: "tip" }, tip)) || null,
+      ),
     );
   }
 
@@ -240,11 +234,11 @@
     const user = uid ? client.users.get(uid) : undefined;
     const serverChannel =
       targetChannel &&
-      (targetChannel.channel_type == "TextChannel" ||
-        targetChannel.channel_type == "VoiceChannel")
+      (targetChannel.type == "TextChannel" ||
+        targetChannel.type == "VoiceChannel")
         ? targetChannel
         : undefined;
-    const s = serverChannel ? serverChannel.server_id! : sid;
+    const s = serverChannel ? serverChannel.serverId! : sid;
     const server = s ? client.servers.get(s) : undefined;
 
     const channelPermissions = targetChannel?.permission || 0;
@@ -264,15 +258,15 @@
             action: "mark_server_as_read",
             server,
           },
-          "mark_as_read"
+          "mark_as_read",
         );
       }
     }
     if (contextualChannel) {
-      if (user && user._id != userId) {
+      if (user && user.id != userId) {
         makeAction({
           action: "mention",
-          user: user._id,
+          user: user.id,
         });
 
         pushDivider();
@@ -313,7 +307,7 @@
           user,
         });
       }
-      if (user._id !== userId) {
+      if (user.id != userId) {
         if (userPermissions & UserPermission.SendMessage) {
           makeAction({
             action: "message_user",
@@ -331,9 +325,9 @@
                   placement: "left",
                   hideOnClick: false,
                 },
-                $t("app.context_menu.message_user")
-              )
-            )
+                $t("app.context_menu.message_user"),
+              ),
+            ),
           );
         }
       }
@@ -347,8 +341,8 @@
       }
 
       if (contextualChannel) {
-        if (contextualChannel.channel_type == "Group" && uid) {
-          if (contextualChannel.owner_id == userId && userId != uid) {
+        if (contextualChannel.type == "Group" && uid) {
+          if (contextualChannel.ownerId == userId && userId != uid) {
             makeAction(
               {
                 action: "make_owner",
@@ -358,7 +352,7 @@
               undefined,
               false,
               undefined,
-              "var(--error)"
+              "var(--error)",
             );
 
             makeAction(
@@ -370,13 +364,13 @@
               undefined,
               false,
               undefined,
-              "var(--error)"
+              "var(--error)",
             );
           }
         }
       }
 
-      makeAction({action: "copy_id", id: user._id}, "copy_uid");
+      makeAction({ action: "copy_id", id: user.id }, "copy_uid");
     }
     const { queued, message, attachment } = data;
     if (queued) {
@@ -421,14 +415,14 @@
         });
       }
 
-      if (message.author_id == userId) {
+      if (message.authorId == userId) {
         makeAction({
           action: "edit_message",
-          id: message._id,
+          id: message.id,
         });
       }
 
-      if (message.author_id != userId) {
+      if (message.authorId != userId) {
         makeAction(
           {
             action: "report",
@@ -437,12 +431,12 @@
           "report_message",
           undefined,
           undefined,
-          "var(--error)"
+          "var(--error)",
         );
       }
 
       if (
-        message.author_id == userId ||
+        message.authorId == userId ||
         channelPermissions & Permission.ManageMessages
       ) {
         makeAction(
@@ -453,7 +447,7 @@
           undefined,
           undefined,
           undefined,
-          "var(--error)"
+          "var(--error)",
         );
       }
 
@@ -470,11 +464,11 @@
             action: "open_file",
             attachment: message.attachments[0],
           },
-          type === "Image"
+          type == "Image"
             ? "open_image"
-            : type === "Video"
+            : type == "Video"
               ? "open_video"
-              : "open_file"
+              : "open_file",
         );
 
         makeAction(
@@ -486,7 +480,7 @@
             ? "save_image"
             : type == "Video"
               ? "save_video"
-              : "save_file"
+              : "save_file",
         );
 
         makeAction(
@@ -494,7 +488,7 @@
             action: "copy_file_link",
             attachment: message.attachments[0],
           },
-          "copy_link"
+          "copy_link",
         );
       }
 
@@ -507,7 +501,7 @@
         }
       }
 
-      makeAction({action: "copy_id", id: message._id}, "copy_mid");
+      makeAction({ action: "copy_id", id: message.id }, "copy_mid");
     }
 
     if (attachment) {
@@ -524,7 +518,7 @@
           ? "open_image"
           : type == "Video"
             ? "open_video"
-            : "open_file"
+            : "open_file",
       );
 
       makeAction(
@@ -536,7 +530,7 @@
           ? "save_image"
           : type == "Video"
             ? "save_video"
-            : "save_file"
+            : "save_file",
       );
 
       makeAction(
@@ -544,42 +538,42 @@
           action: "copy_file_link",
           attachment,
         },
-        "copy_link"
+        "copy_link",
       );
     }
-    const id = sid ?? cid ?? uid ?? message?._id;
+    const id = sid ?? cid ?? uid ?? message?.id;
     if (id) {
       pushDivider();
 
       if (channel) {
-        if (channel.channel_type) {
+        if (channel.type) {
           makeAction(
             {
               action: "open_notification_options",
               channel,
             },
             undefined,
-            undefined
+            undefined,
             //<ChevronRight size={24} />,
           );
         }
 
-        switch (channel.channel_type) {
+        switch (channel.type) {
           case "Group":
             // ! makeAction({ action: "create_invite", target: channel }); FIXME: add support for group invites
             makeAction(
               {
                 action: "open_channel_settings",
-                id: channel._id,
+                id: channel.id,
               },
-              "open_group_settings"
+              "open_group_settings",
             );
             makeAction(
               {
                 action: "leave_group",
                 target: channel,
               },
-              "leave_group"
+              "leave_group",
             );
             break;
           case "DirectMessage":
@@ -601,25 +595,26 @@
               makeAction(
                 {
                   action: "open_server_channel_settings",
-                  server: channel.server_id!,
-                  id: channel._id,
+                  server: channel.serverId!,
+                  id: channel.id,
                 },
-                "open_channel_settings"
+                "open_channel_settings",
               );
 
             if (serverPermissions & Permission.ManageChannel)
-              makeAction({
-                action: "delete_channel",
-                target: channel,
-              },
-              undefined,
-              undefined,
-              undefined,
-              "var(--error)"
+              makeAction(
+                {
+                  action: "delete_channel",
+                  target: channel,
+                },
+                undefined,
+                undefined,
+                undefined,
+                "var(--error)",
               );
             break;
         }
-        makeAction({action: "copy_id", id: channel._id}, "copy_cid");
+        makeAction({ action: "copy_id", id: channel.id }, "copy_cid");
       }
       if (sid && server) {
         makeAction(
@@ -628,7 +623,7 @@
             server,
           },
           undefined,
-          undefined
+          undefined,
           //<ChevronRight size={24} />,
         );
 
@@ -638,7 +633,7 @@
               action: "create_invite",
               target: server.channels[0],
             },
-            "create_invite"
+            "create_invite",
           );
 
         if (
@@ -650,16 +645,16 @@
               action: "edit_identity",
               target: server.member!,
             },
-            "edit_identity"
+            "edit_identity",
           );
 
         if (serverPermissions & Permission.ManageServer)
           makeAction(
             {
               action: "open_server_settings",
-              id: server._id,
+              id: server.id,
             },
-            "open_server_settings"
+            "open_server_settings",
           );
 
         // workaround to move this above the delete/leave button
@@ -672,7 +667,7 @@
             "delete_server",
             undefined,
             undefined,
-            "var(--error)"
+            "var(--error)",
           );
         } else {
           /*
@@ -692,7 +687,7 @@
             "leave_server",
             undefined,
             undefined,
-            "var(--error)"
+            "var(--error)",
           );
         }
       }

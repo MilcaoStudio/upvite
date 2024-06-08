@@ -14,7 +14,7 @@
 </script>
 
 {#if $status >= VoiceStatus.RTC_CONNECTING}
-    {#if linkedRoom == channel._id}
+    {#if linkedRoom == channel.id}
         <IconButton onClick={()=> {
             internalEmit("voice", "leave");
         }}>

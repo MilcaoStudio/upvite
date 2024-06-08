@@ -306,7 +306,7 @@ export default class VoiceClient extends EventEmitter<VoiceEvents> {
     }
 
     async authenticate(userId: string) {
-        this.signaling.authenticate(userId, [...this.apiClient.channels.values()].filter(c => c.channel_type == "VoiceChannel").map(c => c._id));
+        this.signaling.authenticate(userId, [...this.apiClient.channels.values()].filter(c => c.type == "VoiceChannel").map(c => c.id));
         // Response should be a token
         this.userId = userId;
     }

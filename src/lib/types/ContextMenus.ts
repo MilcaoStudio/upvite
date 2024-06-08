@@ -1,7 +1,6 @@
-import type { SvelteNode } from "$lib/markdown/runtime/svelteRuntime";
 import type { QueuedMessage } from "$lib/stores/MessageQueue";
 import type { NotificationState } from "$lib/stores/NotificationOptions";
-import type { Message, API, Channel, Server, User, Member } from "revolt.js";
+import type { Message, API, Channel, Server, User, File, ServerMember } from "revolt.js";
 
 export interface ContextMenuData {
     user?: string;
@@ -9,7 +8,7 @@ export interface ContextMenuData {
     server_list?: string;
     channel?: string;
     message?: Message;
-    attachment?: API.File;
+    attachment?: File;
 
     unread?: boolean;
     queued?: QueuedMessage;
@@ -34,15 +33,15 @@ export type Action =
     | { action: "quote_message"; content: string }
     | { action: "edit_message"; id: string }
     | { action: "delete_message"; target: Message }
-    | { action: "open_file"; attachment: API.File }
-    | { action: "save_file"; attachment: API.File }
-    | { action: "copy_file_link"; attachment: API.File }
+    | { action: "open_file"; attachment: File }
+    | { action: "save_file"; attachment: File }
+    | { action: "copy_file_link"; attachment: File }
     | { action: "open_link"; link: string }
     | { action: "copy_link"; link: string }
     | { action: "make_owner"; channel: Channel; user: User }
     | { action: "remove_member"; channel: Channel; user: User }
-    | { action: "kick_member"; target: Member }
-    | { action: "ban_member"; target: Member }
+    | { action: "kick_member"; target: ServerMember }
+    | { action: "ban_member"; target: ServerMember }
     | { action: "view_profile"; user: User }
     | { action: "message_user"; user: User }
     | { action: "block_user"; user: User }
@@ -67,7 +66,7 @@ export type Action =
     | { action: "close_dm"; target: Channel }
     | { action: "leave_server"; target: Server }
     | { action: "delete_server"; target: Server }
-    | { action: "edit_identity"; target: Member }
+    | { action: "edit_identity"; target: ServerMember }
     | {
           action: "open_notification_options";
           channel?: Channel;

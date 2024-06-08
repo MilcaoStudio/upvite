@@ -1,4 +1,4 @@
-import type { API, Client, User, Member, Channel, Server, Message } from "revolt.js";
+import type { API, Client, User, ServerMember, Channel, Server, Message, File } from "revolt.js";
 import type { HTMLAttributes } from "svelte/elements";
 
 export type Modal = {
@@ -78,7 +78,7 @@ export type Modal = {
       }
     | {
           type: "server_identity";
-          member: Member;
+          member: ServerMember;
       }
     | {
           type: "channel_info";
@@ -91,7 +91,7 @@ export type Modal = {
     | {
           type: "image_viewer";
           embed?: API.Image;
-          attachment?: API.File;
+          attachment?: File;
       }
     | {
           type: "user_picker";
@@ -157,11 +157,11 @@ export type Modal = {
       }
     | {
           type: "kick_member";
-          member: Member;
+          member: ServerMember;
       }
     | {
           type: "ban_member";
-          member: Member;
+          member: ServerMember;
       }
     | {
           type: "unfriend_user";

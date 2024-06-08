@@ -20,7 +20,7 @@ type Transition =
     | {
         action: "LOGIN";
         apiUrl?: string;
-        session: SessionPrivate;
+        session?: SessionPrivate;
         configuration?: API.RevoltConfig;
 
         knowledge: "new" | "existing";
@@ -37,7 +37,7 @@ type Transition =
 
 export default class Session {
     state: SessionState = navigator.onLine ? "Ready" : "Offline";
-    user_id: string | null = null;
+    user_id: string | undefined;
     client: Client | null = null;
 
     /**
@@ -57,11 +57,24 @@ export default class Session {
      * Initiate logout and destroy client
      */
     @action destroy() {
+        /*
         if (this.client) {
             this.client.logout(false);
             this.state = "Ready";
             this.client = null;
-        }
+        }*/
+    }
+
+    @action async login(credentials: API.DataLogin) {
+        this.assert("Ready");
+        this.state = "Connecting";
+        const client = this.createClient();
+        await client.login(credentials);
+        this.user_id = client.sessionId;
+        const sessions = client.sessions;
+        console.debug("sessions (%d)", sessions.size());
+        sessions.forEach(s => console.debug(s));
+        
     }
 
     /**
@@ -104,17 +117,21 @@ export default class Session {
     /**
      * Create a new Revolt.js Client for this Session
      * @param apiUrl Optionally specify an API URL
+     * @returns new Client
      */
-    private createClient(apiUrl?: string) {
+    private createClient(apiUrl?: string): Client {
+        
         this.client = new Client({
-            unreads: true,
+            syncUnreads: true,
             autoReconnect: false,
-            onPongTimeout: "EXIT",
-            apiURL: apiUrl ?? env.PUBLIC_API_URL,
+            pongTimeout: 20,
+            baseURL: apiUrl ?? env.PUBLIC_API_URL,
         });
 
-        this.client.addListener("dropped", this.onDropped);
+        this.client.addListener("disconnected", this.onDropped);
         this.client.addListener("ready", this.onReady);
+
+        return this.client as Client
     }
 
     /**
@@ -122,8 +139,10 @@ export default class Session {
      */
     private destroyClient() {
         this.client!.removeAllListeners();
+        /*
         this.client!.logout();
-        this.user_id = null;
+        */
+        this.user_id = undefined;
         this.client = null;
     }
 
@@ -151,9 +170,9 @@ export default class Session {
      */
     private async continueLogin(data: Transition & { action: "LOGIN" }) {
         try {
-            await this.client!.useExistingSession(data.session);
-            this.user_id = this.client!.user!._id;
-            state.auth.setSession(data.session);
+            //this.client?.useExistingSession(data.session)
+            this.user_id = this.client!.user!.id;
+            //state.auth.setSession(data.session);
             voiceState.loadVoice(this.client!);
         } catch (err) {
             this.state = "Ready";
@@ -171,19 +190,7 @@ export default class Session {
         switch (data.action) {
             // Login with session
             case "LOGIN": {
-                this.assert("Ready");
-                this.state = "Connecting";
-                this.createClient(data.apiUrl);
-
-                if (data.configuration) {
-                    this.client!.configuration = data.configuration;
-                }
-
-                if (data.knowledge === "new") {
-                    await this.client!.fetchConfiguration();
-                    this.client!.session = data.session;
-                    (this.client! as any).$updateHeaders();
-
+                if (data.knowledge == "new") {
                     const { onboarding } = await this.client!.api.get(
                         "/onboard/hello",
                     );
@@ -192,10 +199,8 @@ export default class Session {
                         modalController.push({
                             type: "onboarding",
                             callback: async (username: string) =>
-                                this.client!.completeOnboarding(
-                                    { username },
-                                    false,
-                                ).then(() => this.continueLogin(data)),
+                                this.client!.api.post("/onboard/complete", {username})
+                                .then(() => this.continueLogin(data)),
                         });
 
                         return;
@@ -232,7 +237,9 @@ export default class Session {
             // We should try reconnecting
             case "RETRY": {
                 this.assert("Disconnected");
+                /*
                 this.client!.websocket.connect();
+                */
                 this.state = "Connecting";
                 break;
             }
@@ -283,6 +290,7 @@ export class ClientController {
      */
     private configuration: API.RevoltConfig | null;
 
+    private session = new Session();
     /**
      * Map of user IDs to sessions
      */
@@ -298,7 +306,7 @@ export class ClientController {
             if (!env.PUBLIC_API_URL) {
                 throw ReferenceError("PUBLIC_API_URL environment variable is undefined. PUBLIC_API_URL is mandatory for client controller.");
             }
-
+/*
             this.apiClient = new Client({
                 apiURL: env.PUBLIC_API_URL,
             });
@@ -306,8 +314,8 @@ export class ClientController {
             this.apiClient
                 .fetchConfiguration()
                 .then(() => (this.configuration = this.apiClient!.configuration!));
+                */
         }
-
         this.configuration = null;
         this.sessions = observable.map();
         this.current = null;
@@ -332,7 +340,7 @@ export class ClientController {
      */
     @action hydrate(auth: Auth) {
         for (const entry of auth.accounts) {
-            this.addSession(entry, "existing");
+            //this.addSession(entry, "existing");
         }
 
         this.pickNextSession();
@@ -396,32 +404,28 @@ export class ClientController {
      * @param knowledge Whether the session is new or existing
      */
     @action addSession(
-        entry: { session: SessionPrivate; apiUrl?: string },
         knowledge: "new" | "existing",
     ) {
-        const user_id = entry.session.user_id!;
+       
 
-        const session = new Session();
-        this.sessions.set(user_id, session);
+        const user_id = this.session.user_id!;
         this.pickNextSession();
 
-        session
+        this.session
             .emit({
                 action: "LOGIN",
-                session: entry.session,
-                apiUrl: entry.apiUrl,
                 configuration: this.configuration!,
                 knowledge,
             })
             .catch((err) => {
                 const error = takeError(err);
-                if (error === "Forbidden" || error === "Unauthorized") {
+                if (error == "Forbidden" || error == "Unauthorized") {
                     this.sessions.delete(user_id);
                     this.current = null;
                     this.pickNextSession();
                     state.auth.removeSession(user_id);
                     modalController.push({ type: "signed_out" });
-                    session.destroy();
+                    this.session.destroy();
                 } else {
                     modalController.push({
                         type: "error",
@@ -464,11 +468,13 @@ export class ClientController {
         }
 
         // Try to login with given credentials
+        /*
         let session = await this.apiClient!.api.post("/auth/session/login", {
             ...credentials,
             friendly_name,
-        });
+        });*/
 
+        /*
         // Prompt for MFA verificaiton if necessary
         if (session.result === "MFA") {
             const { allowed_methods } = session;
@@ -504,13 +510,10 @@ export class ClientController {
             if (session.result === "MFA") {
                 throw "Cancelled";
             }
-        }
-
+        }*/
+        this.session.login(credentials);
         // Start client lifecycle
         this.addSession(
-            {
-                session: session as never,
-            },
             "new",
         );
     }
