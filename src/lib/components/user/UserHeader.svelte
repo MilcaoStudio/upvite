@@ -1,19 +1,17 @@
 <script lang="ts">
     import { useClient, useSession } from "$lib/controllers/ClientController";
-    import { type API, User } from "revolt.js";
+    import { type API, User, File } from "revolt.js";
     import UserIcon from "./UserIcon.svelte";
     export let user: User | undefined,
         placeholderProfile: API.UserProfile | undefined = undefined, profile: API.UserProfile | undefined;
     const session = useSession()!;
     const client = useClient();
     let backgroundURL: string | undefined;
-    
     $: if (profile && profile.background) {
-        backgroundURL = profile.background.createFileURL()
+        backgroundURL = new File(client, profile.background).createFileURL({width: 1000}, true);
     } else {
         placeholderProfile?.background &&
-            (backgroundURL = client.generateFileURL(
-                placeholderProfile.background,
+            (backgroundURL = new File(client, placeholderProfile.background).createFileURL(
                 { width: 1000 },
                 true,
             ));
@@ -27,7 +25,7 @@
     <div class="profile">
         <div>
             <UserIcon target={user} size={80} animate status />
-            <h2>{user?.username}</h2>
+            <h2>{user?.username}#{user?.discriminator}</h2>
         </div>
         <div class="action">
             <slot name="action" />

@@ -1,7 +1,8 @@
 <script lang="ts">
-    import { Channel, Permission, type API, type Server } from "revolt.js";
+    import { Channel, type API, type Server } from "revolt.js";
     import DefaultPermissionSelect from "./DefaultPermissionSelect.svelte";
     import PermissionSelect from "./PermissionSelect.svelte";
+    import { Permission } from "revolt.js/lib/esm/permissions/definitions";
 
     export let value: number | API.OverrideField,
         onChange: (value: number | API.OverrideField) => void,

@@ -37,6 +37,10 @@ function getVersion() {
   return JSON.parse(readFileSync("package.json").toString()).version
 }
 
+function getLibraryVersion() {
+  return JSON.parse(readFileSync("node_modules/revolt.js/package.json").toString()).version
+}
+
 export default defineConfig({
   build: {
     rollupOptions: {
@@ -71,6 +75,7 @@ export default defineConfig({
       __GIT_REVISION__: getGitRevision(),
       __GIT_BRANCH__: getGitBranch(),
       __APP_VERSION__: getVersion(),
+      __REVOLTJS_VERSION__: getLibraryVersion(),
       preventAssignment: true,
     }),
   ],

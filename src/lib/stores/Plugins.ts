@@ -8,7 +8,7 @@ import { clientController } from "$lib/controllers/ClientController";
 import type Persistent from "$lib/types/Persistent";
 import localforage from "localforage";
 import { action, computed, makeAutoObservable, ObservableMap } from "mobx";
-import type { Channel, Nullable, Server } from "revolt.js";
+import type { Channel, Server } from "revolt.js";
 
 type Plugin = PluginInfo & {
     

@@ -15,7 +15,7 @@ import type { Server } from "revolt.js";
             | ((callback: (role_id: string) => void) => void)
             | undefined = undefined;
     $: if (server.roles) {
-        if (selected != "default" && !server.roles[selected]) {
+        if (selected != "default" && !server.roles.get(selected)) {
             onSelect("default");
         }
     }

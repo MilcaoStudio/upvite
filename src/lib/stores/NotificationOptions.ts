@@ -1,11 +1,13 @@
-import { pushState } from "$app/navigation";
+import { goto, pushState } from "$app/navigation";
 import { mapToRecord } from "$lib";
 import type State from "$lib/State";
 import { routeInformation } from "$lib/components/context/history";
+import { useClient } from "$lib/controllers/ClientController";
+import { translate } from "$lib/i18n";
 import type Persistent from "$lib/types/Persistent";
 import type Syncable from "$lib/types/Syncable";
 import { ObservableMap, action, computed, makeAutoObservable } from "mobx";
-import { Server, Channel, type Message, User } from "revolt.js";
+import { Server, Channel, type Message, User, UserSystemMessage, UserModeratedSystemMessage, ChannelEditSystemMessage, ChannelRenamedSystemMessage } from "revolt.js";
 import { decodeTime } from "ulid";
 
 export type NotificationState = "all" | "mention" | "none" | "muted";
@@ -14,7 +16,7 @@ export type NotificationState = "all" | "mention" | "none" | "muted";
  * Default notification states for various types of channels.
  */
 export const DEFAULT_STATES: {
-    [key in Channel["channel_type"]]: NotificationState;
+    [key in Channel["type"]]: NotificationState;
 } = {
     SavedMessages: "all",
     DirectMessage: "all",
@@ -114,15 +116,15 @@ export default class NotificationOptions
      * @returns Notification state
      */
     computeForChannel(channel: Channel) {
-        if (this.channel.has(channel._id)) {
-            return this.channel.get(channel._id);
+        if (this.channel.has(channel.id)) {
+            return this.channel.get(channel.id);
         }
 
-        if (channel.server_id) {
-            return this.computeForServer(channel.server_id);
+        if (channel.serverId) {
+            return this.computeForServer(channel.serverId);
         }
 
-        return DEFAULT_STATES[channel.channel_type];
+        return DEFAULT_STATES[channel.type];
     }
 
     /**
@@ -132,23 +134,23 @@ export default class NotificationOptions
      */
     shouldNotify(message: Message) {
         // Make sure the author is not blocked.
-        if (message.author?.relationship === "Blocked") {
+        if (message.author?.relationship == "Blocked") {
             return false;
         }
 
         // Check if the message was sent by us.
-        const user = message.client.user!;
-        if (message.author_id === user._id) {
+        const user = useClient().user;
+        if (message.authorId == user?.id) {
             return false;
         }
 
         // Check whether we are busy.
-        if (user.status?.presence === "Busy") {
+        if (user?.status?.presence == "Busy") {
             return false;
         }
 
         // Check channel notification settings
-        const mentioned = message.mention_ids?.includes(user._id);
+        const mentioned = message.mentionIds?.includes(user?.id ?? "");
         switch (this.computeForChannel(message.channel!)) {
             case "muted":
             case "none":
@@ -160,7 +162,7 @@ export default class NotificationOptions
         }
 
         // Check if we are in focus mode
-        if (user.status?.presence === "Focus" && !mentioned) {
+        if (user?.status?.presence == "Focus" && !mentioned) {
             return false;
         }
 
@@ -234,7 +236,7 @@ export default class NotificationOptions
         if (target instanceof Channel) {
             value = this.computeForChannel(target);
         } else if (target instanceof Server) {
-            value = this.computeForServer(target._id);
+            value = this.computeForServer(target.id);
         }
 
         if (value === "muted") {
@@ -251,7 +253,7 @@ export default class NotificationOptions
     async onMessage(message: Message) {
         // Ignore if we are currently looking and focused on the channel.
         if (
-            message.channel_id == routeInformation.getChannel() &&
+            message.channelId == routeInformation.getChannel() &&
             document.hasFocus()
         )
             return;
@@ -266,15 +268,15 @@ export default class NotificationOptions
         const effectiveName =
             message.masquerade?.name ?? message.author?.username;
 
-        let title;
-        switch (message.channel?.channel_type) {
+        let title: string;
+        switch (message.channel?.type) {
             case "SavedMessages":
                 return;
             case "DirectMessage":
                 title = `@${effectiveName}`;
                 break;
             case "Group":
-                if (message.author?._id == "00000000000000000000000000") {
+                if (message.author?.id == "00000000000000000000000000") {
                     title = message.channel.name;
                 } else {
                     title = `@${effectiveName} - ${message.channel.name}`;
@@ -284,7 +286,7 @@ export default class NotificationOptions
                 title = `@${effectiveName} (#${message.channel.name}, ${message.channel.server?.name})`;
                 break;
             default:
-                title = message.channel?._id;
+                title = message.channel?.id ?? "";
                 break;
         }
 
@@ -294,36 +296,35 @@ export default class NotificationOptions
                 (x) => x.metadata.type == "Image",
             );
             if (imageAttachment) {
-                image = message.client.generateFileURL(imageAttachment, {
-                    max_side: 720,
-                });
+                image = imageAttachment.createFileURL({max_side: 720});
             }
         }
 
         let body, icon;
+        const client = useClient();
         if (message.content) {
-            body = message.client.markdownToText(message.content);
+            body = client.markdownToText(message.content);
 
             if (message.masquerade?.avatar) {
-                icon = message.client.proxyFile(message.masquerade.avatar);
+                icon = client.proxyFile(message.masquerade.avatar);
             } else {
-                icon = message.author?.generateAvatarURL({ max_side: 256 });
+                icon = message.author?.avatar?.createFileURL({max_side: 256});
             }
-        } else if (message.system) {
-            const users = message.client.users;
+        } else if (message.systemMessage) {
+            const users = client.users;
 
             // ! FIXME: I've had to strip translations while
             // ! I move stuff into the new project structure
-            switch (message.system.type) {
+            switch (message.systemMessage.type) {
                 case "user_added":
                 case "user_remove":
                     {
-                        const user = users.get(message.system.id);
-                        body = `${user?.username} ${
-                            message.system.type === "user_added"
+                        const systemMessage = message.systemMessage as UserModeratedSystemMessage;
+                        body = `${systemMessage.user?.username} ${
+                            message.systemMessage.type == "user_added"
                                 ? "added by"
                                 : "removed by"
-                        } ${users.get(message.system.by)?.username}`;
+                        } ${systemMessage.by?.username}`;
                         /*body = translate(
                             `app.main.channel.system.${
                                 message.system.type === "user_added"
@@ -336,7 +337,7 @@ export default class NotificationOptions
                                     ?.username,
                             },
                         );*/
-                        icon = user?.generateAvatarURL({
+                        icon = systemMessage.user?.avatar?.createFileURL({
                             max_side: 256,
                         });
                     }
@@ -346,21 +347,21 @@ export default class NotificationOptions
                 case "user_kicked":
                 case "user_banned":
                     {
-                        const user = users.get(message.system.id);
-                        body = `${user?.username}`;
+                        const systemMessage = message.systemMessage as UserSystemMessage;
+                        body = `${systemMessage.user?.username}`;
                         /*body = translate(
                             `app.main.channel.system.${message.system.type}`,
                             { user: user?.username },
                         );*/
-                        icon = user?.generateAvatarURL({
+                        icon = systemMessage.user?.avatar?.createFileURL({
                             max_side: 256,
                         });
                     }
                     break;
                 case "channel_renamed":
                     {
-                        const user = users.get(message.system.by);
-                        body = `${user?.username} renamed channel to ${message.system.name}`;
+                        const systemMessage = message.systemMessage as ChannelRenamedSystemMessage;
+                        body = `${systemMessage.by?.username} renamed channel to ${systemMessage.name}`;
                         /*body = translate(
                             `app.main.channel.system.channel_renamed`,
                             {
@@ -368,7 +369,7 @@ export default class NotificationOptions
                                 name: message.system.name,
                             },
                         );*/
-                        icon = user?.generateAvatarURL({
+                        icon = systemMessage.by?.avatar?.createFileURL({
                             max_side: 256,
                         });
                     }
@@ -376,13 +377,13 @@ export default class NotificationOptions
                 case "channel_description_changed":
                 case "channel_icon_changed":
                     {
-                        const user = users.get(message.system.by);
+                        const systemMessage = message.systemMessage as ChannelEditSystemMessage;
                         /*body = translate(
                             `app.main.channel.system.${message.system.type}`,
                             { user: users.get(message.system.by)?.username },
                         );*/
-                        body = `${users.get(message.system.by)?.username}`;
-                        icon = user?.generateAvatarURL({
+                        body = `${systemMessage.by?.username}`;
+                        icon = systemMessage.by?.avatar?.createFileURL({
                             max_side: 256,
                         });
                     }
@@ -390,12 +391,12 @@ export default class NotificationOptions
             }
         }
 
-        const notif = await createNotification(title!, {
+        const notif = await createNotification(title, {
             icon,
-            image,
+            //image,
             body,
-            timestamp: decodeTime(message._id),
-            tag: message.channel?._id,
+            //timestamp: decodeTime(message.id),
+            tag: message.channel?.id,
             badge: "/assets/icons/android-chrome-512x512.png",
             silent: true,
         });
@@ -403,25 +404,25 @@ export default class NotificationOptions
         if (notif) {
             notif.addEventListener("click", () => {
                 window.focus();
-
-                const id = message.channel_id;
-                if (id !== routeInformation.getChannel()) {
-                    const channel = message.client.channels.get(id);
+                console.debug("Notification clicked");
+                const id = message.channelId;
+                if (id != routeInformation.getChannel()) {
+                    const channel = client.channels.get(id);
                     if (channel) {
-                        if (channel.channel_type === "TextChannel") {
-                            pushState(`/server/${channel.server_id}/channel/${id}`, {});
+                        if (channel.type == "TextChannel" || channel.type == "VoiceChannel") {
+                            goto(`/server/${channel.serverId}/channel/${id}`, {});
                         } else {
-                            pushState(`/channel/${id}`, {});
+                            goto(`/channel/${id}`, {});
                         }
                     }
                 }
             });
 
-            this.activeNotifications[message.channel_id] = notif;
+            this.activeNotifications[message.channelId] = notif;
 
             notif.addEventListener(
                 "close",
-                () => delete this.activeNotifications[message.channel_id],
+                () => delete this.activeNotifications[message.channelId],
             );
         }
     }
@@ -446,26 +447,26 @@ export default class NotificationOptions
                 /*event = translate("notifications.sent_request", {
                     person: user.username,
                 });*/
-                event = `${user.username} sent you a friend request`;
+                event = translate("notifications.sent_request", {person: user.username});
                 break;
             case "Friend":
                 /*event = translate("notifications.now_friends", {
                     person: user.username,
                 });*/
-                event = `Now friends with ${user.username}`;
+                event = translate("notifications.now_friends", {person: user.username});
                 break;
             default:
                 return;
         }
 
         const notif = await createNotification(event, {
-            icon: user.generateAvatarURL({ max_side: 256 }),
+            icon: user.avatar?.createFileURL({ max_side: 256 }),
             badge: "/assets/icons/android-chrome-512x512.png",
-            timestamp: +new Date(),
+            //timestamp: +new Date(),
         });
 
         notif?.addEventListener("click", () => {
-            pushState(`/friends`, {});
+            goto(`/friends`);
         });
     }
 
@@ -473,7 +474,7 @@ export default class NotificationOptions
      * Called when document visibility changes.
      */
     onVisibilityChange() {
-        if (document.visibilityState === "visible") {
+        if (document.visibilityState == "visible") {
             const channel_id = routeInformation.getChannel()!;
             if (this.activeNotifications[channel_id]) {
                 this.activeNotifications[channel_id].close();

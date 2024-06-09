@@ -1,5 +1,5 @@
 import { ObservableMap, action, makeAutoObservable, runInAction } from "mobx";
-import { Channel, type Nullable, toNullable, Client } from "revolt.js";
+import { Client } from "revolt.js";
 
 import type { ProduceType, VoiceUser } from "../types/Voice";
 import type VoiceClient from "./VoiceClient";
@@ -28,12 +28,11 @@ class VoiceStateReference {
     connecting?: boolean;
 
     status: Writable<VoiceStatus>;
-    roomId: Nullable<string>;
+    roomId: string | undefined;
     participants: Map<string, VoiceUser>;
     streams: ObservableMap<string, RemoteStream>;
 
     constructor() {
-        this.roomId = null;
         this.status = writable(VoiceStatus.UNLOADED);
         this.participants = new Map();
         this.streams = new ObservableMap;
@@ -53,7 +52,7 @@ class VoiceStateReference {
     // client and applies it to the state here.
     @action syncState() {
         if (!this.client) return;
-        this.roomId = toNullable(this.client.roomId);
+        this.roomId = this.client.roomId;
         this.participants.clear();
         this.client.participants.forEach((v, k) => this.participants.set(k, v));
     }
@@ -62,7 +61,7 @@ class VoiceStateReference {
     @action async loadVoice(apiClient: Client) {
         this.status.set(VoiceStatus.LOADING);
 
-        const userId = apiClient.user?._id ?? "guest";
+        const userId = apiClient.user?.id ?? "guest";
         try {
             const { default: VoiceClient } = await import("./VoiceClient");
             const client = new VoiceClient();

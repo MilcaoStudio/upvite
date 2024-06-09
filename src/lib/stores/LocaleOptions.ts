@@ -3,7 +3,6 @@ import { action, computed, makeAutoObservable } from "mobx";
 import { Language, Languages } from "../../lang/Languages";
 import type Persistent from "$lib/types/Persistent";
 import type Syncable from "$lib/types/Syncable";
-import type { Nullable } from "revolt.js";
 import { building } from "$app/environment";
 
 
@@ -16,7 +15,7 @@ export interface Data {
  * @param lang Language to find
  * @returns Matched Language
  */
-export function findLanguage(lang?: Nullable<string>): Language {
+export function findLanguage(lang?: string): Language {
     lang = lang || typeof navigator == "undefined" ? Language.ENGLISH : navigator.language || "en";
     console.info("Finding", lang);
 

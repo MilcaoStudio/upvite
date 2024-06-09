@@ -1,6 +1,7 @@
 import { autorun } from "mobx";
 import type { API, Channel, Server, User } from "revolt.js";
 import { writable, type Writable } from "svelte/store";
+import { useClient } from "./controllers/ClientController";
 
 export type MemberListGroup = {
     type: "online" | "offline" | "role" | "no_offline";
@@ -22,7 +23,7 @@ export function shouldSkipOffline(offline_count: number) {
 }
 
 export function fetchMembers(channel: Channel, getKeys: ()=>string[], isServer?: boolean) {
-    const client = channel.client;
+    const client = useClient();
     let entries: Writable<MemberListGroup[]> = writable([]);
     function sort(keys: string[]) {
         const categories: { [key: string]: [User, string][] } = {
@@ -33,21 +34,12 @@ export function fetchMembers(channel: Channel, getKeys: ()=>string[], isServer?:
         let roles: Server["roles"] | undefined;
         let roleList: string[];
         if (
-            channel.channel_type == "TextChannel" ||
-            channel.channel_type == "VoiceChannel"
+            channel.type == "TextChannel" ||
+            channel.type == "VoiceChannel"
         ) {
             roles = channel.server?.roles;
             if (roles) {
-                const list = Object.keys(roles)
-                    .map((id) => {
-                        return [id, roles![id], roles![id].rank ?? 0] as [
-                            string,
-                            API.Role,
-                            number,
-                        ];
-                    })
-                    .filter(([, role]) => role.hoist);
-
+                const list = [...roles.entries()].map(([id, role]) => [id, role, role.rank ?? 0] as [string, API.Role, number]);
                 list.sort((b, a) => b[2] - a[2]);
 
                 list.forEach(([id, role]) => {
@@ -64,7 +56,7 @@ export function fetchMembers(channel: Channel, getKeys: ()=>string[], isServer?:
             let u;
             if (isServer) {
                 const { server, user } = JSON.parse(key);
-                if (server != channel.server_id) return;
+                if (server != channel.serverId) return;
                 u = client.users.get(user);
             } else {
                 u = client.users.get(key);
@@ -72,11 +64,11 @@ export function fetchMembers(channel: Channel, getKeys: ()=>string[], isServer?:
 
             if (!u) return;
 
-            const member = client.members.get(key);
+            const member = client.serverMembers.get(key);
             const sort = member?.nickname ?? u.username;
             const entry = [u, sort] as [User, string];
 
-            if (!u.online || u.status?.presence === "Invisible") {
+            if (!u.online || u.status?.presence == "Invisible") {
                 categories.offline.push(entry);
             } else {
                 if (isServer) {

@@ -8,7 +8,6 @@
     import type { ComponentType } from "svelte";
     import ScrollerContent from "$lib/components/settings/common/scrollerContent.svelte";
     import { state } from "$lib/State";
-    import { modalController } from "$lib/components/modals/ModalController";
     import Tf2 from "$lib/components/settings/personal/tf2.svelte";
     import Language from "$lib/components/settings/personal/language.svelte";
     import {
@@ -16,9 +15,9 @@
         GIT_BRANCH,
         GIT_REVISION,
         REPO_URL,
+        LIBRARY_VERSION
     } from "$lib/revision";
     import { useClient } from "$lib/controllers/ClientController";
-    import { LIBRARY_VERSION } from "revolt.js";
     import Account from "$lib/components/settings/personal/account.svelte";
     import Chat from "$lib/components/settings/personal/chat.svelte";
     import Notifications from "$lib/components/settings/personal/notifications.svelte";

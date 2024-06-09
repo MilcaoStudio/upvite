@@ -8,6 +8,7 @@ import { injectWindow, takeError } from "$lib";
 import { ObservableMap, action, computed, makeAutoObservable, observable } from "mobx";
 import { browser } from "$app/environment";
 import { voiceState } from "$lib/voice/VoiceState";
+import { APILogin, logout } from "$lib/utils";
 /**
  * Current lifecycle state
  */
@@ -20,7 +21,7 @@ type Transition =
     | {
         action: "LOGIN";
         apiUrl?: string;
-        session?: SessionPrivate;
+        session: SessionPrivate;
         configuration?: API.RevoltConfig;
 
         knowledge: "new" | "existing";
@@ -57,24 +58,11 @@ export default class Session {
      * Initiate logout and destroy client
      */
     @action destroy() {
-        /*
         if (this.client) {
-            this.client.logout(false);
+            logout(this.client);
             this.state = "Ready";
             this.client = null;
-        }*/
-    }
-
-    @action async login(credentials: API.DataLogin) {
-        this.assert("Ready");
-        this.state = "Connecting";
-        const client = this.createClient();
-        await client.login(credentials);
-        this.user_id = client.sessionId;
-        const sessions = client.sessions;
-        console.debug("sessions (%d)", sessions.size());
-        sessions.forEach(s => console.debug(s));
-        
+        }
     }
 
     /**
@@ -139,9 +127,7 @@ export default class Session {
      */
     private destroyClient() {
         this.client!.removeAllListeners();
-        /*
-        this.client!.logout();
-        */
+        logout(this.client!);
         this.user_id = undefined;
         this.client = null;
     }
@@ -170,9 +156,11 @@ export default class Session {
      */
     private async continueLogin(data: Transition & { action: "LOGIN" }) {
         try {
-            //this.client?.useExistingSession(data.session)
-            this.user_id = this.client!.user!.id;
-            //state.auth.setSession(data.session);
+            await this.client?.useExistingSession(data.session);
+            const sessions = this.client!.sessions;
+            sessions.forEach(s => console.debug(s));
+            this.user_id = this.client!.sessionId;
+            state.auth.setSession(data.session);
             voiceState.loadVoice(this.client!);
         } catch (err) {
             this.state = "Ready";
@@ -190,6 +178,10 @@ export default class Session {
         switch (data.action) {
             // Login with session
             case "LOGIN": {
+                this.assert("Ready");
+                this.state = "Connecting";
+                const client = this.createClient();
+                this.user_id = client.sessionId;
                 if (data.knowledge == "new") {
                     const { onboarding } = await this.client!.api.get(
                         "/onboard/hello",
@@ -290,7 +282,6 @@ export class ClientController {
      */
     private configuration: API.RevoltConfig | null;
 
-    private session = new Session();
     /**
      * Map of user IDs to sessions
      */
@@ -306,15 +297,11 @@ export class ClientController {
             if (!env.PUBLIC_API_URL) {
                 throw ReferenceError("PUBLIC_API_URL environment variable is undefined. PUBLIC_API_URL is mandatory for client controller.");
             }
-/*
-            this.apiClient = new Client({
-                apiURL: env.PUBLIC_API_URL,
-            });
 
-            this.apiClient
-                .fetchConfiguration()
-                .then(() => (this.configuration = this.apiClient!.configuration!));
-                */
+            this.apiClient = new Client({
+                baseURL: env.PUBLIC_API_URL,
+            });
+            
         }
         this.configuration = null;
         this.sessions = observable.map();
@@ -340,7 +327,7 @@ export class ClientController {
      */
     @action hydrate(auth: Auth) {
         for (const entry of auth.accounts) {
-            //this.addSession(entry, "existing");
+            this.addSession(entry.session, "existing");
         }
 
         this.pickNextSession();
@@ -404,16 +391,18 @@ export class ClientController {
      * @param knowledge Whether the session is new or existing
      */
     @action addSession(
+        entry: SessionPrivate,
         knowledge: "new" | "existing",
     ) {
-       
+        const session = new Session();
+        const user_id = entry.user_id;
+        this.sessions.set(user_id, session);
+        //this.pickNextSession();
 
-        const user_id = this.session.user_id!;
-        this.pickNextSession();
-
-        this.session
+        session
             .emit({
                 action: "LOGIN",
+                session: entry,
                 configuration: this.configuration!,
                 knowledge,
             })
@@ -425,7 +414,7 @@ export class ClientController {
                     this.pickNextSession();
                     state.auth.removeSession(user_id);
                     modalController.push({ type: "signed_out" });
-                    this.session.destroy();
+                    session.destroy();
                 } else {
                     modalController.push({
                         type: "error",
@@ -468,13 +457,10 @@ export class ClientController {
         }
 
         // Try to login with given credentials
+        
+        let session = await APILogin(this.apiClient!, {...credentials, friendly_name});
         /*
-        let session = await this.apiClient!.api.post("/auth/session/login", {
-            ...credentials,
-            friendly_name,
-        });*/
-
-        /*
+        TODO: move to APILogin
         // Prompt for MFA verificaiton if necessary
         if (session.result === "MFA") {
             const { allowed_methods } = session;
@@ -511,9 +497,10 @@ export class ClientController {
                 throw "Cancelled";
             }
         }*/
-        this.session.login(credentials);
+
         // Start client lifecycle
         this.addSession(
+            session,
             "new",
         );
     }

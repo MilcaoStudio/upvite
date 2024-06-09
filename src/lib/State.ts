@@ -1,6 +1,6 @@
 import stringify from "json-stringify-deterministic";
 import localforage from "localforage";
-import type { Client, ClientboundNotification } from "revolt.js";
+import type { Client } from "revolt.js";
 import type Persistent from "./types/Persistent";
 import MessageQueue from "./stores/MessageQueue";
 import Auth from "./stores/Auth";
@@ -19,6 +19,7 @@ import type Syncable from "./types/Syncable";
 import Plugins from "./stores/Plugins";
 import LocaleOptions from "./stores/LocaleOptions";
 import NetworkOptions from "./stores/NetworkOptions";
+import { setSyncSettings } from "./utils";
 
 export default class State {
     private persistent: [string, Persistent<unknown>][] = [];
@@ -40,7 +41,7 @@ export default class State {
         makeAutoObservable(this);
 
         this.disable = this.disable.bind(this);
-        this.onPacket = this.onPacket.bind(this);
+        this.onSync = this.onSync.bind(this);
 
         this.notifications = new NotificationOptions(this);
         this.ordering = new Ordering(this);
@@ -118,15 +119,10 @@ export default class State {
         this.plugins.init();
     }
 
-    @action onPacket(packet: ClientboundNotification) {
-        if (packet.type == "UserSettingsUpdate") {
-            try {
-                this.sync.apply(packet.update);
-            } catch (err) {
-                //reportError(err as any, "failed_sync_apply");
-            }
-        }
+    @action onSync(id: string, update: Record<string, [number, string]>) {
+        this.sync.apply(update);
     }
+
     /**
          * Register reaction listeners for persistent data stores.
          * @returns Function to dispose of listeners
@@ -135,16 +131,18 @@ export default class State {
         // If a client is present currently, expose it and provide it to plugins.
         if (client) {
             // Register message listener for clearing queue.
-            client.addListener("message", this.queue.onMessage);
+            client.addListener("messageCreate", this.queue.onMessage);
 
             // Register listener for incoming packets.
-            client.addListener("packet", this.onPacket);
+            client.addListener("userSettingsUpdate", this.onSync);
 
             
             // Register events for notifications.
-            client.addListener("message", this.notifications.onMessage);
+            client.addListener("messageCreate", this.notifications.onMessage);
+            
+            // Client emits UserRelationship event data into userUpdate event
             client.addListener(
-                "user/relationship",
+                "userUpdate",
                 this.notifications.onRelationship,
             );
             document.addEventListener(
@@ -207,8 +205,9 @@ export default class State {
                                 }
     
                                 if (Object.keys(obj).length) {
-                                    if (client.websocket.connected) {
-                                        client.syncSetSettings(
+                                    if (client.ready()) {
+                                        setSyncSettings(
+                                            client,
                                             obj as any,
                                             revision,
                                         );
@@ -223,9 +222,10 @@ export default class State {
                                     }
     
                                     this.sync.setRevision(id, revision);
-                                    if (client.websocket.connected) {
+                                    if (client.ready()) {
                                         console.log("Syncing", store.id, "to API");
-                                        client.syncSetSettings(
+                                        setSyncSettings(
+                                            client,
                                             (
                                                 store as unknown as Syncable
                                             ).toSyncable(),
@@ -247,11 +247,11 @@ export default class State {
         return () => {
             // Remove any listeners attached to client.
             if (client) {
-                client.removeListener("message", this.queue.onMessage);
-                client.removeListener("packet", this.onPacket);
-                client.removeListener("message", this.notifications.onMessage);
+                client.removeListener("messageCreate", this.queue.onMessage);
+                client.removeListener("userSettingsUpdate", this.onSync);
+                client.removeListener("messageCreate", this.notifications.onMessage);
                 client.removeListener(
-                    "user/relationship",
+                    "userUpdate",
                     this.notifications.onRelationship,
                 );
                 document.removeEventListener(
@@ -266,8 +266,10 @@ export default class State {
     }
     reset() {
         runInAction(() => {
+            console.info("Reset app state");
             this.draft = new Draft();
             //this.experiments = new Experiments();
+            this.plugins.reset();
             this.layout = new Layout();
             this.notifications = new NotificationOptions(this);
             this.queue = new MessageQueue();

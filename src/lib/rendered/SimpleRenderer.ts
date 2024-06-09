@@ -6,12 +6,12 @@ import type { RendererRoutines } from "./types";
 const MAX_MESSAGES = 150;
 export const SimpleRenderer: RendererRoutines = {
     init: async (renderer, nearby, smooth) => {
-        if (renderer.channel.client.websocket.connected) {
+        if (true) {
             if (nearby)
                 renderer.channel
                     .fetchMessagesWithUsers({ nearby, limit: renderer.limit })
                     .then(({ messages }) => {
-                        messages.sort((a, b) => a._id.localeCompare(b._id));
+                        messages.sort((a, b) => a.id.localeCompare(b.id));
 
                         runInAction(() => {
                             renderer.state = "RENDER";
@@ -50,9 +50,9 @@ export const SimpleRenderer: RendererRoutines = {
         }
     },
     receive: async (renderer, message) => {
-        if (message.channel_id !== renderer.channel._id) return;
+        if (message.channelId !== renderer.channel.id) return;
         if (renderer.state !== "RENDER") return;
-        if (renderer.messages.find((x) => x._id == message._id)) return;
+        if (renderer.messages.find((x) => x.id == message.id)) return;
         if (!renderer.atBottom) return;
 
         let messages = [...renderer.messages, message];
@@ -83,7 +83,7 @@ export const SimpleRenderer: RendererRoutines = {
         if (!channel) return;
         if (renderer.state != "RENDER") return;
 
-        const index = renderer.messages.findIndex((x) => x._id == id);
+        const index = renderer.messages.findIndex((x) => x.id == id);
 
         if (index > -1) {
             runInAction(() => {
@@ -101,7 +101,7 @@ export const SimpleRenderer: RendererRoutines = {
 
         const { messages: data } =
             await renderer.channel.fetchMessagesWithUsers({
-                before: renderer.messages[0]._id,
+                before: renderer.messages[0].id,
                 limit: renderer.limit,
             });
 
@@ -125,7 +125,7 @@ export const SimpleRenderer: RendererRoutines = {
 
             renderer.emitScroll(
                 generateScroll(
-                    renderer.messages[renderer.messages.length - 1]._id,
+                    renderer.messages[renderer.messages.length - 1].id,
                 ),
             );
         });
@@ -139,7 +139,7 @@ export const SimpleRenderer: RendererRoutines = {
 
         const { messages: data } =
             await renderer.channel.fetchMessagesWithUsers({
-                after: renderer.messages[renderer.messages.length - 1]._id,
+                after: renderer.messages[renderer.messages.length - 1].id,
                 sort: "Oldest",
             });
 
@@ -160,7 +160,7 @@ export const SimpleRenderer: RendererRoutines = {
                 renderer.atTop = false;
             }
 
-            renderer.emitScroll(generateScroll(renderer.messages[0]._id));
+            renderer.emitScroll(generateScroll(renderer.messages[0].id));
         });
     },
 };

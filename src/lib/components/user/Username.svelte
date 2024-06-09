@@ -15,7 +15,7 @@
         const server_id = $page.params.server;
         if (server_id) {
             const client = useClient();
-            const member = client.members.getKey({server: server_id, user: user._id,});
+            const member = client.serverMembers.getByKey({server: server_id, user: user.id,});
             if (member) {
                 if (member.nickname) {
                     if (showServerIdentity == "both") {
@@ -30,7 +30,7 @@
                 }
 
                 if (!color) {
-                    for (const [_, { colour }] of member.orderedRoles) {
+                    for (const {colour} of member.orderedRoles) {
                         if (colour) {
                             color = colour;
                         }

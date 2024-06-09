@@ -1,6 +1,5 @@
 <script lang="ts">
     import ConditionalLink from "$lib/components/atoms/ConditionalLink.svelte";
-    import Download from "svelte-boxicons/BxDownload.svelte";
     export let data = "",
         fileType = "text/plain",
         encoding = "utf8",

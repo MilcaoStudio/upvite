@@ -2,7 +2,6 @@
     import { takeError } from "$lib";
     import { modalController } from "$lib/components/modals/ModalController";
     import { grabFiles } from "$lib/types/FileUpload";
-    import Import from "svelte-boxicons/BxUpload.svelte";
     export let onChange: ((file: File) => void) | null = null,
         accept = "*",
         maxFileSize = 5_000;
@@ -53,7 +52,8 @@
         const items = e.clipboardData?.items;
         let file = null;
         if (items) {
-            for (const item of items) {
+            for (let i = 0; i < items.length; i++) {
+                const item = items[i];
                 if (item.type.startsWith("text/")) {
                     const blob = item.getAsFile();
                     if (blob) {

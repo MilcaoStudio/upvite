@@ -4,13 +4,14 @@
     import { translate } from "$lib/i18n";
     import { getRoles, type RoleOrDefault } from "$lib/types/Permissions";
     import { isEqual } from "lodash";
-    import { API, Channel, DEFAULT_PERMISSION_DIRECT_MESSAGE, Permission } from "revolt.js";
+    import { API, Channel } from "revolt.js";
     import { t } from "svelte-i18n";
     import PermissionList from "./PermissionList.svelte";
+    import { DEFAULT_PERMISSION_DIRECT_MESSAGE, Permission } from "revolt.js/lib/esm/permissions/definitions";
 
     export let selected: string, channel: Channel;
     let currentRoles =
-        channel?.channel_type == "Group"
+        channel?.type == "Group"
             ? ([
                   {
                       id: "default",
@@ -23,8 +24,8 @@
             : getRoles(channel.server!).map((role) => ({
                   ...role,
                   permissions: (role.id == "default"
-                      ? channel.default_permissions
-                      : channel.role_permissions?.[role.id]) ?? {
+                      ? channel.defaultPermissions
+                      : channel.rolePermissions?.[role.id]) ?? {
                       a: 0,
                       d: 0,
                   },
@@ -46,7 +47,7 @@
                 "ManageChannel",
                 "ManagePermissions",
     ]);
-    $: channel.channel_type != "Group" && items.add("ViewChannel");
+    $: channel.type != "Group" && items.add("ViewChannel");
     function onChange(value: number | API.OverrideField) {
         currentValue = value;
     }

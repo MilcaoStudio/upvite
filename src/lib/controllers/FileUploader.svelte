@@ -108,7 +108,8 @@
         if (behavior.type != "multi" || !behavior.append) return;
 
         const files = [];
-        for (const item of items) {
+        for (let i = 0; i < items.length; i++) {
+            const item = items[i];
             if (!item.type.startsWith("text/")) {
                 const blob = item.getAsFile();
                 if (blob) {
@@ -142,7 +143,8 @@
         const dropped = e.dataTransfer?.files;
         if (dropped) {
             const files = [];
-            for (const item of dropped) {
+            for (let i = 0; i < dropped.length; i++) {
+                const item = dropped.item(i)!;
                 if (item.size > maxFileSize) {
                     modalController.push({
                         type: "error",

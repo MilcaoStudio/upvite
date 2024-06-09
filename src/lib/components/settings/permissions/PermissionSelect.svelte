@@ -1,9 +1,10 @@
 <script lang="ts">
-    import { type Permission, type Channel, Server, type API } from "revolt.js";
+    import { type Channel, Server, type API } from "revolt.js";
     import Long from "long";
     import OverrideSwitch from "$lib/components/atoms/input/OverrideSwitch.svelte";
     import type { SwitchState } from "$lib/types/Form";
     import PermissionEntry from "../permissions/PermissionEntry.svelte";
+    import { Permission } from "revolt.js/lib/esm/permissions/definitions";
 
     export let id: keyof typeof Permission,
         target: Channel | Server,

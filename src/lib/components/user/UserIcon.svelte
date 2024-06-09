@@ -1,10 +1,11 @@
 <script context="module" lang="ts">
     import { state } from "$lib/State";
     import { useClient } from "$lib/controllers/ClientController";
-    import type { API, User } from "revolt.js";
+    import type { API, User, File } from "revolt.js";
     import fallback from "$lib/assets/user.png";
     import IconBase from "../IconBase.svelte";
     import { page } from "$app/stores";
+    import { createFileURL } from "$lib";
 
     export function useStatusColor(user: User | null) {
         const theme = state.settings.theme;
@@ -46,9 +47,9 @@
         if (target && showServerIdentity) {
             const server = $page.params.server;
             if (server) {
-                const member = client.members.getKey({
+                const member = client.serverMembers.getByKey({
                     server,
-                    user: target._id,
+                    user: target.id,
                 });
 
                 if (member?.avatar) {
@@ -57,12 +58,7 @@
             }
         }
 
-        url =
-            client.generateFileURL(
-                override ?? target?.avatar ?? attachment ?? undefined,
-                { max_side: shrinkMedia ? 64 : 256 },
-                animate,
-            ) ?? (target ? target.defaultAvatarURL : fallback);
+        url = createFileURL(override ?? target?.avatar ?? attachment, {max_side: shrinkMedia ? 64 : 256}, animate) ?? (target ? target.defaultAvatarURL : fallback);
     }
 </script>
 

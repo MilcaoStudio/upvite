@@ -2,7 +2,6 @@ import { mapToRecord } from "$lib";
 import type { Overrides, Fonts, MonospaceFonts } from "$lib/components/context/Theme.svelte";
 import type Persistent from "$lib/types/Persistent";
 import type Syncable from "$lib/types/Syncable";
-import type Plugin from "./Plugins"
 import { ObservableMap, makeAutoObservable, action, computed } from "mobx";
 import SAudio,{ type SoundOptions } from "./helpers/SAudio";
 import SSecurity from "./helpers/SSecurity";

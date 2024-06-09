@@ -1,9 +1,11 @@
 import { action, makeAutoObservable } from "mobx";
-import type { Channel, Message, Nullable } from "revolt.js";
+import type { Channel, Message } from "revolt.js";
 
 import { SimpleRenderer } from "./SimpleRenderer";
 import type { RendererRoutines, ScrollState } from "./types";
 import type State from "$lib/State";
+import { useClient } from "$lib/controllers/ClientController";
+import type { HydratedMessage } from "revolt.js/lib/esm/hydration";
 
 export const SMOOTH_SCROLL_ON_RECEIVE = false;
 
@@ -12,8 +14,8 @@ export class ChannelRenderer {
 
     state: "LOADING" | "WAITING_FOR_NETWORK" | "EMPTY" | "RENDER" = "LOADING";
     scrollState: ScrollState = { type: "ScrollToBottom" };
-    atTop: Nullable<boolean> = null;
-    atBottom: Nullable<boolean> = null;
+    atTop: boolean = false;
+    atBottom: boolean = false;
     messages: Message[] = [];
     limit: number;
 
@@ -23,6 +25,7 @@ export class ChannelRenderer {
     fetching = false;
     scrollPosition = 0;
     scrollAnchored = false;
+    client = useClient();
 
     constructor(channel: Channel, currentState: State) {
         this.channel = channel;
@@ -39,35 +42,33 @@ export class ChannelRenderer {
         this.updated = this.updated.bind(this);
         this.delete = this.delete.bind(this);
 
-        const client = this.channel.client;
-        client.addListener("message", this.receive);
-        client.addListener("message/updated", this.updated);
-        client.addListener("message/delete", this.delete);
+        this.client.addListener("messageCreate", this.receive);
+        this.client.addListener("messageUpdate", this.updated);
+        this.client.addListener("messageDelete", this.delete);
     }
 
     destroy() {
-        const client = this.channel.client;
-        client.removeListener("message", this.receive);
-        client.removeListener("message/updated", this.updated);
-        client.removeListener("message/delete", this.delete);
+        this.client.removeListener("messageCreate", this.receive);
+        this.client.removeListener("messageUpdate", this.updated);
+        this.client.removeListener("messageDelete", this.delete);
     }
 
     private receive(message: Message) {
         this.currentRenderer.receive(this, message);
     }
 
-    private updated(id: string, message: Message) {
-        this.currentRenderer.updated(this, id, message);
+    private updated(message: Message) {
+        this.currentRenderer.updated(this, message.id, message);
     }
 
-    private delete(id: string) {
-        this.currentRenderer.delete(this, id);
+    private delete(message: HydratedMessage) {
+        this.currentRenderer.delete(this, message.id);
     }
 
     @action async init(message_id?: string) {
         if (message_id) {
             if (this.state == "RENDER") {
-                const message = this.messages.find((x) => x._id == message_id);
+                const message = this.messages.find((x) => x.id == message_id);
 
                 if (message) {
                     this.emitScroll({
@@ -214,10 +215,10 @@ export class ChannelRenderer {
 const renderers: Record<string, ChannelRenderer> = {};
 
 export function getRenderer(channel: Channel, currentState: State) {
-    let renderer = renderers[channel._id];
+    let renderer = renderers[channel.id];
     if (!renderer) {
         renderer = new ChannelRenderer(channel, currentState);
-        renderers[channel._id] = renderer;
+        renderers[channel.id] = renderer;
     }
 
     return renderer;

@@ -109,3 +109,7 @@ export function determineFileSize(size: number) {
 
     return `${size} B`;
 }
+
+export function createFileURL(file?: import("revolt.js").File, options?: {max_side?: number, size?: number, width?: number, height?: number}, allowAnimation?: boolean){
+    return file?.createFileURL(options, allowAnimation)
+}

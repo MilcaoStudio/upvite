@@ -1,4 +1,3 @@
-// @ts-expect-error No typings.
 import rgba from "color-rgba";
 import { makeAutoObservable, computed, action } from "mobx";
 

@@ -176,10 +176,7 @@ export default class Sync implements Persistent<Data> {
     }
 
     async pull(client: Client) {
-        const data = await client.syncFetchSettings(
-            SYNC_KEYS.filter(this.isEnabled),
-        );
-
+        const data = await client.account.fetchSettings(SYNC_KEYS.filter(this.isEnabled));
         this.apply(data);
     }
 }

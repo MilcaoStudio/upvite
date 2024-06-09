@@ -15,6 +15,6 @@ export function getRoles(server: Server): RoleOrDefault[] {
     return [...server.orderedRoles, {
         id: "default",
         name: "Default",
-        permissions: server.default_permissions,
+        permissions: server.defaultPermissions,
     }]
 }

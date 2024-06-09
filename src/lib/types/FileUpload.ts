@@ -72,7 +72,11 @@ export function grabFiles(
         const files = (e.currentTarget as HTMLInputElement)?.files;
         if (!files) return;
 
-        for (const file of files) {
+        for (let i = 0; i < files.length; i++) {
+            const file = files.item(i);
+            if (!file) {
+                continue;
+            }
             if (file.size > maxFileSize) {
                 return tooLarge();
             }

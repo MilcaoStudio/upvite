@@ -7,11 +7,11 @@
 
     export let user: User | undefined = undefined, size = 20, prefixAt = false, masquerade: API.Masquerade | null = null, showServerIdentity = false;
     const openProfile = () => user &&
-        modalController.push({ type: "user_profile", user_id: user._id });
+        modalController.push({ type: "user_profile", user_id: user.id });
     const handleUserClick = (e: MouseEvent) => {
-        if (e.shiftKey && user?._id) {
+        if (e.shiftKey && user?.id) {
             e.preventDefault();
-            internalEmit("MessageBox", "append", `<@${user?._id}>`, "mention");
+            internalEmit("MessageBox", "append", `<@${user?.id}>`, "mention");
         } else {
             openProfile();
         }
