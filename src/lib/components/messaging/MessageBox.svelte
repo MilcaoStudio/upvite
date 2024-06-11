@@ -41,12 +41,14 @@
     import FilePreview from "./bars/FilePreview.svelte";
     import { modalController } from "../modals/ModalController";
     import ReplyBar from "./bars/ReplyBar.svelte";
+    import TextEditor from "../atoms/input/TextEditor.svelte";
 
     export let channel: Channel;
     const client = useClient();
     let uploadState: UploadState = { type: "none" };
     let replies: Reply[] = [];
     let typing = 0;
+    let markup = false;
 
     let value = "";
     $: autorun(() => {
@@ -63,7 +65,7 @@
             margin: 0px 6px 6px 6px;
             -webkit-backdrop-filter: blur(10px);
             backdrop-filter: blur(10px);
-            background-color: rgba(var(--secondary-header-rgb), max(0, 0.86) );
+            background-color: rgba(var(--secondary-header-rgb), max(0, 0.86));
             border-radius: var(--border-radius-inner);
             textarea {
                 font-size: var(--text-size);
@@ -485,6 +487,7 @@
         {replies}
         setReplies={(_replies) => (replies = _replies)}
     />
+
     <div class={Base}>
         {#if channel.havePermission("UploadFiles")}
             <div class={Action}>
@@ -526,66 +529,71 @@
                 />
             </div>
         {/if}
-        <TextAreaAutoSize
-            maxRows={20}
-            id="message"
-            maxlength="2000"
-            minHeight={60}
-            {value}
-            onChange={(e) => {
-                setMessage(e.currentTarget.value);
-                startTyping();
-                onChange(e);
-            }}
-            {onKeyUp}
-            onKeyDown={(e) => {
-                if (e.ctrlKey && e.key == "Enter") {
-                    e.preventDefault();
-                    return send();
-                }
-
-                if (onKeyDown(e)) return;
-
-                if (e.key == "ArrowUp" && !state.draft.has(channel._id)) {
-                    e.preventDefault();
-                    internalEmit("MessageRenderer", "edit_last");
-                    return;
-                }
-
-                if (
-                    !e.shiftKey &&
-                    !e.isComposing &&
-                    e.key == "Enter" &&
-                    !isTouchscreenDevice
-                ) {
-                    e.preventDefault();
-                    return send();
-                }
-
-                if (e.key == "Escape") {
-                    if (replies.length) {
-                        replies = replies.slice(0, -1);
-                    } else if (
-                        uploadState.type == "attached" &&
-                        uploadState.files.length
-                    ) {
-                        uploadState = {
-                            type:
-                                uploadState.files.length > 1
-                                    ? "attached"
-                                    : "none",
-                            files: uploadState.files.slice(0, -1),
-                        };
+        {#if markup}
+            <TextEditor id="message" minHeight={60} {value} {onBlur} />
+        {:else}
+            <TextAreaAutoSize
+                maxRows={20}
+                id="message"
+                maxlength="2000"
+                minHeight={60}
+                {value}
+                onChange={(e) => {
+                    setMessage(e.currentTarget.value);
+                    startTyping();
+                    onChange(e);
+                }}
+                {onKeyUp}
+                onKeyDown={(e) => {
+                    if (e.ctrlKey && e.key == "Enter") {
+                        e.preventDefault();
+                        return send();
                     }
-                }
 
-                debounceStopTyping(true);
-            }}
-            {onFocus}
-            {onBlur}
-            disabled={uploadState.type == "uploading" ||
-                uploadState.type == "sending"}
-        />
+                    if (onKeyDown(e)) return;
+
+                    if (e.key == "ArrowUp" && !state.draft.has(channel._id)) {
+                        e.preventDefault();
+                        internalEmit("MessageRenderer", "edit_last");
+                        return;
+                    }
+
+                    if (
+                        !e.shiftKey &&
+                        !e.isComposing &&
+                        e.key == "Enter" &&
+                        !isTouchscreenDevice
+                    ) {
+                        e.preventDefault();
+                        return send();
+                    }
+
+                    if (e.key == "Escape") {
+                        if (replies.length) {
+                            replies = replies.slice(0, -1);
+                        } else if (
+                            uploadState.type == "attached" &&
+                            uploadState.files.length
+                        ) {
+                            uploadState = {
+                                type:
+                                    uploadState.files.length > 1
+                                        ? "attached"
+                                        : "none",
+                                files: uploadState.files.slice(0, -1),
+                            };
+                        }
+                    }
+
+                    debounceStopTyping(true);
+                }}
+                {onFocus}
+                {onBlur}
+                disabled={uploadState.type == "uploading" ||
+                    uploadState.type == "sending"}
+            />
+        {/if}
+
         <div class={Action}>
             <Flyout offset={24} alignment="end">
                 <IconButton>
