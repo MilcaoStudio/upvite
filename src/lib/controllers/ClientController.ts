@@ -58,7 +58,7 @@ export default class Session {
      */
     @action destroy() {
         if (this.client) {
-            this.client.logout(false);
+            this.client.logout(true);
             this.state = "Ready";
             this.client = null;
         }
@@ -400,11 +400,8 @@ export class ClientController {
         knowledge: "new" | "existing",
     ) {
         const user_id = entry.session.user_id!;
-
         const session = new Session();
         this.sessions.set(user_id, session);
-        this.pickNextSession();
-
         session
             .emit({
                 action: "LOGIN",
@@ -415,12 +412,14 @@ export class ClientController {
             })
             .catch((err) => {
                 const error = takeError(err);
-                if (error === "Forbidden" || error === "Unauthorized") {
+                if (error == "Forbidden" || error == "Unauthorized") {
                     this.sessions.delete(user_id);
                     this.current = null;
                     this.pickNextSession();
                     state.auth.removeSession(user_id);
-                    modalController.push({ type: "signed_out" });
+                    if (user_id == this.current) {
+                        modalController.push({ type: "signed_out" });
+                    }
                     session.destroy();
                 } else {
                     modalController.push({

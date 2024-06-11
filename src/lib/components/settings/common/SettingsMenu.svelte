@@ -4,7 +4,7 @@
 
 <style>
     .container {
-        padding: 2rem 3rem;
+        padding: 4rem 2rem 2rem;
         width: 100%;
     }
 </style>
