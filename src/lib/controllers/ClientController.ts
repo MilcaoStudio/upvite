@@ -58,7 +58,7 @@ export default class Session {
      */
     @action destroy() {
         if (this.client) {
-            this.client.logout(true);
+            this.client.logout(false);
             this.state = "Ready";
             this.client = null;
         }
@@ -527,7 +527,8 @@ export class ClientController {
 
             this.sessions.delete(user_id);
             this.pickNextSession();
-            session.destroy();
+            // Safe logout
+            session.emit({action: "LOGOUT"});
         }
     }
     /**

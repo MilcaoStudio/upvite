@@ -17,6 +17,8 @@ import ModifyAccount from "./ModifyAccount.svelte";
 import type { ComponentType } from "svelte";
 import CreateGroup from "./CreateGroup.svelte";
 import UserPicker from "./UserPicker.svelte";
+import DeleteAllSessions from "./DeleteAllSessions.svelte";
+import SignedOut from "./SignedOut.svelte";
 
 export class ModalController {
     @observable stack: Modal[] = [];
@@ -147,6 +149,8 @@ export const modalController = new ModalController({
     modify_account: ModifyAccount,
     link_warning: LinkWarning,
     onboarding: Onboarding,
+    sign_out_sessions: DeleteAllSessions,
+    signed_out: SignedOut,
     unfriend_user: Confirmation,
     user_picker: UserPicker,
     user_profile: UserProfile,
