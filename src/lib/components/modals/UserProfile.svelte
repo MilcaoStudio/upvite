@@ -11,6 +11,7 @@
     import H3 from "../atoms/heading/H3.svelte";
     import { t } from "svelte-i18n";
     import Markdown from "$lib/markdown/Markdown.svelte";
+    import UserBadges from "../user/UserBadges.svelte";
 
     export let props: ModalProps<"user_profile">;
     const session = useSession()!;
@@ -27,18 +28,25 @@
         }
     }
 
-    $: server = props.contextualServer && client.servers.get(props.contextualServer);
+    $: server =
+        props.contextualServer && client.servers.get(props.contextualServer);
     let roles: API.Role[] = [];
     $: if (server && user) {
-        server.fetchMember(user).then(member => member.orderedRoles ?? []).then(or => roles = or.map(r => r[1]));
+        server
+            .fetchMember(user)
+            .then((member) => member.orderedRoles ?? [])
+            .then((or) => (roles = or.map((r) => r[1])));
     }
-    
 </script>
 
 <Modal {...props}>
     <div class="container" slot="override">
         <div class="userProfile">
-            <UserHeader {user} placeholderProfile={props.placeholderProfile} {profile}>
+            <UserHeader
+                {user}
+                placeholderProfile={props.placeholderProfile}
+                {profile}
+            >
                 <svelte:fragment slot="action">
                     {#if user?.relationship == "User"}
                         <IconButton
@@ -56,13 +64,28 @@
                         </IconButton>
                     {:else if user?.relationship == "Outgoing"}
                         <IconButton onClick={() => user.removeFriend()}>
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-user-plus" xmlns="http://www.w3.org/2000/svg">
-                                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                                <path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0"/>
-                                <path d="M 18 21 L 22 16"/>
-                                <path d="M 18 16 L 22 21"/>
-                                <path d="M6 21v-2a4 4 0 0 1 4 -4h4"/>
-                              </svg>
+                            <svg
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                class="icon icon-tabler icons-tabler-outline icon-tabler-user-plus"
+                                xmlns="http://www.w3.org/2000/svg"
+                            >
+                                <path
+                                    stroke="none"
+                                    d="M0 0h24v24H0z"
+                                    fill="none"
+                                />
+                                <path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" />
+                                <path d="M 18 21 L 22 16" />
+                                <path d="M 18 16 L 22 21" />
+                                <path d="M6 21v-2a4 4 0 0 1 4 -4h4" />
+                            </svg>
                         </IconButton>
                     {:else}
                         <IconButton onClick={() => user?.addFriend()}>
@@ -91,25 +114,32 @@
                     {/if}
                 </svelte:fragment>
             </UserHeader>
-            <div class="userContent">
-                <div class="">
-                    <div class="category"></div>
-                    <div class="content">
-                        {#if server}
-                            <H3>Roles</H3>
-                            {#each roles as role}
-                                <div class="role">
-                                    <span class="colour" style="--colour: {role.colour}" /> {role.name}
-                                </div>
-                            {/each}
-                        {/if}
-                        {#if profile?.content}
-                            <H3>BIO</H3>
-                            <Markdown content={profile.content} />
-                        {/if}
+            {#if user}
+                <div class="userContent">
+                    <div class="">
+                        <UserBadges {user} />
+                        <div class="category"></div>
+                        <div class="content">
+                            {#if server}
+                                <H3>Roles</H3>
+                                {#each roles as role}
+                                    <div class="role">
+                                        <span
+                                            class="colour"
+                                            style="--colour: {role.colour}"
+                                        />
+                                        {role.name}
+                                    </div>
+                                {/each}
+                            {/if}
+                            {#if profile?.content}
+                                <H3>BIO</H3>
+                                <Markdown content={profile.content} />
+                            {/if}
+                        </div>
                     </div>
                 </div>
-            </div>
+            {/if}
         </div>
     </div>
 </Modal>

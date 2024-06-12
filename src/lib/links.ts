@@ -11,6 +11,7 @@ type LinkType =
     | { type: "external"; href: string; url: URL }
     | { type: "none" };
 
+export const DONATION = "https://ko-fi.com/projectuprising";
 /**
  * Allowed origins for relative navigation
  */
