@@ -87,6 +87,9 @@
             !bottomNav ? undefined : bottomNav.showIf;
         recalculate();
     }
+    $: if (!docked) {
+        height = `calc(${height} - ${bottomNav?.height}px)`;
+    }
 </script>
 
 {#if docked}
@@ -132,8 +135,8 @@
             {/if}
         </div>
         {#if bottomNav}
-            <div class="nav" style:bottom={height}>
-                <div bind:this={bottomNavRef} style:height={height} style:width>
+            <div class="nav" style:height="{bottomNav.height}px">
+                <div bind:this={bottomNavRef} style:width>
                     <svelte:component this={bottomNav.component} />
                 </div>
             </div>
