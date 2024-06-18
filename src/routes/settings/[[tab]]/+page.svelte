@@ -55,18 +55,17 @@
     };
     const client = useClient();
     export let data;
-    $: isTouch = isTouchscreenDevice();
+    $: isTouch = isTouchscreenDevice() && state.layout.getViewport() != Viewport.LARGE;
     let history: string[] = [state.layout.getLastPath()];
 
     let index = 0;
     let nav_sub = navigating.subscribe((nav) => {
+        if(!isTouch) return;
         if (nav && nav.to && nav.to.url.pathname != history[index]) {
-            console.log(nav.to.url);
             index++;
             history[index] = nav.to.url.pathname;
         }
     });
-    $: console.log(index);
 
     onDestroy(nav_sub);
     $: tab = data.tab;
