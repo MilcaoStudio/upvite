@@ -5,6 +5,7 @@
     import Preloader from "../indicators/Preloader.svelte";
     import FormField from "./FormField.svelte";
     import Button from "../atoms/Button.svelte";
+    import MailProvider from "./MailProvider.svelte";
 
     interface FormInputs {
         email: string;
@@ -19,58 +20,63 @@
     }) => Promise<void>;
 
     const configuration = clientController.serverConfig;
-    let loading = false, success: string | undefined, error: string | undefined;
-    let email: string = '', password = '';
-    $: onSubmit = async function() {
+    let loading = false,
+        success: string | undefined,
+        error: string | undefined;
+    let email: string = "",
+        password = "";
+    $: onSubmit = async function () {
         error = undefined;
         loading = true;
         function onError(err: unknown) {
             loading = false;
-            error =  takeError(err);
+            error = takeError(err);
             console.error(error);
         }
-        const data: FormInputs = {email, password}
+        const data: FormInputs = { email, password };
         try {
             await callback(data);
-            success = data.email
+            success = data.email;
         } catch (err) {
-            onError(err)
+            onError(err);
         }
-    }
+    };
 </script>
 
 {#if success}
     <div class="success">
         {#if configuration?.features.email}
             <div>
-                <div class="title">{$_('login.check_mail')}</div>
-                <div class="subtitle">{$_('login.email_delay')}</div>
+                <div class="title">{$_("login.check_mail")}</div>
+                <div class="subtitle">{$_("login.email_delay")}</div>
             </div>
-            <!--<MailProvider email={success} />-->
+            <MailProvider email={success} />
+        {:else if type == "login"}
+            <div class="title">{$_("login.verified_account")}</div>
         {:else}
-        <div class="title">{$_('login.successful_registration')}</div>
+            <div class="title">{$_("login.successful_registration")}</div>
         {/if}
-        <a href="/">{$_('login.remembered')}</a>
+        <a href="/">{$_("login.remembered")}</a>
     </div>
-    {:else if loading}
-        <Preloader type='spinner'/>
-    {:else}
+{:else if loading}
+    <Preloader type="spinner" />
+{:else}
     <div class="formModal">
         <div class="welcome">
             <div class="title">
-                {$_(type == 'create' ? 'login.welcome2' : 'login.welcome')}
+                {$_(type == "create" ? "login.welcome2" : "login.welcome")}
             </div>
             <div class="subtitle">
-                {$_(type == 'create' ? 'login.subtitle2' : 'login.subtitle')}
+                {$_(type == "create" ? "login.subtitle2" : "login.subtitle")}
                 <div>(app.uprising.chat)</div>
             </div>
         </div>
         <form on:submit|preventDefault={onSubmit}>
-            {#if type != 'reset'}
-                <FormField type='email' showOverline bind:value={email} />
+            {#if type != "reset"}
+                <FormField type="email" showOverline bind:value={email} />
             {/if}
-            {#if type == 'login' || type == 'create' || type == 'reset'}
-                <FormField type='password' showOverline bind:value={password} />
+            {#if type == "login" || type == "create" || type == "reset"}
+                <FormField type="password" showOverline bind:value={password} />
             {/if}
             {#if error}
                 <div>
@@ -78,20 +84,22 @@
                 </div>
             {/if}
             <Button>
-                {$_(type == 'create'
-                ? 'login.register'
-                : type == 'login'
-                ? 'login.title'
-                : type === 'reset'
-                ? 'login.set_password'
-                : type === 'resend'
-                ? 'login.resend'
-                : 'login.reset')}
+                {$_(
+                    type == "create"
+                        ? "login.register"
+                        : type == "login"
+                          ? "login.title"
+                          : type === "reset"
+                            ? "login.set_password"
+                            : type === "resend"
+                              ? "login.resend"
+                              : "login.reset",
+                )}
             </Button>
         </form>
         <slot>
             <span class="create">
-                <a href="/login">{$_('login.remembered')}</a>
+                <a href="/login">{$_("login.remembered")}</a>
             </span>
         </slot>
     </div>
