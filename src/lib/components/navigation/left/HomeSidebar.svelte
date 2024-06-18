@@ -34,7 +34,7 @@
             font-weight: 600;
             flex-shrink: 0;
             height: 48px;
-            ${isTouchscreenDevice && `height:56px;`}
+            ${isTouchscreenDevice() && `height:56px;`}
         `,
     );
     const client = useClient();

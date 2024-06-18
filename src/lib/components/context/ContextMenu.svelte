@@ -9,7 +9,6 @@
   import LineDivider from "../atoms/LineDivider.svelte";
   import MenuItem from "./MenuItem.svelte";
   import { t } from "svelte-i18n";
-  import { useSession } from "$lib/controllers/ClientController";
   import { modalController } from "../modals/ModalController";
   import { getRenderer } from "$lib/rendered/Singleton";
   import { internalEmit } from "$lib/InternalEmitter";
@@ -19,10 +18,15 @@
   import { Permission, UserPermission } from "revolt.js";
   import Tooltip from "../atoms/Tooltip.svelte";
   import { setContext } from "svelte";
-    import { goto } from "$app/navigation";
-  const session = useSession()!;
-  const client = session.client!;
-  const userId = client.user?._id;
+  import { goto } from "$app/navigation";
+  import { page } from "$app/stores";
+  import { useClient as useMockClient } from "../mock/MockClient";
+  import { useClient } from "$lib/controllers/ClientController";
+
+  $: demo = $page.data.demo || false;
+  let client = useClient();
+  $: client = demo ? useMockClient() : useClient();
+  $: userId = client.user?._id;
   export let data: ContextMenuData;
   let lastDivider = false;
   let elements: SvelteElement[] = [];

@@ -6,6 +6,7 @@
         clientController,
         useClient,
     } from "$lib/controllers/ClientController";
+    import { useClient as useMockClient } from "../mock/MockClient";
     import BxHappyBeaming from "svelte-boxicons/BxHappyBeaming.svelte";
     import BxSend from "svelte-boxicons/BxSend.svelte";
     import BxShieldX from "svelte-boxicons/BxShieldX.svelte";
@@ -15,7 +16,7 @@
     import { ulid } from "ulid";
     import type { Reply } from "$lib/stores/MessageQueue";
     import TextAreaAutoSize from "../atoms/TextAreaAutoSize.svelte";
-    import type { Channel } from "revolt.js";
+    import type { API, Channel } from "revolt.js";
     import {
         CAN_UPLOAD_AT_ONCE,
         ATTACHMENT_SIZE_LIMIT,
@@ -28,6 +29,7 @@
         SMOOTH_SCROLL_ON_RECEIVE,
         getRenderer,
     } from "$lib/rendered/Singleton";
+    import { getRenderer as getMockRenderer } from "../mock/MockRenderer";
     import { debounce, defer, isTouchscreenDevice, takeError } from "$lib";
     import Autocomplete, { useAutoComplete } from "../Autocomplete.svelte";
     import PermissionTooltip from "../atoms/PermissionTooltip.svelte";
@@ -42,8 +44,9 @@
     import { modalController } from "../modals/ModalController";
     import ReplyBar from "./bars/ReplyBar.svelte";
 
-    export let channel: Channel;
-    const client = useClient();
+    export let channel: Channel,
+        mock = false;
+    const client = mock ? useMockClient() : useClient();
     let uploadState: UploadState = { type: "none" };
     let replies: Reply[] = [];
     let typing = 0;
@@ -63,7 +66,7 @@
             margin: 0px 6px 6px 6px;
             -webkit-backdrop-filter: blur(10px);
             backdrop-filter: blur(10px);
-            background-color: rgba(var(--secondary-header-rgb), max(0, 0.86) );
+            background-color: rgba(var(--secondary-header-rgb), max(0, 0.86));
             border-radius: var(--border-radius-inner);
             textarea {
                 font-size: var(--text-size);
@@ -127,9 +130,12 @@
     // Tests for code block delimiters (``` at start of line)
     const RE_CODE_DELIMITER = new RegExp("^```", "gm");
 
-    const renderer = getRenderer(channel, state);
+    const renderer = mock
+        ? getMockRenderer(channel, state)
+        : getRenderer(channel, state);
 
     function startTyping() {
+        if (mock) return;
         if (typeof typing == "number" && +new Date() < typing) return;
 
         const ws = client.websocket;
@@ -144,6 +150,7 @@
 
     $: debounceStopTyping = debounce(stopTyping, 1000);
     function stopTyping(force?: boolean) {
+        if (mock) return;
         if (force || typing) {
             const ws = client.websocket;
             if (ws.connected) {
@@ -185,6 +192,211 @@
     );
 
     /**
+     * Send directly to mock client
+     */
+    function mockSend() {
+        if (uploadState.type == "uploading" || uploadState.type == "sending")
+            return;
+        const content = state.draft.get(channel._id)?.content?.trim() ?? "";
+        if (uploadState.type != "none") {
+            return mockSendFile(content);
+        }
+        if (!content.length) {
+            console.warn("Empty message cannot be sent");
+            return;
+        }
+        internalEmit("NewMessages", "hide");
+        stopTyping();
+        setMessage();
+        const messageReplies = replies;
+        replies = [];
+        const nonce = ulid();
+
+        // sed style message editing.
+        // If the user types for example `s/abc/def`, the string "abc"
+        // will be replaced with "def" in their last sent message.
+        if (RE_SED.test(content)) {
+            replaceMessage(content, true);
+        } else {
+            //state.settings.sounds.playSound("outbound");
+
+            state.queue.add(nonce, channel._id, {
+                _id: nonce,
+                channel: channel._id,
+                author: client.user!._id,
+
+                content,
+                replies: messageReplies,
+            });
+
+            defer(() => renderer.jumpToBottom(SMOOTH_SCROLL_ON_RECEIVE));
+
+            try {
+                client.emit("message", client.messages.createObj({
+                    _id: ulid(),
+                    channel: channel._id,
+                    author: client.user!._id,
+                    content,
+                    nonce,
+                    replies: messageReplies.filter(r => r.mention).map(r => r.id),
+                }));
+            } catch (error) {
+                state.queue.fail(nonce, takeError(error));
+            }
+        }
+    }
+
+    async function mockSendFile(content: string) {
+        // Typescript does not like overlaps
+        if (uploadState.type == "attached" || uploadState.type == "failed") {
+            const attachments: API.File[] = [];
+            const abortController = new AbortController();
+            const files = uploadState.files;
+            stopTyping();
+            uploadState = {
+                type: "uploading",
+                files,
+                percent: 0,
+                cancel: abortController,
+            };
+
+            try {
+                for (
+                    let i = 0;
+                    i < files.length && i < CAN_UPLOAD_AT_ONCE;
+                    i++
+                ) {
+                    const file = files[i];
+
+                    attachments.push(
+                        await uploadFile(
+                            client.configuration!.features.autumn.url,
+                            "attachments",
+                            file,
+                            {
+                                onDownloadProgress(event) {
+                                    uploadState = {
+                                        type: "uploading",
+                                        files,
+                                        percent: Math.round(
+                                            (i * 100 +
+                                                (100 * event.loaded) /
+                                                    (event.total || 1)) /
+                                                Math.min(
+                                                    files.length,
+                                                    CAN_UPLOAD_AT_ONCE,
+                                                ),
+                                        ),
+                                        cancel: abortController,
+                                    };
+                                },
+                                signal: abortController.signal,
+                            },
+                            true,
+                        ),
+                    );
+                }
+            } catch (err) {
+                if (err instanceof Error && err.message == "cancel") {
+                    uploadState = { type: "attached", files };
+                    console.error(err);
+                } else {
+                    uploadState = {
+                        type: "failed",
+                        files,
+                        error: takeError(err),
+                    };
+                }
+
+                console.error("[MessageBox] Error uploading files", err);
+
+                // Stops function
+                return;
+            }
+
+            uploadState = { type: "sending", files };
+            const nonce = ulid();
+            try {
+                // Emits message to client
+                client.emit(
+                    "message",
+                    client.messages.createObj({
+                        _id: ulid(),
+                        channel: channel._id,
+                        author: client.user!._id,
+                        content,
+                        nonce,
+                        replies: replies
+                            .filter((r) => r.mention)
+                            .map((r) => r.id),
+                        attachments,
+                        // mentions
+                    }),
+                );
+            } catch (err) {
+                uploadState = { type: "failed", files, error: takeError(err) };
+                return;
+            }
+
+            setMessage();
+            replies = [];
+            // state.settings.sounds.playSound("outbound");
+            if (files.length > CAN_UPLOAD_AT_ONCE) {
+                uploadState = {
+                    type: "attached",
+                    files: files.slice(CAN_UPLOAD_AT_ONCE),
+                };
+            } else {
+                uploadState = { type: "none" };
+            }
+        }
+    }
+
+    async function replaceMessage(content: string, mock = false) {
+        renderer.messages.reverse();
+        const msg = renderer.messages.find(
+            (msg) => msg.author_id == client.user!._id,
+        );
+        renderer.messages.reverse();
+
+        if (msg?.content) {
+            let [_, toReplace, newText, flags] = content.split(/\//);
+
+            if (toReplace == "*") toReplace = msg.content.toString();
+
+            const newContent =
+                toReplace == ""
+                    ? msg.content.toString() + newText
+                    : msg.content
+                          .toString()
+                          .replace(new RegExp(toReplace, flags), newText);
+
+            if (newContent != msg.content) {
+                if (newContent.length == 0) {
+                    if (mock) {
+                        client.emit("message/delete", msg._id, channel)
+                    } else {
+                        msg.delete().catch(console.error);
+                    }
+                } else {
+                    try {
+                        if (mock) {
+                            client.emit("message/update", {
+                                ...msg,
+                                content: newContent.slice(0, 2000),
+                            });
+                        } else {
+                            await msg.edit({ content: newContent.slice(0, 2000) });
+                        }
+                        defer(() =>renderer.jumpToBottom(SMOOTH_SCROLL_ON_RECEIVE),)
+                    } catch (error) {
+                        console.error(error);
+                    }
+                }
+            }
+        }
+    }
+    /**
      * Trigger send message.
      */
     async function send() {
@@ -206,42 +418,7 @@
         // If the user types for example `s/abc/def`, the string "abc"
         // will be replaced with "def" in their last sent message.
         if (RE_SED.test(content)) {
-            renderer.messages.reverse();
-            const msg = renderer.messages.find(
-                (msg) => msg.author_id == client.user!._id,
-            );
-            renderer.messages.reverse();
-
-            if (msg?.content) {
-                let [_, toReplace, newText, flags] = content.split(/\//);
-
-                if (toReplace == "*") toReplace = msg.content.toString();
-
-                const newContent =
-                    toReplace == ""
-                        ? msg.content.toString() + newText
-                        : msg.content
-                              .toString()
-                              .replace(new RegExp(toReplace, flags), newText);
-
-                if (newContent != msg.content) {
-                    if (newContent.length == 0) {
-                        msg.delete().catch(console.error);
-                    } else {
-                        msg.edit({
-                            content: newContent.slice(0, 2000),
-                        })
-                            .then(() =>
-                                defer(() =>
-                                    renderer.jumpToBottom(
-                                        SMOOTH_SCROLL_ON_RECEIVE,
-                                    ),
-                                ),
-                            )
-                            .catch(console.error);
-                    }
-                }
-            }
+            replaceMessage(content);
         } else {
             //state.settings.sounds.playSound("outbound");
 
@@ -430,7 +607,7 @@
             </div>
         </div>
     </div>
-{:else if !channel.havePermission("SendMessage")}
+{:else if !channel.havePermission("SendMessage") && !mock}
     <div class={Base}>
         <div class={Blocked}>
             <div class={Action}>
@@ -541,7 +718,7 @@
             onKeyDown={(e) => {
                 if (e.ctrlKey && e.key == "Enter") {
                     e.preventDefault();
-                    return send();
+                    return mock? mockSend() : send();
                 }
 
                 if (onKeyDown(e)) return;
@@ -556,10 +733,10 @@
                     !e.shiftKey &&
                     !e.isComposing &&
                     e.key == "Enter" &&
-                    !isTouchscreenDevice
+                    !isTouchscreenDevice()
                 ) {
                     e.preventDefault();
-                    return send();
+                    return mock? mockSend() : send();
                 }
 
                 if (e.key == "Escape") {
@@ -600,7 +777,7 @@
             </Flyout>
         </div>
         <div class={Action}>
-            <BxSend size={20} on:click={send} />
+            <BxSend size={20} on:click={mock ? mockSend : send} />
         </div>
     </div>
 {/if}

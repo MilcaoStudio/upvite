@@ -1,9 +1,7 @@
 <script lang="ts">
-    import { isTouchscreenDevice } from "$lib";
     import { state } from "$lib/State";
     import ConditionalLink from "$lib/components/atoms/ConditionalLink.svelte";
     import JSXRender from "$lib/components/JSXRender.svelte";
-    import { useClient } from "$lib/controllers/ClientController";
     import { css, cx } from "@emotion/css";
     import type { Channel, Server } from "revolt.js";
     import { internalEmit } from "$lib/InternalEmitter";
@@ -18,8 +16,9 @@
     } from "$lib/markdown/runtime/svelteRuntime";
     import UserPanel from "./UserPanel.svelte";
     import { autorun } from "mobx";
+    import type { Client } from "revolt.js";
 
-    export let server: Server, channel: Channel | undefined;
+    export let server: Server, channel: Channel | undefined, client: Client;
     const ServerBase = cx(
         "ServerBase",
         css`
@@ -47,7 +46,6 @@
         `,
     );
 
-    const client = useClient();
     $: channel && state.layout.setLastOpened(server._id, channel._id);
     let uncategorised = new Set<string>();
     let elements: SvelteElement[] = [];
