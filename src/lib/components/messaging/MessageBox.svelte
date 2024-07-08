@@ -31,7 +31,7 @@
     import { debounce, defer, isTouchscreenDevice, takeError } from "$lib";
     import Autocomplete, { useAutoComplete } from "../Autocomplete.svelte";
     import PermissionTooltip from "../atoms/PermissionTooltip.svelte";
-    import { Flyout } from "fluent-svelte";
+    import { Checkbox, Flyout } from "fluent-svelte";
     import IconButton from "../atoms/input/IconButton.svelte";
     import Picker from "../atoms/media/Picker.svelte";
     import { RevoltEmojiDictionary } from "revkit";
@@ -529,8 +529,11 @@
                 />
             </div>
         {/if}
+        <Checkbox bind:checked={markup}>Rich text</Checkbox>
         {#if markup}
-            <TextEditor id="message" minHeight={60} {value} {onBlur} />
+            <TextEditor id="message" minHeight={60} value={[{
+                    children: [{ text: value }]
+                }]} />
         {:else}
             <TextAreaAutoSize
                 maxRows={20}

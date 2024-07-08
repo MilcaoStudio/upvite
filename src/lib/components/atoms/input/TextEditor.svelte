@@ -1,52 +1,62 @@
 <script lang="ts">
+    import { Slate, Editable, withSvelte } from "svelte-slate";
+    import {
+        createEditor,
+        Text,
+        type Range,
+        type Descendant,
+        type Path,
+        type Node,
+    } from "slate";
     import Prism from "$lib/markdown/prism";
+    import Leaf from "$lib/markdown/Leaf.svelte";
+    import type { Token } from "prismjs";
+    import EditorArea from "$lib/markdown/EditorArea.svelte";
+    export let value: Descendant[];
+    const editor = withSvelte(createEditor());
+    $: console.log("TextEditor value:", value);
+    let decorate: (_entry: any) => unknown = ([node, path]: [Node, Path]) => {
+        const ranges: Range[] = [];
+        console.log(node);
+        if (!Text.isText(node)) {
+            return ranges;
+        }
+        function length(token: Token | string): number {
+            if (typeof token == "string") {
+                return token.length;
+            } else if (!Array.isArray(token.content)) {
+                return token.content.length;
+            } else {
+                return token.content.reduce((l, t) => l + length(t), 0);
+            }
+        }
+        const tokens = Prism.tokenize(node.text, Prism.languages.markdown);
+        let start = 0;
 
-    export let value = "", minHeight = 0, maxRows = 5, lineHeight = "var(--textarea-line-height)", onBlur: (()=>void) | undefined = undefined;
-    let highlight = "";
-    $: console.log(highlight);
-    $: highlight = Prism.highlight(value, Prism.languages.py, "python");
+        for (const token of tokens) {
+            const len = length(token);
+            const end = start + len;
+
+            if (typeof token != "string") {
+                ranges.push({
+                    [token.type]: true,
+                    anchor: { path, offset: start },
+                    focus: { path, offset: end },
+                });
+            }
+
+            start = end;
+        }
+        return ranges;
+    };
 </script>
-<!--<Scrubble />-->
-<!--
-    <div role="textbox" aria-multiline="true" spellcheck="true" aria-haspopup="listbox" aria-invalid="false" aria-autocomplete="list" class="markup_a7e664 editor__66464 slateTextArea_b19976 fontSize16Padding_bcbeae" autocorrect="off" data-can-focus="true" aria-label="Mensaje #dev" data-slate-editor="true" data-slate-node="value" contenteditable="true" zindex="-1" style="position: relative; outline: none; white-space: pre-wrap; overflow-wrap: break-word;">
-        Line 1
-        <div data-slate-node="element">
-            Text node
-            <span data-slate-node="text">
-                Code node
-                <span data-slate-leaf="true" class="codeBlockSyntax__4104a" spellcheck="false">
-                    <span data-slate-string="true">```</span>
-                </span>
-                Lenguage node
-                <span data-slate-leaf="true" class="">
-                    <span data-slate-string="true">py</span>
-                </span>
-            </span>
-        </div>
-        Line 2
-        Code line
-        <div class="codeLine__10acb" spellcheck="false" data-slate-node="element">
-            Text node
-            <span data-slate-node="text">
-                Prism syntax
-                <span data-slate-leaf="true" class="hljs-keyword"><span data-slate-string="true">def</span></span><span data-slate-leaf="true" class=""><span data-slate-string="true"> </span></span><span data-slate-leaf="true" class="hljs-title function_"><span data-slate-string="true">main</span></span><span data-slate-leaf="true" class=""><span data-slate-string="true">():</span></span></span></div><div class="codeLine__10acb" spellcheck="false" data-slate-node="element"><span data-slate-node="text"><span data-slate-leaf="true" class=""><span data-slate-string="true">  </span></span><span data-slate-leaf="true" class="hljs-built_in"><span data-slate-string="true">print</span></span><span data-slate-leaf="true" class=""><span data-slate-string="true">(</span></span><span data-slate-leaf="true" class="hljs-string"><span data-slate-string="true">"Hola mundo"</span></span><span data-slate-leaf="true" class=""><span data-slate-string="true">)</span></span></span></div><div data-slate-node="element"><span data-slate-node="text"><span data-slate-leaf="true" class="codeBlockSyntax__4104a" spellcheck="false"><span data-slate-string="true">```</span></span></span></div></div>
--->
-<div class="TextEditor" style:min-height="{minHeight}px" style:max-height="calc({lineHeight} * {maxRows})" role="textbox" aria-multiline="true" spellcheck="true" aria-haspopup="listbox" aria-invalid="false" aria-autocomplete="list" autocorrect="off"  contenteditable="true" {...$$restProps} on:blur={onBlur}>
-    <div class="codeline">
-        <code>{@html highlight}</code>
-    </div>
-</div>
+
+<Slate {editor} bind:value>
+    <Editable {decorate} {Leaf} Element={EditorArea} placeholder="" class="TextEditor" {...$$restProps} />
+</Slate>
 
 <style>
-    .TextEditor {
-        position: relative;
-        outline: none;
-        white-space: pre-wrap;
-        overflow-wrap: break-word;
-        flex-grow: 1;
-        display: flex;
-        padding: var(--message-box-padding);
-        border-radius: var(--border-radius-inner);
-        border: var(--input-border-width) solid var(--accent);
+    :global(.TextEditor) {
+        width: 100%;
     }
 </style>
