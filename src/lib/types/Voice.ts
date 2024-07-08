@@ -190,9 +190,9 @@ export interface AuthenticationResult {
 export interface VoiceUser {
     audio?: boolean;
     room: string,
-    //video?: boolean,
-    //saudio?: boolean,
-    //svideo?: boolean,
+    video?: boolean,
+    saudio?: boolean,
+    svideo?: boolean,
 }
 
 export interface ConsumerList {
