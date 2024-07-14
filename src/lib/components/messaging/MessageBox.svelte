@@ -531,9 +531,61 @@
         {/if}
         <Checkbox bind:checked={markup}>Rich text</Checkbox>
         {#if markup}
-            <TextEditor id="message" minHeight={60} value={[{
-                    children: [{ text: value }]
-                }]} />
+            <TextEditor
+                id="message"
+                minHeight={60}
+                {value}
+                onChange={(value, selectionStart, selectionEnd) => {
+                    setMessage(value);
+                    startTyping();
+                    onChange(value, selectionStart, selectionEnd);
+                }}
+                onKeyDown={(e) => {
+                    if (e.ctrlKey && e.key == "Enter") {
+                        e.preventDefault();
+                        return send();
+                    }
+
+                    if (onKeyDown(e)) return;
+
+                    if (e.key == "ArrowUp" && !state.draft.has(channel._id)) {
+                        e.preventDefault();
+                        internalEmit("MessageRenderer", "edit_last");
+                        return;
+                    }
+
+                    if (
+                        !e.shiftKey &&
+                        !e.isComposing &&
+                        e.key == "Enter" &&
+                        !isTouchscreenDevice
+                    ) {
+                        e.preventDefault();
+                        return send();
+                    }
+
+                    if (e.key == "Escape") {
+                        if (replies.length) {
+                            replies = replies.slice(0, -1);
+                        } else if (
+                            uploadState.type == "attached" &&
+                            uploadState.files.length
+                        ) {
+                            uploadState = {
+                                type:
+                                    uploadState.files.length > 1
+                                        ? "attached"
+                                        : "none",
+                                files: uploadState.files.slice(0, -1),
+                            };
+                        }
+                    }
+
+                    debounceStopTyping(true);
+                }}
+                {onFocus}
+                {onBlur}
+            />
         {:else}
             <TextAreaAutoSize
                 maxRows={20}
@@ -544,7 +596,8 @@
                 onChange={(e) => {
                     setMessage(e.currentTarget.value);
                     startTyping();
-                    onChange(e);
+                    const t = e.currentTarget;
+                    onChange(t.value, t.selectionStart, t.selectionEnd);
                 }}
                 {onKeyUp}
                 onKeyDown={(e) => {

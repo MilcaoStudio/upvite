@@ -8,10 +8,10 @@
         let state: Writable<AutoCompleteState> = writable({ type: "none" });
         let focused = false;
         const client = useClient();
-        function onChange(e: Event & { currentTarget: HTMLTextAreaElement }) {
-            if (!e.currentTarget) return;
+        function onChange(value: string, selectionStart?: number, selectionEnd?: number) {
+            if (!value) return;
             let _state = get(state);
-            const result = searchString(e.currentTarget);
+            const result = searchString(value, selectionStart, selectionEnd);
             if (result) {
                 const [type, search] = result;
                 const regex = new RegExp(search, "i");
@@ -122,17 +122,26 @@
             if (_state.type != "none") {
                 state.set({ type: "none" });
             }
-            setValue(e.currentTarget.value);
+            setValue(value);
         }
 
-        function selectCurrent(el: HTMLTextAreaElement) {
+        function selectCurrent(el: HTMLElement) {
             let _state = get(state);
+            let value = "", selectionStart, selectionEnd;
+            if (el instanceof HTMLDivElement) {
+                value = el.textContent ?? "";
+                const selection = document.getSelection();
+                selectionStart = selection?.anchorOffset;
+                selectionEnd = selection?.focusOffset;
+            } else if (el instanceof HTMLTextAreaElement) {
+                ({value, selectionStart, selectionEnd} = el);
+            }
             if (_state.type != "none") {
-                const result = searchString(el);
+                const result = searchString(value, selectionStart, selectionEnd);
                 if (result) {
                     const [_type, search, index] = result;
 
-                    const content = el.value.split("");
+                    const content = value.split("");
                     if (_state.type == "user") {
                         content.splice(
                             index,
@@ -158,7 +167,8 @@
 
         function onClick(ev: MouseEvent) {
             ev.preventDefault();
-            selectCurrent(document.querySelector("#message")!);
+            const el: HTMLElement = document.querySelector("#message")!;
+            selectCurrent(el);
             focused = false;
         }
 
@@ -191,7 +201,8 @@
 
                 if (e.key == "Enter" || e.key == "Tab") {
                     e.preventDefault();
-                    selectCurrent(e.currentTarget as HTMLTextAreaElement);
+                    const t = e.currentTarget;
+                    t && selectCurrent(t as HTMLElement);
                     return true;
                 }
             }
@@ -203,20 +214,32 @@
             e: KeyboardEvent & { currentTarget: HTMLTextAreaElement },
         ) {
             if (e.currentTarget) {
-                onChange(e);
+                onChange(e.currentTarget.value, e.currentTarget.selectionStart, e.currentTarget.selectionEnd);
             }
         }
 
         function onFocus(
-            ev: FocusEvent & { currentTarget: HTMLTextAreaElement },
+            ev: FocusEvent & { currentTarget: HTMLElement },
         ) {
+            console.debug("focus", true);
             focused = true;
-            onChange(ev);
+            let value = "", selectionStart, selectionEnd;
+            const t = ev.currentTarget;
+            if (t instanceof HTMLDivElement) {
+                value = t.textContent ?? "";
+                const selection = document.getSelection();
+                selectionStart = selection?.anchorOffset;
+                selectionEnd = selection?.focusOffset;
+            } else if (t instanceof HTMLTextAreaElement) {
+                ({value, selectionStart, selectionEnd} = t);
+            }
+            onChange(value, selectionStart, selectionEnd);
         }
 
         function onBlur() {
             let _state = get(state);
             if (_state.type != "none" && _state.within) return;
+            console.debug("blur", false);
             focused = false;
         }
 
@@ -232,11 +255,13 @@
     }
 
     function searchString(
-        el: HTMLTextAreaElement,
+        value: string,
+        selectionStart?: number,
+        selectionEnd?: number
     ): ["user" | "channel", string, number] | undefined {
-        if (el.selectionStart == el.selectionEnd) {
-            const cursor = el.selectionStart;
-            const content = el.value.slice(0, cursor);
+        if (selectionStart == selectionEnd) {
+            const cursor = selectionStart;
+            const content = value.slice(0, cursor);
 
             const valid = /[\w\-]/;
 
@@ -343,7 +368,7 @@
 <div class={Base}>
     <div>
         {#if $state.type == "user"}
-            {#each $state.matches as match, i (i)}
+            {#each $state.matches as match, i (match._id)}
                 <button
                     class:active={i == $state.selected}
                     on:mouseenter={() => {
@@ -371,7 +396,7 @@
             {/each}
         {/if}
         {#if $state.type == "channel"}
-            {#each $state.matches as match, i}
+            {#each $state.matches as match, i (match._id)}
                 <button class:active={i == $state.selected}
                 on:mouseenter={()=>{
                     (i != $state.selected || !$state.within) && state.update(_state=>({

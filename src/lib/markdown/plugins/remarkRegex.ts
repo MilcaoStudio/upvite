@@ -2,7 +2,6 @@ import { RE_ULID } from "$lib";
 import { clientController } from "$lib/controllers/ClientController";
 import type { Handler } from "mdast-util-to-hast";
 import { RevoltEmojiDictionary } from "revkit";
-import { RE_MENTIONS } from "revolt.js";
 import type { Plugin } from "unified";
 import { visit } from "unist-util-visit";
 
@@ -109,15 +108,17 @@ export const passThroughComponents = (...keys: string[]) => {
     return obj;
 };
 
-export const remarkMention = createComponent("mention", RE_MENTIONS, (_, match) =>
-    clientController.availableClient.users.has(match),
+export const RE_MENTION = /<@([A-z0-9]{26})>/g;
+export const RE_CHANNEL = /<#([A-z0-9]{26})>/g;
+export const RE_EMOJI = /:(?:(UP|RV|DC):)?([a-zA-Z0-9\-_]+):/g;
+
+export const remarkMention = createComponent("mention", RE_MENTION, (_, match) =>
+    RE_ULID.test(match),
 );
 
-export const remarkChannel = createComponent("channel", /<#([A-z0-9]{26})>/g, (_, match) =>
-    clientController.availableClient.channels.has(match)
+export const remarkChannel = createComponent("channel", RE_CHANNEL, (_, match) =>
+    RE_ULID.test(match),
 );
-
-const RE_EMOJI = /:(?:(UP|RV|DC):)?([a-zA-Z0-9\-_]+):/g;
 
 export const remarkEmoji = createComponent("emoji", RE_EMOJI, (_, arg1, arg2) => arg1 == "DC" ? /[0-9]+/.test(arg2) :  arg2 in RevoltEmojiDictionary || RE_ULID.test(arg2));
 
