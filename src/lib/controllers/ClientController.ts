@@ -8,6 +8,7 @@ import { injectWindow, takeError } from "$lib";
 import { ObservableMap, action, computed, makeAutoObservable, observable } from "mobx";
 import { browser } from "$app/environment";
 import { voiceState } from "$lib/voice/VoiceState";
+import { goto } from "$app/navigation";
 /**
  * Current lifecycle state
  */
@@ -125,6 +126,7 @@ export default class Session {
         this.client!.logout();
         this.user_id = null;
         this.client = null;
+        goto("/login");
     }
 
     /**
@@ -177,10 +179,11 @@ export default class Session {
 
                 if (data.configuration) {
                     this.client!.configuration = data.configuration;
+                } else {
+                    await this.client!.fetchConfiguration();
                 }
 
-                if (data.knowledge === "new") {
-                    await this.client!.fetchConfiguration();
+                if (data.knowledge == "new") {
                     this.client!.session = data.session;
                     (this.client! as any).$updateHeaders();
 
@@ -332,6 +335,7 @@ export class ClientController {
      */
     @action hydrate(auth: Auth) {
         for (const entry of auth.accounts) {
+            console.log("[hydrate] Add existing session:", entry.session._id);
             this.addSession(entry, "existing");
         }
 
@@ -400,11 +404,8 @@ export class ClientController {
         knowledge: "new" | "existing",
     ) {
         const user_id = entry.session.user_id!;
-
         const session = new Session();
         this.sessions.set(user_id, session);
-        this.pickNextSession();
-
         session
             .emit({
                 action: "LOGIN",
@@ -412,15 +413,19 @@ export class ClientController {
                 apiUrl: entry.apiUrl,
                 configuration: this.configuration!,
                 knowledge,
+            }).then(()=>{
+                this.pickNextSession();
             })
             .catch((err) => {
                 const error = takeError(err);
-                if (error === "Forbidden" || error === "Unauthorized") {
+                if (error == "Forbidden" || error == "Unauthorized") {
                     this.sessions.delete(user_id);
                     this.current = null;
                     this.pickNextSession();
                     state.auth.removeSession(user_id);
-                    modalController.push({ type: "signed_out" });
+                    if (user_id == this.current) {
+                        modalController.push({ type: "signed_out" });
+                    }
                     session.destroy();
                 } else {
                     modalController.push({
@@ -522,13 +527,18 @@ export class ClientController {
     @action logout(user_id: string) {
         const session = this.sessions.get(user_id);
         if (session) {
-            if (user_id === this.current) {
+            if (user_id == this.current) {
                 this.current = null;
             }
 
-            this.sessions.delete(user_id);
+            if(this.sessions.delete(user_id)) {
+                console.debug("Session" + user_id + "deleted");
+            } else {
+                console.warn("No sessions deleted");
+            }
             this.pickNextSession();
-            session.destroy();
+            // Safe logout
+            session.emit({action: "LOGOUT"});
         }
     }
     /**
@@ -543,10 +553,6 @@ export class ClientController {
     @action switchAccount(user_id: string) {
         this.current = user_id;
         console.log('account switched to', user_id);
-
-        // This will allow account switching to work more seamlessly,
-        // maybe it'll be properly / fully implemented at some point.
-        // resetMemberSidebarFetched();
     }
 }
 

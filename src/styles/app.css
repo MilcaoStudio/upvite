@@ -392,14 +392,6 @@ div.TitlebarBase {
     transition: 0.2s ease background-color;
 }
 
-.actions div:hover {
-    background: var(--primary-background);
-}
-
-.actions div.error:hover {
-    background: var(--error);
-}
-
 @keyframes highlight {
     0% {
         background: var(--mention);

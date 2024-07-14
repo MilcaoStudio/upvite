@@ -4,26 +4,33 @@
     import { goto } from "$app/navigation";
     import { autorun } from "mobx";
     import { getContext } from "svelte";
-    
-    export let auth: boolean = false, blockRender: boolean = false;
 
-    let loggedIn = false;
+    export let auth: boolean = false,
+        blockRender: boolean = false;
+
+    $: loggedIn = false;
     let ready = false;
     let invite_code: string = getContext("invite");
-    $: autorun(()=>{
+    $: autorun(async () => {
         loggedIn = clientController.isLoggedIn;
         ready = clientController.isReady || false;
-        if (auth && !loggedIn){
-            if (!blockRender) goto('/login');
-        } else if (!auth && loggedIn) {
-            if (!blockRender) goto(invite_code ? `/invite/${invite_code}` : `/`);
+        try {
+            if (auth && !loggedIn) {
+                console.debug("[CheckAuth] Redirect to login");
+                if (!blockRender) await goto("/login");
+            } else if (!auth && loggedIn) {
+                console.debug("[CheckAuth] Redirect to home");
+                if (!blockRender)
+                    await goto(invite_code ? `/invite/${invite_code}` : `/`);
+            }
+        } catch (error) {
+            console.error(error);
         }
     });
-    
 </script>
 
 {#if auth && loggedIn && !ready}
-    <Preloader type='spinner' />
+    <Preloader type="spinner" />
 {:else}
     <slot />
 {/if}

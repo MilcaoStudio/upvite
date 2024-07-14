@@ -20,6 +20,7 @@
 
 <style>
     .BottomNavigation {
+        padding: .25rem 0;
         display: flex;
         justify-content: space-evenly;
         background-color: var(--secondary-background);

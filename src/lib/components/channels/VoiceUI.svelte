@@ -3,8 +3,6 @@
     import { VoiceStatus, voiceState } from "$lib/voice/VoiceState";
     import Row from "$lib/components/atoms/layout/Row.svelte";
     import type { Channel } from "revolt.js";
-    import UserIcon from "../user/UserIcon.svelte";
-    import { modalController } from "../modals/ModalController";
     import { useClient } from "$lib/controllers/ClientController";
     import { internalSubscribe } from "$lib/InternalEmitter";
     import { autorun } from "mobx";
@@ -14,7 +12,6 @@
     import BxVideoOff from "svelte-boxicons/BxVideoOff.svelte";
     import BxMicrophone from "svelte-boxicons/BxMicrophone.svelte";
     import BxMicrophoneOff from "svelte-boxicons/BxMicrophoneOff.svelte";
-    import { readable } from "svelte/store";
 
     export let channel: Channel;
     let client = useClient();
@@ -72,7 +69,7 @@
         <Row centred gap="8px">
             {#if user}
                 {#if localStream}
-                    <VideoStream srcObject={localStream} {video} />
+                    <VideoStream srcObject={localStream} {video} muted />
                 {/if}
             {/if}
             {#if streams}

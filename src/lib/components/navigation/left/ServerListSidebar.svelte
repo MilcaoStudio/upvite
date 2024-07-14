@@ -1,13 +1,10 @@
 <script lang="ts">
     import { state } from "$lib/State";
-    import { routeInformation } from "$lib/components/context/history";
     import { modalController } from "$lib/components/modals/ModalController";
-    import { useClient } from "$lib/controllers/ClientController";
+    import { Client } from "revolt.js";
 
     import ServerList from "../servers/ServerList.svelte";
-
-    const client = useClient();
-    const server_id = routeInformation.getServer();
+    export let client: Client, server_id: string;
     function createServer() {
         modalController.push({ type: "create_server" });
     }

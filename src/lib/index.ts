@@ -49,7 +49,9 @@ export function mapError(error: any): never {
     throw takeError(error);
 }
 
-export const isTouchscreenDevice = browser && navigator.maxTouchPoints > 1;
+export function isTouchscreenDevice() {
+    return browser && navigator.maxTouchPoints > 0;
+}
 
 
   export function injectWindow(key: string, source: any) {

@@ -35,6 +35,7 @@ export async function uploadFile(
     tag: string,
     file: File,
     config?: AxiosRequestConfig,
+    include_meta = false
 ) {
     const formData = new FormData();
     formData.append("file", file);
@@ -46,7 +47,7 @@ export async function uploadFile(
         ...config,
     });
 
-    return res.data.id;
+    return include_meta ? res.data : res.data.id;
 }
 
 let input: HTMLInputElement;
@@ -72,8 +73,8 @@ export function grabFiles(
         const files = (e.currentTarget as HTMLInputElement)?.files;
         if (!files) return;
 
-        for (const file of files) {
-            if (file.size > maxFileSize) {
+        for (let i = 0; i < files.length; i++) {
+            if (files[i].size > maxFileSize) {
                 return tooLarge();
             }
         }

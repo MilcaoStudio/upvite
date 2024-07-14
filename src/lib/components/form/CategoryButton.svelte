@@ -8,19 +8,6 @@
     $: CategoryButton = cx(
         "CategoryButton",
         css`
-            ${disabled
-                ? `
-                opacity: 0.4;
-                .action {
-                    font-size: 0.875rem;
-                }`
-                : `cursor: pointer;
-                  opacity: 1;
-                  transition: 0.1s ease background-color;
-
-                  &:hover {
-                      background: var(--secondary-background);
-                  }`}
             ${account
                 ? `
                 height: 54px;
@@ -48,7 +35,7 @@
 
 <style>
     a.CategoryButton {
-        padding: 9.8px 12px;
+        padding: .5rem 12px;
         border-radius: var(--border-radius);
         margin-bottom: 10px;
         color: var(--foreground);
@@ -57,6 +44,17 @@
         display: flex;
         align-items: center;
         flex-direction: row;
+        cursor: pointer;
+        opacity: 1;
+        transition: 0.1s ease background-color;
+    }
+
+    a.CategoryButton.disabled {
+        opacity: 0.4;
+    }
+
+    a.CategoryButton:not(.disabled):hover {
+        background: var(--secondary-background);
     }
 
     a.CategoryButton > :global(svg) {
@@ -91,7 +89,7 @@
 </style>
 
 <!-- svelte-ignore a11y-missing-attribute -->
-<a class={CategoryButton} role="button" tabindex="0" on:click={onClick} on:keydown={onClick}>
+<a class="{CategoryButton} {disabled ? "disabled" : ""}" role="button" tabindex="0" on:click={onClick} on:keydown={onClick}>
     <svelte:component this={icon} size={24} />
     <div class="content">
         <div class="title">

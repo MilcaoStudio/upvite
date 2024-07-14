@@ -3,13 +3,5 @@
 </script>
 
 <CheckAuth auth>
-    <div class="center">
-        <slot />
-    </div>
-    
+    <slot />
 </CheckAuth>
-
-<style>
-
-
-</style>

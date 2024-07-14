@@ -11,6 +11,9 @@
     import { _ } from "svelte-i18n";
     import PageHeader from "../atoms/PageHeader.svelte";
     import CategoryButton from "../form/CategoryButton.svelte";
+    import { modalController } from "../modals/ModalController";
+    import { DONATION } from "$lib/links";
+    import { ORG_NAME } from "$lib/revision";
 
     const Overlay = cx(
         "Overlay",
@@ -31,7 +34,7 @@
     // const seasonalTheme = state.settings.get("appearance:seasonal", true);
     let seasonalTheme = true;
     // const toggleSeasonalTheme = () => state.settings.set("appearance:seasonal", !seasonalTheme);
-    const toggleSeasonalTheme = ()=>seasonalTheme = !seasonalTheme;
+    const toggleSeasonalTheme = () => (seasonalTheme = !seasonalTheme);
     const isDecember = !isTouchscreenDevice && new Date().getMonth() == 11;
     const isOctober = !isTouchscreenDevice && new Date().getMonth() == 9;
 
@@ -74,59 +77,93 @@
 <div class="home">
     <div class={Overlay}>
         {#if seasonalTheme}
-        <div class="snowfall">
-            {#each snowflakes as emoji}
-                <div class="snowflake">
-                    {emoji}
-                </div>
-            {/each}
-        </div>
+            <div class="snowfall">
+                {#each snowflakes as emoji}
+                    <div class="snowflake">
+                        {emoji}
+                    </div>
+                {/each}
+            </div>
         {/if}
         <div class="content">
             <PageHeader icon={BxHome} withTransparency>
-                {$_('app.navigation.tabs.home')}
+                {$_("app.navigation.tabs.home")}
             </PageHeader>
         </div>
         <div class="homeScreen">
-            <h3>{$_('app.special.modals.onboarding.welcome')} Uprising</h3>
+            <h3>{$_("app.special.modals.onboarding.welcome")} Uprising</h3>
             <div class="actions">
                 <!-- svelte-ignore a11y-missing-attribute -->
-                <!--on:click={()=>modalController.push({type: "create_group",})}-->
-                <a role="menuitem" tabindex="0" on:click={()=>{}} on:keydown={()=>{}}>
-                    <CategoryButton action="chevron" icon={BxPlusCircle} description={$_('app.home.group_desc')}>
-                        {$_('app.home.group')}
+                <a
+                    role="menuitem"
+                    tabindex="0"
+                    on:click={() => {
+                        modalController.push({ type: "create_group" });
+                    }}
+                    on:keydown={() => {
+                        modalController.push({ type: "create_group" });
+                    }}
+                >
+                    <CategoryButton
+                        action="chevron"
+                        icon={BxPlusCircle}
+                        description={$_("app.home.group_desc")}
+                    >
+                        {$_("app.home.group")}
                     </CategoryButton>
                 </a>
                 <a href="/discover">
-                    <CategoryButton action="chevron" icon={BxCompass} description={$_('app.home.discover_desc')}>{$_('app.home.discover')}</CategoryButton>
+                    <CategoryButton
+                        action="chevron"
+                        icon={BxCompass}
+                        description={$_("app.home.discover_desc")}
+                        >{$_("app.home.discover").replace(
+                            "Revolt",
+                            ORG_NAME,
+                        )}</CategoryButton
+                    >
                 </a>
-                {#if client.servers.get(
-                    "01HRSZB6J5PW9D2XGBZVZAKGFA",
-                ) }
+                {#if client.servers.get("01HRSZB6J5PW9D2XGBZVZAKGFA")}
                     <a href="/server/01HRSZB6J5PW9D2XGBZVZAKGFA">
-                        <CategoryButton action="chevron" icon={BxRightArrowCircle} description={$_('app.home.goto-testers_desc')}>
-                            {$_('app.home.goto-testers')}
+                        <CategoryButton
+                            action="chevron"
+                            icon={BxRightArrowCircle}
+                            description={$_("app.home.goto-testers_desc")}
+                        >
+                            {$_("app.home.goto-testers")}
                         </CategoryButton>
                     </a>
                 {:else}
                     <a href="/invite/Testers">
-                        <CategoryButton action="chevron" icon={BxGroup} description={$_('app.home.join-testers_desc')}>{$_('app.home.join-testers')}</CategoryButton>
+                        <CategoryButton
+                            action="chevron"
+                            icon={BxGroup}
+                            description={$_("app.home.join-testers_desc")}
+                            >{$_("app.home.join-testers")}</CategoryButton
+                        >
                     </a>
                 {/if}
-                <a href="https://ko-fi.com/projectuprising">
-                    <CategoryButton action="external" icon={BxMoney} description={$_('app.home.donate_desc')}>{$_('app.home.donate')}</CategoryButton>
+                <a href={DONATION}>
+                    <CategoryButton
+                        action="external"
+                        icon={BxMoney}
+                        description={$_("app.home.donate_desc")}
+                        >{$_("app.home.donate").replace(
+                            "Revolt",
+                            ORG_NAME,
+                        )}</CategoryButton
+                    >
                 </a>
             </div>
             {#if isDecember}
-            <!-- svelte-ignore a11y-invalid-attribute -->
-            <a href="#" on:click={toggleSeasonalTheme}>
-                Turn {seasonalTheme ? "off" : "on"} homescreen effects
-            </a>
+                <!-- svelte-ignore a11y-invalid-attribute -->
+                <a href="#" on:click={toggleSeasonalTheme}>
+                    Turn {seasonalTheme ? "off" : "on"} homescreen effects
+                </a>
             {/if}
         </div>
     </div>
 </div>
-
 
 <style>
     .home {
@@ -134,7 +171,7 @@
         user-select: none;
         position: relative;
     }
-    .home .homeScreen {
+    .homeScreen {
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -142,41 +179,40 @@
         height: 100%;
         padding: 12px;
     }
-    .homeScreen h3 {
+    h3 {
         margin: 20px 0;
         font-size: 48px;
         text-align: center;
     }
-    .homeScreen h3 :global(img) {
+    h3 :global(img) {
         height: 36px;
     }
 
     .homeScreen a {
         font-size: 13px;
     }
-    .homeScreen .actions {
+
+    .actions {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
         gap: 16px;
         max-width: 650px;
-        margin-bottom: 30px;
     }
-    .homeScreen .actions > :global(* > *) {
-        height: 100%;
-    }
-    .homeScreen .actions a {
+
+    .actions a {
         width: 100%;
-        height: 6em;
     }
-    .homeScreen .actions a div {
+
+    .actions a div {
         margin: 0;
     }
 
-    .homeScreen .actions :global([data-light="true"] .home svg) {
+    .actions :global([data-light="true"] .home svg) {
         filter: invert(100%);
     }
+
     @media (max-width: 600px) {
-        .homeScreen .actions {
+        .actions {
             grid-template-columns: repeat(1, 1fr);
         }
     }

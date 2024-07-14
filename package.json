@@ -1,15 +1,17 @@
 {
   "name": "upvite",
-  "version": "0.3.8",
+  "version": "0.3.13",
   "private": true,
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",
     "preview": "vite preview",
+    "pull": "node scripts/setup_badges.js",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
   },
   "devDependencies": {
+    "@faker-js/faker": "^8.4.1",
     "@fontsource/atkinson-hyperlegible": "^5.0.18",
     "@fontsource/bitter": "^5.0.16",
     "@fontsource/comic-neue": "^5.0.8",

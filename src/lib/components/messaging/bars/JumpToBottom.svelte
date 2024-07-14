@@ -5,9 +5,10 @@
     import { internalEmit } from "$lib/InternalEmitter";
     import { t } from "svelte-i18n";
     import BxDownArrowAlt from "svelte-boxicons/BxDownArrowAlt.svelte";
+    import { state } from "$lib/State";
 
     export let channel: Channel;
-    let renderer = getRenderer(channel);
+    let renderer = getRenderer(channel, state);
 </script>
 
 {#if renderer.state == "RENDER" && !renderer.atBottom}

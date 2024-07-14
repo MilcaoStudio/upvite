@@ -19,28 +19,7 @@
     } from "./runtime/svelteRuntime";
     import { css, cx } from "@emotion/css";
 
-    const components: Record<string, string | Function | null> = {
-        a: Anchor,
-        code: "code",
-        channel: ChannelLink,
-        emoji: Emoji,
-        li: "li",
-        mention: UserMention,
-        ol: "ol",
-        pre: "pre",
-        table: "table",
-        ul: "ul",
-        // Block image elements
-        img: null,
-        // Catch literally everything else just in case
-        video: null,
-        figure: null,
-        picture: null,
-        source: null,
-        audio: null,
-        script: null,
-        style: null,
-    };
+    
     // disables <@id> as email link
     export const micromarkExtensions = [{disable: {null: ["autolink"]}}];
     export const remarkProcessor = unified()
@@ -121,6 +100,47 @@
     import Emoji from "./plugins/Emoji.svelte";
 
     export let content: string;
+    const components: Record<string, string | Function | null> = {
+        a: Anchor,
+        code: "code",
+        channel: ChannelLink,
+        emoji: Emoji,
+        li: "li",
+        mention: UserMention,
+        ol: "ol",
+        pre: "pre",
+        table: "table",
+        ul: "ul",
+        // Block image elements
+        img: null,
+        // Catch literally everything else just in case
+        video: null,
+        figure: null,
+        picture: null,
+        source: null,
+        audio: null,
+        script: null,
+        style: null,
+    };
+
+    const rendered = unified()
+        .data({micromarkExtensions})
+        .use(remarkParse)
+        .use(remarkBreaks)
+        .use(remarkMath)
+        .use(remarkMention)
+        .use(remarkChannel)
+        .use(remarkEmoji)
+        .use(remarkTimestamps)
+        .use(remarkGfm)
+        .use(remarkHtmlToText)
+        // Mdast to Hast
+        .use(remarkRehype, { handlers, })
+        // code block highlight
+        .use(rehypePrism)
+        // Hast to svelte elements
+        .use(rehypeSvelte, { createElement, components });
+        
     $: sanitisedContent = sanitise(content);
     const Markdown = cx(
         "Markdown",
