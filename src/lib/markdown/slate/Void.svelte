@@ -1,11 +1,8 @@
 <script lang="ts">
-    import type { IElement } from "svelte-slate/plugins";
-    import UserMention from "../plugins/UserMention.svelte";
 
     export let isInline: boolean,
         ref: HTMLElement,
-        dir: "rtl" | "ltr" | undefined = undefined,
-        element: IElement;
+        dir: "rtl" | "ltr" | undefined = undefined;
 </script>
 
 <svelte:element
@@ -17,8 +14,6 @@
     {dir}
     contenteditable="false"
 >
+    <!-- TODO: Render void elements -->
     <slot />
-    {#if element.type == "mention"}
-        <UserMention match={element.match} />
-    {/if}
 </svelte:element>

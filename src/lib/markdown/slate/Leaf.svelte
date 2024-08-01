@@ -1,11 +1,25 @@
 <script lang="ts">
     import type { IText } from "svelte-slate/plugins";
     import type { RichText } from "./types";
-    import UserMention from "../plugins/UserMention.svelte";
+    import MentionLeaf from "./MentionLeaf.svelte";
     export let leaf: IText & RichText;
-    $: console.debug(leaf.text);
 </script>
 
-<span data-slate-leaf="true" style:font-weigth={leaf.bold ? "bold": "normal"} style:font-style={leaf.italic ? "italic": "normal"} style:text-decoration={leaf.underline ? "underline" : leaf.strikeThrough ? "line-through" : "none"}>
-    <slot/>
-</span>
+{#if leaf.type == "mention"}
+    <MentionLeaf>
+        <slot />
+    </MentionLeaf>
+{:else}
+    <span
+        data-slate-leaf="true"
+        style:font-weight={leaf.bold ? "bold" : "normal"}
+        style:font-style={leaf.italic ? "italic" : "normal"}
+        style:text-decoration={leaf.underline
+            ? "underline"
+            : leaf.strikeThrough
+              ? "line-through"
+              : "none"}
+    >
+        <slot />
+    </span>
+{/if}
