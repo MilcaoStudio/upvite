@@ -126,13 +126,29 @@
         }
 
         function selectCurrent(el: HTMLElement) {
+            console.debug("[selectCurrent] selecting", el);
             let _state = get(state);
-            let value = "", selectionStart, selectionEnd;
+            let value = "", selectionStart = 0, selectionEnd = 0;
             if (el instanceof HTMLDivElement) {
                 value = el.textContent ?? "";
                 const selection = document.getSelection();
-                selectionStart = selection?.anchorOffset;
-                selectionEnd = selection?.focusOffset;
+                const leaf = selection?.anchorNode?.
+                // span data-slate-string="true"
+                parentElement?.
+                // span data-slate-leaf="true"
+                parentElement;
+                let prev = leaf?.previousSibling;
+                selectionStart = selection?.anchorOffset ?? 0;
+                selectionEnd = selection?.focusOffset ?? 0;
+                while (prev) {
+                    if (prev.textContent) {
+                        const len = prev.textContent.length;
+                        selectionStart += len;
+                        selectionEnd += len;
+                    }
+                    prev = prev.previousSibling;
+                }
+                
             } else if (el instanceof HTMLTextAreaElement) {
                 ({value, selectionStart, selectionEnd} = el);
             }
@@ -203,6 +219,7 @@
                     e.preventDefault();
                     const t = e.currentTarget;
                     t && selectCurrent(t as HTMLElement);
+                    focused = false;
                     return true;
                 }
             }
@@ -223,17 +240,6 @@
         ) {
             console.debug("focus", true);
             focused = true;
-            let value = "", selectionStart, selectionEnd;
-            const t = ev.currentTarget;
-            if (t instanceof HTMLDivElement) {
-                value = t.textContent ?? "";
-                const selection = document.getSelection();
-                selectionStart = selection?.anchorOffset;
-                selectionEnd = selection?.focusOffset;
-            } else if (t instanceof HTMLTextAreaElement) {
-                ({value, selectionStart, selectionEnd} = t);
-            }
-            onChange(value, selectionStart, selectionEnd);
         }
 
         function onBlur() {
