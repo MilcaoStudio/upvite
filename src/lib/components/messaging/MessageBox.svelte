@@ -51,7 +51,6 @@
     let uploadState: UploadState = { type: "none" };
     let replies: Reply[] = [];
     let typing = 0;
-    let markup = false;
 
     let value = "";
     $: autorun(() => {
@@ -124,7 +123,7 @@
                 width: 62px;
             }
 
-            ${!isTouchscreenDevice ? `.mobile { display: none; }` : ``}
+            ${!isTouchscreenDevice() ? `.mobile { display: none; }` : ``}
         `,
     );
 
@@ -707,8 +706,7 @@
                 />
             </div>
         {/if}
-        <Checkbox bind:checked={markup}>Rich text</Checkbox>
-        {#if markup}
+        
             <TextEditor
                 id="message"
                 minHeight={60}
@@ -721,7 +719,7 @@
                 onKeyDown={(e) => {
                     if (e.ctrlKey && e.key == "Enter") {
                         e.preventDefault();
-                        return send();
+                        return mock ? mockSend() : send();
                     }
 
                     if (onKeyDown(e)) return;
@@ -736,10 +734,10 @@
                         !e.shiftKey &&
                         !e.isComposing &&
                         e.key == "Enter" &&
-                        !isTouchscreenDevice
+                        !isTouchscreenDevice()
                     ) {
                         e.preventDefault();
-                        return send();
+                        return mock ? mockSend() : send();
                     }
 
                     if (e.key == "Escape") {
@@ -764,70 +762,6 @@
                 {onFocus}
                 {onBlur}
             />
-        {:else}
-            <TextAreaAutoSize
-                maxRows={20}
-                id="message"
-                maxlength="2000"
-                minHeight={60}
-                {value}
-                onChange={(e) => {
-                    setMessage(e.currentTarget.value);
-                    startTyping();
-                    const t = e.currentTarget;
-                    onChange(t.value, t.selectionStart, t.selectionEnd);
-                }}
-                {onKeyUp}
-                onKeyDown={(e) => {
-                    if (e.ctrlKey && e.key == "Enter") {
-                        e.preventDefault();
-                        return send();
-                    }
-
-                    if (onKeyDown(e)) return;
-
-                    if (e.key == "ArrowUp" && !state.draft.has(channel._id)) {
-                        e.preventDefault();
-                        internalEmit("MessageRenderer", "edit_last");
-                        return;
-                    }
-
-                if (
-                    !e.shiftKey &&
-                    !e.isComposing &&
-                    e.key == "Enter" &&
-                    !isTouchscreenDevice()
-                ) {
-                    e.preventDefault();
-                    return mock? mockSend() : send();
-                }
-
-                    if (e.key == "Escape") {
-                        if (replies.length) {
-                            replies = replies.slice(0, -1);
-                        } else if (
-                            uploadState.type == "attached" &&
-                            uploadState.files.length
-                        ) {
-                            uploadState = {
-                                type:
-                                    uploadState.files.length > 1
-                                        ? "attached"
-                                        : "none",
-                                files: uploadState.files.slice(0, -1),
-                            };
-                        }
-                    }
-
-                    debounceStopTyping(true);
-                }}
-                {onFocus}
-                {onBlur}
-                disabled={uploadState.type == "uploading" ||
-                    uploadState.type == "sending"}
-            />
-        {/if}
-
         <div class={Action}>
             <Flyout offset={24} alignment="end">
                 <IconButton>

@@ -236,7 +236,7 @@
         }
 
         function onFocus(
-            ev: FocusEvent & { currentTarget: HTMLElement },
+            ev?: FocusEvent & { currentTarget: HTMLElement },
         ) {
             console.debug("focus", true);
             focused = true;
