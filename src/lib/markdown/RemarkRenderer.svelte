@@ -33,13 +33,7 @@
         .use(remarkTimestamps)
         .use(remarkGfm)
         .use(remarkHtmlToText);
-    const rehypeProcessor = remarkProcessor()
-        // Mdast to Hast
-        .use(remarkRehype, { handlers, })
-        // code block highlight
-        .use(rehypePrism)
-        // Hast to svelte elements
-        .use(rehypeSvelte, { createElement, components });
+    
     /**
      * Regex for matching execessive recursion of blockquotes and lists
      */
@@ -123,17 +117,7 @@
         style: null,
     };
 
-    const rendered = unified()
-        .data({micromarkExtensions})
-        .use(remarkParse)
-        .use(remarkBreaks)
-        .use(remarkMath)
-        .use(remarkMention)
-        .use(remarkChannel)
-        .use(remarkEmoji)
-        .use(remarkTimestamps)
-        .use(remarkGfm)
-        .use(remarkHtmlToText)
+    const rehypeProcessor = remarkProcessor()
         // Mdast to Hast
         .use(remarkRehype, { handlers, })
         // code block highlight
