@@ -2,7 +2,6 @@ import { RE_ULID } from "$lib";
 import { clientController } from "$lib/controllers/ClientController";
 import type { Handler } from "mdast-util-to-hast";
 import { RevoltEmojiDictionary } from "revkit";
-import { RE_MENTIONS } from "revolt.js";
 import type { Plugin } from "unified";
 import { visit } from "unist-util-visit";
 
@@ -18,13 +17,13 @@ export interface CustomComponentProps {
 /**
  * Create a new custom component matched by a given RegExp
  * @param type hast node type
- * @param regex Regex to match (must have one capture group)
+ * @param regex Regex to match (must have at least one capture group)
  * @returns Unified Plugin
  */
 export function createComponent(
     type: string,
     regex: RegExp,
-    validator?: (match: string) => boolean,
+    validator?: (...args: string[]) => boolean,
 ): Plugin {
     /**
      * Plugin which transforms a given RegExp into a custom component with given name.
@@ -47,7 +46,7 @@ export function createComponent(
                     let match = regex.exec(node.value);
 
                     while (match) {
-                        if (!validator || validator(match[1])) {
+                        if (!validator || validator(...match)) {
                             const position = match.index;
 
                             if (start !== position) {
@@ -109,17 +108,19 @@ export const passThroughComponents = (...keys: string[]) => {
     return obj;
 };
 
-export const remarkMention = createComponent("mention", RE_MENTIONS, (match) =>
-    clientController.availableClient.users.has(match),
+export const RE_MENTION = /<@([A-z0-9]{26})>/g;
+export const RE_CHANNEL = /<#([A-z0-9]{26})>/g;
+export const RE_EMOJI = /:(?:(UP|RV|DC):)?([a-zA-Z0-9\-_]+):/g;
+
+export const remarkMention = createComponent("mention", RE_MENTION, (_, match) =>
+    RE_ULID.test(match),
 );
 
-export const remarkChannel = createComponent("channel", /<#([A-z0-9]{26})>/g, (match) =>
-    clientController.availableClient.channels.has(match)
+export const remarkChannel = createComponent("channel", RE_CHANNEL, (_, match) =>
+    RE_ULID.test(match),
 );
 
-const RE_EMOJI = /:([a-zA-Z0-9\-_]+):/g;
-
-export const remarkEmoji = createComponent("emoji", RE_EMOJI, (match) => match in RevoltEmojiDictionary || RE_ULID.test(match));
+export const remarkEmoji = createComponent("emoji", RE_EMOJI, (_, arg1, arg2) => arg1 == "DC" ? /[0-9]+/.test(arg2) :  arg2 in RevoltEmojiDictionary || RE_ULID.test(arg2));
 
 export function isOnlyEmoji(text: string) {
     return !text.replaceAll(RE_EMOJI, "").trim().length;

@@ -7,20 +7,20 @@
     import { dayjs, type Dictionary } from "$lib/i18n";
 
     export let message: Message, position: "left" | "top";
-    const dict = getContext<Dictionary>('dictionary');
+    const dict = getContext<Dictionary>("dictionary");
 </script>
 
-{#if position == "left"}
+{#if position == "left" && dict}
     {#if message.edited}
         <time class="copyTime">
             <i class="copyBracket">[</i>
-            {dayjs(decodeTime(message._id)).format(
-                dict.dayjs?.timeFormat,
-            )}
+            {dayjs(decodeTime(message._id)).format(dict.dayjs?.timeFormat)}
             <i class="copyBracket">]</i>
         </time>
         <span class="edited">
-            <Tooltip content={dayjs(message.edited).format("LLLL")}>{$t('app.main.channel.edited')}</Tooltip>
+            <Tooltip content={dayjs(message.edited).format("LLLL")}
+                >{$t("app.main.channel.edited")}</Tooltip
+            >
         </span>
     {:else}
         <time>
@@ -37,7 +37,7 @@
         {#if message.edited}
             <Tooltip content={dayjs(message.edited).format("LLLL")}>
                 <span class="edited">
-                    {$t('app.main.channel.edited')}
+                    {$t("app.main.channel.edited")}
                 </span>
             </Tooltip>
         {/if}

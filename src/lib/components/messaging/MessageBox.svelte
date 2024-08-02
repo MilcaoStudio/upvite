@@ -33,7 +33,7 @@
     import { debounce, defer, isTouchscreenDevice, takeError } from "$lib";
     import Autocomplete, { useAutoComplete } from "../Autocomplete.svelte";
     import PermissionTooltip from "../atoms/PermissionTooltip.svelte";
-    import { Flyout } from "fluent-svelte";
+    import { Checkbox, Flyout } from "fluent-svelte";
     import IconButton from "../atoms/input/IconButton.svelte";
     import Picker from "../atoms/media/Picker.svelte";
     import { RevoltEmojiDictionary } from "revkit";
@@ -43,6 +43,7 @@
     import FilePreview from "./bars/FilePreview.svelte";
     import { modalController } from "../modals/ModalController";
     import ReplyBar from "./bars/ReplyBar.svelte";
+    import TextEditor from "../atoms/input/TextEditor.svelte";
 
     export let channel: Channel,
         mock = false;
@@ -66,6 +67,7 @@
             margin: 0px 6px 6px 6px;
             -webkit-backdrop-filter: blur(10px);
             backdrop-filter: blur(10px);
+            background-color: rgba(var(--secondary-header-rgb), max(0, 0.86));
             background-color: rgba(var(--secondary-header-rgb), max(0, 0.86));
             border-radius: var(--border-radius-inner);
             textarea {
@@ -121,7 +123,7 @@
                 width: 62px;
             }
 
-            ${!isTouchscreenDevice ? `.mobile { display: none; }` : ``}
+            ${!isTouchscreenDevice() ? `.mobile { display: none; }` : ``}
         `,
     );
 
@@ -662,6 +664,7 @@
         {replies}
         setReplies={(_replies) => (replies = _replies)}
     />
+
     <div class={Base}>
         {#if channel.havePermission("UploadFiles")}
             <div class={Action}>
@@ -703,66 +706,62 @@
                 />
             </div>
         {/if}
-        <TextAreaAutoSize
-            maxRows={20}
-            id="message"
-            maxlength="2000"
-            minHeight={60}
-            {value}
-            onChange={(e) => {
-                setMessage(e.currentTarget.value);
-                startTyping();
-                onChange(e);
-            }}
-            {onKeyUp}
-            onKeyDown={(e) => {
-                if (e.ctrlKey && e.key == "Enter") {
-                    e.preventDefault();
-                    return mock? mockSend() : send();
-                }
-
-                if (onKeyDown(e)) return;
-
-                if (e.key == "ArrowUp" && !state.draft.has(channel._id)) {
-                    e.preventDefault();
-                    internalEmit("MessageRenderer", "edit_last");
-                    return;
-                }
-
-                if (
-                    !e.shiftKey &&
-                    !e.isComposing &&
-                    e.key == "Enter" &&
-                    !isTouchscreenDevice()
-                ) {
-                    e.preventDefault();
-                    return mock? mockSend() : send();
-                }
-
-                if (e.key == "Escape") {
-                    if (replies.length) {
-                        replies = replies.slice(0, -1);
-                    } else if (
-                        uploadState.type == "attached" &&
-                        uploadState.files.length
-                    ) {
-                        uploadState = {
-                            type:
-                                uploadState.files.length > 1
-                                    ? "attached"
-                                    : "none",
-                            files: uploadState.files.slice(0, -1),
-                        };
+        
+            <TextEditor
+                id="message"
+                minHeight={60}
+                {value}
+                onChange={(value, selectionStart, selectionEnd) => {
+                    setMessage(value);
+                    startTyping();
+                    onChange(value, selectionStart, selectionEnd);
+                }}
+                onKeyDown={(e) => {
+                    if (e.ctrlKey && e.key == "Enter") {
+                        e.preventDefault();
+                        return mock ? mockSend() : send();
                     }
-                }
 
-                debounceStopTyping(true);
-            }}
-            {onFocus}
-            {onBlur}
-            disabled={uploadState.type == "uploading" ||
-                uploadState.type == "sending"}
-        />
+                    if (onKeyDown(e)) return;
+
+                    if (e.key == "ArrowUp" && !state.draft.has(channel._id)) {
+                        e.preventDefault();
+                        internalEmit("MessageRenderer", "edit_last");
+                        return;
+                    }
+
+                    if (
+                        !e.shiftKey &&
+                        !e.isComposing &&
+                        e.key == "Enter" &&
+                        !isTouchscreenDevice()
+                    ) {
+                        e.preventDefault();
+                        return mock ? mockSend() : send();
+                    }
+
+                    if (e.key == "Escape") {
+                        if (replies.length) {
+                            replies = replies.slice(0, -1);
+                        } else if (
+                            uploadState.type == "attached" &&
+                            uploadState.files.length
+                        ) {
+                            uploadState = {
+                                type:
+                                    uploadState.files.length > 1
+                                        ? "attached"
+                                        : "none",
+                                files: uploadState.files.slice(0, -1),
+                            };
+                        }
+                    }
+
+                    debounceStopTyping(true);
+                }}
+                {onFocus}
+                {onBlur}
+            />
         <div class={Action}>
             <Flyout offset={24} alignment="end">
                 <IconButton>
@@ -776,8 +775,8 @@
                 />
             </Flyout>
         </div>
-        <div class={Action}>
-            <BxSend size={20} on:click={mock ? mockSend : send} />
+        <div class="{Action}">
+            <BxSend class="mobile" size={20} on:click={mock ? mockSend : send} />
         </div>
     </div>
 {/if}

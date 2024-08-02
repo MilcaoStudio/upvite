@@ -65,6 +65,9 @@ export default defineConfig({
       }
     }
   },
+  optimizeDeps: {
+		exclude: ['svelte-slate']
+	},
   plugins: [
     sveltekit(),
     replace({

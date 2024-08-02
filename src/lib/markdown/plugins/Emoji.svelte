@@ -4,7 +4,7 @@
     import { css, cx } from "@emotion/css";
     import { RevoltEmojiDictionary, unicodeEmojiURL } from "revkit";
 
-    export let match: string;
+    export let match: string | null = null, arg1: string;
     const Icon = cx("emoji", match, css`
         object-fit: contain;
 
@@ -23,14 +23,19 @@
         }
     `);
     let fail = false;
-    $: url = RE_ULID.test(match)
-        ? `${clientController.anonymousClient.configuration?.features.autumn.url}/emojis/${match}`
-        : unicodeEmojiURL(RevoltEmojiDictionary[match] || match);
+    $: url = RE_ULID.test(arg1)
+        // Matches ULID
+        ? match == "RV" ? `https://autumn.revolt.chat/emojis/${arg1}` :
+        `${clientController.anonymousClient.configuration?.features.autumn.url}/emojis/${match}` 
+        :
+        // Not matches ULID
+        match == "DC" ? `https://cdn.discordapp.com/emojis/${arg1}?quality=lossless`
+        : unicodeEmojiURL(RevoltEmojiDictionary[arg1] || arg1);
     
 </script>
 
 {#if fail}
-    <span>:{match}:</span>
+    <span>{#if match}:{match}{/if}:{arg1}:</span>
 {:else}
-    <img class={Icon} alt=":{match}:" loading="lazy" draggable="false" src={url} on:error={()=>(fail=true)} />
+    <img class={Icon} alt=":{arg1}:" loading="lazy" draggable="false" src={url} on:error={()=>(fail=true)} />
 {/if}

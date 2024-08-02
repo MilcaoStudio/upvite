@@ -63,7 +63,7 @@ export function isTouchscreenDevice() {
     }
 }
 
-export const RE_ULID = /^[0123456789ABCDEFGHJKMNPQRSTVWXYZ]{26}$/;
+export const RE_ULID = /^[0-9ABCDEFGHJKMNPQRSTVWXYZ]{26}$/;
 
 /*
 

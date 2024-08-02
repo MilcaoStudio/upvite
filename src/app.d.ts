@@ -22,6 +22,11 @@ declare module 'mdast' {
 	interface RootContentMap {
 	  timestamp: {
 		type: "timestamp",
+		children: PhrasingContent[]
+	  },
+	  mention: {
+		type: "mention",
+		match: string,
 	  }
 	}
 }
@@ -29,7 +34,14 @@ declare module 'mdast' {
 declare module 'unified' {
 	interface CompileResultMap {
 	  // Register a new result (value is used, key should match it).
+	  EditorChildren: (import("svelte-slate/plugins").IBaseElement|import("svelte-slate/plugins").IText)[],
 	  SvelteElement: import("$lib/markdown/runtime/svelteRuntime").SvelteElement
 	}
-  }
+}
+
+declare module "svelte-slate/plugins" {
+	interface IText {
+		strikeThrough?: boolean
+	}
+}
 export {};

@@ -21,7 +21,19 @@
 
     
     // disables <@id> as email link
-    const micromarkExtensions = [{disable: {null: ["autolink"]}}];
+    export const micromarkExtensions = [{disable: {null: ["autolink"]}}];
+    export const remarkProcessor = unified()
+        .data({micromarkExtensions})
+        .use(remarkParse)
+        .use(remarkBreaks)
+        .use(remarkMath)
+        .use(remarkMention)
+        .use(remarkChannel)
+        .use(remarkEmoji)
+        .use(remarkTimestamps)
+        .use(remarkGfm)
+        .use(remarkHtmlToText);
+    
     /**
      * Regex for matching execessive recursion of blockquotes and lists
      */
@@ -105,17 +117,7 @@
         style: null,
     };
 
-    const rendered = unified()
-        .data({micromarkExtensions})
-        .use(remarkParse)
-        .use(remarkBreaks)
-        .use(remarkMath)
-        .use(remarkMention)
-        .use(remarkChannel)
-        .use(remarkEmoji)
-        .use(remarkTimestamps)
-        .use(remarkGfm)
-        .use(remarkHtmlToText)
+    const rehypeProcessor = remarkProcessor()
         // Mdast to Hast
         .use(remarkRehype, { handlers, })
         // code block highlight
@@ -140,7 +142,7 @@
     );
     let Content: SvelteNode | null = null;
     $: {
-        rendered
+        rehypeProcessor
             .process(sanitisedContent)
             .then((file) => (Content = file.result as SvelteNode))
             .catch(() => {
