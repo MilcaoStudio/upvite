@@ -775,8 +775,8 @@
                 />
             </Flyout>
         </div>
-        <div class={Action}>
-            <BxSend size={20} on:click={mock ? mockSend : send} />
+        <div class="{Action}">
+            <BxSend class="mobile" size={20} on:click={mock ? mockSend : send} />
         </div>
     </div>
 {/if}
