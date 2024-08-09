@@ -392,9 +392,9 @@ export default class NotificationOptions
 
         const notif = await createNotification(title!, {
             icon,
-            image,
+            //image,
             body,
-            timestamp: decodeTime(message._id),
+            //timestamp: decodeTime(message._id),
             tag: message.channel?._id,
             badge: "/assets/icons/android-chrome-512x512.png",
             silent: true,
@@ -461,7 +461,7 @@ export default class NotificationOptions
         const notif = await createNotification(event, {
             icon: user.generateAvatarURL({ max_side: 256 }),
             badge: "/assets/icons/android-chrome-512x512.png",
-            timestamp: +new Date(),
+            //timestamp: +new Date(),
         });
 
         notif?.addEventListener("click", () => {
