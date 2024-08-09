@@ -1,9 +1,5 @@
 <script lang="ts">
-    import {
-        Slate,
-        Editable,
-        withSvelte,
-    } from "svelte-slate";
+    import { Slate, Editable, withSvelte } from "svelte-slate";
     import {
         createEditor,
         type Path,
@@ -18,7 +14,11 @@
     import withMarkdown from "$lib/markdown/withMarkdown";
     import type { IElement } from "svelte-slate/plugins";
     import { onDestroy, onMount } from "svelte";
-    import { RE_MENTION } from "$lib/markdown/plugins/remarkRegex";
+    import {
+        RE_CHANNEL,
+        RE_EMOJI,
+        RE_MENTION,
+    } from "$lib/markdown/plugins/remarkRegex";
     import Prism from "$lib/markdown/prism";
     export let value = "",
         minHeight = 0,
@@ -58,12 +58,14 @@
                 ? token.content.reduce((l, t) => l + tokenLen(t), 0)
                 : tokenLen(token.content);
     }
+
     function decorate([node, path]: [Node, Path]) {
         if (!Text.isText(node)) {
             return [];
         }
+        const text = node.text;
         const ranges: (Range & { type?: string })[] = [];
-        const tokens = Prism.tokenize(node.text, Prism.languages.markdown);
+        const tokens = Prism.tokenize(text, Prism.languages.markdown);
 
         let start = 0;
         for (const token of tokens) {
@@ -77,9 +79,15 @@
             }
             start = end;
         }
-        const mentions: [string, number][] = (node.text.match(RE_MENTION) ?? [])
-            .map((m) => m.trim())
-            .map((m) => [m, node.text.indexOf(m)]);
+        function mapMatch(match: string): [string, number] {
+            const m = match.trim();
+            return [m, text.indexOf(m)];
+        }
+
+        const mentions = (text.match(RE_MENTION) ?? ([] as string[]))
+            .concat(text.match(RE_CHANNEL) ?? [])
+            .map(mapMatch);
+
         mentions.forEach(([m, i]) =>
             ranges.push({
                 anchor: { path, offset: i },
@@ -87,6 +95,16 @@
                 type: "mention",
             }),
         );
+
+        (text.match(RE_EMOJI) ?? ([] as string[]))
+            .map(mapMatch)
+            .forEach(([m, i]) =>
+                ranges.push({
+                    anchor: { path, offset: i },
+                    focus: { path, offset: i + m.length },
+                    type: "emoji",
+                }),
+            );
         return ranges;
     }
 
@@ -96,7 +114,7 @@
         ref?.addEventListener("focus", onFocus);
         onBlur && ref?.addEventListener("blur", onBlur);
     });
-    
+
     onDestroy(() => {
         ref?.removeEventListener("focus", onFocus);
         onBlur && ref?.removeEventListener("blur", onBlur);
@@ -109,7 +127,8 @@
         value={ASTValue}
         on:value={(v) => {
             const content = stringifyNodes(v.detail);
-            editor.move({unit: "line"});
+            editor.move({ unit: "line" });
+            console.debug(JSON.stringify(editor.selection));
             onChange(
                 content,
                 editor.selection?.anchor.offset,

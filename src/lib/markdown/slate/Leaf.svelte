@@ -2,6 +2,7 @@
     import type { IText } from "svelte-slate/plugins";
     import type { RichText } from "./types";
     import MentionLeaf from "./MentionLeaf.svelte";
+    import EmojiLeaf from "./EmojiLeaf.svelte";
     export let leaf: IText & RichText;
 </script>
 
@@ -9,6 +10,10 @@
     <MentionLeaf>
         <slot />
     </MentionLeaf>
+{:else if leaf.type == "emoji"}
+    <EmojiLeaf {leaf}>
+        <slot />
+    </EmojiLeaf>
 {:else}
     <span
         data-slate-leaf="true"
