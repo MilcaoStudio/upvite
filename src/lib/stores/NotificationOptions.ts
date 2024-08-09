@@ -485,6 +485,10 @@ export default class NotificationOptions
         this.hydrate(data as Data);
     }
 
+    @action reset() {
+        this.server.clear();
+        this.channel.clear();
+    }
     @computed toSyncable() {
         return {
             notifications: this.toJSON(),

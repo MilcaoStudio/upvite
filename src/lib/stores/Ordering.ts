@@ -86,4 +86,8 @@ export default class Ordering implements Persistent<Data>, Syncable {
     @action reorderServer(items: Server[]) {
         this.servers = reorder(items.map((x) => x._id));
     }
+
+    @action reset() {
+        this.servers = [];
+    }
 }

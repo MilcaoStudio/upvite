@@ -537,6 +537,7 @@ export class ClientController {
                 console.warn("No sessions deleted");
             }
             this.pickNextSession();
+            state.sync.reset();
             // Safe logout
             session.emit({action: "LOGOUT"});
         }

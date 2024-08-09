@@ -182,4 +182,10 @@ export default class Sync implements Persistent<Data> {
 
         this.apply(data);
     }
+
+    reset() {
+        this.state.settings.reset();
+        this.state.notifications.reset();
+        this.state.plugins.reset();
+    }
 }

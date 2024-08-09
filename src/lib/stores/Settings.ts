@@ -153,6 +153,10 @@ export default class Settings
         return obj;
     }
 
+    @action reset() {
+        this.data.clear();
+    }
+    
     @computed toSyncable() {
         const data: Record<"appearance" | "theme", Partial<ISettings>> = {
             appearance: this.pullKeys([
