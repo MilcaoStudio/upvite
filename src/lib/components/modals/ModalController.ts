@@ -19,6 +19,7 @@ import CreateGroup from "./CreateGroup.svelte";
 import UserPicker from "./UserPicker.svelte";
 import DeleteAllSessions from "./DeleteAllSessions.svelte";
 import SignedOut from "./SignedOut.svelte";
+import Error from "./Error.svelte";
 
 export class ModalController {
     @observable stack: Modal[] = [];
@@ -146,6 +147,7 @@ export const modalController = new ModalController({
     delete_channel: Confirmation,
     delete_message: DeleteMessage,
     delete_server: Confirmation,
+    error: Error,
     modify_account: ModifyAccount,
     link_warning: LinkWarning,
     onboarding: Onboarding,
