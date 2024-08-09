@@ -89,7 +89,7 @@
     --border-radius-channel-icon: var(--border-radius-half);
     --border-radius-server-icon: var(--border-radius-half);
 
-    --emoji-size: 32px;
+    --emoji-size: 1.25em;
 
     --header-height: 50px;
     --header-height-rgb: undefined,undefined,undefined;
