@@ -21,5 +21,5 @@
         },
     ]}
 >
-    {$_(`errors.${props.error}`) || props.error}
+    {$_(`error.${props.error}`) || props.error}
 </Dialog>
