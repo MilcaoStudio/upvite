@@ -527,19 +527,23 @@ export class ClientController {
     @action logout(user_id: string) {
         const session = this.sessions.get(user_id);
         if (session) {
+            // Safe logout
+            session.emit({action: "LOGOUT"});
+
+            if(this.sessions.delete(user_id)) {
+                state.auth.removeSession(user_id);
+                console.debug("Session %s deleted", user_id);
+            } else {
+                console.warn("No sessions deleted");
+            }
+
+            state.sync.reset();
+
             if (user_id == this.current) {
                 this.current = null;
             }
 
-            if(this.sessions.delete(user_id)) {
-                console.debug("Session" + user_id + "deleted");
-            } else {
-                console.warn("No sessions deleted");
-            }
             this.pickNextSession();
-            state.sync.reset();
-            // Safe logout
-            session.emit({action: "LOGOUT"});
         }
     }
     /**
