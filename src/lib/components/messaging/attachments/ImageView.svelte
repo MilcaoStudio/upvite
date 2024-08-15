@@ -1,6 +1,5 @@
 <script lang="ts">
     import { modalController } from "$lib/components/modals/ModalController";
-    import { useClient } from "$lib/controllers/ClientController";
     import { ImageState } from "$lib/types/messaging";
     import { cx } from "@emotion/css";
     import type { API } from "revolt.js";
@@ -18,8 +17,8 @@
     loading="lazy"
     on:click={() => modalController.push({ type: "image_viewer", attachment })}
     on:mousedown={(ev) => ev.button == 1 && window.open(src, "blank_")}
-    on:error={() => ImageState.Error}
-    on:load={() => ImageState.Loaded}
+    on:error={() => loading = ImageState.Error}
+    on:load={() => loading = ImageState.Loaded}
 />
 
 
