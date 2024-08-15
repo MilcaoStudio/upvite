@@ -13,11 +13,10 @@
     import MessageDivider from "../indicators/MessageDivider.svelte";
     import Message from "./Message.svelte";
     import { css, cx } from "@emotion/css";
-    import { autorun, runInAction, spy } from "mobx";
+    import { autorun, } from "mobx";
     import {
         createElement,
         type SvelteElement,
-        type SvelteNode,
     } from "$lib/markdown/runtime/svelteRuntime";
     import MessageEditor from "./MessageEditor.svelte";
     import { internalEmit, internalSubscribe } from "$lib/InternalEmitter";
@@ -153,6 +152,7 @@
 
     function renderMessages() {
         render = [];
+        previous = undefined;
         for (const message of renderer.messages) {
             if (previous) {
                 compare(
