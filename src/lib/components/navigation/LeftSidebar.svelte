@@ -38,7 +38,7 @@
 <SidebarBase>
     <ServerListSidebar {server_id} {client} />
     {#if openLeft || snap}
-        {#if server && channel}
+        {#if server}
             {#key channel}
                 <ServerSidebar {client} {server} {channel} />
             {/key}
