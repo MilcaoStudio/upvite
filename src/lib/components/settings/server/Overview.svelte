@@ -14,13 +14,14 @@
     import ComboBox from "$lib/components/form/ComboBox.svelte";
     import ChannelName from "$lib/components/channels/ChannelName.svelte";
     import Button from "$lib/components/atoms/Button.svelte";
-    import ImageIconBase from "$lib/components/ImageIconBase.svelte";
     import { PersonPicture } from "fluent-svelte";
 
     export let server: Server;
     let name = server.name;
     let description = server.description ?? "";
     let systemMessages = server.system_messages;
+    let editable = server.havePermission("ManageServer");
+    $: console.log(editable);
     autorun(() => (name = server.name));
     autorun(() => (systemMessages = server.system_messages));
     let changed = false;
@@ -61,24 +62,32 @@
 
 <div>
     <Row gap="20px" centred>
-        <PersonPicture alt={server.name} size={80} src={server.generateIconURL({ max_side: 256 }, true)} />
-        <FileUploader
-            style={{
-                type: "icon",
-                width: 80,
-            }}
-            behavior={{
-                type: "upload",
-                onUpload: (icon) => server.edit({ icon }).then(() => {}),
-            }}
-            remove={removeIcon}
-            fileType="icons"
-            maxFileSize={2_500_000}
+        <PersonPicture
+            alt={server.name}
+            size={80}
+            src={server.generateIconURL({ max_side: 256 }, true)}
         />
+        {#if editable}
+            <FileUploader
+                style={{
+                    type: "icon",
+                    width: 80,
+                }}
+                behavior={{
+                    type: "upload",
+                    onUpload: (icon) => server.edit({ icon }).then(() => {}),
+                }}
+                remove={removeIcon}
+                fileType="icons"
+                maxFileSize={2_500_000}
+            />
+        {/if}
+
         <Column>
             <H3>{$t("app.main.servers.name")}</H3>
             <InputBox
                 type="text"
+                disabled={!editable}
                 value={name}
                 maxLength={32}
                 palette="secondary"
@@ -91,6 +100,7 @@
     </Row>
     <H3>{$t("app.main.servers.description")}</H3>
     <TextAreaAutoSize
+        disabled={!editable}
         maxRows={10}
         minHeight={120}
         maxLength={1024}
@@ -122,18 +132,20 @@
                 src={server.generateBannerURL({ width: 1000 }, true)}
             />
         {/if}
-        <FileUploader
-            style={{ type: "banner", height: 160 }}
-            behavior={{
-                type: "upload",
-                async onUpload(banner) {
-                    server.edit({ banner });
-                },
-            }}
-            fileType="banners"
-            maxFileSize={6_000_000}
-            remove={removeBanner}
-        />
+        {#if editable}
+            <FileUploader
+                style={{ type: "banner", height: 160 }}
+                behavior={{
+                    type: "upload",
+                    async onUpload(banner) {
+                        server.edit({ banner });
+                    },
+                }}
+                fileType="banners"
+                maxFileSize={6_000_000}
+                remove={removeBanner}
+            />
+        {/if}
     </Row>
 
     <hr />
@@ -142,6 +154,7 @@
         <p style="display:flex;gap:8px;align-items:center;">
             <span style="flex-shrink:0;flex:25%">{event_name}</span>
             <ComboBox
+                disabled={!editable}
                 value={systemMessages?.[key] ?? "disabled"}
                 onChange={(ev) => {
                     if (!systemMessages) return;
@@ -167,9 +180,11 @@
         </p>
     {/each}
 
-    <p>
-        <Button onClick={save} palette="secondary" disabled={!changed}>
-            {$t("app.special.modals.actions.save")}
-        </Button>
-    </p>
+    {#if editable}
+        <p>
+            <Button onClick={save} palette="secondary" disabled={!changed}>
+                {$t("app.special.modals.actions.save")}
+            </Button>
+        </p>
+    {/if}
 </div>

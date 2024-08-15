@@ -55,7 +55,7 @@
     }
 
     $: member = target && (target instanceof Server ? target.member : target.server?.member);
-    $: disabled = member && !member.hasPermission(target!, id);
+    $: disabled = member && !(member.hasPermission(target!, id) && member.hasPermission(target!, "ManageRole"));
 </script>
 
 <PermissionEntry {disabled} {id}>

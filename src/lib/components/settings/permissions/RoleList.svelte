@@ -37,7 +37,7 @@ import type { Server } from "revolt.js";
         <Item selected={selected == "default"} onclick={()=>onSelect("default")}>
             <strong style:padding-left="24px">@everyone</strong></Item>
     {/if}
-    {#if onCreateRole}
+    {#if onCreateRole && server.havePermission("ManageRole")}
        <Button palette="plain-secondary" onClick={()=>onCreateRole(onSelect)}>{$t("app.settings.permissions.create_role")}</Button> 
     {/if}
 </div>

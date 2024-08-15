@@ -9,12 +9,14 @@
     import type { Channel } from "revolt.js";
     import { t } from "svelte-i18n";
     export let channel: Channel;
+    let editable = channel.havePermission("ManageChannel");
     $: name = channel.name;
     $: description = channel.description;
     $: nsfw = channel.nsfw;
-    $: changed = (name != channel.name) ||
-        (description != channel.description) ||
-        (nsfw != channel.nsfw);
+    $: changed =
+        name != channel.name ||
+        description != channel.description ||
+        nsfw != channel.nsfw;
     function save() {
         const changes: Record<string, string | boolean> = {};
         if (name) {
@@ -32,25 +34,30 @@
 <Row gap="32px">
     <div>
         <ChannelIcon size={80} target={channel} animate />
-        <FileUploader
-            style={{
-                type: "icon",
-                previewURL: channel.generateIconURL({ max_side: 256 }, true),
-                defaultPreview:
-                    channel.channel_type == "Group"
-                        ? "$lib/assets/group.png"
-                        : undefined,
-            }}
-            fileType="icons"
-            behavior={{
-                type: "upload",
-                onUpload(icon) {
-                    return channel.edit({ icon });
-                },
-            }}
-            maxFileSize={2_500_000}
-            remove={() => channel.edit({ remove: ["Icon"] })}
-        />
+        {#if editable}
+            <FileUploader
+                style={{
+                    type: "icon",
+                    previewURL: channel.generateIconURL(
+                        { max_side: 256 },
+                        true,
+                    ),
+                    defaultPreview:
+                        channel.channel_type == "Group"
+                            ? "$lib/assets/group.png"
+                            : undefined,
+                }}
+                fileType="icons"
+                behavior={{
+                    type: "upload",
+                    onUpload(icon) {
+                        return channel.edit({ icon });
+                    },
+                }}
+                maxFileSize={2_500_000}
+                remove={() => channel.edit({ remove: ["Icon"] })}
+            />
+        {/if}
     </div>
 
     <div>
@@ -62,6 +69,7 @@
         <InputBox
             palette="secondary"
             type="text"
+            disabled={!editable}
             value={name}
             max-length="32"
             onChange={(e) => {
@@ -79,6 +87,7 @@
     maxRows={10}
     minHeight={60}
     maxLength={1024}
+    disabled={!editable}
     value={description ?? ""}
     placeholder={"Set a description..."}
     onChange={(ev) => {
@@ -86,10 +95,14 @@
     }}
 />
 {#if channel.channel_type != "VoiceChannel"}
-    <Checkbox bind:value={nsfw}>Set this channel to NSFW</Checkbox>
+    <Checkbox disabled={!editable} bind:value={nsfw}>
+        Set this channel to NSFW
+    </Checkbox>
 {/if}
-<p>
-    <Button palette="secondary" disabled={!changed} onClick={save}
-        >{$t("app.special.modals.actions.save")}</Button
-    >
-</p>
+{#if editable}
+    <p>
+        <Button palette="secondary" disabled={!changed} onClick={save}>
+            {$t("app.special.modals.actions.save")}
+        </Button>
+    </p>
+{/if}
