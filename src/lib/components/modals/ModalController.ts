@@ -21,6 +21,7 @@ import DeleteAllSessions from "./DeleteAllSessions.svelte";
 import SignedOut from "./SignedOut.svelte";
 import Error from "./Error.svelte";
 import ImageViewer from "./ImageViewer.svelte";
+import CreateInvite from "./CreateInvite.svelte";
 
 export class ModalController {
     @observable stack: Modal[] = [];
@@ -143,6 +144,7 @@ export const modalController = new ModalController({
     close_dm: Confirmation,
     create_channel: CreateChannel,
     create_group: CreateGroup,
+    create_invite: CreateInvite,
     create_server: CreateServer,
     delete_bot: Confirmation,
     delete_channel: Confirmation,
