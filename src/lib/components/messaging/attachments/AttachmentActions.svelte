@@ -40,8 +40,7 @@
     </div>
 {:else if metadata.type == "Image"}
     <div class="actions imageAction">
-        <BxImage size={24} />
-        <span>{filename}</span>
+        <span class="filename">{filename}</span>
         <span class="fileSize">
             {`${metadata.width}x${metadata.height}`} ({filesize})
         </span>
@@ -65,7 +64,7 @@
 {:else if metadata.type == "Video"}
     <div class="actions">
         <BxVideo size={24} class="iconType" />
-        <span>{filename}</span>
+        <span class="filename">{filename}</span>
         <span class="fileSize">
             {`${metadata.width}x${metadata.height}`} ({filesize})
         </span>
@@ -84,7 +83,7 @@
 {:else}
     <div class="actions">
         <BxFile size={24} class="iconType" />
-        <span>{filename}</span>
+        <span class="filename">{filename}</span>
         <span class="fileSize">{filesize}</span>
         <a
             href={open_url}
@@ -113,8 +112,8 @@
 <style>
     .actions.imageAction {
         grid-template:
-            "name icon external download" auto
-            "size icon external download" auto
+            "name external icon download" auto
+            "size external icon download" auto
             / minmax(20px, 1fr) min-content min-content;
     }
 
@@ -140,6 +139,10 @@
         text-overflow: ellipsis;
         white-space: nowrap;
         overflow: hidden;
+    }
+
+    .filename {
+        grid-area: name;
     }
 
     .fileSize {
