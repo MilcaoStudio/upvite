@@ -726,11 +726,15 @@
     setContext("Menu", onClick);
 </script>
 
-<ContextMenu bind:open={isOpen}>
+{#if elements.length}
+    <ContextMenu bind:open={isOpen}>
+        <slot />
+        <svelte:fragment slot="flyout">
+            {#each elements as element}
+                <JsxRender node={element} />
+            {/each}
+        </svelte:fragment>
+    </ContextMenu>
+{:else}
     <slot />
-    <svelte:fragment slot="flyout">
-        {#each elements as element}
-            <JsxRender node={element} />
-        {/each}
-    </svelte:fragment>
-</ContextMenu>
+{/if}
