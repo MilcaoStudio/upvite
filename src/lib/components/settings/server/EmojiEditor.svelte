@@ -1,6 +1,6 @@
 <script lang="ts">
     import IconButton from "$lib/components/atoms/input/IconButton.svelte";
-import InputBox from "$lib/components/form/InputBox.svelte";
+    import InputBox from "$lib/components/form/InputBox.svelte";
     import UserShort from "$lib/components/user/UserShort.svelte";
     import type { Emoji, Server } from "revolt.js";
     import BxX from "svelte-boxicons/BxX.svelte";
@@ -20,18 +20,18 @@ import InputBox from "$lib/components/form/InputBox.svelte";
             return;
         }
         try {
-            if (!/^[a-z0-9_]+$/.test(value)){
+            if (!/^[a-z0-9_]+$/.test(value)) {
                 throw new Error("Invalid emoji name");
             }
             await server.client.api.put(`/custom/emoji/${emoji._id}`, {
-            name: value,
-            parent: { type: "Server", id: server._id },
-        });
+                name: value,
+                parent: { type: "Server", id: server._id },
+            });
             emoji.name = value;
         } catch (error) {
             ev.currentTarget.value = emoji.name;
+            console.error(error);
         }
-        
     }
 </script>
 
@@ -42,16 +42,28 @@ import InputBox from "$lib/components/form/InputBox.svelte";
     on:mouseenter={() => (mouseenter = true)}
     on:mouseleave={() => (mouseenter = false)}
 >
-    <img class="preview" src={emoji.imageURL} alt={emoji.name} />
+    <img class="preview icon" src={emoji.imageURL} alt={emoji.name} />
     {#if mouseenter && editable}
-        :<InputBox type="text" onChange={onNameChange} value={emoji.name} maxlength=32 size=8 />:
-        <UserShort user={emoji.creator} />
-        <IconButton onClick={()=>emoji.delete()}>
-            <BxX size={20} />
-        </IconButton>
+        <div class="label">
+            :<InputBox
+                padding={false}
+                type="text"
+                onChange={onNameChange}
+                value={emoji.name}
+                maxlength="32"
+            />
+        </div>
+        <div class="label">
+            <UserShort user={emoji.creator} />
+            <IconButton onClick={() => emoji.delete()}>
+                <BxX size={20} />
+            </IconButton>
+        </div>
     {:else}
-        <span>:{emoji.name}:</span>
-        <UserShort user={emoji.creator} />
+        <span class="label">:{emoji.name}:</span>
+        <div class="label">
+           <UserShort user={emoji.creator} /> 
+        </div>
     {/if}
 </div>
 

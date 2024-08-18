@@ -3,22 +3,24 @@
     import { t } from "svelte-i18n";
     import type { ChangeEventHandler } from "svelte/elements";
 
-    export let palette: "primary" | "secondary" = "primary", onChange: ChangeEventHandler<HTMLInputElement> = function(){}, type: HTMLInputElement["type"];
+    let className: string | null = "";
+    export {className as class};
+    export let palette: "primary" | "secondary" = "primary", onChange: ChangeEventHandler<HTMLInputElement> = function(){}, 
+        type: HTMLInputElement["type"], padding=true;
     let showPassword = false;
     $: revealText = showPassword ? $t("app.special.modals.actions.hide") : $t("app.special.modals.actions.reveal");
     $: InputBox = cx(
         "InputBox",
         css`
             width: 100%;
-            padding: 11px 16px;
             font-size: 0.9375rem;
             font-family: inherit;
             font-weight: 500;
             border: none;
-            border-radius: var(--border-radius);
             box-sizing: border-box;
             outline: none;
             transition: 0.1s ease-in-out all;
+            ${padding ? "padding: 11px 16px; border-radius: var(--border-radius);" : "padding: 4px; border-radius: 3px;"}
             ${
                 palette == "primary"
                     ? `
@@ -43,7 +45,7 @@
                         : "var(--hover)"
                 };
             }
-        }`,
+        }`, 
     );
 
     function togglePasswordReveal() {
@@ -55,7 +57,7 @@
 
 <!--TextBox is not recommended because it does not listen to change events-->
 <div class="text-box-container">
-    <input class={InputBox} {type} {...$$restProps} on:change={onChange} on:keyup={onChange}  />
+    <input class="{InputBox} {className}" {type} {...$$restProps} on:change={onChange} on:keyup={onChange}  />
     {#if type == "password" || type == "spy"}
         <!-- svelte-ignore a11y-no-static-element-interactions -->
         <!-- svelte-ignore a11y-missing-attribute -->

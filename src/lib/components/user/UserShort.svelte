@@ -5,8 +5,13 @@
     import UserIcon from "./UserIcon.svelte";
     import Username from "./Username.svelte";
 
-    export let user: User | undefined = undefined, size = 20, prefixAt = false, masquerade: API.Masquerade | null = null, showServerIdentity = false;
-    const openProfile = () => user &&
+    export let user: User | undefined = undefined,
+        size = 20,
+        prefixAt = false,
+        masquerade: API.Masquerade | null = null,
+        showServerIdentity = false;
+    const openProfile = () =>
+        user &&
         modalController.push({ type: "user_profile", user_id: user._id });
     const handleUserClick = (e: MouseEvent) => {
         if (e.shiftKey && user?._id) {
@@ -18,17 +23,19 @@
     };
 </script>
 
-<UserIcon
-    target={user}
-    size={size ?? 24}
-    masquerade={masquerade}
-    onClick={handleUserClick}
-    showServerIdentity={showServerIdentity}
-/>
-<Username
-    {user}
-    prefixAt={prefixAt}
-    masquerade={masquerade}
-    onClick={handleUserClick}
-    showServerIdentity={showServerIdentity}
-/>
+<div {...$$restProps}>
+    <UserIcon
+        target={user}
+        size={size ?? 24}
+        {masquerade}
+        onClick={handleUserClick}
+        {showServerIdentity}
+    />
+    <Username
+        {user}
+        {prefixAt}
+        {masquerade}
+        onClick={handleUserClick}
+        {showServerIdentity}
+    />
+</div>

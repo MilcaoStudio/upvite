@@ -1,0 +1,11 @@
+.EmojiTable .icon {
+    flex-basis: 60px;
+}
+
+.EmojiTable .label {
+    display: inline-flex;
+    flex-basis: 45%;
+    gap: 8px;
+}
+
+
