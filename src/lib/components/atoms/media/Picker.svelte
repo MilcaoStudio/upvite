@@ -173,6 +173,7 @@
 <Column class={Base} gap="0" bind:this={baseRef}>
     <Column class="controls">
         <InputBox
+            type="text"
             autoFocus
             value={query}
             onChange={(e) => (query = e.currentTarget.value)}
@@ -180,7 +181,7 @@
         />
     </Column>
     <div class="container">
-        <div class="scroller" on:scroll={onScroll}>
+        <div class="scroller" on:scroll={onScroll} bind:this={ref}>
             {#each generated.items as row, i}
                 <div class="row" data-index={i}>
                     {#each row as item}
@@ -190,7 +191,7 @@
                             on:focus={() => (active.emoji = item)}
                             on:mouseover={() => (active.emoji = item)}
                         >
-                            <Emoji match={item.id} />
+                            <Emoji arg1={item.id} />
                         </button>
                     {/each}
                 </div>
@@ -205,7 +206,7 @@
                     <div class="category icon">
                         {#if cat.emoji}
                             <div>
-                                <Emoji match={cat.emoji} />
+                                <Emoji arg1={cat.emoji} />
                             </div>
                         {:else}
                             <PersonPicture size={24} src={cat.iconURL} />
@@ -217,7 +218,7 @@
     </div>
     {#if active.emoji}
         <div class="EmojiPreview">
-            <Emoji match={active.emoji.id} />
+            <Emoji arg1={active.emoji.id} />
             <span>:{active.emoji.name ?? active.emoji.id}:</span>
         </div>
     {/if}
