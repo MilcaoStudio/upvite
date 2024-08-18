@@ -6,13 +6,15 @@
 // - override (tri-state) [to implement]
 // - radio (string)
 // - textarea (string) [to implement]
+// - file (string)
 
 import type { HTMLButtonAttributes, HTMLSelectAttributes } from "svelte/elements";
 import type { CheckBoxProps, ColorSelectProps, InputBoxProps, RadioProps, TextAreaProps } from "./Inputs";
-import { setContext, type SvelteComponent } from "svelte";
+import { type SvelteComponent } from "svelte";
 import type { Action, Modal, ModalProps } from "./Modal";
 import type { SvelteElement } from "$lib/markdown/runtime/svelteRuntime";
-import type { BehaviorType, FileUploaderProps, StyleType } from "./FileUpload";
+import type { FileUploaderProps } from "./FileUpload";
+import type { Writable } from "svelte/store";
 
 /**
  * Available input types
@@ -185,7 +187,7 @@ export function getInitialValues<T extends FormTemplate>(
 }
 
 export type FormContext = Pick<FormProps<any>, "schema" | "disabled" | "onChange" | "data"> & {
-    values: Record<string, any>;
+    values: Writable<Record<string, any>>;
 }
 
 export type ModalFormProps<T extends FormTemplate, M extends Modal["type"]> = Exclude<

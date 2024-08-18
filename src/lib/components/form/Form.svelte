@@ -5,6 +5,7 @@
     import FormElement from "./FormElement.svelte";
     import Button from "../atoms/Button.svelte";
     import type { HTMLButtonAttributes } from "svelte/elements";
+    import { writable } from "svelte/store";
 
     type T = FormTemplate;
     export let schema: T,
@@ -17,18 +18,13 @@
         submitBtn: Omit<HTMLButtonAttributes, "type"> | undefined = undefined;
 
     $: keys = Object.keys(schema);
-    let values: MapFormToValues<T>;
+    let values = writable(observed ?? getInitialValues(schema, defaults));
     $: {
-        values = observed ?? getInitialValues(schema, defaults);
         setContext('form', {schema, disabled, values, onChange, data })
     }
-    $: submit = function(){
-        onSubmit?.(values)
-    };
-    
 </script>
 
-<form on:submit|preventDefault={submit}>
+<form on:submit|preventDefault={() => onSubmit?.($values)}>
     <Column>
         <slot name="field">
             {#each keys as key}

@@ -8,10 +8,10 @@
     const props = {
         type: schema[id],
         disabled,
-        value: () => values[id] as Value<typeof schema[typeof id]>,
+        value: () => $values[id] as Value<typeof schema[typeof id]>,
         onChange: (value: string) => {
-            values[id as keyof typeof values] = value;
-            onChange?.(values, id);
+            values.update((v: Record<string, any>) => {v[id] = value; return v;});
+            onChange?.($values, id);
         },
         ...data[id]
     }
