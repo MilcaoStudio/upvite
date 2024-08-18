@@ -6,8 +6,10 @@
     import type { Choice } from "../../types/Form";
     import Column from "../atoms/layout/Column.svelte";
     import { RadioButton } from "fluent-svelte";
+    import FileUploader from "$lib/controllers/FileUploader.svelte";
+    import type { FileUploaderProps } from "$lib/types/FileUpload";
 
-    export let props: HTMLInputAttributes & {
+    export let props: HTMLInputAttributes & Partial<FileUploaderProps> & {
         onChange?: (value: string) => void;
         field?: string;
         options?: Choice[];
@@ -41,5 +43,7 @@
     </Column>
     {:else if type == "text" || type == "password"}
         <InputBox {type} value={v} onChange={ev=>onChange?.(ev.currentTarget.value)} {..._props} />
+    {:else if type == "file"}
+        <FileUploader {..._props} />
     {/if}
 {/key}

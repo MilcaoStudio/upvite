@@ -12,6 +12,7 @@ import type { CheckBoxProps, ColorSelectProps, InputBoxProps, RadioProps, TextAr
 import { setContext, type SvelteComponent } from "svelte";
 import type { Action, Modal, ModalProps } from "./Modal";
 import type { SvelteElement } from "$lib/markdown/runtime/svelteRuntime";
+import type { BehaviorType, FileUploaderProps, StyleType } from "./FileUpload";
 
 /**
  * Available input types
@@ -24,7 +25,8 @@ export type Type =
     | "combo"
     | "radio"
     | "textarea"
-    | "custom";
+    | "custom"
+    | "file";
 
 /**
  * Get default value
@@ -67,6 +69,7 @@ type Metadata = {
     };
     textarea: { value: string; props: TextAreaProps };
     custom: { value: never; props: { element: SvelteElement } };
+    file: { value: string, props: FileUploaderProps}
 };
 
 /**

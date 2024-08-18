@@ -30,6 +30,19 @@ export type StyleType =
         size?: number;
     };
 
+export type FileUploaderProps = {
+    behavior: BehaviorType,
+    fileType: "backgrounds"
+    | "icons"
+    | "avatars"
+    | "attachments"
+    | "banners"
+    | "emojis",
+    maxFileSize: number,
+    style: StyleType,
+    remove: ()=>Promise<void>,
+}
+
 export async function uploadFile(
     autumnURL: string,
     tag: string,
