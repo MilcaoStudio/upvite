@@ -16,11 +16,13 @@
     import BxListUl from "svelte-boxicons/BxListUl.svelte";
     import BxCrown from "svelte-boxicons/BxCrown.svelte";
     import Button from "./buttonSimple.svelte";
+    import BxHappyBeaming from "svelte-boxicons/BxHappyBeaming.svelte";
 
     const icons: Record<string, ComponentType> = {
         overview: BxInfoCircle,
         permissions: BxListUl,
-        roles: BxCrown
+        roles: BxCrown,
+        emojis: BxHappyBeaming,
     };
     export let pages: Record<string, ComponentType>,
         tab: string | undefined = undefined,
