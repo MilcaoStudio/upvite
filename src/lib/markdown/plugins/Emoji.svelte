@@ -26,7 +26,7 @@
     $: url = RE_ULID.test(arg1)
         // Matches ULID
         ? match == "RV" ? `https://autumn.revolt.chat/emojis/${arg1}` :
-        `${clientController.anonymousClient.configuration?.features.autumn.url}/emojis/${match}` 
+        `${clientController.anonymousClient.configuration?.features.autumn.url}/emojis/${arg1}` 
         :
         // Not matches ULID
         match == "DC" ? `https://cdn.discordapp.com/emojis/${arg1}?quality=lossless`
