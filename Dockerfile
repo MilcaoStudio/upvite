@@ -9,13 +9,18 @@ RUN cd /temp/dev && bun install --frozen-lockfile
 
 # copy node_modules from temp directory
 # then copy all (non-ignored) project files into the image
-FROM base AS release
+FROM base AS prerelease
 COPY --from=install /temp/dev/node_modules node_modules
 COPY . .
 
 # build app
 ENV NODE_ENV=production
 RUN bun run build
+
+# copy production code into final image
+FROM base AS release
+COPY --from=prerelease /usr/upvite/build build
+COPY --from=prerelease /usr/upvite/node_modules node_modules
 
 # run the app
 ## some node modules are read-protected, root user is needed
