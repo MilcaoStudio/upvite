@@ -13,7 +13,7 @@
             <div class="title">
                 <div class="flag">
                     
-                    <slot name="svg"><Emoji match="🇨🇱"></Emoji></slot>
+                    <slot name="svg"></slot>
 
                     
                 </div>
@@ -50,6 +50,7 @@
         font-weight: 600;
         display: -webkit-box;
         -webkit-box-orient: vertical;
+        line-clamp: 2;
         -webkit-line-clamp: 2;
         overflow: hidden;
     } 

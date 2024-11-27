@@ -72,6 +72,7 @@
     a.CategoryButton .title {
         display: -webkit-box;
         -webkit-box-orient: vertical;
+        line-clamp: 2;
         -webkit-line-clamp: 2;
         overflow: hidden;
     }
@@ -79,6 +80,7 @@
         font-weight: 400;
         display: -webkit-box;
         -webkit-box-orient: vertical;
+        line-clamp: 3;
         -webkit-line-clamp: 3;
         overflow: hidden;
         color: var(--secondary-foreground);

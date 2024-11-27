@@ -250,6 +250,7 @@
         font-size: 1.1em;
         overflow: hidden;
         display: -webkit-box;
+        line-clamp: 2;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
     }
@@ -263,6 +264,7 @@
         overflow: hidden;
         display: -webkit-box;
         white-space: pre-wrap;
+        line-clamp: 6;
         -webkit-line-clamp: 6;
         -webkit-box-orient: vertical;
     }

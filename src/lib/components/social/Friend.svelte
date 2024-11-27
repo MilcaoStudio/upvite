@@ -48,9 +48,7 @@
         padding: 2px 0px 2px 16px;
         gap: 12px;
     }
-    .Friend > :global(*) {
-        
-    }
+    
     .Actions{
         margin-left: auto;
     }
