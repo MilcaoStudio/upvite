@@ -6,8 +6,10 @@ const config = {
 	// Consult https://kit.svelte.dev/docs/integrations#preprocessors
 	// for more information about preprocessors
 	preprocess: vitePreprocess(),
-
 	kit: {
+		alias: {
+			"external/lang/Languages": "./external/lang/Languages.ts"
+		},
 		adapter: adapter()
 	}
 };

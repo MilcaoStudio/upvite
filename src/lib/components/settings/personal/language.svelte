@@ -3,7 +3,7 @@
     import InDevelopment from "$lib/components/atoms/inDevelopment.svelte";
     import RadioLanguage from "$lib/components/atoms/input/RadioLanguage.svelte";
 
-    import { Languages } from "../../../../lang/Languages";
+    import { Languages } from "external/lang/Languages";
     let group = state.locale.getLanguage();
     let languages = Object.entries(Languages).sort(([localeA, _a],[localeB, _b])=>localeB == group ? 1 : (localeA.localeCompare(localeB)));
     let naturalLangs = languages.filter(([_, entry])=>!entry.cat)

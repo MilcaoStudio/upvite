@@ -2,7 +2,7 @@
   import { dictionary, locale, waitLocale } from "svelte-i18n";
   import { browser } from "$app/environment";
   import { setContext } from "svelte";
-  import { Languages } from "../../../lang/Languages";
+  import { Languages } from "external/lang/Languages";
   import { defaultDictionary, type Dictionary, transformLanguage, dayjs, defaultLocale } from "$lib/i18n";
   import { state } from "$lib/State";
   import { findLanguage } from "$lib/stores/LocaleOptions";

@@ -5,8 +5,8 @@ import dayJS from "dayjs";
 import calendar from "dayjs/plugin/calendar";
 import format from "dayjs/plugin/localizedFormat";
 import update from "dayjs/plugin/updateLocale";
-import definition from "../../lang/en.json";
-import { Language, Languages } from "../../lang/Languages";
+import definition from "external/lang/en.json";
+import { Language, Languages } from "external/lang/Languages";
 import defaultsDeep from 'lodash.defaultsdeep';
 
 export const dayjs = dayJS;
@@ -78,6 +78,7 @@ export function transformLanguage(source: Dictionary) {
 
   return obj;
 }
+
 
 // speeds up building
 if (!building) {

@@ -105,6 +105,10 @@
     "w3c-css-validator": "^1.3.2"
   },
   "trustedDependencies": [
+    "@sveltejs/kit",
+    "es5-ext",
+    "esbuild",
+    "svelte-preprocess",
     "svelte-slate"
   ]
 }

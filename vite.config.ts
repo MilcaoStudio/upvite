@@ -41,7 +41,7 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        manualChunks(id) {
+        manualChunks(id: string | string[]) {
           if (id.includes("@sveltejs/kit")) {
             return "sveltekit"
           }
