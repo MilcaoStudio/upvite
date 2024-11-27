@@ -21,7 +21,7 @@
 
 <Column>
     {#if server.havePermission("ManageCustomisation")}
-        <EmojiUploader {server} />
+        <EmojiUploader />
     {/if}
     <h3>
         {$t("app.settings.server_pages.emojis.title")} - {emojis.length}
