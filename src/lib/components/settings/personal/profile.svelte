@@ -107,7 +107,7 @@
     value={profile?.content ?? ""}
     disabled={typeof profile == "undefined"}
     onChange={(ev) => {
-        onChange(ev);
+        onChange(ev.currentTarget.value);
         setContent(ev.currentTarget.value);
         client.users.edit({profile: { content: profile?.content }});
     }}

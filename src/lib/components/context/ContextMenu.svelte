@@ -19,13 +19,10 @@
     import Tooltip from "../atoms/Tooltip.svelte";
     import { setContext } from "svelte";
     import { goto } from "$app/navigation";
-    import { page } from "$app/stores";
-    import { useClient as useMockClient } from "../mock/MockClient";
     import { useClient } from "$lib/controllers/ClientController";
 
-    $: demo = $page.data.demo || false;
     let client = useClient();
-    $: client = demo ? useMockClient() : useClient();
+    $: client = useClient();
     let userId = client.user?._id;
     export let data: ContextMenuData;
     let lastDivider = false;

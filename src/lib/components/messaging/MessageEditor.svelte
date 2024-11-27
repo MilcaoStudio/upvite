@@ -56,7 +56,7 @@
         maxLength={2000}
         padding="var(--message-box-padding)"
         onChange={(ev) => {
-            onChange(ev);
+            onChange(ev.currentTarget.value);
             setContent(ev.currentTarget.value);
         }}
         onKeyDown={(e) => {

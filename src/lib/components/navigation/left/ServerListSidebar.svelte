@@ -4,7 +4,9 @@
     import { Client } from "revolt.js";
 
     import ServerList from "../servers/ServerList.svelte";
-    export let client: Client, server_id: string;
+    import { page } from "$app/stores";
+    export let client: Client;
+    let server_id = $page.params.server_id;
     function createServer() {
         modalController.push({ type: "create_server" });
     }

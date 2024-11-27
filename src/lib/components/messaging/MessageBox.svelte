@@ -6,7 +6,6 @@
         clientController,
         useClient,
     } from "$lib/controllers/ClientController";
-    import { useClient as useMockClient } from "../mock/MockClient";
     import BxHappyBeaming from "svelte-boxicons/BxHappyBeaming.svelte";
     import BxSend from "svelte-boxicons/BxSend.svelte";
     import BxShieldX from "svelte-boxicons/BxShieldX.svelte";
@@ -29,7 +28,6 @@
         SMOOTH_SCROLL_ON_RECEIVE,
         getRenderer,
     } from "$lib/rendered/Singleton";
-    import { getRenderer as getMockRenderer } from "../mock/MockRenderer";
     import { debounce, defer, isTouchscreenDevice, takeError } from "$lib";
     import Autocomplete, { useAutoComplete } from "../Autocomplete.svelte";
     import PermissionTooltip from "../atoms/PermissionTooltip.svelte";
@@ -47,7 +45,7 @@
 
     export let channel: Channel,
         mock = false;
-    const client = mock ? useMockClient() : useClient();
+    const client = useClient();
     let uploadState: UploadState = { type: "none" };
     let replies: Reply[] = [];
     let typing = 0;
@@ -132,9 +130,7 @@
     // Tests for code block delimiters (``` at start of line)
     const RE_CODE_DELIMITER = new RegExp("^```", "gm");
 
-    const renderer = mock
-        ? getMockRenderer(channel, state)
-        : getRenderer(channel, state);
+    const renderer = getRenderer(channel, state);
 
     function startTyping() {
         if (mock) return;

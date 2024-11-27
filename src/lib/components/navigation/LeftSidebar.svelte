@@ -8,16 +8,15 @@
     import ServerSidebar from "./left/ServerSidebar.svelte";
     import { page } from "$app/stores";
     import { useClient } from "$lib/controllers/ClientController";
-    import { servers, useClient as useMockClient } from "../mock/MockClient";
 
     export let snap = false;
     $: demo = $page.data.demo || false;
     $: channel_id = $page.params.channel;
     $: server_id = $page.params.server;
     console.log($page.data);
-    $: client = demo ? useMockClient() : useClient();
-    $: channel = demo ? servers[0].channels[0] : channel_id ? client.channels.get(channel_id) : undefined;
-    $: server = demo ? servers[0] : server_id ? client.servers.get(server_id) : undefined;
+    $: client = useClient();
+    $: channel = channel_id ? client.channels.get(channel_id) : undefined;
+    $: server = server_id ? client.servers.get(server_id) : undefined;
     $: document.title = server
         ? `#${channel?.name ?? ""} - ${server.name} | Uprising`
         : channel
@@ -35,8 +34,9 @@
     });
 </script>
 
+
 <SidebarBase>
-    <ServerListSidebar {server_id} {client} />
+    <ServerListSidebar {client} />
     {#if openLeft || snap}
         {#if server}
             {#key channel}
