@@ -31,6 +31,7 @@ function createMD5(filePath) {
         const lines = content.split("\n");
         for (const line of lines) {
             const [remote_checksum, file] = line.split(/\s+/);
+            if(!file) continue;
             const local_path = `${OUT_DIRECTORY}/${file}`;
             const target_path = `${target}/${file}`;
             if (existsSync(local_path)) {
