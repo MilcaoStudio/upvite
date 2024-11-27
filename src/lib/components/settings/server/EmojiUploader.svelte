@@ -1,16 +1,10 @@
 <script lang="ts">
-    import Button from "$lib/components/atoms/Button.svelte";
-    import Column from "$lib/components/atoms/layout/Column.svelte";
-    import Row from "$lib/components/atoms/layout/Row.svelte";
-    import Form from "$lib/components/form/Form.svelte";
-    import FormElement from "$lib/components/form/FormElement.svelte";
-    import type { Server } from "revolt.js";
     import { t } from "svelte-i18n";
-    export let server: Server;
-    let id = "";
 </script>
 
 <h3>{$t("app.settings.server_pages.emojis.upload")}</h3>
+<!-- FIXME: Scheme types are unstable. Should be fixed in svelte 5 migration. -->
+<!--
 <Form
     schema={{ name: "text", file: "file" }}
     data={{
@@ -55,3 +49,4 @@
         </Column>
     </Row>
 </Form>
+-->

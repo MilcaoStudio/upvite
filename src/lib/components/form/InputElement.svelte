@@ -43,7 +43,8 @@
     </Column>
     {:else if type == "text" || type == "password"}
         <InputBox {type} value={v} onChange={ev=>onChange?.(ev.currentTarget.value)} {..._props} />
-    {:else if type == "file"}
-        <FileUploader {..._props} />
+    <!-- FIXME: File scheme may have undefined fields
+    {:else if type == "file"} <FileUploader {..._props} />
+    -->
     {/if}
 {/key}
