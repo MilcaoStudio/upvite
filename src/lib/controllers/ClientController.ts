@@ -555,7 +555,7 @@ export class ClientController {
         }
     }
 
-    @action switchAccount(user_id: string) {
+    @action switchAccount(user_id: string | null) {
         this.current = user_id;
         console.log('account switched to', user_id);
     }

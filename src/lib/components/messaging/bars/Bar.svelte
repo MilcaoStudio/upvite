@@ -13,7 +13,7 @@
             ` : `
             top: -28px;
             animation: bottomBounce 340ms cubic-bezier(0.2, 0.9, 0.5, 1.16) forwards;
-            ${isTouchscreenDevice ? ` top: -90px;` : ``}`}
+            ${isTouchscreenDevice() ? ` top: -90px;` : ``}`}
         
         @keyframes bottomBounce {
             0% {
@@ -88,7 +88,7 @@
             &:active {
                 transform: translateY(1px);
             }
-            ${isTouchscreenDevice ? `height: 34px; padding: 0 12px;` : ``}
+            ${isTouchscreenDevice() ? `height: 34px; padding: 0 12px;` : ``}
         }
         @media only screen and (max-width: 800px) {
             .right > span {

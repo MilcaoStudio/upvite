@@ -41,7 +41,7 @@
         <span class="name">
             <ChannelName {channel} />
         </span>
-        {#if isTouchscreenDevice && channel.channel_type == "DirectMessage"}
+        {#if isTouchscreenDevice() && channel.channel_type == "DirectMessage"}
             <div class="divider" />
             <span class="desc">
                 <div class="status" style:background-color={useStatusColor(recipient)}>
@@ -49,7 +49,7 @@
                 </div>
             </span>
         {/if}
-        {#if !isTouchscreenDevice && (channel.channel_type == "Group" || channel.channel_type == "TextChannel") && channel.description}
+        {#if !isTouchscreenDevice() && (channel.channel_type == "Group" || channel.channel_type == "TextChannel") && channel.description}
             <div class="divider" />
             <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
             <span class="desc" role="complementary" on:click={()=>modalController.push({type: "channel_info", channel})} on:keydown={()=>modalController.push({type: "channel_info", channel})}>

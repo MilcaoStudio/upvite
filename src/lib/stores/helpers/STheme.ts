@@ -1,4 +1,3 @@
-// @ts-expect-error No typings.
 import rgba from "color-rgba";
 import { makeAutoObservable, computed, action } from "mobx";
 
@@ -119,8 +118,8 @@ export default class STheme {
             "min-opacity": this.settings.get("appearance:transparency", true)
                 ? 0
                 : 1,
-            "header-height": isTouchscreenDevice ? "56px" : "48px",
-            "effective-bottom-offset": isTouchscreenDevice
+            "header-height": isTouchscreenDevice() ? "56px" : "48px",
+            "effective-bottom-offset": isTouchscreenDevice()
                 ? "var(--bottom-navigation-height)"
                 : "0px",
         };
@@ -219,7 +218,7 @@ function getContrastingColour(hex: string, fallback?: string): string {
     if (typeof hex !== "string") return "black";
 
     const colour = rgba(hex);
-    if (!colour) return fallback ? getContrastingColour(fallback) : "black";
+    if (!colour || !colour.length) return fallback ? getContrastingColour(fallback) : "black";
 
     // https://awik.io/determine-color-bright-dark-using-javascript/
     // http://alienryderflex.com/hsp.html

@@ -13,6 +13,7 @@
     let lightness_tones = ["20%", "40%", "50%", "60%", "80%", "90%"];
     function onGradientChange(value: string) {
         gradient = value;
+        onChange(value);
     }
     function onSolidColorChange(value: string) {
         colour = value;

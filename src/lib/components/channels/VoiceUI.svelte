@@ -17,7 +17,7 @@
     let client = useClient();
     $: user = client.user;
     let localStream: LocalStream | null;
-    let localVideo: HTMLVideoElement | null;
+    let localVideo: HTMLVideoElement | undefined;
     $: participants = voiceState.participants;
 
     let video = false;

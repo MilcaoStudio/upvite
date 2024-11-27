@@ -162,7 +162,7 @@ export class LocalStream extends MediaStream {
       const cap = RTCRtpSender.getCapabilities(kind);
       console.debug(cap?.codecs);
       if (!cap) return;
-      let selCodec: RTCRtpCodecCapability | undefined;
+      let selCodec: RTCRtpCodec | undefined;
       if (this.constraints.preferredCodecProfile && kind == 'video') {
         const allCodecProfiles = cap.codecs.filter(
           (c) => c.mimeType.toLowerCase() == `video/${this.constraints.codec.toLowerCase()}`,
