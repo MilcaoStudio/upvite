@@ -1,4 +1,6 @@
 <script lang="ts">
+    import { run } from 'svelte/legacy';
+
     import type {
         EmojiCategory,
         EmojiInfo,
@@ -60,16 +62,20 @@
         `,
     );
 
-    export let categories: EmojiCategory[],
-        emojis: Record<string | "default", EmojiInfo[]>,
-        onSelect: (emoji: string) => void = function () {};
+    interface Props {
+        categories: EmojiCategory[];
+        emojis: Record<string | "default", EmojiInfo[]>;
+        onSelect?: (emoji: string) => void;
+    }
+
+    let { categories, emojis, onSelect = function () {} }: Props = $props();
     // Take a ref of container
-    let ref: HTMLDivElement | null = null;
-    let baseRef = null;
+    let ref: HTMLDivElement | null = $state(null);
+    let baseRef = $state(null);
     // Keep track of user queries
-    let query = "";
+    let query = $state("");
     // Keep track of "active" emoji (on hover)
-    let active: { emoji: EmojiInfo | null } = observable({ emoji: null });
+    let active: { emoji: EmojiInfo | null } = $state(observable({ emoji: null }));
     function sliceArray<T>(array: T[], size: number): T[][] {
         const result = [];
         for (let i = 0; i < array.length; i += size) {
@@ -157,17 +163,17 @@
         };
     }
 
-    let generated: EmojiTable = {
+    let generated: EmojiTable = $state({
         items: [],
         categoryCounts: [],
         activeCategories: [],
-    };
-    $: {
+    });
+    run(() => {
         query;
         emojis;
         categories;
         generated = fetchEmojis();
-    }
+    });
 </script>
 
 <Column class={Base} gap="0" bind:this={baseRef}>
@@ -181,15 +187,15 @@
         />
     </Column>
     <div class="container">
-        <div class="scroller" on:scroll={onScroll} bind:this={ref}>
+        <div class="scroller" onscroll={onScroll} bind:this={ref}>
             {#each generated.items as row, i}
                 <div class="row" data-index={i}>
                     {#each row as item}
                         <button
                             class={EmojiContainer}
-                            on:click={() => onSelect(item.id)}
-                            on:focus={() => (active.emoji = item)}
-                            on:mouseover={() => (active.emoji = item)}
+                            onclick={() => onSelect(item.id)}
+                            onfocus={() => (active.emoji = item)}
+                            onmouseover={() => (active.emoji = item)}
                         >
                             <Emoji arg1={item.id} />
                         </button>
@@ -201,7 +207,7 @@
             {#each generated.activeCategories as cat}
                 <button
                     class={EmojiContainer}
-                    on:click={() => ref?.scrollIntoView({ behavior: "smooth" })}
+                    onclick={() => ref?.scrollIntoView({ behavior: "smooth" })}
                 >
                     <div class="category icon">
                         {#if cat.emoji}

@@ -5,7 +5,11 @@
     import { t } from "svelte-i18n";
     import DialogForm from "./DialogForm.svelte";
 
-    export let props: ModalProps<"modify_account">;
+    interface Props {
+        props: ModalProps<"modify_account">;
+    }
+
+    let { props }: Props = $props();
 
     const schema = Object.freeze({
         current_password: "password",
@@ -81,11 +85,13 @@
     }}
     title={$t(`app.special.modals.account.change.${props.field}`)}
 >
-    <div slot="description">
-        {#if props.field == "username"}
-            Changing your username may change your number tag. You can freely
-            change the case of your username. Your number tag may change at most
-            once a day.
-        {/if}
-    </div>
+    {#snippet description()}
+        <div >
+            {#if props.field == "username"}
+                Changing your username may change your number tag. You can freely
+                change the case of your username. Your number tag may change at most
+                once a day.
+            {/if}
+        </div>
+    {/snippet}
 </DialogForm>

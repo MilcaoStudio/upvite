@@ -1,4 +1,6 @@
 <script>
+    import { run } from 'svelte/legacy';
+
     import { state } from "$lib/State";
     import UprisingApp from "$lib/components/UprisingApp.svelte";
     import SidebarBase from "$lib/components/navigation/SidebarBase.svelte";
@@ -9,15 +11,17 @@
     import { SIDEBAR_CHANNELS, Viewport } from "$lib/stores/Layout";
     import { autorun } from "mobx";
 
-    let open = state.layout.getSectionState(
+    let open = $state(state.layout.getSectionState(
         SIDEBAR_CHANNELS,
         state.layout.getViewport() != Viewport.SMALL,
-    );
-    $: autorun(() => {
-        open = state.layout.getSectionState(
-            SIDEBAR_CHANNELS,
-            state.layout.getViewport() != Viewport.SMALL,
-        );
+    ));
+    run(() => {
+        autorun(() => {
+            open = state.layout.getSectionState(
+                SIDEBAR_CHANNELS,
+                state.layout.getViewport() != Viewport.SMALL,
+            );
+        });
     });
 </script>
 

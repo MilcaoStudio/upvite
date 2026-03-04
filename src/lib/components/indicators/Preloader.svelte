@@ -1,6 +1,10 @@
 <script lang="ts">
     import { ProgressRing } from "fluent-svelte";
-    export let type: 'ring' | 'spinner';
+    interface Props {
+        type: 'ring' | 'spinner';
+    }
+
+    let { type }: Props = $props();
 </script>
 
 <style>
@@ -59,9 +63,9 @@
         <ProgressRing class="ring" size={48} />
     {:else}
         <div class="spinner">
-            <div />
-            <div />
-            <div />
+            <div></div>
+            <div></div>
+            <div></div>
         </div>
     {/if}
 </div>

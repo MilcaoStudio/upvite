@@ -9,15 +9,20 @@
   import PermissionList from "../permissions/PermissionList.svelte";
   import isEqual from "lodash.isequal";
 
-  export let selected: string, server: Server;
-  $: currentRole = getRoles(server).find((x) => x.id == selected)!;
-  $: clientPermission = server.permission;
-  let role: Partial<RoleOrDefault> = {};
-  $: mutableRole = { ...currentRole, ...role };
+  interface Props {
+    selected: string;
+    server: Server;
+  }
 
-  $: disabled =
-    !server.member?.hasPermission(server, "ManageRole") ||
-    (server.member?.ranking ?? Infinity) > (currentRole.rank ?? 0);
+  let { selected, server }: Props = $props();
+  let currentRole = $derived(getRoles(server).find((x) => x.id == selected)!);
+  let clientPermission = $derived(server.permission);
+  let role: Partial<RoleOrDefault> = $state({});
+  let mutableRole = $derived({ ...currentRole, ...role });
+
+  let disabled =
+    $derived(!server.member?.hasPermission(server, "ManageRole") ||
+    (server.member?.ranking ?? Infinity) > (currentRole.rank ?? 0));
   function onPermissionsChange(permissions: bigint | {a: bigint, d: bigint}) {
     role = { ...role, permissions } as RoleOrDefault;
   }

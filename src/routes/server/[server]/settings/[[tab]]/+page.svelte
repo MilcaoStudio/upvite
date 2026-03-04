@@ -5,10 +5,11 @@
     import Roles from "$lib/components/settings/server/Roles.svelte";
     import { useClient } from "$lib/controllers/ClientController";
 
-    export let data;
+    /** @type {{data: any}} */
+    let { data } = $props();
     let client = useClient();
-    $: tab = data.tab;
-    $: server = client.servers.get(data.server);
+    let tab = $derived(data.tab);
+    let server = $derived(client.servers.get(data.server));
 
     let pages = {
         overview: Overview,

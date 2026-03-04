@@ -1,4 +1,6 @@
 <script lang="ts">
+    import { run } from 'svelte/legacy';
+
     import InputBox from "./InputBox.svelte";
     import type { HTMLInputAttributes } from "svelte/elements";
     import Category from "../atoms/Category.svelte";
@@ -9,14 +11,23 @@
     import FileUploader from "$lib/controllers/FileUploader.svelte";
     import type { FileUploaderProps } from "$lib/types/FileUpload";
 
-    export let props: HTMLInputAttributes & Partial<FileUploaderProps> & {
+    interface Props {
+        props: HTMLInputAttributes & Partial<FileUploaderProps> & {
         onChange?: (value: string) => void;
         field?: string;
         options?: Choice[];
     };
+    }
+
+    let { props }: Props = $props();
     const { value, type, field, onChange, options, ..._props } = props;
-    $: v = typeof value == "function" ? value() : value;
-    $: props.onChange?.(v);
+    let v;
+    run(() => {
+        v = typeof value == "function" ? value() : value;
+    });
+    run(() => {
+        props.onChange?.(v);
+    });
 </script>
 
 {#key props}

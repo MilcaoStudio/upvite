@@ -7,7 +7,11 @@
     import type { LayoutData } from "./$types";
     const client = useClient();
 
-    export let data: LayoutData;
+    interface Props {
+        data: LayoutData;
+    }
+
+    let { data }: Props = $props();
     const { server: server_id } = data;
 
     if (server_id) {

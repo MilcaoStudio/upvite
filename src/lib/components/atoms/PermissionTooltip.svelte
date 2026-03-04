@@ -4,7 +4,13 @@
     import { t } from "svelte-i18n";
     import type { TippyProps } from "svelte-tippy";
 
-    export let permission: string, placement: TippyProps["placement"] | undefined = undefined;
+    interface Props {
+        permission: string;
+        placement?: TippyProps["placement"] | undefined;
+        children?: import('svelte').Snippet;
+    }
+
+    let { permission, placement = undefined, children }: Props = $props();
     const Base = cx('PermissionTooltip', css`
         display: flex;
         align-items: center;
@@ -24,7 +30,7 @@
 
 <Tooltip content="" {placement}>
     <div class={Base}>
-        <slot />
+        {@render children?.()}
         <span>{$t('app.permissions.required')}</span>
         <code>{permission}</code>
     </div>

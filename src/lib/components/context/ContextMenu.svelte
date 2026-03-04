@@ -1,4 +1,6 @@
 <script lang="ts">
+    import { run } from 'svelte/legacy';
+
     import {
         type SvelteElement,
         createElement,
@@ -23,14 +25,21 @@
     import { useClient as useMockClient } from "../mock/MockClient";
     import { useClient } from "$lib/controllers/ClientController";
 
-    $: demo = $page.data.demo || false;
-    let client = useClient();
-    $: client = demo ? useMockClient() : useClient();
+    let demo = $derived($page.data.demo || false);
+    let client = $state(useClient());
+    run(() => {
+        client = demo ? useMockClient() : useClient();
+    });
     let userId = client.user?.id;
-    export let data: ContextMenuData;
+    interface Props {
+        data: ContextMenuData;
+        children?: import('svelte').Snippet;
+    }
+
+    let { data, children }: Props = $props();
     let lastDivider = false;
     let elements: SvelteElement[] = [];
-    let isOpen = false;
+    let isOpen = $state(false);
 
     async function onClick(data?: Action) {
         console.log("Context menu action", data);
@@ -721,13 +730,15 @@
 
 {#if elements.length}
     <ContextMenu bind:open={isOpen}>
-        <slot />
-        <svelte:fragment slot="flyout">
-            {#each elements as element}
-                <JsxRender node={element} />
-            {/each}
-        </svelte:fragment>
+        {@render children?.()}
+        {#snippet flyout()}
+            
+                {#each elements as element}
+                    <JsxRender node={element} />
+                {/each}
+            
+            {/snippet}
     </ContextMenu>
 {:else}
-    <slot />
+    {@render children?.()}
 {/if}

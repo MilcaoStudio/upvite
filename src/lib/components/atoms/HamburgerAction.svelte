@@ -12,8 +12,8 @@
 </script>
 
 {#if isVertical}
-    <!-- svelte-ignore a11y-no-static-element-interactions -->
-    <div class="menu" on:click={openSidebar} on:keydown={openSidebar}>
+    <!-- svelte-ignore a11y_no_static_element_interactions -->
+    <div class="menu" onclick={openSidebar} onkeydown={openSidebar}>
         <Menu size={27} />
     </div>
 {/if}

@@ -1,17 +1,23 @@
 <script lang="ts">
+    import { run } from 'svelte/legacy';
+
     import Button from "$lib/components/atoms/Button.svelte";
     import Preloader from "$lib/components/indicators/Preloader.svelte";
     import axios from "axios";
     import type { File } from "stoat.js";
     import { t } from "svelte-i18n";
 
-    const fileCache: { [key: string]: string } = {};
-    export let attachment: File;
-    $: url = attachment.originalUrl;
-    let gated = (attachment.size || 0) > 100_000;
-    let content = "";
-    let loading = false;
-    $: {
+    const fileCache: { [key: string]: string } = $state({});
+    interface Props {
+        attachment: File;
+    }
+
+    let { attachment }: Props = $props();
+    let url = $derived(attachment.originalUrl);
+    let gated = $state((attachment.size || 0) > 100_000);
+    let content = $state("");
+    let loading = $state(false);
+    run(() => {
         if (!content || !loading || !gated) {
             loading = true;
             const cached = fileCache[attachment.id];
@@ -36,7 +42,7 @@
                     });
             }
         }
-    }
+    });
 </script>
 
 <div class="textContent" data-loading={!content.length}>

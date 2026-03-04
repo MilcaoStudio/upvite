@@ -2,24 +2,39 @@
     import { cx } from "@emotion/css";
     import "./Item.css";
 
-    let className = "";
-    export let active = false,
-        alert: "unread" | "mention" | null = null,
+    interface Props {
+        class?: string;
+        active?: boolean;
+        alert?: "unread" | "mention" | null;
+        alertCount?: number;
+        onClick?: any;
+        compact?: boolean;
+        children?: import('svelte').Snippet;
+        [key: string]: any
+    }
+
+    let {
+        class: className = "",
+        active = false,
+        alert = null,
         alertCount = 0,
         onClick = () => {},
-        compact = false;
-    export { className as class };
+        compact = false,
+        children,
+        ...rest
+    }: Props = $props();
+    
 </script>
 
 <button
-    {...$$restProps}
+    {...rest}
     class={cx("item", className, { compact }, { normal: !compact })}
-    on:click={onClick}
+    onclick={onClick}
     data-active={active}
     data-alert={typeof alert == "string"}
 >
     <div class="content">
-        <slot />
+        {@render children?.()}
     </div>
     {#if alert}
         <div class="alert" data-style={alert}>

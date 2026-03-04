@@ -1,16 +1,31 @@
 <script lang="ts">
     import type { EventHandler } from "svelte/elements";
 
-    export let active: boolean, onClick: EventHandler<MouseEvent|KeyboardEvent>=function(){}, href: string | undefined = undefined;
-    let className = "";
-    export {className as class}
+    interface Props {
+        active: boolean;
+        onClick?: EventHandler<MouseEvent|KeyboardEvent>;
+        href?: string | undefined;
+        class?: string;
+        children?: import('svelte').Snippet;
+        [key: string]: any
+    }
+
+    let {
+        active,
+        onClick = function(){},
+        href = undefined,
+        class: className = "",
+        children,
+        ...rest
+    }: Props = $props();
+    
 </script>
 
 {#if active}
-    <!-- svelte-ignore a11y-missing-attribute -->
-    <a role="none" class={className} on:click={onClick} on:keydown={onClick} >
-        <slot />
+    <!-- svelte-ignore a11y_missing_attribute -->
+    <a role="none" class={className} onclick={onClick} onkeydown={onClick} >
+        {@render children?.()}
     </a>
 {:else}
-    <a class={className} {href} {...$$restProps}><slot /></a>
+    <a class={className} {href} {...rest}>{@render children?.()}</a>
 {/if}

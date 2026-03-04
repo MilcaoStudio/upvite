@@ -1,4 +1,6 @@
 <script lang="ts">
+    import { run } from 'svelte/legacy';
+
     import { goto } from "$app/navigation";
     import { state } from "$lib/State";
     import Row from "$lib/components/atoms/layout/Row.svelte";
@@ -24,17 +26,32 @@
         roles: BxCrown,
         emojis: BxHappyBeaming,
     };
-    export let pages: Record<string, ComponentType>,
-        tab: string | undefined = undefined,
-        title: string | null = null,
-        locale = "pages";
-    let isVertical = state.layout.getViewport() == Viewport.SMALL;
-    $: autorun(() => {
-        isVertical = state.layout.getViewport() == Viewport.SMALL;
-    });
-    $: if (!tab && !isVertical) {
-        tab = "overview";
+    interface Props {
+        pages: Record<string, ComponentType>;
+        tab?: string | undefined;
+        title?: string | null;
+        locale?: string;
+        [key: string]: any
     }
+
+    let {
+        pages,
+        tab = $bindable(undefined),
+        title = null,
+        locale = "pages",
+        ...rest
+    }: Props = $props();
+    let isVertical = $state(state.layout.getViewport() == Viewport.SMALL);
+    run(() => {
+        autorun(() => {
+            isVertical = state.layout.getViewport() == Viewport.SMALL;
+        });
+    });
+    run(() => {
+        if (!tab && !isVertical) {
+            tab = "overview";
+        }
+    });
 
     function exitSettings() {
         setTimeout(() => goto(state.layout.getLastPath()), 200);
@@ -48,7 +65,7 @@
     }
 </script>
 
-<svelte:body on:keydown={keyDown} />
+<svelte:body onkeydown={keyDown} />
 
 {#if tab}
     <Row>
@@ -57,11 +74,13 @@
                 <Category>{title}</Category>
                 {#each Object.keys(pages) as page (page)}
                     <Button onClick={() => (tab = page)} active={tab == page}>
-                        <svelte:component
-                            this={icons[page]}
-                            size={20}
-                            slot="svg"
-                        />
+                        {#snippet svg()}
+                                                {@const SvelteComponent = icons[page]}
+                        <SvelteComponent
+                                size={20}
+                                
+                            />
+                                            {/snippet}
                         {$t(`app.settings.${locale}.${page}.title`)}
                     </Button>
                 {/each}
@@ -73,7 +92,8 @@
                     default: tab[0].toUpperCase().concat(tab.slice(1)),
                 })}
             </h1>
-            <svelte:component this={pages[tab]} {...$$restProps} />
+            {@const SvelteComponent_1 = pages[tab]}
+            <SvelteComponent_1 {...rest} />
         </ScrollerContent>
         <CloseButton />
     </Row>
@@ -82,7 +102,10 @@
         <Category>{title}</Category>
         {#each Object.keys(pages) as page (page)}
             <Button href="settings/{page}" large active>
-                <svelte:component this={icons[page]} size={20} slot="svg" />
+                {#snippet svg()}
+                                {@const SvelteComponent_2 = icons[page]}
+                <SvelteComponent_2 size={20}  />
+                            {/snippet}
                 {$t(`app.settings.${locale}.${page}.title`)}
             </Button>
         {/each}

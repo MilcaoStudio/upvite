@@ -7,15 +7,19 @@
     import { PersonPicture } from "fluent-svelte";
     import { useClient } from "$lib/controllers/ClientController";
 
-    export let home: () => string;
+    interface Props {
+        home: () => string;
+    }
+
+    let { home }: Props = $props();
         //client: Client,
         //active = false,
     const client = useClient();
-    $: channels = [...client.channels.values()].filter(
+    let channels = $derived([...client.channels.values()].filter(
         (x) =>
             ((x.type == "DirectMessage" && x.active) ||
                 x.type == "Group") && x.unread,
-    );
+    ));
 </script>
 
 <div class={ItemContainer} style="padding-top: 6px;">

@@ -1,4 +1,6 @@
 <script lang="ts">
+    import { run } from 'svelte/legacy';
+
     import { useClient } from "$lib/controllers/ClientController";
     import type { File, Channel } from "stoat.js";
     import IconBase from "../IconBase.svelte";
@@ -10,26 +12,44 @@
     import BxPhoneCall from "svelte-boxicons/BxPhoneCall.svelte";
     import ImageIconBase from "../ImageIconBase.svelte";
 
-    export let server = false,
-        size: number,
-        target: Channel | null = null,
-        attachment: File | null = null,
-        animate = false,
-        showBadge = false;
-    let badge = Math.max(16, Math.floor(size / 4));
-    $: max_side = state.network.media.shrinkMedia ? 64 : 256;
-    const client = useClient();
-    $: iconURL = animate ? (target?.animatedIconURL || attachment?.createFileURL(true)) : (target?.iconURL || attachment?.createFileURL());
+    interface Props {
+        server?: boolean;
+        size: number;
+        target?: Channel | null;
+        attachment?: File | null;
+        animate?: boolean;
+        showBadge?: boolean;
+        [key: string]: any
+    }
 
-    $: autorun(
-        () =>
-        (iconURL = animate ? (target?.animatedIconURL || attachment?.createFileURL(true)) : (target?.iconURL || attachment?.createFileURL()))
-    );
-    $: isServerChannel =
-        server ||
-        (target && target.type == "TextChannel");
+    let {
+        server = false,
+        size,
+        target = null,
+        attachment = null,
+        animate = false,
+        showBadge = false,
+        ...rest
+    }: Props = $props();
+    let badge = Math.max(16, Math.floor(size / 4));
+    let max_side = $derived(state.network.media.shrinkMedia ? 64 : 256);
+    const client = useClient();
+    let iconURL;
+    run(() => {
+        iconURL = animate ? (target?.animatedIconURL || attachment?.createFileURL(true)) : (target?.iconURL || attachment?.createFileURL());
+    });
+
+    run(() => {
+        autorun(
+            () =>
+            (iconURL = animate ? (target?.animatedIconURL || attachment?.createFileURL(true)) : (target?.iconURL || attachment?.createFileURL()))
+        );
+    });
+    let isServerChannel =
+        $derived(server ||
+        (target && target.type == "TextChannel"));
     // The border radius of the channel icon, if it's a server-channel it should be square (undefined).
-    let borderRadius: string | undefined = "--border-radius-channel-icon";
+    let borderRadius: string | undefined = $state("--border-radius-channel-icon");
     if (isServerChannel) {
         borderRadius = undefined;
     }
@@ -84,7 +104,7 @@
         height={size}
         aria-hidden
         viewBox="0 0 {size + badge} {size}"
-        {...$$restProps}
+        {...rest}
     >
         {#if iconURL}
             <foreignObject

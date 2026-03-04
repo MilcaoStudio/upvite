@@ -4,35 +4,41 @@
     import { clientController } from "$lib/controllers/ClientController";
     import AttachmentActions from "../messaging/attachments/AttachmentActions.svelte";
     import EmbedActions from "../messaging/embed/EmbedActions.svelte";
-    export let props: ModalProps<"image_viewer">;
+    interface Props {
+        props: ModalProps<"image_viewer">;
+    }
+
+    let { props }: Props = $props();
     let { attachment, embed } = props;
 </script>
 
 <Modal {...props}>
-    <div class="view" slot="override">
-        {#if attachment && attachment.metadata.type == "Image"}
-            <img
-                alt={attachment.filename}
-                src={attachment.filename}
-                
-                loading="eager"
-            />
-            <AttachmentActions {attachment} />
-        {:else if embed}
-            <img
-                loading="eager"
-                alt={embed.size}
-                src={clientController.availableClient.proxyFile(embed.url)}
-                width={embed.width}
-                height={embed.height}
-            />
-            <EmbedActions {embed} />
-        {:else}
-            {console.warn(
-                `Attempted to use a non valid attatchment type in the image viewer: ${attachment?.metadata.type}`,
-            )}
-        {/if}
-    </div>
+    {#snippet override()}
+        <div class="view" >
+            {#if attachment && attachment.metadata.type == "Image"}
+                <img
+                    alt={attachment.filename}
+                    src={attachment.filename}
+                    
+                    loading="eager"
+                />
+                <AttachmentActions {attachment} />
+            {:else if embed}
+                <img
+                    loading="eager"
+                    alt={embed.size}
+                    src={clientController.availableClient.proxyFile(embed.url)}
+                    width={embed.width}
+                    height={embed.height}
+                />
+                <EmbedActions {embed} />
+            {:else}
+                {console.warn(
+                    `Attempted to use a non valid attatchment type in the image viewer: ${attachment?.metadata.type}`,
+                )}
+            {/if}
+        </div>
+    {/snippet}
 </Modal>
 
 <style>

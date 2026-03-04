@@ -1,4 +1,4 @@
-<script context="module" lang="ts">
+<script module lang="ts">
     import { useClient } from "$lib/controllers/ClientController";
 
     export function useAutoComplete(
@@ -312,9 +312,13 @@
     import ChannelIcon from "./channels/ChannelIcon.svelte";
     import { get, writable, type Writable } from "svelte/store";
 
-    export let detached = false,
-        state: Writable<AutoCompleteState>,
+    interface Props {
+        detached?: boolean;
+        state: Writable<AutoCompleteState>;
         onClick: MouseEventHandler<HTMLButtonElement>;
+    }
+
+    let { detached = false, state, onClick }: Props = $props();
     const Base = cx(
         "AutoComplete",
         css`
@@ -377,7 +381,7 @@
             {#each $state.matches as match, i (match.id)}
                 <button
                     class:active={i == $state.selected}
-                    on:mouseenter={() => {
+                    onmouseenter={() => {
                         (i != $state.selected || !$state.within) &&
                             state.update(_state=>({
                                 ..._state,
@@ -385,13 +389,13 @@
                                 within: true,
                             }));
                     }}
-                    on:mouseleave={() =>
+                    onmouseleave={() =>
                         $state.within &&
                         state.update(_state =>({
                             ..._state,
                             within: false,
                         }))}
-                    on:click={onClick}
+                    onclick={onClick}
                 >
                     <UserIcon
                         size={24}
@@ -404,14 +408,14 @@
         {#if $state.type == "channel"}
             {#each $state.matches as match, i (match.id)}
                 <button class:active={i == $state.selected}
-                on:mouseenter={()=>{
+                onmouseenter={()=>{
                     (i != $state.selected || !$state.within) && state.update(_state=>({
                         ..._state,
                         selected: i,
                         within: true
                     }))
                 }}
-                on:mouseleave={()=>{
+                onmouseleave={()=>{
                     $state.within && state.update(_state=>({..._state, within: false}))
                 }}>
                 <ChannelIcon size={24} target={match} />

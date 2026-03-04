@@ -7,14 +7,18 @@
     import BxDownArrowAlt from "svelte-boxicons/BxDownArrowAlt.svelte";
     import { state } from "$lib/State";
 
-    export let channel: Channel;
+    interface Props {
+        channel: Channel;
+    }
+
+    let { channel }: Props = $props();
     let renderer = getRenderer(channel, state);
 </script>
 
 {#if renderer.state == "RENDER" && !renderer.atBottom}
     <Bar position="bottom">
         <button
-            on:click={() => {
+            onclick={() => {
                 renderer.jumpToBottom(true);
                 internalEmit("NewMessages", "hide");
             }}

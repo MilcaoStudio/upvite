@@ -2,7 +2,13 @@
     import { t } from "svelte-i18n";
     import Lock from "svelte-boxicons/BxLock.svelte";
 
-    export let disabled = false, id: string;
+    interface Props {
+        disabled?: boolean;
+        id: string;
+        children?: import('svelte').Snippet;
+    }
+
+    let { disabled = false, id, children }: Props = $props();
 </script>
 
 <label class="PermissionEntry" style:color={disabled ? "var(--tertiary-foreground)" : ""}>
@@ -17,7 +23,7 @@
             {$t(`permissions.${id}.d`)}
         </span>
     </span>
-    <slot />
+    {@render children?.()}
 </label>
 
 <style>

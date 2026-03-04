@@ -66,4 +66,4 @@
   });
 </script>
 
-<svelte:document on:keydown={keyDown} />
+<svelte:document onkeydown={keyDown} />

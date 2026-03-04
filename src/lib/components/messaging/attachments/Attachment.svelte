@@ -9,8 +9,12 @@
     import { state } from "$lib/State";
     import TextView from "./TextView.svelte";
 
-    export let attachment: File,
-        hasContent = false;
+    interface Props {
+        attachment: File;
+        hasContent?: boolean;
+    }
+
+    let { attachment, hasContent = false }: Props = $props();
     let { filename, metadata } = attachment;
     let spoiler = filename?.startsWith("SPOILER_");
     const style = getComputedStyle(document.documentElement);
@@ -27,7 +31,7 @@
 {#if metadata.type == "Audio"}
     <div class="attachment audio" data-has-content={hasContent}>
         <AttachmentActions {attachment}/>
-        <audio src={url} controls preload="metadata" />
+        <audio src={url} controls preload="metadata"></audio>
     </div>
 {:else if metadata.type == "Image"}
     <ContextMenu data={{ attachment }}>
@@ -63,15 +67,15 @@
             height={metadata.height}
             className={cx({ spoiler })}
         >
-            <!-- svelte-ignore a11y-media-has-caption -->
+            <!-- svelte-ignore a11y_media_has_caption -->
             <video
                 src={url}
                 controls
                 width={metadata.width}
                 height={metadata.height}
-                on:mousedown={(ev) =>
+                onmousedown={(ev) =>
                     ev.button == 1 && window.open(url, "_blank")}
-            />
+></video>
             <!--TODO: Spoiler layer-->
         </SizedGrid>
     </div>

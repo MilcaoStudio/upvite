@@ -17,12 +17,12 @@
     }
 </script>
 
-<svelte:body on:keydown={keyDown} />
+<svelte:body onkeydown={keyDown} />
 
 <div class="baseCloseButton">
     <button
         class="close"
-        on:click={() => {
+        onclick={() => {
             exitSettings();
         }}
     >

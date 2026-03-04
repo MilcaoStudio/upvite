@@ -5,9 +5,13 @@
     import type { ImageEmbed, VideoEmbed, WebsiteEmbed } from "stoat.js";
     import { isWebsiteEmbed } from "./MessageEmbed";
 
-    export let embed: WebsiteEmbed,
-        width = 0,
+    interface Props {
+        embed: WebsiteEmbed;
+        width?: number;
         height: number;
+    }
+
+    let { embed, width = 0, height }: Props = $props();
     let client = useClient();
     let autoplay = state.network.media.autoplay;
     
@@ -22,7 +26,7 @@
             src="http://www.youtube-nocookie.com/embed/{embed.specialContent.id}?modestbranding=1&hl={state.locale.getLanguage()}&start={embed.specialContent.timestamp ?? 0}"
             frameborder="0"
             allowfullscreen
-        />
+></iframe>
     {:else if embed.video}
         <video
             class="image"
@@ -33,12 +37,12 @@
             controls={embed.specialContent?.type != "GIF"}
             autoplay={embed.specialContent?.type == "GIF" && autoplay}
             muted={embed.specialContent?.type == "GIF" ? true : undefined}
-            on:click={(ev) =>
+            onclick={(ev) =>
                 ev.currentTarget.paused && ev.currentTarget.play()}
-        />
+></video>
     {:else if embed.image}
-        <!-- svelte-ignore a11y-click-events-have-key-events -->
-        <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
+        <!-- svelte-ignore a11y_click_events_have_key_events -->
+        <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
         <img
             class="image"
             alt={embed.siteName}
@@ -46,13 +50,13 @@
             loading="lazy"
             style:width="100%"
             style:height="100%"
-            on:click={() =>
+            onclick={() =>
                 embed.type == "Website" &&
                 modalController.push({
                     type: "image_viewer",
                     embed: embed.image ?? undefined,
                 })}
-            on:mousedown={(ev) =>
+            onmousedown={(ev) =>
                 embed.type == "Website" &&
                 ev.button == 1 &&
                 window.open(embed.image?.url, "_blank")}

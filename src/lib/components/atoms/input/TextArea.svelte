@@ -4,18 +4,36 @@
     import { css } from "@emotion/css";
     import type { ChangeEventHandler, FocusEventHandler, KeyboardEventHandler } from "svelte/elements";
 
-    export let code = false,
-        tabSize = 4,
-        padding = "var(--textarea-padding)",
-        lineHeight = "var(--textarea-line-height)",
-        hideBorder = false,
-        onChange: ChangeEventHandler<HTMLTextAreaElement> | null = null,
-        onKeyUp: KeyboardEventHandler<HTMLTextAreaElement> | null = null,
-        onKeyDown: KeyboardEventHandler<HTMLTextAreaElement> | null = null,
-        onFocus: FocusEventHandler<HTMLTextAreaElement> | null = null,
-        onBlur: (()=>void) | null = null;
 
-    export let ref: HTMLTextAreaElement | undefined;
+  interface Props {
+    code?: boolean;
+    tabSize?: number;
+    padding?: string;
+    lineHeight?: string;
+    hideBorder?: boolean;
+    onChange?: ChangeEventHandler<HTMLTextAreaElement> | null;
+    onKeyUp?: KeyboardEventHandler<HTMLTextAreaElement> | null;
+    onKeyDown?: KeyboardEventHandler<HTMLTextAreaElement> | null;
+    onFocus?: FocusEventHandler<HTMLTextAreaElement> | null;
+    onBlur?: (()=>void) | null;
+    ref: HTMLTextAreaElement | undefined;
+    [key: string]: any
+  }
+
+  let {
+    code = false,
+    tabSize = 4,
+    padding = "var(--textarea-padding)",
+    lineHeight = "var(--textarea-line-height)",
+    hideBorder = false,
+    onChange = null,
+    onKeyUp = null,
+    onKeyDown = null,
+    onFocus = null,
+    onBlur = null,
+    ref = $bindable(),
+    ...rest
+  }: Props = $props();
 
     const TextArea = css`
       width: 100%;
@@ -48,4 +66,4 @@
   
 </script>
 
-<textarea class={TextArea} bind:this={ref} on:change={onChange} on:keyup={onKeyUp} on:keydown={onKeyDown} on:focus={onFocus} on:blur={onBlur} {...$$restProps} />
+<textarea class={TextArea} bind:this={ref} onchange={onChange} onkeyup={onKeyUp} onkeydown={onKeyDown} onfocus={onFocus} onblur={onBlur} {...rest}></textarea>

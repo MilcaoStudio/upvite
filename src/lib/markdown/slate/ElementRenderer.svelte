@@ -3,16 +3,28 @@
 	import Void from "./Void.svelte";
 
 	//export let element: IElement;
-	export let isInline: boolean,
-		isVoid: boolean,
-		contenteditable: boolean,
-		dir: "rtl" | "ltr" | undefined = undefined,
+	interface Props {
+		isInline: boolean;
+		isVoid: boolean;
+		contenteditable: boolean;
+		dir?: "rtl" | "ltr" | undefined;
 		ref: HTMLElement;
+		children?: import('svelte').Snippet;
+	}
+
+	let {
+		isInline,
+		isVoid,
+		contenteditable,
+		dir = undefined,
+		ref = $bindable(),
+		children
+	}: Props = $props();
 </script>
 
 {#if isVoid}
 	<Void bind:ref {isInline} {dir}>
-		<slot />
+		{@render children?.()}
 	</Void>
 {:else}
 	<svelte:element
@@ -24,7 +36,7 @@
 		{dir}
 		{contenteditable}
 	>
-		<slot />
+		{@render children?.()}
 	</svelte:element>
 {/if}
 

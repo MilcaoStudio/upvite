@@ -1,4 +1,6 @@
 <script lang="ts">
+    import { run } from 'svelte/legacy';
+
     import type { ModalProps } from "$lib/types/Modal";
     import { t } from "svelte-i18n";
     import DialogForm from "./DialogForm.svelte";
@@ -23,22 +25,28 @@
             }
         `,
     );
-    export let props: ModalProps<"create_invite">;
-    let { target } = props;
-    let processing = false,
-        code = "";
-    $: if (target) {
-        processing = true;
-        target
-            .createInvite()
-            .then(({ _id }) => (code = _id))
-            .catch((err) =>
-                modalController.push({ type: "error", error: takeError(err) }),
-            )
-            .finally(() => (processing = false));
+    interface Props {
+        props: ModalProps<"create_invite">;
     }
 
-    $: data = {
+    let { props }: Props = $props();
+    let { target } = props;
+    let processing = $state(false),
+        code = $state("");
+    run(() => {
+        if (target) {
+            processing = true;
+            target
+                .createInvite()
+                .then(({ _id }) => (code = _id))
+                .catch((err) =>
+                    modalController.push({ type: "error", error: takeError(err) }),
+                )
+                .finally(() => (processing = false));
+        }
+    });
+
+    let data = $derived({
         message: {
             element: processing
                 ? createElement(TextSvelte, {
@@ -53,7 +61,7 @@
                       createElement("code", null, code),
                   ),
         },
-    };
+    });
 </script>
 
 <DialogForm

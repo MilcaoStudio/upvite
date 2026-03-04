@@ -7,9 +7,15 @@
     import Swatch from "./Swatch.svelte";
     import GradientEditor, {getSteps} from "./GradientEditor.svelte";
 
-    export let colour: string | null = null, disabled = false, onChange: (color: string) => void;
-    let gradient = "none";
-    let hue = 0;
+    interface Props {
+        colour?: string | null;
+        disabled?: boolean;
+        onChange: (color: string) => void;
+    }
+
+    let { colour = $bindable(null), disabled = false, onChange }: Props = $props();
+    let gradient = $state("none");
+    let hue = $state(0);
     let lightness_tones = ["20%", "40%", "50%", "60%", "80%", "90%"];
     function onGradientChange(value: string) {
         gradient = value;
@@ -36,7 +42,7 @@
 />
 {#if gradient == "none"}
     <Row gap="16px" centred>
-        <div class="preview" style:background={colour} />
+        <div class="preview" style:background={colour}></div>
         <Column centred>
             <HueSlider {disabled} bind:value={hue}>Hue</HueSlider>
             <Column>
@@ -45,12 +51,14 @@
                         <Swatch
                             hsl={[hue, "100%", light]}
                             onchange={onSolidColorChange}
-                            let:colour={bgColour}
+                            
                         >
-                            {#if colour == bgColour}
-                                <BxCheck size={18} />
-                            {/if}
-                        </Swatch>
+                            {#snippet children({ colour: bgColour })}
+                                                        {#if colour == bgColour}
+                                    <BxCheck size={18} />
+                                {/if}
+                                                                                {/snippet}
+                                                </Swatch>
                     {/each}
                 </Row>
                 <Row gap="8px">
@@ -58,12 +66,14 @@
                         <Swatch
                             hsl={[hue, "60%", light]}
                             onchange={onSolidColorChange}
-                            let:colour={bgColour}
+                            
                         >
-                            {#if colour == bgColour}
-                                <BxCheck size={18} />
-                            {/if}
-                        </Swatch>
+                            {#snippet children({ colour: bgColour })}
+                                                        {#if colour == bgColour}
+                                    <BxCheck size={18} />
+                                {/if}
+                                                                                {/snippet}
+                                                </Swatch>
                     {/each}
                 </Row>
             </Column>
@@ -71,7 +81,7 @@
     </Row>
 {:else}
     <Row gap="8px" centred>
-        <div class="preview" style:background={colour} />
+        <div class="preview" style:background={colour}></div>
         {#if colour?.startsWith("linear-gradient")}
             <GradientEditor steps={getSteps(colour) ?? []} />
         {:else}

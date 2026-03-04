@@ -1,3 +1,8 @@
+<script>
+    /** @type {{children?: import('svelte').Snippet}} */
+    let { children } = $props();
+</script>
+
 <style>
     /* MODAL SUBTITLE */
     h4 {
@@ -7,4 +12,4 @@
         color: var(--secondary-foreground);
     }
 </style>
-<h4><slot /></h4>
+<h4>{@render children?.()}</h4>

@@ -1,8 +1,12 @@
 <script lang="ts">
     import { clientController } from "$lib/controllers/ClientController";
 
-    export let match: string;
-    $: channel = clientController.availableClient?.channels.get(match)
+    interface Props {
+        match: string;
+    }
+
+    let { match }: Props = $props();
+    let channel = $derived(clientController.availableClient?.channels.get(match))
 </script>
 
 <a href={channel?.path} >

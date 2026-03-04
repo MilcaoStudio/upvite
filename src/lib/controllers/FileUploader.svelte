@@ -1,4 +1,6 @@
 <script lang="ts">
+    import { run } from 'svelte/legacy';
+
     import { onDestroy } from "svelte";
     import { useClient } from "./ClientController";
     import {
@@ -18,26 +20,38 @@
     import Plus from "svelte-boxicons/BxPlus.svelte";
 
     const client = useClient()!;
-    export let fileType:
+    interface Props {
+        fileType: 
             | "backgrounds"
             | "icons"
             | "avatars"
             | "attachments"
             | "banners"
-            | "emojis",
-        maxFileSize: number,
-        style: StyleType,
-        remove: () => Promise<void>,
+            | "emojis";
+        maxFileSize: number;
+        style: StyleType;
+        remove: () => Promise<void>;
         behavior: BehaviorType;
-    let uploading = false,
-        previewFile: File | null = null,
-        previewURL = "";
-    $: if (previewFile) {
-        const url = URL.createObjectURL(previewFile);
-        previewURL = url;
-    } else {
-        previewURL = "";
     }
+
+    let {
+        fileType,
+        maxFileSize,
+        style,
+        remove,
+        behavior
+    }: Props = $props();
+    let uploading = $state(false),
+        previewFile: File | null = $state(null),
+        previewURL = $state("");
+    run(() => {
+        if (previewFile) {
+            const url = URL.createObjectURL(previewFile);
+            previewURL = url;
+        } else {
+            previewURL = "";
+        }
+    });
 
     // free memory
     onDestroy(() => URL.revokeObjectURL(previewURL));
@@ -102,7 +116,7 @@
         }
     }
 
-    $: paste = function (e: ClipboardEvent) {
+    let paste = $derived(function (e: ClipboardEvent) {
         const items = e.clipboardData?.items;
         if (typeof items == "undefined") return;
         if (behavior.type != "multi" || !behavior.append) return;
@@ -126,7 +140,7 @@
         }
 
         behavior.append(files);
-    };
+    });
     // Let the browser know we can drop files.
     function dragover(e: DragEvent) {
         //e.stopPropagation();
@@ -159,7 +173,7 @@
     }
 </script>
 
-<svelte:document on:paste={paste} on:dragover={dragover} on:drop={drop} />
+<svelte:document onpaste={paste} ondragover={dragover} ondrop={drop} />
 
 {#if style.type == "icon" || style.type == "banner"}
     <div
@@ -181,7 +195,7 @@
             
             style:width={style.width}
             style:height={style.height}
-            on:click={onClick}
+            onclick={onClick}
         >
             {#if uploading}
                 <div class="uploading">
@@ -194,10 +208,10 @@
             {/if}
         </button>
         <div class="small">
-            <!-- svelte-ignore a11y-click-events-have-key-events -->
-            <!-- svelte-ignore a11y-no-static-element-interactions -->
+            <!-- svelte-ignore a11y_click_events_have_key_events -->
+            <!-- svelte-ignore a11y_no_static_element_interactions -->
             <!-- replace to button ? -->
-            <span on:click={removeOrUpload}>
+            <span onclick={removeOrUpload}>
                 {uploading ? $t("app.main.channel.uploading_file") : style.previewURL || previewFile ?
                     $t("app.settings.actions.remove"): $t("app.settings.actions.upload")
                 }

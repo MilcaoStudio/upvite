@@ -1,3 +1,8 @@
+<script>
+    /** @type {{children?: import('svelte').Snippet, [key: string]: any}} */
+    let { children, ...rest } = $props();
+</script>
+
 <style>
     /* SETTINGS SECTION TITLE, 
        NOT TO BE CONFUSED WITH CATEGORY TITLES, 
@@ -10,4 +15,4 @@
     }
 </style>
 
-<h3 {...$$restProps}><slot /></h3>
+<h3 {...rest}>{@render children?.()}</h3>

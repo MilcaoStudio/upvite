@@ -2,7 +2,21 @@
     import { PersonPicture } from "fluent-svelte";
     import type { Server, File } from "stoat.js";
 
-    export let target: Server | null = null, attachment: File | undefined = undefined, size: number, animate = false, server_name = '';
+    interface Props {
+        target?: Server | null;
+        attachment?: File | undefined;
+        size: number;
+        animate?: boolean;
+        server_name?: string;
+    }
+
+    let {
+        target = null,
+        attachment = undefined,
+        size,
+        animate = false,
+        server_name = ''
+    }: Props = $props();
     const iconURL = animate ? (target?.animatedIconURL || attachment?.createFileURL(true)) : (target?.iconURL || attachment?.createFileURL());
 
     const name = target?.name ?? server_name;

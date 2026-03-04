@@ -1,16 +1,30 @@
 <script lang="ts">
-    export let height: "compact" | "normal" = "normal",
-        selected = false, onclick: (()=>void) | undefined = undefined,
-        backgroundSelected = "var(--hover)";
+    interface Props {
+        height?: "compact" | "normal";
+        selected?: boolean;
+        onclick?: (()=>void) | undefined;
+        backgroundSelected?: string;
+        children?: import('svelte').Snippet;
+        [key: string]: any
+    }
+
+    let {
+        height = "normal",
+        selected = false,
+        onclick = undefined,
+        backgroundSelected = "var(--hover)",
+        children,
+        ...rest
+    }: Props = $props();
 </script>
 
 <button
     class="item"
-    on:click={onclick}
-    {...$$restProps}
+    {onclick}
+    {...rest}
     style:height={height == "compact" ? "32px" : "42px"}
     style:background={selected ? backgroundSelected : "none"}
-><slot /></button>
+>{@render children?.()}</button>
 
 <style>
     .item {

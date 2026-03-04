@@ -1,4 +1,6 @@
 <script>
+    import { run } from 'svelte/legacy';
+
     import { state } from "$lib/State";
     import { SIDEBAR_CHANNELS } from "$lib/stores/Layout";
     import { autorun } from "mobx";
@@ -10,28 +12,31 @@
     import { useClient } from "$lib/controllers/ClientController";
     import { servers, useClient as useMockClient } from "../mock/MockClient";
 
-    export let snap = false;
-    $: demo = $page.data.demo || false;
-    $: channel_id = $page.params.channel;
-    $: server_id = $page.params.server;
+    /** @type {{snap?: boolean}} */
+    let { snap = false } = $props();
+    let demo = $derived($page.data.demo || false);
+    let channel_id = $derived($page.params.channel);
+    let server_id = $derived($page.params.server);
     console.debug("<Page> params", $page.data);
-    $: client = demo ? useMockClient() : useClient();
-    $: channel = demo ? servers[0].channels[0] : channel_id ? client.channels.get(channel_id) : undefined;
-    $: server = demo ? servers[0] : server_id ? client.servers.get(server_id) : undefined;
-    $: document.title = server
+    let client = $derived(demo ? useMockClient() : useClient());
+    let channel = $derived(demo ? servers[0].channels[0] : channel_id ? client.channels.get(channel_id) : undefined);
+    let server = $derived(demo ? servers[0] : server_id ? client.servers.get(server_id) : undefined);
+    let document.title = $derived(server
         ? `#${channel?.name ?? ""} - ${server.name} | Uprising`
         : channel
           ? `#${channel.name} | Uprising`
-          : `Uprising`;
-    let openLeft = state.layout.getSectionState(
+          : `Uprising`);
+    let openLeft = $state(state.layout.getSectionState(
         SIDEBAR_CHANNELS,
         true,
-    );
-    $: autorun(() => {
-        openLeft = state.layout.getSectionState(
-            SIDEBAR_CHANNELS,
-            true,
-        );
+    ));
+    run(() => {
+        autorun(() => {
+            openLeft = state.layout.getSectionState(
+                SIDEBAR_CHANNELS,
+                true,
+            );
+        });
     });
 </script>
 

@@ -2,7 +2,11 @@
     import { _ } from "svelte-i18n";
     import Dialog from "./Dialog.svelte";
     import type { ModalProps } from "$lib/types/Modal";
-    export let props: ModalProps<"error">
+    interface Props {
+        props: ModalProps<"error">;
+    }
+
+    let { props }: Props = $props();
 </script>
 
 <Dialog

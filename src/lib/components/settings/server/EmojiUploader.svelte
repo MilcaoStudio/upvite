@@ -6,8 +6,12 @@
     import FormElement from "$lib/components/form/FormElement.svelte";
     import type { Server } from "stoat.js";
     import { t } from "svelte-i18n";
-    export let server: Server;
-    let id = "";
+    interface Props {
+        server: Server;
+    }
+
+    let { server }: Props = $props();
+    let id = $state("");
 </script>
 
 <h3>{$t("app.settings.server_pages.emojis.upload")}</h3>
@@ -43,13 +47,15 @@
         id = "";
     }}
 >
-    <Row gap="8px" slot="field">
-        <FormElement id="file" />
-        <Column>
-            <FormElement id="name" />
-            <Button type="submit" palette="secondary" disabled={!id}>
-                {$t("app.special.modals.actions.save")}
-            </Button>
-        </Column>
-    </Row>
+    {#snippet field()}
+        <Row gap="8px" >
+            <FormElement id="file" />
+            <Column>
+                <FormElement id="name" />
+                <Button type="submit" palette="secondary" disabled={!id}>
+                    {$t("app.special.modals.actions.save")}
+                </Button>
+            </Column>
+        </Row>
+    {/snippet}
 </Form>

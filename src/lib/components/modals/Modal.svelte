@@ -1,23 +1,50 @@
 <script lang="ts">
+    import { run, createBubbler, stopPropagation } from 'svelte/legacy';
+
+    const bubble = createBubbler();
     import type { Action } from "$lib/types/Modal";
     import H2 from "../atoms/heading/H2.svelte";
     import H4 from "../atoms/heading/H4.svelte";
     import Button from "../atoms/Button.svelte";
     import { css, cx } from "@emotion/css";
 
-    export let padding: boolean = true,
-        maxWidth: string = "",
-        maxHeight: string = "",
+    interface Props {
+        padding?: boolean;
+        maxWidth?: string;
+        maxHeight?: string;
+        disabled?: boolean;
+        transparent?: boolean;
+        nonDismissable?: boolean;
+        actions?: Action[];
+        onClose?: (force: boolean) => void;
+        signal?: "close" | "confirm" | "force" | undefined;
+        registerOnClose?: (fn: () => void) => () => void;
+        registerOnConfirm?: (fn: () => void) => () => void;
+        override?: import('svelte').Snippet;
+        title?: import('svelte').Snippet;
+        description?: import('svelte').Snippet;
+        children?: import('svelte').Snippet;
+    }
+
+    let {
+        padding = true,
+        maxWidth = "",
+        maxHeight = "",
         disabled = false,
         transparent = false,
         nonDismissable = false,
-        actions: Action[] = [],
-        onClose: (force: boolean) => void = function () {},
-        signal: "close" | "confirm" | "force" | undefined = undefined,
-        registerOnClose: (fn: () => void) => () => void = (fn) => fn,
-        registerOnConfirm: (fn: () => void) => () => void = (fn) => fn;
+        actions = [],
+        onClose = function () {},
+        signal = undefined,
+        registerOnClose = (fn) => fn,
+        registerOnConfirm = (fn) => fn,
+        override,
+        title,
+        description,
+        children
+    }: Props = $props();
 
-    let closing = false;
+    let closing = $state(false);
     const Base = cx(
         "Base",
         css`
@@ -50,7 +77,7 @@
     );
     const Actions = cx("Actions");
 
-    $: closeModal = function () {
+    let closeModal = $derived(function () {
         if (!closing) {
             setTimeout(function () {
                 onClose(true);
@@ -58,7 +85,7 @@
         }
         closing = true;
         console.log("[closeModal] Closing modal");
-    };
+    });
 
     async function confirm() {
         if (await actions.find((x) => x.confirmation)?.onClick?.()) {
@@ -67,10 +94,14 @@
         }
     }
 
-    $: registerOnClose(closeModal);
-    $: registerOnConfirm(confirm);
+    run(() => {
+        registerOnClose(closeModal);
+    });
+    run(() => {
+        registerOnConfirm(confirm);
+    });
 
-    $: {
+    run(() => {
         if (signal == "confirm") {
             confirm();
         } else if (signal) {
@@ -79,28 +110,28 @@
                 closeModal();
             }
         }
-    }
+    });
 </script>
 
-<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
+<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 <div
     class={Base}
     role="dialog"
-    on:click={() => !nonDismissable && closeModal()}
-    on:keydown={() => !nonDismissable && closeModal()}
+    onclick={() => !nonDismissable && closeModal()}
+    onkeydown={() => !nonDismissable && closeModal()}
 >
         <div
             class={Container}
             role="none"
-            on:click|stopPropagation
-            on:keydown|stopPropagation
+            onclick={stopPropagation(bubble('click'))}
+            onkeydown={stopPropagation(bubble('keydown'))}
         >
-    <slot name="override">
+    {#if override}{@render override()}{:else}
             <div class={Title}>
-                <H2><slot name="title" /></H2>
-                <H4><slot name="description" /></H4>
+                <H2>{@render title?.()}</H2>
+                <H4>{@render description?.()}</H4>
             </div>
-            <div class={Content}><slot /></div>
+            <div class={Content}>{@render children?.()}</div>
             {#if actions.length}
                 <div class={Actions}>
                     {#each actions as action}
@@ -115,6 +146,6 @@
                     {/each}
                 </div>
             {/if}
-        </slot>
+        {/if}
     </div>
 </div>

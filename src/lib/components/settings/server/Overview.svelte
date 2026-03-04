@@ -1,4 +1,6 @@
 <script lang="ts">
+    import { run } from 'svelte/legacy';
+
     import TextAreaAutoSize from "$lib/components/atoms/TextAreaAutoSize.svelte";
     import H3 from "$lib/components/atoms/heading/H3.svelte";
     import Column from "$lib/components/atoms/layout/Column.svelte";
@@ -16,15 +18,21 @@
     import Button from "$lib/components/atoms/Button.svelte";
     import { PersonPicture } from "fluent-svelte";
 
-    export let server: Server;
-    let name = server.name;
-    let description = server.description ?? "";
-    let systemMessages = server.systemMessages;
+    interface Props {
+        server: Server;
+    }
+
+    let { server }: Props = $props();
+    let name = $state(server.name);
+    let description = $state(server.description ?? "");
+    let systemMessages = $state(server.systemMessages);
     let editable = server.havePermission("ManageServer");
-    $: console.log(editable);
+    run(() => {
+        console.log(editable);
+    });
     autorun(() => (name = server.name));
     autorun(() => (systemMessages = server.systemMessages));
-    let changed = false;
+    let changed = $state(false);
     function save() {
         const changes: API.DataEditServer = {};
         if (name != server.name) changes.name = name;

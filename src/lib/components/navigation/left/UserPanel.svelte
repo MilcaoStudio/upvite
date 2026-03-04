@@ -6,7 +6,7 @@
     import { css, cx } from "@emotion/css";
 
     const client = useClient();
-    $: demo = $page.data.demo || false;
+    let demo = $derived($page.data.demo || false);
     let user = client.user;
     const Base = cx("UserPanel", css`
         display: flex;

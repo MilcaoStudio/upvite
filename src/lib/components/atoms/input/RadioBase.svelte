@@ -1,12 +1,14 @@
 
 <script>
+    /** @type {{children?: import('svelte').Snippet}} */
+    let { children } = $props();
 
 </script>
-<!-- svelte-ignore missing-declaration -->
-<!-- svelte-ignore a11y-label-has-associated-control -->
+<!-- svelte-ignore missing_declaration -->
+<!-- svelte-ignore a11y_label_has_associated_control -->
 <label>
     <div class="flex-button">
-        <slot/>
+        {@render children?.()}
     </div>
 </label>
 

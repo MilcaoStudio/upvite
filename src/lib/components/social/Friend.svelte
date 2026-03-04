@@ -9,7 +9,11 @@
     import Username from "../user/Username.svelte";
     import IconButton from "../atoms/input/IconButton.svelte";
 
-    export let user: User;
+    interface Props {
+        user: User;
+    }
+
+    let { user }: Props = $props();
 </script>
 
 <div class="Friend">

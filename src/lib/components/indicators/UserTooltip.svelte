@@ -3,7 +3,13 @@
     import Tooltip from "../atoms/Tooltip.svelte";
     import { css, cx } from "@emotion/css";
 
-    export let user: User | undefined;
+    interface Props {
+        user: User | undefined;
+        children?: import('svelte').Snippet;
+        [key: string]: any
+    }
+
+    let { user, children, ...rest }: Props = $props();
     const Base = cx(
         "UserTooltip",
         css`
@@ -27,7 +33,7 @@
 
 <Tooltip
     content={`${user?.username}\n${user?.status?.presence || ''}`}
-    {...$$restProps}
+    {...rest}
 >
-    <slot />
+    {@render children?.()}
 </Tooltip>

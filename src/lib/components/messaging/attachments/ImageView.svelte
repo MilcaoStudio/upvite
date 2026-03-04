@@ -4,21 +4,26 @@
     import { cx } from "@emotion/css";
     import type { File } from "stoat.js";
 
-    export let attachment: File, src = "";
-    let loading = ImageState.Loading;
+    interface Props {
+        attachment: File;
+        src?: string;
+    }
+
+    let { attachment, src = "" }: Props = $props();
+    let loading = $state(ImageState.Loading);
 </script>
 
-<!-- svelte-ignore a11y-click-events-have-key-events -->
-<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
+<!-- svelte-ignore a11y_click_events_have_key_events -->
+<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 <img
     alt={attachment.filename}
     class={cx("image", { loading: loading != ImageState.Loaded})}
     {src}
     loading="lazy"
-    on:click={() => modalController.push({ type: "image_viewer", attachment })}
-    on:mousedown={(ev) => ev.button == 1 && window.open(src, "blank_")}
-    on:error={() => loading = ImageState.Error}
-    on:load={() => loading = ImageState.Loaded}
+    onclick={() => modalController.push({ type: "image_viewer", attachment })}
+    onmousedown={(ev) => ev.button == 1 && window.open(src, "blank_")}
+    onerror={() => loading = ImageState.Error}
+    onload={() => loading = ImageState.Loaded}
 />
 
 

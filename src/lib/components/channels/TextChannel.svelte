@@ -1,4 +1,6 @@
 <script lang="ts">
+    import { run } from 'svelte/legacy';
+
     import { internalSubscribe } from "$lib/InternalEmitter";
     import { reaction } from "mobx";
     import type { Channel } from "stoat.js";
@@ -9,15 +11,19 @@
     import { useClient } from "$lib/controllers/ClientController";
 
     const client = useClient();
-    export let channel: Channel,
-        message: string | null = null;
+    interface Props {
+        channel: Channel;
+        message?: string | null;
+    }
 
-    let lastId: string | undefined;
+    let { channel, message = null }: Props = $props();
+
+    let lastId: string | undefined = $state();
     internalSubscribe("NewMessages", "hide", () => (lastId = undefined));
     internalSubscribe("NewMessages", "mark", (id) => {
         if (typeof id == "string") lastId = id;
     });
-    $: {
+    run(() => {
         let unreads = client.channelUnreads.for(channel);
         lastId = unreads.lastMessageId;
         const checkUnread = () => channel.ack();
@@ -26,7 +32,7 @@
             () => channel.lastMessageId,
             checkUnread,
         );
-    }
+    });
 </script>
 
 <ChannelLayout {channel}>

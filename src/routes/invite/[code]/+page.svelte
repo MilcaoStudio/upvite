@@ -1,4 +1,6 @@
 <script lang="ts">
+    import { run } from 'svelte/legacy';
+
     import { goto, pushState } from "$app/navigation";
     import { takeError } from "$lib";
     import { state } from "$lib/State.js";
@@ -20,22 +22,21 @@
     import UserIcon from "$lib/components/user/UserIcon.svelte";
     import { createElement } from "$lib/markdown/runtime/svelteRuntime";
 
-    export let data;
+    interface Props {
+        data: any;
+    }
+
+    let { data }: Props = $props();
 
     const code = data.code;
     const session = useSession();
     const client = useClient();
     const layout = state.layout;
 
-    let processing = false;
-    let error: string;
-    let invite: PublicChannelInvite;
+    let processing = $state(false);
+    let error: string = $state();
+    let invite: PublicChannelInvite = $state();
 
-    $: {
-        if (!invite) {
-            fetchInvite(code).then((result)=>(invite=result)).catch((reason)=>error = takeError(reason));
-        }
-    }
 
     async function fetchInvite(code: string): Promise<PublicChannelInvite> {
         return client.api.get(`/invites/${code as ""}`).then((result) => PublicChannelInvite.from(client, result));
@@ -43,6 +44,11 @@
     function isServerInvite(invite: PublicChannelInvite): invite is ServerPublicInvite {
         return invite.type == "Server";
     }
+    run(() => {
+        if (!invite) {
+            fetchInvite(code).then((result)=>(invite=result)).catch((reason)=>error = takeError(reason));
+        }
+    });
 </script>
 
 {#if !invite}

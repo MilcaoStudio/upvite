@@ -1,7 +1,11 @@
 <script lang="ts">
     import RemarkRenderer from "./RemarkRenderer.svelte";
 
-    export let content: string | null;
+    interface Props {
+        content: string | null;
+    }
+
+    let { content }: Props = $props();
 </script>
 
 {#if content}

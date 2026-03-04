@@ -17,15 +17,29 @@
     import MessageReply from "./attachments/MessageReply.svelte";
     import Embed from "./embed/Embed.svelte";
     import { useClient } from "$lib/controllers/ClientController";
-    export let message: MessageType & {
+    interface Props {
+        message: MessageType & {
             webhook?: { name: string; avatar?: string };
-        },
-        head = false,
-        queued: QueuedMessage | undefined = undefined,
+        };
+        head?: boolean;
+        queued?: QueuedMessage | undefined;
+        highlight?: boolean;
+        contrast?: boolean;
+        hideReply?: boolean;
+        compact?: boolean;
+        children?: import('svelte').Snippet;
+    }
+
+    let {
+        message,
+        head = $bindable(false),
+        queued = undefined,
         highlight = false,
         contrast = false,
         hideReply = false,
-        compact = false;
+        compact = false,
+        children
+    }: Props = $props();
     
     const Wrapper = cx(
         "Wrapper",
@@ -35,9 +49,9 @@
         `,
     );
 
-    $: client = useClient();
-    $: user = message.author;
-    $: content = message.content;
+    let client = $derived(useClient());
+    let user = $derived(message.author);
+    let content = $derived(message.content);
     head = head || (message.replyIds ? message.replyIds.length > 0 : false);
 
     function openProfile() {
@@ -141,9 +155,9 @@
                         </span>
                     {/if}
                     <!-- Slot default for message editor or markdown -->
-                    <slot>
+                    {#if children}{@render children()}{:else}
                         <Markdown {content} />
-                    </slot>
+                    {/if}
 
                     <!--InviteList-->
                     {#if queued?.error}

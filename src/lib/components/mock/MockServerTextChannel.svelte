@@ -5,7 +5,11 @@
     import MockMessageArea from "./MockMessageArea.svelte";
     import MessageBox from "../messaging/MessageBox.svelte";
     
-    export let channel: Channel;
+    interface Props {
+        channel: Channel;
+    }
+
+    let { channel }: Props = $props();
 </script>
 
 <ChannelLayout {channel}>

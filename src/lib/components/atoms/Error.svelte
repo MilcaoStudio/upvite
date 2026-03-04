@@ -1,9 +1,14 @@
 <script lang="ts">
-    export let error: string = ''
+    interface Props {
+        error?: string;
+        children?: import('svelte').Snippet;
+    }
+
+    let { error = '', children }: Props = $props();
 </script>
 
 <span class="Base">
-    <slot />
+    {@render children?.()}
     <span class="error">
         {#if error}
             &middot;

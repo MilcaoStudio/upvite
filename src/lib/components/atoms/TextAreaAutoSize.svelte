@@ -1,4 +1,6 @@
 <script lang="ts">
+    import { run } from 'svelte/legacy';
+
     import { internalSubscribe } from "$lib/InternalEmitter";
     import { css, cx } from "@emotion/css";
     import TextArea from "./input/TextArea.svelte";
@@ -8,22 +10,43 @@
         KeyboardEventHandler,
     } from "svelte/elements";
 
-    export let autoFocus = false,
-        id: string | undefined = undefined,
+    interface Props {
+        autoFocus?: boolean;
+        id?: string | undefined;
+        minHeight?: number;
+        maxRows?: number;
+        value: string;
+        padding?: string;
+        lineHeight?: string;
+        hideBorder?: boolean;
+        forceFocus?: boolean;
+        onChange: ChangeEventHandler<HTMLTextAreaElement>;
+        onKeyUp?: KeyboardEventHandler<HTMLTextAreaElement> | null;
+        onKeyDown?: KeyboardEventHandler<HTMLTextAreaElement> | null;
+        onFocus?: FocusEventHandler<HTMLTextAreaElement> | null;
+        onBlur?: (() => void) | null;
+        [key: string]: any
+    }
+
+    let {
+        autoFocus = false,
+        id = undefined,
         minHeight = 0,
         maxRows = 5,
-        value: string,
+        value,
         padding = "",
         lineHeight = "var(--textarea-line-height)",
         hideBorder = false,
         forceFocus = false,
-        onChange: ChangeEventHandler<HTMLTextAreaElement>,
-        onKeyUp: KeyboardEventHandler<HTMLTextAreaElement> | null = null,
-        onKeyDown: KeyboardEventHandler<HTMLTextAreaElement> | null = null,
-        onFocus: FocusEventHandler<HTMLTextAreaElement> | null = null,
-        onBlur: (() => void) | null = null;
-    let ref: HTMLTextAreaElement | undefined;
-    let ghost: HTMLDivElement;
+        onChange,
+        onKeyUp = null,
+        onKeyDown = null,
+        onFocus = null,
+        onBlur = null,
+        ...rest
+    }: Props = $props();
+    let ref: HTMLTextAreaElement | undefined = $state();
+    let ghost: HTMLDivElement = $state();
 
     const AutoSize = cx(
         "AutoSize",
@@ -62,7 +85,7 @@
         );
     }
 
-    $: {
+    run(() => {
         if (forceFocus) {
             ref?.focus();
         }
@@ -70,7 +93,7 @@
         if (autoFocus && !inputSelected()) {
             ref?.focus();
         }
-    }
+    });
 
     function keyDown(e: KeyboardEvent) {
         if ((e.ctrlKey && e.key != "v") || e.altKey || e.metaKey) return;
@@ -93,7 +116,7 @@
     );
 </script>
 
-<svelte:document on:keydown={keyDown} />
+<svelte:document onkeydown={keyDown} />
 
 <div class={AutoSize}>
     <div bind:this={ghost}>
@@ -112,7 +135,7 @@
             {onKeyDown}
             {onFocus}
             {onBlur}
-            {...$$restProps}
+            {...rest}
         />
     </div>
 </div>

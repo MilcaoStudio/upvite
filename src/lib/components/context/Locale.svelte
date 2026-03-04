@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
   import { dictionary, isLoading, locale, waitLocale } from "svelte-i18n";
   import { browser } from "$app/environment";
   import { setContext } from "svelte";
@@ -7,9 +9,14 @@
   import { state } from "$lib/State";
   import { findLanguage } from "$lib/stores/LocaleOptions";
   import { autorun } from "mobx";
+  interface Props {
+    children?: import('svelte').Snippet;
+  }
+
+  let { children }: Props = $props();
     
 
-  let definitions: Dictionary = defaultDictionary;
+  let definitions: Dictionary = $state(defaultDictionary);
   let lang = state.locale.getLanguage();
   let source = Languages[lang];
 
@@ -17,7 +24,7 @@
     lang = findLanguage($locale);
   }
 
-  $: loadLanguage = async function (locale: string) {
+  let loadLanguage = $derived(async function (locale: string) {
     await waitLocale(locale);
     if (locale == "en") {
       // If English, make sure to restore everything to defaults.
@@ -51,18 +58,22 @@
 
     // Apply definition to app.
     definitions = defn;
-  };
+  });
 
-  $: autorun(()=>{
-    locale.set(state.locale.getLanguage())
-  })
-  $: definitions && setContext('dictionary', definitions);
-  $: document.body.style.direction = source.rtl ? "rtl" : "";
+  run(() => {
+    autorun(()=>{
+      locale.set(state.locale.getLanguage())
+    })
+  });
+  run(() => {
+    definitions && setContext('dictionary', definitions);
+  });
+  let document.body.style.direction = $derived(source.rtl ? "rtl" : "");
 </script>
 
 {#await loadLanguage($locale || defaultLocale) then }
   {#if !$isLoading}
-    <slot />
+    {@render children?.()}
   {/if}
 {/await}
 

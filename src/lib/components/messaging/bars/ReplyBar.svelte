@@ -1,4 +1,6 @@
 <script lang="ts">
+    import { run } from 'svelte/legacy';
+
     import { internalSubscribe } from "$lib/InternalEmitter";
     import { state } from "$lib/State";
     import { SECTION_MENTION } from "$lib/stores/Layout";
@@ -17,8 +19,12 @@
     import XCircle from "svelte-boxicons/BxXCircle.svelte";
     import { useClient } from "$lib/controllers/ClientController";
 
-    export let replies: Reply[],
+    interface Props {
+        replies: Reply[];
         setReplies: (replies: Reply[]) => void;
+    }
+
+    let { replies = $bindable(), setReplies }: Props = $props();
     let client = useClient();
     const layout = state.layout;
 
@@ -55,10 +61,12 @@
     onDestroy(() => unsubscribe?.());
 
     // Map all the replies to messages we are aware of.
-    $: messages = replies.map((x) => client.messages.get(x.id));
-    $: if (messages.includes(undefined)) {
-        setReplies(replies.filter((_, i) => typeof messages[i] != "undefined"));
-    }
+    let messages = $derived(replies.map((x) => client.messages.get(x.id)));
+    run(() => {
+        if (messages.includes(undefined)) {
+            setReplies(replies.filter((_, i) => typeof messages[i] != "undefined"));
+        }
+    });
 </script>
 
 

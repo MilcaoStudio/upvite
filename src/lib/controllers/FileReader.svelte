@@ -1,11 +1,23 @@
 <script lang="ts">
+    import { preventDefault, stopPropagation } from 'svelte/legacy';
+
     import { takeError } from "$lib";
     import { modalController } from "$lib/components/modals/ModalController";
     import { grabFiles } from "$lib/types/FileUpload";
     import Import from "svelte-boxicons/BxUpload.svelte";
-    export let onChange: ((file: File) => void) | null = null,
+    interface Props {
+        onChange?: ((file: File) => void) | null;
+        accept?: string;
+        maxFileSize?: number;
+        children?: import('svelte').Snippet;
+    }
+
+    let {
+        onChange = null,
         accept = "*",
-        maxFileSize = 5_000;
+        maxFileSize = 5_000,
+        children
+    }: Props = $props();
 
     function onClick() {
         grabFiles(
@@ -77,12 +89,12 @@
 </script>
 
 <svelte:document
-    on:paste={paste}
-    on:dragover|preventDefault|stopPropagation={dragover}
-    on:drop|preventDefault={drop}
+    onpaste={paste}
+    ondragover={stopPropagation(preventDefault(dragover))}
+    ondrop={preventDefault(drop)}
 />
 
-<button class="flex-button" on:click={onClick}>
+<button class="flex-button" onclick={onClick}>
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-upload">
         <path stroke="none" d="M0 0h24v24H0z" fill="none" />
         <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" />
@@ -90,7 +102,7 @@
         <path d="M12 4l0 12" />
       </svg>
     
-    <slot><span>Import from file</span></slot>
+    {#if children}{@render children()}{:else}<span>Import from file</span>{/if}
 </button>
 
 <style>

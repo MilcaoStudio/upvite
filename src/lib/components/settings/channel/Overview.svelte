@@ -1,4 +1,6 @@
 <script lang="ts">
+    import { run } from 'svelte/legacy';
+
     import Button from "$lib/components/atoms/Button.svelte";
     import TextAreaAutoSize from "$lib/components/atoms/TextAreaAutoSize.svelte";
     import Row from "$lib/components/atoms/layout/Row.svelte";
@@ -8,15 +10,31 @@
     import { Checkbox } from "fluent-svelte";
     import type { API, Channel } from "stoat.js";
     import { t } from "svelte-i18n";
-    export let channel: Channel;
+    interface Props {
+        channel: Channel;
+    }
+
+    let { channel }: Props = $props();
     let editable = channel.havePermission("ManageChannel");
-    $: name = channel.name;
-    $: description = channel.description;
-    $: nsfw = channel.mature;
-    $: changed =
-        name != channel.name ||
-        description != channel.description ||
-        nsfw != channel.mature;
+    let name;
+    run(() => {
+        name = channel.name;
+    });
+    let description;
+    run(() => {
+        description = channel.description;
+    });
+    let nsfw;
+    run(() => {
+        nsfw = channel.mature;
+    });
+    let changed;
+    run(() => {
+        changed =
+            name != channel.name ||
+            description != channel.description ||
+            nsfw != channel.mature;
+    });
     function save() {
         const changes: API.DataEditChannel = {};
         if (name) {

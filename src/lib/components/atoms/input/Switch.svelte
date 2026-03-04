@@ -1,23 +1,33 @@
 <script lang="ts">
     import type { SwitchState } from "$lib/types/Form";
 
-    export let selected = false,
-        state: SwitchState,
+    interface Props {
+        selected?: boolean;
+        state: SwitchState;
         onClick: ()=>void;
-    $: color = selected
+        children?: import('svelte').Snippet;
+    }
+
+    let {
+        selected = false,
+        state,
+        onClick,
+        children
+    }: Props = $props();
+    let color = $derived(selected
         ? "white"
         : state == "Allow"
           ? "var(--success)"
           : state == "Deny"
             ? "var(--error)"
-            : "var(--tertiary-background)";
-    $: background = selected
+            : "var(--tertiary-background)");
+    let background = $derived(selected
         ? state == "Allow"
             ? "var(--success)"
             : state == "Deny"
               ? "var(--error)"
               : "var(--primary-background)"
-        : "";
+        : "");
 </script>
 
 <div
@@ -26,11 +36,11 @@
     style:background
     role="radio"
     aria-checked={selected}
-    on:click={onClick}
-    on:keypress={onClick}
+    onclick={onClick}
+    onkeypress={onClick}
     tabindex="0"
 >
-    <slot />
+    {@render children?.()}
 </div>
 
 <style>

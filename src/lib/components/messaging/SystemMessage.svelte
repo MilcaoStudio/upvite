@@ -26,15 +26,19 @@
         channel_renamed: Edit,
         text: Info,
     };
-    export let message: Message,
-        highlight = false,
-        hideInfo = false;
+    interface Props {
+        message: Message;
+        highlight?: boolean;
+        hideInfo?: boolean;
+    }
+
+    let { message, highlight = false, hideInfo = false }: Props = $props();
     // I don't have time for fixing this
-    $: data = message.systemMessage as any;
-    $: createdAt =
-        data?.type == "user_joined"
+    let data = $derived(message.systemMessage as any);
+    let createdAt =
+        $derived(data?.type == "user_joined"
             ? decodeTime((data as UserSystemMessage).userId)
-            : null;
+            : null);
     let settings = state.settings;
 </script>
 
@@ -43,7 +47,8 @@
         {#if !hideInfo}
             <MessageInfo click={false}>
                 <MessageDetail {message} position="left" />
-                <svelte:component this={Icons[data.type] ?? Info} />
+                {@const SvelteComponent = Icons[data.type] ?? Info}
+                <SvelteComponent />
             </MessageInfo>
         {/if}
         <div class="SystemContent">

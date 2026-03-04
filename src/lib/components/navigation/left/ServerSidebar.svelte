@@ -1,4 +1,6 @@
 <script lang="ts">
+    import { run } from 'svelte/legacy';
+
     import { state } from "$lib/State";
     import ConditionalLink from "$lib/components/atoms/ConditionalLink.svelte";
     import JSXRender from "$lib/components/JSXRender.svelte";
@@ -18,7 +20,13 @@
     import { autorun } from "mobx";
     import { notificationsStore } from "$lib/stores/NotificationOptions";
 
-    export let server: Server, channel: Channel | undefined, client: Client;
+    interface Props {
+        server: Server;
+        channel: Channel | undefined;
+        client: Client;
+    }
+
+    let { server, channel, client }: Props = $props();
     const ServerBase = cx(
         "ServerBase",
         css`
@@ -46,9 +54,11 @@
         `,
     );
 
-    $: channel && state.layout.setLastOpened(server.id, channel.id);
+    run(() => {
+        channel && state.layout.setLastOpened(server.id, channel.id);
+    });
     let uncategorised = new Set<string>();
-    let elements: SvelteElement[] = [];
+    let elements: SvelteElement[] = $state([]);
     autorun(() => {
         uncategorised = new Set(server.channelIds);
         elements = [];

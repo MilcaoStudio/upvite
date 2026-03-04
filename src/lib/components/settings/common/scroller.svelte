@@ -1,6 +1,11 @@
+<script>
+    /** @type {{children?: import('svelte').Snippet}} */
+    let { children } = $props();
+</script>
+
 <div class="scroller-y">
     <div class="container">
-        <slot/>
+        {@render children?.()}
     </div>
 </div>
 

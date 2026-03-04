@@ -7,9 +7,13 @@
     import X from "svelte-boxicons/BxX.svelte";
     import { t } from "svelte-i18n";
 
-    export let state: UploadState,
-        addFile: () => void,
+    interface Props {
+        state: UploadState;
+        addFile: () => void;
         removeFile: (index: number) => void;
+    }
+
+    let { state, addFile, removeFile }: Props = $props();
 </script>
 
 {#if state.type != "none"}
@@ -17,7 +21,7 @@
         <div class="Carousel">
             {#each state.files as file, index}
                 {#if index == CAN_UPLOAD_AT_ONCE}
-                    <div class="divider" />
+                    <div class="divider"></div>
                 {/if}
                 <FileEntry
                     {index}

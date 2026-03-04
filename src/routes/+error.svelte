@@ -1,5 +1,5 @@
 <script>
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 </script>
 
 
@@ -13,7 +13,7 @@
 		<path d="M20 9v.01" />
 		<path d="M20 6a2.003 2.003 0 0 0 .914 -3.782a1.98 1.98 0 0 0 -2.414 .483" />
 	  </svg>
-	<h1>{$page.status}: {$page.error?.message}</h1>
+	<h1>{page.status}: {page.error?.message}</h1>
 	<a class="hover" href="/">
 		<h2>Home</h2>
 	</a>

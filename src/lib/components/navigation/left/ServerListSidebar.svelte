@@ -4,7 +4,11 @@
     import { orderingStore } from "$lib/stores/Ordering";
 
     import ServerList from "../servers/ServerList.svelte";
-    export let server_id: string | undefined = undefined;
+    interface Props {
+        server_id?: string | undefined;
+    }
+
+    let { server_id = undefined }: Props = $props();
     function createServer() {
         modalController.push({ type: "create_server" });
     }

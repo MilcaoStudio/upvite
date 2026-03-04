@@ -1,4 +1,4 @@
-<script context="module" lang="ts">
+<script module lang="ts">
     import { useClient } from "$lib/controllers/ClientController";
     import type { API, File, User } from "stoat.js";
     import fallback from "$lib/assets/user.png";
@@ -22,39 +22,62 @@
 </script>
 
 <script lang="ts">
-    export let target: User | null = null,
-        attachment: File | undefined = undefined,
-        size: number,
+    import { run } from 'svelte/legacy';
+
+    interface Props {
+        target?: User | null;
+        attachment?: File | undefined;
+        size: number;
+        status?: boolean;
+        animate?: boolean;
+        mask?: string | undefined;
+        hover?: boolean;
+        showServerIdentity?: boolean;
+        masquerade?: API.Masquerade | null;
+        innerRef?: SVGElement | undefined;
+        override?: string | undefined;
+        onClick?: ((e: MouseEvent)=>void) | null;
+        [key: string]: any
+    }
+
+    let {
+        target = null,
+        attachment = undefined,
+        size,
         status = false,
         animate = false,
-        mask: string | undefined = undefined,
+        mask = undefined,
         hover = false,
         showServerIdentity = false,
-        masquerade: API.Masquerade | null = null,
-        innerRef: SVGElement | undefined = undefined,
-        override: string | undefined = undefined,
-        onClick: ((e: MouseEvent)=>void) | null = null;
+        masquerade = null,
+        innerRef = $bindable(undefined),
+        override = undefined,
+        onClick = null,
+        ...rest
+    }: Props = $props();
     const client = useClient();
 
-    let url: string | undefined;
-    $: if (masquerade?.avatar) {
-        url = client.proxyFile(masquerade.avatar);
-    } else if (override) {
-        url = override;
-    } else if (!url) {
-        let memberAvatarUrl;
-        if (target && showServerIdentity) {
-            const server = $page.params.server;
-            if (server) {
-                const member = client.serverMembers.getByKey({server, user: target.id});
-                if (member?.avatar) {
-                    memberAvatarUrl = animate ? member.animatedAvatarURL : member.avatarURL;
+    let url: string | undefined = $state();
+    run(() => {
+        if (masquerade?.avatar) {
+            url = client.proxyFile(masquerade.avatar);
+        } else if (override) {
+            url = override;
+        } else if (!url) {
+            let memberAvatarUrl;
+            if (target && showServerIdentity) {
+                const server = $page.params.server;
+                if (server) {
+                    const member = client.serverMembers.getByKey({server, user: target.id});
+                    if (member?.avatar) {
+                        memberAvatarUrl = animate ? member.animatedAvatarURL : member.avatarURL;
+                    }
                 }
             }
+            let avatarUrl = animate ? target?.animatedAvatarURL : target?.avatarURL;
+            url = memberAvatarUrl || avatarUrl || attachment?.createFileURL(animate) || fallback;
         }
-        let avatarUrl = animate ? target?.animatedAvatarURL : target?.avatarURL;
-        url = memberAvatarUrl || avatarUrl || attachment?.createFileURL(animate) || fallback;
-    }
+    });
 </script>
 
 <IconBase
@@ -66,7 +89,7 @@
     aria-hidden
     viewBox="0 0 32 32"
     {onClick}
-    {...$$restProps}
+    {...rest}
 >
     <foreignObject
         x="0"

@@ -1,35 +1,41 @@
 <!--Experimental: Replace Modal by ContentDialog-->
 <script lang="ts">
+    import { run } from 'svelte/legacy';
+
     import type { Action } from "$lib/types/Modal";
     import { ContentDialog }  from "fluent-svelte";
     import H4 from "../atoms/heading/H4.svelte";
     import { cx } from "@emotion/css";
     import Button from "../atoms/Button.svelte";
-    export let open = true,
+    interface Props {
+        open?: boolean;
+        disabled?: boolean;
+        nonDismissable?: boolean;
+        title?: string | undefined;
+        onClose?: (force: boolean) => void;
+        actions?: Action[];
+        signal?: "close" | "confirm" | "force" | undefined;
+        registerOnClose?: (fn: () => void) => () => void;
+        registerOnConfirm?: (fn: () => void) => () => void;
+        description?: import('svelte').Snippet;
+        children?: import('svelte').Snippet;
+        [key: string]: any
+    }
+
+    let {
+        open = $bindable(true),
         disabled = false,
         nonDismissable = false,
-        title: string | undefined = undefined,
-        onClose: (force: boolean) => void = function () {},
-        actions: Action[] = [],
-        signal: "close" | "confirm" | "force" | undefined = undefined,
-        registerOnClose: (fn: () => void) => () => void = (fn) => fn,
-        registerOnConfirm: (fn: () => void) => () => void = (fn) => fn;
-    $: closeModal = function () {
-        setTimeout(function () {
-            open = false;
-            onClose(true);
-        }, 10);
-        console.log("[closeModal] Closing modal");
-    };
-    $: if (signal == "confirm") {
-        signal = undefined;
-        confirm();
-    } else if (signal) {
-        const cannotClose = signal == "close" && nonDismissable;
-        if (!cannotClose) {
-            closeModal();
-        }
-    }
+        title = undefined,
+        onClose = function () {},
+        actions = [],
+        signal = $bindable(undefined),
+        registerOnClose = (fn) => fn,
+        registerOnConfirm = (fn) => fn,
+        description,
+        children,
+        ...rest
+    }: Props = $props();
     async function confirm() {
         const action = actions.find((x) => x.confirmation);
         const success = await action?.onClick?.();
@@ -38,13 +44,35 @@
             console.log("[confirm] Closing modal");
         }
     }
-    $: registerOnClose(closeModal);
-    $: registerOnConfirm(confirm);
+    let closeModal = $derived(function () {
+        setTimeout(function () {
+            open = false;
+            onClose(true);
+        }, 10);
+        console.log("[closeModal] Closing modal");
+    });
+    run(() => {
+        if (signal == "confirm") {
+            signal = undefined;
+            confirm();
+        } else if (signal) {
+            const cannotClose = signal == "close" && nonDismissable;
+            if (!cannotClose) {
+                closeModal();
+            }
+        }
+    });
+    run(() => {
+        registerOnClose(closeModal);
+    });
+    run(() => {
+        registerOnConfirm(confirm);
+    });
 </script>
 
-<ContentDialog bind:open {title} {...$$restProps} closable={!nonDismissable} on:close={closeModal}>
-    <H4><slot name="description" /></H4>
-    <slot />
+<ContentDialog bind:open {title} {...rest} closable={!nonDismissable} on:close={closeModal}>
+    <H4>{@render description?.()}</H4>
+    {@render children?.()}
     {#if actions.length}
         <div class={cx("Actions")}>
             {#each actions as action}

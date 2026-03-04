@@ -1,4 +1,6 @@
 <script lang="ts">
+    import { run } from 'svelte/legacy';
+
     import { getRenderer } from "$lib/rendered/Singleton";
     import type { Channel, Message } from "stoat.js";
     import Reply from "./Reply.svelte";
@@ -10,22 +12,31 @@
     import { state } from "$lib/State";
     import { useClient } from "$lib/controllers/ClientController";
 
-    export let index: number,
-        channel: Channel | undefined = undefined,
-        id: string,
+    interface Props {
+        index: number;
+        channel?: Channel | undefined;
+        id: string;
         mentions: string[];
-    $: view = channel && getRenderer(channel, state);
-    let message: Message | undefined;
+    }
+
+    let {
+        index,
+        channel = undefined,
+        id,
+        mentions
+    }: Props = $props();
+    let view = $derived(channel && getRenderer(channel, state));
+    let message: Message | undefined = $state();
     let client = useClient();
 
-    $: {
+    run(() => {
         const msg = client.messages.get(id);
         if (msg) {
             message = msg;
         } else {
             channel?.fetchMessage(id).then((_message) => (message = _message));
         }
-    }
+    });
 
     if (view?.state == "RENDER") {
     }

@@ -1,7 +1,12 @@
 <script lang="ts">
     import { css, cx } from "@emotion/css";
 
-    export let unread = false, date = '';
+    interface Props {
+        unread?: boolean;
+        date?: string;
+    }
+
+    let { unread = false, date = '' }: Props = $props();
     const Base = cx('MessageDivider', css`
         display: flex;
         align-items: center;

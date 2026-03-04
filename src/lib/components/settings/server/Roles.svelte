@@ -1,7 +1,11 @@
 <script lang="ts">
     import type { Server } from "stoat.js";
     import PermissionsLayout from "../permissions/PermissionsLayout.svelte";
-    export let server: Server;
+    interface Props {
+        server: Server;
+    }
+
+    let { server }: Props = $props();
 </script>
 
 <PermissionsLayout {server} />

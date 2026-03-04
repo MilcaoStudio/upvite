@@ -1,15 +1,19 @@
 <script lang="ts">
     import { css, cx } from "@emotion/css";
 
-    export let overlay = false;
-    $: TitlebarBase = cx(
+    interface Props {
+        overlay?: boolean;
+    }
+
+    let { overlay = false }: Props = $props();
+    let TitlebarBase = $derived(cx(
         "TitlebarBase",
         overlay &&
             css`
                 position: fixed;
                 width: 100%;
             `,
-    );
+    ));
 </script>
 
 <div class={TitlebarBase}>
@@ -24,19 +28,19 @@
             />
         </svg>
     </div>
-    <div class="drag" />
+    <div class="drag"></div>
     <!-- Audio control actions -->
 
     <!-- Window controls -->
     <div class="actions">
-        <!-- svelte-ignore a11y-no-static-element-interactions -->
-        <div on:click={window.native.min} on:keydown={window.native.min}>
+        <!-- svelte-ignore a11y_no_static_element_interactions -->
+        <div onclick={window.native.min} onkeydown={window.native.min}>
             <svg aria-hidden="false" width="12" height="12" viewBox="0 0 12 12">
                 <rect fill="currentColor" width="10" height="1" x="1" y="6" />
             </svg>
         </div>
-        <!-- svelte-ignore a11y-no-static-element-interactions -->
-        <div on:click={window.native.max} on:keydown={window.native.max}>
+        <!-- svelte-ignore a11y_no_static_element_interactions -->
+        <div onclick={window.native.max} onkeydown={window.native.max}>
             <svg aria-hidden="false" width="12" height="12" viewBox="0 0 12 12">
                 <rect
                     width="9"
@@ -48,10 +52,10 @@
                 />
             </svg>
         </div>
-        <!-- svelte-ignore a11y-no-static-element-interactions -->
+        <!-- svelte-ignore a11y_no_static_element_interactions -->
         <div
-            on:click={window.native.close}
-            on:keydown={window.native.close}
+            onclick={window.native.close}
+            onkeydown={window.native.close}
             class="error"
         >
             <svg aria-hidden="false" width="12" height="12" viewBox="0 0 12 12">

@@ -1,11 +1,17 @@
 <script lang="ts">
     import type { ChangeEventHandler } from "svelte/elements";
 
-    export let onChange: ChangeEventHandler<HTMLSelectElement> | null = null;
+    interface Props {
+        onChange?: ChangeEventHandler<HTMLSelectElement> | null;
+        children?: import('svelte').Snippet;
+        [key: string]: any
+    }
+
+    let { onChange = null, children, ...rest }: Props = $props();
 </script>
 
-<select class="ComboBox" on:change={onChange} {...$$restProps}>
-    <slot />
+<select class="ComboBox" onchange={onChange} {...rest}>
+    {@render children?.()}
 </select>
 
 <style>

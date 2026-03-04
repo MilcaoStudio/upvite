@@ -3,16 +3,21 @@
     import type { RichText } from "./types";
     import MentionLeaf from "./MentionLeaf.svelte";
     import EmojiLeaf from "./EmojiLeaf.svelte";
-    export let leaf: IText & RichText;
+    interface Props {
+        leaf: IText & RichText;
+        children?: import('svelte').Snippet;
+    }
+
+    let { leaf, children }: Props = $props();
 </script>
 
 {#if leaf.type == "mention"}
     <MentionLeaf>
-        <slot />
+        {@render children?.()}
     </MentionLeaf>
 {:else if leaf.type == "emoji"}
     <EmojiLeaf {leaf}>
-        <slot />
+        {@render children?.()}
     </EmojiLeaf>
 {:else}
     <span
@@ -25,6 +30,6 @@
               ? "line-through"
               : "none"}
     >
-        <slot />
+        {@render children?.()}
     </span>
 {/if}

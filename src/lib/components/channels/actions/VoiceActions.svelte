@@ -1,4 +1,6 @@
 <script lang="ts">
+    import { run } from 'svelte/legacy';
+
     import IconButton from "$lib/components/atoms/input/IconButton.svelte";
     import PhoneCall from "svelte-boxicons/BxPhoneCall.svelte";
     import PhoneOff from "svelte-boxicons/BxPhoneOff.svelte";
@@ -7,10 +9,16 @@
     import { autorun } from "mobx";
     import { internalEmit } from "$lib/InternalEmitter";
 
-    export let channel: Channel;
-    let linkedRoom: string | null = null;
+    interface Props {
+        channel: Channel;
+    }
+
+    let { channel }: Props = $props();
+    let linkedRoom: string | null = $state(null);
     let status = voiceState.status;
-    $: autorun(()=> linkedRoom = voiceState.roomId)
+    run(() => {
+        autorun(()=> linkedRoom = voiceState.roomId)
+    });
 </script>
 
 {#if $status >= VoiceStatus.RTC_CONNECTING}

@@ -9,20 +9,37 @@
     import { _ } from "svelte-i18n";
     import JsxRender from "../JSXRender.svelte";
 
-    export let schema: FormTemplate,
-        data: MapFormToData<any>,
-        defaults: Partial<MapFormToValues<FormTemplate>> | undefined = undefined,
-        callback: (values: any)=>Promise<void>,
-        title: string | undefined = undefined,
-        submit: Omit<HTMLButtonAttributes, "type"> & ButtonProps & {children?: string} | undefined,
-        submitBtn: Omit<HTMLButtonAttributes, "type"> & {children?: string} | undefined = undefined,
-        actions: Action[] = [{
+    interface Props {
+        schema: FormTemplate;
+        data: MapFormToData<any>;
+        defaults?: Partial<MapFormToValues<FormTemplate>> | undefined;
+        callback: (values: any)=>Promise<void>;
+        title?: string | undefined;
+        submit: Omit<HTMLButtonAttributes, "type"> & ButtonProps & {children?: string} | undefined;
+        submitBtn?: Omit<HTMLButtonAttributes, "type"> & {children?: string} | undefined;
+        actions?: Action[];
+        description?: import('svelte').Snippet;
+        [key: string]: any
+    }
+
+    let {
+        schema,
+        data,
+        defaults = undefined,
+        callback,
+        title = undefined,
+        submit,
+        submitBtn = undefined,
+        actions = [{
             onClick: () => true,
             children: "Cancel",
             palette: "plain",
-        }];
-    let values: MapFormToValues<FormTemplate> = getInitialValues(schema, defaults);
-    let error = '', processing = false;
+        }],
+        description,
+        ...rest
+    }: Props = $props();
+    let values: MapFormToValues<FormTemplate> = $state(getInitialValues(schema, defaults));
+    let error = $state(''), processing = $state(false);
     
     async function onSubmit() {
         try {
@@ -41,7 +58,7 @@
     }
 </script>
 
-<Dialog {...$$restProps} {title} disabled={processing} actions={[
+<Dialog {...rest} {title} disabled={processing} actions={[
     {
         onClick: onSubmit,
         children: "Submit",
@@ -50,9 +67,13 @@
     },
     ...actions,
 ]}>
-    <svelte:fragment slot="description"><slot name="description" /></svelte:fragment>
+    {#snippet description()}
+        {@render description?.()}
+    {/snippet}
     <Form schema={schema} data={data} defaults={defaults} submitBtn={submitBtn} observed={values} {onChange} >
-        <svelte:fragment slot="submit">{submitBtn?.children}</svelte:fragment>
+        {#snippet submit()}
+                {submitBtn?.children}
+            {/snippet}
         {#each Object.keys(schema) as key}
             {#if schema[key] == "custom"}
                 <JsxRender node={data[key].element} />

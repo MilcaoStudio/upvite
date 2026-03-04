@@ -1,24 +1,38 @@
 <script lang="ts">
+    import { run } from 'svelte/legacy';
+
     import { type Permission, type Channel, Server, type API } from "stoat.js";
     import Long from "long";
     import OverrideSwitch from "$lib/components/atoms/input/OverrideSwitch.svelte";
     import type { SwitchState } from "$lib/types/Form";
     import PermissionEntry from "../permissions/PermissionEntry.svelte";
 
-    export let id: keyof typeof Permission,
-        target: Channel | Server,
-        permission: bigint,
-        value: {a: bigint, d: bigint},
+    interface Props {
+        id: keyof typeof Permission;
+        target: Channel | Server;
+        permission: bigint;
+        value: {a: bigint, d: bigint};
         onChange: (value: {a: bigint, d: bigint}) => void;
-
-    let state: SwitchState = "Neutral";
-    $: if (Long.fromBigInt(value.d).and(permission).eq(permission)) {
-        state = "Deny";
-    } else if (Long.fromBigInt(value.a).and(permission).eq(permission)) {
-        state = "Allow";
-    } else {
-        state = "Neutral";
     }
+
+    let {
+        id,
+        target,
+        permission,
+        value,
+        onChange
+    }: Props = $props();
+
+    let state: SwitchState = $state("Neutral");
+    run(() => {
+        if (Long.fromBigInt(value.d).and(permission).eq(permission)) {
+            state = "Deny";
+        } else if (Long.fromBigInt(value.a).and(permission).eq(permission)) {
+            state = "Allow";
+        } else {
+            state = "Neutral";
+        }
+    });
 
     function onSwitch(state: SwitchState) {
         if (typeof value != "object")
@@ -54,8 +68,8 @@
         });
     }
 
-    $: member = target && (target instanceof Server ? target.member : target.server?.member);
-    $: disabled = member && !(member.hasPermission(target!, id) && member.hasPermission(target!, "ManageRole"));
+    let member = $derived(target && (target instanceof Server ? target.member : target.server?.member));
+    let disabled = $derived(member && !(member.hasPermission(target!, id) && member.hasPermission(target!, "ManageRole")));
 </script>
 
 <PermissionEntry {disabled} {id}>

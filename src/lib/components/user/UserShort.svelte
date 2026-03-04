@@ -5,11 +5,23 @@
     import UserIcon from "./UserIcon.svelte";
     import Username from "./Username.svelte";
 
-    export let user: User | undefined = undefined,
+    interface Props {
+        user?: User | undefined;
+        size?: number;
+        prefixAt?: boolean;
+        masquerade?: API.Masquerade | null;
+        showServerIdentity?: boolean;
+        [key: string]: any
+    }
+
+    let {
+        user = undefined,
         size = 20,
         prefixAt = false,
-        masquerade: API.Masquerade | null = null,
-        showServerIdentity = false;
+        masquerade = null,
+        showServerIdentity = false,
+        ...rest
+    }: Props = $props();
     const openProfile = () =>
         user &&
         modalController.push({ type: "user_profile", user_id: user.id });
@@ -23,7 +35,7 @@
     };
 </script>
 
-<div {...$$restProps}>
+<div {...rest}>
     <UserIcon
         target={user}
         size={size ?? 24}

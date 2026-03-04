@@ -6,10 +6,14 @@
     import X from "svelte-boxicons/BxXCircle.svelte";
     import EmptyEntry from "./EmptyEntry.svelte";
 
-    export let file: File,
-        remove: (() => void) | null = null,
+    interface Props {
+        file: File;
+        remove?: (() => void) | null;
         index: number;
-    let url = "";
+    }
+
+    let { file, remove = null, index }: Props = $props();
+    let url = $state("");
     onMount(() => {
         if (file.type.startsWith("image/")) {
             url = URL.createObjectURL(file);
@@ -19,7 +23,7 @@
 </script>
 
 <div class="Entry" class:fade={index >= CAN_UPLOAD_AT_ONCE}>
-    <button class="PreviewBox" on:click={remove}>
+    <button class="PreviewBox" onclick={remove}>
         {#if file.type.startsWith("image/")}
             <img class="icon" src={url} alt={file.name} loading="eager" />
         {:else}

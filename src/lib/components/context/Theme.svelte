@@ -1,4 +1,4 @@
-<script context="module" lang="ts">
+<script module lang="ts">
     export type Variables =
     | "accent"
     | "background"
@@ -312,15 +312,19 @@ export const PRESETS: Record<string, Theme> = {
 </script>
 
 <script lang="ts">
+    import { run } from 'svelte/legacy';
+
     import { state } from "$lib/State";
     import { settings } from "$lib/stores/Settings";
     import { autorun } from "mobx";
 
     const theme = settings.theme;
     const root = document.documentElement.style;
-    let css = "";
-    $: autorun(() => {
-        css = theme.getCSS() ?? "";
+    let css = $state("");
+    run(() => {
+        autorun(() => {
+            css = theme.getCSS() ?? "";
+        });
     });
     autorun(() => {
         const font = theme.getFont() ?? DEFAULT_FONT;
@@ -350,9 +354,11 @@ export const PRESETS: Record<string, Theme> = {
     function onResize() {
     }
 
-    let variables = theme.computeVariables();
-    $: autorun(() => {
-        variables = theme.computeVariables();
+    let variables = $state(theme.computeVariables());
+    run(() => {
+        autorun(() => {
+            variables = theme.computeVariables();
+        });
     });
 
     state.layout.setViewport();

@@ -5,9 +5,13 @@
     import { modalController } from "$lib/components/modals/ModalController";
     import RoleEditorForServer from "../server/RoleEditorForServer.svelte";
 
-    export let channel: Channel | undefined = undefined,
-        server = channel?.server;
-    let selected = "default";
+    interface Props {
+        channel?: Channel | undefined;
+        server?: any;
+    }
+
+    let { channel = undefined, server = channel?.server }: Props = $props();
+    let selected = $state("default");
 </script>
 
 {#if server}

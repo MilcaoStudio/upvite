@@ -1,4 +1,6 @@
 <script lang="ts">
+    import { run } from 'svelte/legacy';
+
     import AutoComplete, {
         useAutoComplete,
     } from "$lib/components/Autocomplete.svelte";
@@ -14,17 +16,19 @@
     const session = useSession()!;
     const client = session.client!;
     const user = client.user!;
-    let profile: UserProfile | undefined;
+    let profile: UserProfile | undefined = $state();
     let profileContent: string | undefined;
     async function refreshProfile() {
         const result = await user.fetchProfile();
         profile = result;
         profileContent = result.content;
     }
-    $: autorun(() => {
-        if (!profile && session._state == "Online") {
-            refreshProfile();
-        }
+    run(() => {
+        autorun(() => {
+            if (!profile && session._state == "Online") {
+                refreshProfile();
+            }
+        });
     });
 
     function setContent(content?: string) {

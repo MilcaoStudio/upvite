@@ -7,7 +7,11 @@
     import DialogForm from "./DialogForm.svelte";
 
     // export let props: ModalProps<"create_server"> = $props(); 
-    export let props: ModalProps<"create_server">
+    interface Props {
+        props: ModalProps<"create_server">;
+    }
+
+    let { props }: Props = $props();
     const client = useClient();
 
 </script>
@@ -23,13 +27,15 @@
     data={{name: {field: $_('app.main.servers.name')}}}
     submit={{children: $_('app.special.modals.actions.create')}}
     title={$_('app.main.servers.create')} >
-    <div slot="description">
-        By creating this server, you agree to the{" "}
-        <a
-            href="http://localhost"
-            target="_blank"
-            rel="noreferrer">
-                Acceptable Use Policy.
-        </a>
-    </div>
+    {#snippet description()}
+        <div >
+            By creating this server, you agree to the{" "}
+            <a
+                href="http://localhost"
+                target="_blank"
+                rel="noreferrer">
+                    Acceptable Use Policy.
+            </a>
+        </div>
+    {/snippet}
 </DialogForm>

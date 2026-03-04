@@ -16,7 +16,8 @@
     unfriend_user: ["unfriend_user", "remove"],
     block_user: ["block_user", "block"],
   };
-  export let props: ModalProps<
+  interface Props {
+    props: ModalProps<
     | "close_dm"
     | "delete_server"
     | "delete_channel"
@@ -24,8 +25,11 @@
     | "block_user"
     | "unfriend_user"
   >;
+  }
+
+  let { props }: Props = $props();
   const event = EVENTS[props.type];
-  let name: string | undefined | null;
+  let name: string | undefined | null = $state();
   switch (props.type) {
     case "unfriend_user":
     case "block_user":
@@ -73,9 +77,11 @@
     children: $t(`app.special.modals.actions.${event[1]}`),
   }}
 >
-  <TextSvelte
-    id="app.special.modals.prompt.{event[0]}_long"
-    fields={{ name: createElement("b", null, name) }}
-    slot="description"
-  />
+  {#snippet description()}
+    <TextSvelte
+      id="app.special.modals.prompt.{event[0]}_long"
+      fields={{ name: createElement("b", null, name) }}
+      
+    />
+  {/snippet}
 </DialogForm>

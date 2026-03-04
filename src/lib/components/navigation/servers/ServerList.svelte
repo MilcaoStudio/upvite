@@ -7,11 +7,21 @@
     import ListFooter from "./ListFooter.svelte";
     import ListHeader from "./ListHeader.svelte";
 
-    export let active: string | undefined = undefined;
-    export let createServer: ()=>void,
-        home: () => string = ()=>"/",
-        servers: Server[],
+    interface Props {
+        active?: string | undefined;
+        createServer: ()=>void;
+        home?: () => string;
+        servers: Server[];
         reorder: (items: Server[]) => void;
+    }
+
+    let {
+        active = undefined,
+        createServer,
+        home = ()=>"/",
+        servers,
+        reorder
+    }: Props = $props();
     const Base = cx(
         "ServerList",
         css`
@@ -49,13 +59,13 @@
     <ListFooter {createServer}/>
     <div
         use:dndzone={{ items: servers }}
-        on:finalize={useCustomReorder(reorder)}
+        onfinalize={useCustomReorder(reorder)}
     >
         {#each servers as server (server.id)}
             <Item item={server} active={server.id == active} />
         {/each}
     </div>
     
-    <div class={Shadow}><div /></div>
+    <div class={Shadow}><div></div></div>
     <!--TODO: Settings icon-->
 </div>

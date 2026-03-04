@@ -3,8 +3,11 @@
     import Button from "../atoms/Button.svelte";
     import TextSvelte from "$lib/i18n/TextSvelte.svelte";
 
-    export let email: string;
-    $: providerData = mapMailProvider(email);
+    interface Props {
+        email: string;
+    }
+
+    let { email }: Props = $props();
     let [name, url] = providerData ?? [null, null];
     function mapMailProvider(email: string): [string, string] | null {
         if (typeof email != "string") {
@@ -102,6 +105,7 @@
                 return [domain, `https://${domain}`];
         }
     }
+    let providerData = $derived(mapMailProvider(email));
 </script>
 
 {#if name && url}

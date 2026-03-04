@@ -3,7 +3,11 @@
     import { useClient } from "$lib/components/mock/MockClient";
     import MockServerTextChannel from "$lib/components/mock/MockServerTextChannel.svelte";
 
-    export let data;
+    interface Props {
+        data: any;
+    }
+
+    let { data }: Props = $props();
     let channel = useClient().channels.get(data.channel_id);
 </script>
 

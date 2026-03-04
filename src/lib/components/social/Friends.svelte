@@ -1,4 +1,6 @@
 <script lang="ts">
+    import { run } from 'svelte/legacy';
+
     import { useClient } from "$lib/controllers/ClientController";
     import { autorun } from "mobx";
     import PageHeader from "../atoms/PageHeader.svelte";
@@ -14,21 +16,25 @@
     import { isTouchscreenDevice } from "$lib";
 
     const client = useClient();
-    let users = [...client.users.values()];
-    $: autorun(() => {
-        users = [...client.users.values()];
+    let users = $state([...client.users.values()]);
+    run(() => {
+        autorun(() => {
+            users = [...client.users.values()];
+        });
     });
-    $: users.sort((a, b) => a.username.localeCompare(b.username));
-    $: friends = users.filter((x) => x.relationship == "Friend");
-    $: online = friends.filter((x) => x.online && x.status?.presence != "Invisible");
-    $: offline = friends.filter((x) => !x.online || x.status?.presence == "Invisible");
-    $: incoming = users.filter((x) => x.relationship == "Incoming");
-    $: outgoing = users.filter((x) => x.relationship == "Outgoing");
-    $: isEmpty =
-        [friends, incoming, outgoing].reduce(
+    run(() => {
+        users.sort((a, b) => a.username.localeCompare(b.username));
+    });
+    let friends = $derived(users.filter((x) => x.relationship == "Friend"));
+    let online = $derived(friends.filter((x) => x.online && x.status?.presence != "Invisible"));
+    let offline = $derived(friends.filter((x) => !x.online || x.status?.presence == "Invisible"));
+    let incoming = $derived(users.filter((x) => x.relationship == "Incoming"));
+    let outgoing = $derived(users.filter((x) => x.relationship == "Outgoing"));
+    let isEmpty =
+        $derived([friends, incoming, outgoing].reduce(
             (p: number, n) => p + n.length,
             0,
-        ) == 0;
+        ) == 0);
 </script>
 
 

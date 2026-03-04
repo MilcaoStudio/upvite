@@ -2,7 +2,13 @@
     import { isTouchscreenDevice } from "$lib";
     import { css, cx } from "@emotion/css";
 
-    export let position: "top" | "bottom", accent = false;
+    interface Props {
+        position: "top" | "bottom";
+        accent?: boolean;
+        children?: import('svelte').Snippet;
+    }
+
+    let { position, accent = false, children }: Props = $props();
     const Bar = cx('Bar', css`
         z-index: 1;
         position: relative;
@@ -98,4 +104,4 @@
     `);
 </script>
 
-<div class={Bar}><slot /></div>
+<div class={Bar}>{@render children?.()}</div>

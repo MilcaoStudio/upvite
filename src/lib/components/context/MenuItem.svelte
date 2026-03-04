@@ -1,7 +1,13 @@
 <script lang="ts">
     import { getContext } from "svelte";
 
-    export let data: unknown, disabled = false;
+    interface Props {
+        data: unknown;
+        disabled?: boolean;
+        children?: import('svelte').Snippet;
+    }
+
+    let { data, disabled = false, children }: Props = $props();
     let callback = getContext<(data: unknown)=>void>("Menu");
     let onClick = function<T>(ev: Event, fn: ((data: T)=>void) | undefined, data: T) {
         if (disabled) {
@@ -15,6 +21,6 @@
     }
 </script>
 
-<button on:click={(ev)=>{onClick(ev, callback, data)}}>
-    <slot />
+<button onclick={(ev)=>{onClick(ev, callback, data)}}>
+    {@render children?.()}
 </button>

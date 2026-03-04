@@ -5,7 +5,11 @@
     import { noopTrue } from "$lib";
 
     // export let props: ModalProps<"clipboard"> = $props();
-    export let props: ModalProps<"clipboard">;
+    interface Props {
+        props: ModalProps<"clipboard">;
+    }
+
+    let { props }: Props = $props();
 </script>
 
 <Dialog
@@ -19,11 +23,13 @@
         },
     ]}
 >
-    <svelte:fragment slot="description">
-        {#if location.protocol != "https:"}
-            {$t("app.special.modals.clipboard.https")}
-        {/if}
-    </svelte:fragment>
+    {#snippet description()}
+    
+            {#if location.protocol != "https:"}
+                {$t("app.special.modals.clipboard.https")}
+            {/if}
+        
+    {/snippet}
     {$t("app.special.modals.clipboard.copy")}
     <code style:user-select="all" style:word-break="break-all">
         {props.text}

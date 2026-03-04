@@ -1,9 +1,12 @@
 <script lang="ts">
+    import { handlers } from 'svelte/legacy';
+
     import { css } from "@emotion/css";
     import { createEventDispatcher } from "svelte";
     import type { HTMLButtonAttributes } from "svelte/elements";
 
-    export let props: HTMLButtonAttributes & {
+    interface Props {
+        props?: HTMLButtonAttributes & {
         compact?: boolean | 'icon',
         palette?: 
         | "primary"
@@ -13,7 +16,20 @@
         | "accent"
         | "success"
         | "warning"
-        | "error"} = { compact: false, palette: 'primary' }, palette = "primary", onClick: (()=>void) | null = null
+        | "error"};
+        palette?: string;
+        onClick?: (()=>void) | null;
+        children?: import('svelte').Snippet;
+        [key: string]: any
+    }
+
+    let {
+        props = { compact: false, palette: 'primary' },
+        palette = $bindable("primary"),
+        onClick = null,
+        children,
+        ...rest
+    }: Props = $props();
 
     const { compact } = props;
     
@@ -21,7 +37,7 @@
 
     let dispatch = createEventDispatcher();
 
-    $: buttonStyle = css`
+    let buttonStyle = $derived(css`
         align-items:center;
         box-sizing:border-box;
         display:inline-flex;
@@ -129,10 +145,10 @@
                     &:active {
                         background: var(--secondary-background);
                     }`
-        }})()}`;
+        }})()}`);
     
 </script>
 
-<button class={buttonStyle} {...props} on:click={()=>dispatch('click')} on:click={onClick} {...$$restProps}>
-    <slot />
+<button class={buttonStyle} {...props} onclick={handlers(()=>dispatch('click'), onClick)} {...rest}>
+    {@render children?.()}
 </button>

@@ -3,7 +3,11 @@
     import ChannelName from "../channels/ChannelName.svelte";
     import { _ } from "svelte-i18n";
 
-    export let channel: Channel;
+    interface Props {
+        channel: Channel;
+    }
+
+    let { channel }: Props = $props();
 </script>
 
 <div class="Start">

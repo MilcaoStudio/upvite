@@ -1,7 +1,13 @@
 <script lang="ts">
     import { css, cx } from "@emotion/css";
 
-    export let click = false, showAlways = false;
+    interface Props {
+        click?: boolean;
+        showAlways?: boolean;
+        children?: import('svelte').Snippet;
+    }
+
+    let { click = false, showAlways = false, children }: Props = $props();
     const Info = cx('MessageInfo', css`
         width: 62px;
         display: flex;
@@ -60,5 +66,5 @@
 </script>
 
 <div class={Info}>
-    <slot />
+    {@render children?.()}
 </div>

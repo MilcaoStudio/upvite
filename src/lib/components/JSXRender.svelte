@@ -1,9 +1,15 @@
 <script lang="ts">
+    import JSXRender from './JSXRender.svelte';
     import type { SvelteNode } from "$lib/markdown/runtime/svelteRuntime";
 
-    export let node: SvelteNode;
-    $: props = typeof node == "object" && node?.props || null;
-    $: children = props?.children ? Array.isArray(props.children) ? props.children : [props.children] : undefined;
+    interface Props {
+        node: SvelteNode;
+        children?: import('svelte').Snippet;
+    }
+
+    let { node, children }: Props = $props();
+    let props = $derived(typeof node == "object" && node?.props || null);
+    let children = $derived(props?.children ? Array.isArray(props.children) ? props.children : [props.children] : undefined);
 </script>
 
 {#if node}
@@ -14,7 +20,7 @@
             {#if children}
                 <svelte:element this={node.type} {...node.props} >
                     {#each children as child}
-                        <svelte:self node={child} />
+                        <JSXRender node={child} />
                     {/each}
                 </svelte:element>
             {:else}
@@ -22,14 +28,14 @@
             {/if}
         {:else}
             {#if children}
-                <svelte:component this={node.type} {...node.props} >
+                <node.type {...node.props} >
                     {#each children as child}
-                        <svelte:self node={child} />
+                        <JSXRender node={child} />
                     {/each}
-                    <slot />
-                </svelte:component>
+                    {@render children?.()}
+                </node.type>
             {:else}
-                <svelte:component this={node.type} {...node.props} />
+                <node.type {...node.props} />
             {/if}
         {/if}
     {/if}

@@ -1,4 +1,6 @@
 <script lang="ts">
+    import { run } from 'svelte/legacy';
+
     import { API, Message as IMessage } from "stoat.js";
     import { createElement, type SvelteElement } from "$lib/markdown/runtime/svelteRuntime";
     import type { ChannelRenderer } from "$lib/rendered/Singleton";
@@ -19,17 +21,21 @@
     import Start from "../messaging/Start.svelte";
     import JSXRender from "../JSXRender.svelte";
 
-    export let lastId: string | undefined = undefined,
-        renderer: ChannelRenderer,
-        highlight: string | undefined = undefined;
+    interface Props {
+        lastId?: string | undefined;
+        renderer: ChannelRenderer;
+        highlight?: string | undefined;
+    }
+
+    let { lastId = undefined, renderer, highlight = undefined }: Props = $props();
     let client = useClient();
     let userId = client.user!.id;
     let queue = new MessageQueue;
-    let render: SvelteElement[] = [];
+    let render: SvelteElement[] = $state([]);
     let previous: IMessage | undefined;
     let head = true;
     let divided = false;
-    let editing: string | null = null;
+    let editing: string | null = $state(null);
     function stopEditing() {
         editing = null;
         internalEmit("TextArea", "focus", "message");
@@ -97,32 +103,8 @@
         blocked = 0;
     }
 
-    $: autorun(() => {
-        function editLast() {
-            if (renderer.state != "RENDER") return;
-            for (let i = renderer.messages.length - 1; i >= 0; i--) {
-                if (renderer.messages[i].authorId == userId) {
-                    editing = renderer.messages[i].id;
-                    internalEmit("MessageArea", "jump_to_bottom");
-                    return;
-                }
-            }
-        }
 
-        const subs = [
-            internalSubscribe("MessageRenderer", "edit_last", editLast),
-            internalSubscribe(
-                "MessageRenderer",
-                "edit_message",
-                (e) => (editing = e as string),
-            ),
-        ];
-        return () => subs.forEach((unsub) => unsub());
-    });
 
-    $: autorun(renderMessages);
-
-    $: renderMessages(), editing;
 
     function renderMessages() {
         render = [];
@@ -202,6 +184,36 @@
                 );
             }
         }
+    });
+    run(() => {
+        autorun(() => {
+            function editLast() {
+                if (renderer.state != "RENDER") return;
+                for (let i = renderer.messages.length - 1; i >= 0; i--) {
+                    if (renderer.messages[i].authorId == userId) {
+                        editing = renderer.messages[i].id;
+                        internalEmit("MessageArea", "jump_to_bottom");
+                        return;
+                    }
+                }
+            }
+
+            const subs = [
+                internalSubscribe("MessageRenderer", "edit_last", editLast),
+                internalSubscribe(
+                    "MessageRenderer",
+                    "edit_message",
+                    (e) => (editing = e as string),
+                ),
+            ];
+            return () => subs.forEach((unsub) => unsub());
+        });
+    });
+    run(() => {
+        autorun(renderMessages);
+    });
+    run(() => {
+        renderMessages(), editing;
     });
 </script>
 

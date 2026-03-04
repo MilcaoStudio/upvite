@@ -3,13 +3,27 @@
     import { t } from "svelte-i18n";
     import type { ChangeEventHandler } from "svelte/elements";
 
-    let className: string | null = "";
-    export {className as class};
-    export let palette: "primary" | "secondary" = "primary", onChange: ChangeEventHandler<HTMLInputElement> = function(){}, 
-        type: HTMLInputElement["type"], padding=true;
-    let showPassword = false;
-    $: revealText = showPassword ? $t("app.special.modals.actions.hide") : $t("app.special.modals.actions.reveal");
-    $: InputBox = cx(
+    
+    interface Props {
+        class?: string | null;
+        palette?: "primary" | "secondary";
+        onChange?: ChangeEventHandler<HTMLInputElement>;
+        type: HTMLInputElement["type"];
+        padding?: boolean;
+        [key: string]: any
+    }
+
+    let {
+        class: className = "",
+        palette = "primary",
+        onChange = function(){},
+        type = $bindable(),
+        padding = true,
+        ...rest
+    }: Props = $props();
+    let showPassword = $state(false);
+    let revealText = $derived(showPassword ? $t("app.special.modals.actions.hide") : $t("app.special.modals.actions.reveal"));
+    let InputBox = $derived(cx(
         "InputBox",
         css`
             width: 100%;
@@ -46,7 +60,7 @@
                 };
             }
         }`, 
-    );
+    ));
 
     function togglePasswordReveal() {
         showPassword = !showPassword;
@@ -57,16 +71,16 @@
 
 <!--TextBox is not recommended because it does not listen to change events-->
 <div class="text-box-container">
-    <input class="{InputBox} {className}" {type} {...$$restProps} on:change={onChange} on:keyup={onChange}  />
+    <input class="{InputBox} {className}" {type} {...rest} onchange={onChange} onkeyup={onChange}  />
     {#if type == "password" || type == "spy"}
-        <!-- svelte-ignore a11y-no-static-element-interactions -->
-        <!-- svelte-ignore a11y-missing-attribute -->
+        <!-- svelte-ignore a11y_no_static_element_interactions -->
+        <!-- svelte-ignore a11y_missing_attribute -->
         <span class="eye">
-            <a on:click={togglePasswordReveal} on:keydown={togglePasswordReveal}>{revealText}</a>
+            <a onclick={togglePasswordReveal} onkeydown={togglePasswordReveal}>{revealText}</a>
         </span>
         
     {/if}
-    <div class="text-box-underline" />
+    <div class="text-box-underline"></div>
 </div>
 
 <style>

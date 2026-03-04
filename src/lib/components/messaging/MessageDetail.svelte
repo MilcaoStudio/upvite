@@ -6,7 +6,12 @@
     import { t } from "svelte-i18n";
     import { dayjs, type Dictionary } from "$lib/i18n";
 
-    export let message: Message, position: "left" | "top";
+    interface Props {
+        message: Message;
+        position: "left" | "top";
+    }
+
+    let { message, position }: Props = $props();
     const dict = getContext<Dictionary>("dictionary");
 </script>
 

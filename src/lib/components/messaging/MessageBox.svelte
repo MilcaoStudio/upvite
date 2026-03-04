@@ -1,4 +1,6 @@
 <script lang="ts">
+    import { run } from 'svelte/legacy';
+
     import { dayjs } from "$lib/i18n";
     import TextSvelte from "$lib/i18n/TextSvelte.svelte";
     import { _ } from "svelte-i18n";
@@ -42,17 +44,18 @@
     import { orderingStore } from "$lib/stores/Ordering";
     import TextAreaAutoSize from "../atoms/TextAreaAutoSize.svelte";
 
-    export let channel: Channel,
-        mock = false;
+    interface Props {
+        channel: Channel;
+        mock?: boolean;
+    }
+
+    let { channel, mock = false }: Props = $props();
     const client = mock ? useMockClient() : useClient();
-    let uploadState: UploadState = { type: "none" };
-    let replies: Reply[] = [];
+    let uploadState: UploadState = $state({ type: "none" });
+    let replies: Reply[] = $state([]);
     let typing = 0;
 
-    let value = "";
-    $: autorun(() => {
-        value = state.draft.get(channel.id)?.content ?? "";
-    });
+    let value = $state("");
     const Base = cx(
         "MessageBox",
         css`
@@ -147,7 +150,6 @@
         }
     }
 
-    $: debounceStopTyping = debounce(stopTyping, 1000);
     function stopTyping(force?: boolean) {
         if (mock) return;
         if (typing) {
@@ -566,33 +568,41 @@
 
     let servers = orderingStore.orderedServers;
 
-    let emojis: Record<string, EmojiInfo[]> = {};
-    let categories: EmojiCategory[] = [];
-    $: autorun(() => {
-        categories = [];
-        for (const server of $servers) {
-            // ! FIXME: add a separate map on each server for emoji
-            const list = [...client.emojis.values()]
-                .filter(
-                    (emoji) =>
-                        emoji.parent.type != "Detached" &&
-                        emoji.parent.id == server.id,
-                )
-                .map(({ id, name }) => ({ id, name }));
+    let emojis: Record<string, EmojiInfo[]> = $state({});
+    let categories: EmojiCategory[] = $state([]);
+    run(() => {
+        autorun(() => {
+            value = state.draft.get(channel.id)?.content ?? "";
+        });
+    });
+    let debounceStopTyping = $derived(debounce(stopTyping, 1000));
+    run(() => {
+        autorun(() => {
+            categories = [];
+            for (const server of $servers) {
+                // ! FIXME: add a separate map on each server for emoji
+                const list = [...client.emojis.values()]
+                    .filter(
+                        (emoji) =>
+                            emoji.parent.type != "Detached" &&
+                            emoji.parent.id == server.id,
+                    )
+                    .map(({ id, name }) => ({ id, name }));
 
-            if (list.length) {
-                emojis[server.id] = list;
-                categories.push({
-                    id: server.id,
-                    name: server.name,
-                    iconURL: server.animatedIconURL,
-                });
+                if (list.length) {
+                    emojis[server.id] = list;
+                    categories.push({
+                        id: server.id,
+                        name: server.name,
+                        iconURL: server.animatedIconURL,
+                    });
+                }
             }
-        }
-        categories.push({
-            id: "default",
-            name: "Default",
-            emoji: "smiley",
+            categories.push({
+                id: "default",
+                name: "Default",
+                emoji: "smiley",
+            });
         });
     });
 </script>
@@ -777,12 +787,14 @@
                 <IconButton>
                     <BxHappyBeaming size={24} />
                 </IconButton>
-                <Picker
-                    {categories}
-                    {emojis}
-                    onSelect={(emoji) => append(`:${emoji}:`, "mention")}
-                    slot="override"
-                />
+                {#snippet override()}
+                                        <Picker
+                        {categories}
+                        {emojis}
+                        onSelect={(emoji) => append(`:${emoji}:`, "mention")}
+                        
+                    />
+                                    {/snippet}
             </Flyout>
         </div>
         <div class={Action}>

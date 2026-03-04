@@ -2,13 +2,19 @@
     import type { Channel } from "stoat.js";
     import ChannelHeader from "./ChannelHeader.svelte";
     import NewMessages from "../messaging/bars/NewMessages.svelte";
-    export let channel: Channel, lastId: string | undefined = undefined;
+    interface Props {
+        channel: Channel;
+        lastId?: string | undefined;
+        children?: import('svelte').Snippet;
+    }
+
+    let { channel, lastId = undefined, children }: Props = $props();
 </script>
 <div class="ChannelMain" data-component="channel">
     <ChannelHeader {channel} />
         <div class="ChannelContent">
             <NewMessages {channel} {lastId} />
-            <slot />
+            {@render children?.()}
         </div>
 </div>
 

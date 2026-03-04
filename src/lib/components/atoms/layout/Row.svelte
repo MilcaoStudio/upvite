@@ -1,7 +1,12 @@
 <script>
-    export let gap = "",
+    /** @type {{gap?: string, centred?: boolean, grow?: boolean, children?: import('svelte').Snippet, [key: string]: any}} */
+    let {
+        gap = "",
         centred = false,
-        grow = false;
+        grow = false,
+        children,
+        ...rest
+    } = $props();
 </script>
 
 <div
@@ -10,9 +15,9 @@
     style:align-items={centred ? "center" : ""}
     style:justify-content={centred ? "center": ""}
     style:flex-grow={grow ? "1" : ""}
-    {...$$restProps}
+    {...rest}
 >
-    <slot />
+    {@render children?.()}
 </div>
 
 <style>

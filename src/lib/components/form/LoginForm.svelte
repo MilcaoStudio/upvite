@@ -1,4 +1,6 @@
 <script lang="ts">
+    import { preventDefault } from 'svelte/legacy';
+
     import { takeError } from "$lib";
     import { clientController } from "$lib/controllers/ClientController";
     import { _, locale } from "svelte-i18n";
@@ -12,20 +14,21 @@
         password: string;
     }
 
-    export let type: "create" | "login" | "send_reset" | "reset" | "resend";
-    export let callback: (fields: {
+    interface Props {
+        type: "create" | "login" | "send_reset" | "reset" | "resend";
+        callback: (fields: {
         email: string;
         password: string;
         captcha?: string;
     }) => Promise<void>;
+        children?: import('svelte').Snippet;
+    }
+
+    let { type, callback, children }: Props = $props();
 
     const configuration = clientController.serverConfig;
-    let loading = false,
-        success: string | undefined,
-        error: string | undefined;
-    let email: string = "",
-        password = "";
-    $: onSubmit = async function () {
+    let loading = $state(false),
+        success: string | undefined = $derived(async function () {
         error = undefined;
         loading = true;
         function onError(err: unknown) {
@@ -40,7 +43,11 @@
         } catch (err) {
             onError(err);
         }
-    };
+    }),
+        error: string | undefined = $state();
+    let email: string = $state(""),
+        password = $state("");
+    
 </script>
 
 {#if success}
@@ -71,7 +78,7 @@
                 <div>(app.uprising.chat)</div>
             </div>
         </div>
-        <form on:submit|preventDefault={onSubmit}>
+        <form onsubmit={preventDefault(onSubmit)}>
             {#if type != "reset"}
                 <FormField type="email" showOverline bind:value={email} />
             {/if}
@@ -97,10 +104,10 @@
                 )}
             </Button>
         </form>
-        <slot>
+        {#if children}{@render children()}{:else}
             <span class="create">
                 <a href="/login">{$_("login.remembered")}</a>
             </span>
-        </slot>
+        {/if}
     </div>
 {/if}

@@ -13,21 +13,37 @@
     import BxX from "svelte-boxicons/BxX.svelte";
     import type { MouseEventHandler } from "svelte/elements";
 
-    export let active = false,
-        alert: "unread" | "mention" | null = null,
+    interface Props {
+        active?: boolean;
+        alert?: "unread" | "mention" | null;
+        alertCount?: number;
+        margin?: boolean;
+        muted?: boolean;
+        user: User | undefined;
+        context?: Channel | undefined;
+        channel?: Channel | undefined;
+        onClick?: MouseEventHandler<HTMLDivElement> | null;
+        [key: string]: any
+    }
+
+    let {
+        active = false,
+        alert = null,
         alertCount = 0,
         margin = false,
         muted = false,
-        user: User | undefined,
-        context: Channel | undefined = undefined,
-        channel: Channel | undefined = undefined,
-        onClick: MouseEventHandler<HTMLDivElement> | null = null;
+        user,
+        context = undefined,
+        channel = undefined,
+        onClick = null,
+        ...rest
+    }: Props = $props();
 </script>
 
-<!-- svelte-ignore a11y-no-static-element-interactions -->
+<!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
-    {...$$restProps}
-    on:click={onClick}
+    {...rest}
+    onclick={onClick}
     class={cx("item", "user")}
     data-active={active}
     data-margin={margin}

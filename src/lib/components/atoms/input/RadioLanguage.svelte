@@ -2,7 +2,19 @@
     import RadioBase from "./RadioBase.svelte";
     import Emoji from '$lib/markdown/plugins/Emoji.svelte';
     import { RadioButton } from "fluent-svelte";
-    export let value: string | undefined = undefined, group: string;
+    interface Props {
+        value?: string | undefined;
+        group: string;
+        svg?: import('svelte').Snippet;
+        children?: import('svelte').Snippet;
+    }
+
+    let {
+        value = undefined,
+        group = $bindable(),
+        svg,
+        children
+    }: Props = $props();
 </script>
 
 
@@ -13,12 +25,12 @@
             <div class="title">
                 <div class="flag">
                     
-                    <slot name="svg"><Emoji arg1="🇨🇱"></Emoji></slot>
+                    {#if svg}{@render svg()}{:else}<Emoji arg1="🇨🇱"></Emoji>{/if}
 
                     
                 </div>
                 <div class="description">
-                    <slot>Cocos</slot>
+                    {#if children}{@render children()}{:else}Cocos{/if}
 
                 </div>
                 

@@ -6,11 +6,27 @@
     import BxTimeFive from "svelte-boxicons/BxTimeFive.svelte";
     import { t } from "svelte-i18n";
 
-    export let user: User | null | undefined = undefined, prefixAt = false, masquerade: API.Masquerade | null = null, showServerIdentity: boolean | "both" = false, onClick: ((e: MouseEvent)=>void) | null = null;
-    let username = (user as unknown as { display_name: string })?.display_name ??
-            user?.username;
+    interface Props {
+        user?: User | null | undefined;
+        prefixAt?: boolean;
+        masquerade?: API.Masquerade | null;
+        showServerIdentity?: boolean | "both";
+        onClick?: ((e: MouseEvent)=>void) | null;
+        [key: string]: any
+    }
+
+    let {
+        user = undefined,
+        prefixAt = false,
+        masquerade = null,
+        showServerIdentity = false,
+        onClick = null,
+        ...rest
+    }: Props = $props();
+    let username = $state((user as unknown as { display_name: string })?.display_name ??
+            user?.username);
     let color = masquerade?.colour;
-    let timed_out: Date | undefined;
+    let timed_out: Date | undefined = $state();
     if (user && showServerIdentity) {
         const server_id = $page.params.server;
         if (server_id) {
@@ -39,7 +55,7 @@
             }
         }
     }
-    let innerRef: HTMLSpanElement | undefined;
+    let innerRef: HTMLSpanElement | undefined = $state();
     const Name = cx('name', color  && (color.includes("gradient") ? css`
         background: ${color};
         background-clip: text;
@@ -48,9 +64,9 @@
     ` : css`color: ${color}`));
 </script>
 
-<!-- svelte-ignore a11y-invalid-attribute -->
-<a href="" on:click={onClick}>
-    <span class={Name} bind:this={innerRef} {...$$restProps} >
+<!-- svelte-ignore a11y_invalid_attribute -->
+<a href="" onclick={onClick}>
+    <span class={Name} bind:this={innerRef} {...rest} >
         {prefixAt ? "@" : ""}
         {masquerade?.name ?? username ?? $t("app.main.channel.unknown_user")}
     </span>

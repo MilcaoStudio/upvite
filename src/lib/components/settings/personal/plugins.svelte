@@ -1,13 +1,17 @@
 <script lang="ts">
+    import { run } from 'svelte/legacy';
+
     import { state } from "$lib/State";
     import PluginCheck from "$lib/components/atoms/input/PluginCheck.svelte";
     import FileReader from "$lib/controllers/FileReader.svelte";
     import type { PluginInfo } from "$lib/stores/Plugins";
     import { autorun } from "mobx";
-    let list: PluginInfo[] = [];
-    $: autorun(()=>{
-        list = state.plugins.list();
-    })
+    let list: PluginInfo[] = $state([]);
+    run(() => {
+        autorun(()=>{
+            list = state.plugins.list();
+        })
+    });
 </script>
 Installed plugins
 {#each list as plugin}

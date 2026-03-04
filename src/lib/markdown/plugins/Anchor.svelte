@@ -1,36 +1,44 @@
 <script lang="ts">
+    import { preventDefault } from 'svelte/legacy';
+
     import { modalController } from "$lib/components/modals/ModalController";
     import { determineLink } from "$lib/links";
 
-    export let href: string | undefined = undefined;
-    $: link = determineLink(href);
+    interface Props {
+        href?: string | undefined;
+        children?: import('svelte').Snippet;
+        [key: string]: any
+    }
+
+    let { href = undefined, children, ...rest }: Props = $props();
+    let link = $derived(determineLink(href));
 </script>
 
 {#if !href || href.startsWith("#")}
-    <a {href} {...$$restProps}>
-        <slot />
+    <a {href} {...rest}>
+        {@render children?.()}
     </a>
 {:else if link.type == "none"}
-    <a href="null" {...$$restProps}>
-        <slot />
+    <a href="null" {...rest}>
+        {@render children?.()}
     </a>
 {:else if link.type == "navigate"}
     <a href={link.path}>
-        <slot />
+        {@render children?.()}
     </a>
 {:else}
     <a
         {href}
         target="_blank"
         rel="noreferrer"
-        on:click|preventDefault={(ev) =>
+        onclick={preventDefault((ev) =>
             modalController.openLink(
                 href,
                 false,
                 ev.currentTarget.innerText != href,
-            )}
-        {...$$restProps}
+            ))}
+        {...rest}
     >
-        <slot />
+        {@render children?.()}
     </a>
 {/if}

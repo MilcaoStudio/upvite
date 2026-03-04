@@ -1,11 +1,23 @@
 <script lang="ts">
     import { css, cx } from "@emotion/css";
 
-    export let palette: "primary" | "secondary" = "primary",
+    interface Props {
+        palette?: "primary" | "secondary";
+        withTransparency?: boolean;
+        withBackground?: boolean;
+        topBorder?: boolean;
+        bottomBorder?: boolean;
+        children?: import('svelte').Snippet;
+    }
+
+    let {
+        palette = "primary",
         withTransparency = false,
         withBackground = false,
         topBorder = false,
-        bottomBorder = false;
+        bottomBorder = false,
+        children
+    }: Props = $props();
     const style = cx(
         "Header",
         css`
@@ -55,5 +67,5 @@
 </style>
 
 <div class={style}>
-    <slot />
+    {@render children?.()}
 </div>

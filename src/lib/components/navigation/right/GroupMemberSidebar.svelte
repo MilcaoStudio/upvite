@@ -5,7 +5,11 @@
     import { fetchRecipients } from "$lib/MemberList";
     import GroupList from "./GroupList.svelte";
 
-    export let channel: Channel | undefined = undefined;
+    interface Props {
+        channel?: Channel | undefined;
+    }
+
+    let { channel = undefined }: Props = $props();
     let entries = fetchRecipients(() => channel!.recipients)
 </script>
 

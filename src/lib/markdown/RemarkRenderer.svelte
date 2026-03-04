@@ -1,4 +1,4 @@
-<script context="module" lang="ts">
+<script module lang="ts">
     import { unified } from "unified";
     import remarkParse from "remark-parse";
     import remarkBreaks from "remark-breaks";
@@ -88,12 +88,18 @@
 </script>
 
 <script lang="ts">
+    import { run } from 'svelte/legacy';
+
     import JsxRender from "$lib/components/JSXRender.svelte";
     import Anchor from "./plugins/Anchor.svelte";
     import { remarkChannel, remarkEmoji, remarkMention } from "./plugins/remarkRegex";
     import Emoji from "./plugins/Emoji.svelte";
 
-    export let content: string;
+    interface Props {
+        content: string;
+    }
+
+    let { content }: Props = $props();
     const components: Record<string, string | Function | null> = {
         a: Anchor,
         code: "code",
@@ -126,7 +132,7 @@
         // Hast to svelte elements
         .use(rehypeSvelte, { createElement, components });
         
-    $: sanitisedContent = sanitise(content);
+    let sanitisedContent = $derived(sanitise(content));
     const Markdown = cx(
         "Markdown",
         css`
@@ -141,15 +147,15 @@
             }
         `,
     );
-    let Content: SvelteNode | null = null;
-    $: {
+    let Content: SvelteNode | null = $state(null);
+    run(() => {
         rehypeProcessor
             .process(sanitisedContent)
             .then((file) => (Content = file.result as SvelteNode))
             .catch(() => {
                 Content = sanitisedContent;
             });
-    }
+    });
     // TODO: Big emoji feature
     // $: largeEmoji = !disallowBigEmoji && isOnlyEmoji(content)
 </script>

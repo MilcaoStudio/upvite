@@ -5,8 +5,13 @@
     import type { Emoji, Server } from "stoat.js";
     import BxX from "svelte-boxicons/BxX.svelte";
 
-    export let emoji: Emoji, server: Server;
-    let mouseenter = false;
+    interface Props {
+        emoji: Emoji;
+        server: Server;
+    }
+
+    let { emoji, server }: Props = $props();
+    let mouseenter = $state(false);
     let editable = server.havePermission("ManageCustomisation");
 
     async function onNameChange(
@@ -18,8 +23,8 @@
     role="row"
     tabindex="0"
     class="EmojiInfo"
-    on:mouseenter={() => (mouseenter = true)}
-    on:mouseleave={() => (mouseenter = false)}
+    onmouseenter={() => (mouseenter = true)}
+    onmouseleave={() => (mouseenter = false)}
 >
     <img class="preview icon" src={emoji.url} alt={emoji.name} />
     {#if mouseenter && editable}

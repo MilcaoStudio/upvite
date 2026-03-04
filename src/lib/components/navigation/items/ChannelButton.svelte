@@ -10,13 +10,27 @@
   import Username from "$lib/components/user/Username.svelte";
     import UserButton from "./UserButton.svelte";
 
-  export let active = false,
-    alert: "unread" | "mention" | undefined = undefined,
+  interface Props {
+    active?: boolean;
+    alert?: "unread" | "mention" | undefined;
+    alertCount?: number;
+    channel: Channel;
+    user?: User | undefined;
+    compact?: boolean;
+    muted?: boolean;
+    [key: string]: any
+  }
+
+  let {
+    active = false,
+    alert = undefined,
     alertCount = 0,
-    channel: Channel,
-    user: User | undefined = undefined,
+    channel,
+    user = undefined,
     compact = false,
-    muted = false;
+    muted = false,
+    ...rest
+  }: Props = $props();
   let participants: User[] = [];
   /*
   TODO: Use current voice state
@@ -44,7 +58,7 @@
         data-muted={muted}
         aria-label={channel.name}
         class={cx("item", { ["compact"]: compact })}
-        {...$$restProps}
+        {...rest}
       >
         <div class="avatar">
           <ChannelIcon target={channel} size={compact ? 24 : 32} showBadge={channel.type != "Group"} />

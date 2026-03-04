@@ -5,7 +5,11 @@
   import { goto } from "$app/navigation";
   import type { FormTemplate, MapFormToValues } from "$lib/types/Form";
 
-  export let props: ModalProps<"create_channel">;
+  interface Props {
+    props: ModalProps<"create_channel">;
+  }
+
+  let { props }: Props = $props();
   async function callback(values: MapFormToValues<FormTemplate>) {
     const channel = await props.target.createChannel({
       type: values.type as "Text" | "Voice",

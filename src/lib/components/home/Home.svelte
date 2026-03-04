@@ -32,13 +32,13 @@
     );
     const client = useClient();
     // const seasonalTheme = state.settings.get("appearance:seasonal", true);
-    let seasonalTheme = true;
+    let seasonalTheme = $state(true);
     // const toggleSeasonalTheme = () => state.settings.set("appearance:seasonal", !seasonalTheme);
     const toggleSeasonalTheme = () => (seasonalTheme = !seasonalTheme);
     const isDecember = !isTouchscreenDevice && new Date().getMonth() == 11;
     const isOctober = !isTouchscreenDevice && new Date().getMonth() == 9;
 
-    $: snowflakes = (function () {
+    let snowflakes = $derived((function () {
         const flakes: string[] = [];
 
         if (isDecember) {
@@ -70,7 +70,7 @@
             return flakes;
         }
         return flakes;
-    })();
+    })());
 </script>
 
 <!--TODO-->
@@ -93,14 +93,14 @@
         <div class="homeScreen">
             <h3>{$_("app.special.modals.onboarding.welcome")} Uprising</h3>
             <div class="actions">
-                <!-- svelte-ignore a11y-missing-attribute -->
+                <!-- svelte-ignore a11y_missing_attribute -->
                 <a
                     role="menuitem"
                     tabindex="0"
-                    on:click={() => {
+                    onclick={() => {
                         modalController.push({ type: "create_group" });
                     }}
-                    on:keydown={() => {
+                    onkeydown={() => {
                         modalController.push({ type: "create_group" });
                     }}
                 >
@@ -156,8 +156,8 @@
                 </a>
             </div>
             {#if isDecember}
-                <!-- svelte-ignore a11y-invalid-attribute -->
-                <a href="#" on:click={toggleSeasonalTheme}>
+                <!-- svelte-ignore a11y_invalid_attribute -->
+                <a href="#" onclick={toggleSeasonalTheme}>
                     Turn {seasonalTheme ? "off" : "on"} homescreen effects
                 </a>
             {/if}

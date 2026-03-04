@@ -1,4 +1,4 @@
-<script context="module" lang="ts">
+<script module lang="ts">
   export const ItemContainer = cx(
     "ItemContainer",
     css`
@@ -12,14 +12,20 @@
 </script>
 
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
   import { InfoBadge, PersonPicture } from "fluent-svelte";
   import { css, cx } from "@emotion/css";
   import type { Server } from "stoat.js";
   import Tooltip from "$lib/components/atoms/Tooltip.svelte";
   import ContextMenu from "$lib/components/context/ContextMenu.svelte";
-  export let head = false,
-    item: Server,
-    active = false;
+  interface Props {
+    head?: boolean;
+    item: Server;
+    active?: boolean;
+  }
+
+  let { head = false, item, active = false }: Props = $props();
   const ItemContainer = cx(
     "ItemContainer",
     css`
@@ -35,9 +41,11 @@
   );
   const unread = item.unread;
   let iconUrl = item.icon?.previewUrl;
-  $: if (active) {
-    console.debug("active", item.id);
-  }
+  run(() => {
+    if (active) {
+      console.debug("active", item.id);
+    }
+  });
   //const count = item.getMentions(permit).length;
 </script>
 

@@ -1,4 +1,6 @@
 <script lang="ts">
+    import { run } from 'svelte/legacy';
+
     import type {
         MessageEmbed,
     } from "stoat.js";
@@ -14,7 +16,11 @@
         isWebsiteEmbed,
     } from "./MessageEmbed";
 
-    export let embed: MessageEmbed;
+    interface Props {
+        embed: MessageEmbed;
+    }
+
+    let { embed }: Props = $props();
     let shrinkMedia = state.network.media.shrinkMedia;
     let root = getComputedStyle(document.documentElement);
     let maxWidth =
@@ -40,41 +46,45 @@
 
         return { width, height };
     }
-    let mw = 0,
-        mh = 0;
-    $: largeMedia = isTextEmbed(embed)
+    let mw = $state(0),
+        mh = $state(0);
+    let largeMedia = $derived(isTextEmbed(embed)
         ? typeof embed.media != "undefined"
         : isWebsiteEmbed(embed) &&
           (embed.specialContent?.type != "None" ||
-              embed.image?.size == "Large");
-    $: if (embed.type == "Text") {
-        mw = maxWidth;
-        mh = 1;
-    }
-    $: if (isWebsiteEmbed(embed)) {
-        switch (embed.specialContent?.type) {
-            case "YouTube":
-            case "Bandcamp":
-                mw = embed.video?.width ?? 1280;
-                mh = embed.video?.height ?? 720;
-                break;
-            case "Twitch":
-            case "Lightspeed":
-            case "Streamable":
-                mw = 1280;
-                mh = 720;
-                break;
-            default:
-                if (embed.image?.size == "Preview") {
-                    mw = maxWidth;
-                    mh = Math.min(embed.image.height, maxPreviewSize);
-                } else {
-                    mw = embed.image?.width ?? maxWidth;
-                    mh = embed.image?.height ?? 0;
-                }
+              embed.image?.size == "Large"));
+    run(() => {
+        if (embed.type == "Text") {
+            mw = maxWidth;
+            mh = 1;
         }
-    }
-    $: size = calculateSize(mw, mh);
+    });
+    run(() => {
+        if (isWebsiteEmbed(embed)) {
+            switch (embed.specialContent?.type) {
+                case "YouTube":
+                case "Bandcamp":
+                    mw = embed.video?.width ?? 1280;
+                    mh = embed.video?.height ?? 720;
+                    break;
+                case "Twitch":
+                case "Lightspeed":
+                case "Streamable":
+                    mw = 1280;
+                    mh = 720;
+                    break;
+                default:
+                    if (embed.image?.size == "Preview") {
+                        mw = maxWidth;
+                        mh = Math.min(embed.image.height, maxPreviewSize);
+                    } else {
+                        mw = embed.image?.width ?? maxWidth;
+                        mh = embed.image?.height ?? 0;
+                    }
+            }
+        }
+    });
+    let size = $derived(calculateSize(mw, mh));
 </script>
 
 {#if isWebsiteEmbed(embed)}
@@ -110,10 +120,10 @@
                 {/if}
                 {#if embed.title}
                     <span>
-                        <!-- svelte-ignore a11y-no-static-element-interactions -->
-                        <!-- svelte-ignore a11y-missing-attribute -->
+                        <!-- svelte-ignore a11y_no_static_element_interactions -->
+                        <!-- svelte-ignore a11y_missing_attribute -->
                         <a
-                            on:mousedown={(ev) =>
+                            onmousedown={(ev) =>
                                 embed.type == "Website" &&
                                 (ev.button == 0 || ev.button == 1) &&
                                 modalController.openLink(
@@ -181,8 +191,8 @@
         </div>
     </div>
 {:else if isImageEmbed(embed)}
-    <!-- svelte-ignore a11y-click-events-have-key-events -->
-    <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
+    <!-- svelte-ignore a11y_click_events_have_key_events -->
+    <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
     <img
         class="embed image"
         alt="external"
@@ -192,16 +202,16 @@
         style:max-height="{maxHeight}px"
         src={embed.proxiedURL}
         loading="lazy"
-        on:click={() =>
+        onclick={() =>
             embed.type == "Image" &&
             modalController.push({ type: "image_viewer", embed })}
-        on:mousedown={(ev) =>
+        onmousedown={(ev) =>
             ev.button == 1 &&
             embed.type == "Image" &&
             modalController.openLink(embed.url, undefined, true)}
     />
 {:else if isVideoEmbed(embed)}
-    <!-- svelte-ignore a11y-media-has-caption -->
+    <!-- svelte-ignore a11y_media_has_caption -->
     <video
         class="embed image"
         style:width="{size.width}px"
@@ -210,7 +220,7 @@
         style:max-height="{maxHeight}px"
         src={embed.proxiedURL}
         controls
-    />
+></video>
 {/if}
 
 <style>

@@ -1,10 +1,26 @@
 <script lang="ts">
+    import { run } from 'svelte/legacy';
+
     import localforage from "localforage";
     import Button from "$lib/components/atoms/Button.svelte"
 
-    export let error: any = null, onError: ((err: any)=>void) | null = null, section: string;
+    interface Props {
+        error?: any;
+        onError?: ((err: any)=>void) | null;
+        section: string;
+        children?: import('svelte').Snippet;
+    }
 
-    $: if ($error && onError) onError($error);
+    let {
+        error = null,
+        onError = null,
+        section,
+        children
+    }: Props = $props();
+
+    run(() => {
+        if ($error && onError) onError($error);
+    });
 
     async function reset() {
         await localforage.clear();
@@ -16,11 +32,11 @@
     <div class="CrashContainer">
         {#if section == "client"}
             <h3>Client Crash Report</h3>
-            <div class="buttonDivider" />
+            <div class="buttonDivider"></div>
             <Button on:click={() => location.reload()}>
                 Refresh page
             </Button>
-            <div class="buttonDivider" />
+            <div class="buttonDivider"></div>
             <Button props={{palette: 'error'}} on:click={reset}>Reset app data</Button>
         {:else}
             <h3>Component Error</h3>
@@ -35,7 +51,7 @@
         <!--<div>This error has been automatically reported.</div>-->
     </div>
 {:else}
-    <slot />
+    {@render children?.()}
 {/if}
 
 <style>

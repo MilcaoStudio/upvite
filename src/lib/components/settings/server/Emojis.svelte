@@ -1,4 +1,6 @@
 <script lang="ts">
+    import { run } from 'svelte/legacy';
+
     import "./Emojis.css";
     import Column from "$lib/components/atoms/layout/Column.svelte";
     import { autorun } from "mobx";
@@ -8,12 +10,18 @@
     import EmojiEditor from "./EmojiEditor.svelte";
     import Row from "$lib/components/atoms/layout/Row.svelte";
     import H3 from "$lib/components/atoms/heading/H3.svelte";
-    export let server: Server;
+    interface Props {
+        server: Server;
+    }
 
-    let emojis = server.emojis;
-    $: autorun(() => {
-        emojis = server.emojis;
-        console.debug("[Emojis.svelte] Emoji list for %s updated", server.id);
+    let { server }: Props = $props();
+
+    let emojis = $state(server.emojis);
+    run(() => {
+        autorun(() => {
+            emojis = server.emojis;
+            console.debug("[Emojis.svelte] Emoji list for %s updated", server.id);
+        });
     });
 </script>
 

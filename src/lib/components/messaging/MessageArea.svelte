@@ -1,4 +1,4 @@
-<script context="module" lang="ts">
+<script module lang="ts">
     import { defer } from "$lib";
     import { internalEmit, internalSubscribe } from "$lib/InternalEmitter";
     import { useSession } from "$lib/controllers/ClientController";
@@ -13,29 +13,35 @@
 </script>
 
 <script lang="ts">
+    import { run } from 'svelte/legacy';
+
     import Preloader from "../indicators/Preloader.svelte";
     import MessageRenderer from "./MessageRenderer.svelte";
     import Start from "./Start.svelte";
     import { afterNavigate, beforeNavigate } from "$app/navigation";
     import { state } from "$lib/State";
 
-    export let lastId: string | undefined = undefined,
-        messageId: string | null = null,
+    interface Props {
+        lastId?: string | undefined;
+        messageId?: string | null;
         channel: Channel;
+    }
+
+    let { lastId = undefined, messageId = null, channel }: Props = $props();
     const session = useSession()!;
 
     // ? This is the scroll container.
-    let ref: HTMLDivElement;
-    let width: number;
-    let height: number;
+    let ref: HTMLDivElement = $state();
+    let width: number = $state();
+    let height: number = $state();
 
-    let highlight: string | undefined;
+    let highlight: string | undefined = $state();
 
     // ? Current channel state.
-    const renderer = getRenderer(channel, state);
+    const renderer = $state(getRenderer(channel, state));
 
     // ? avoid re-renders
-    let scrollState: ScrollState = { type: "Free" };
+    let scrollState: ScrollState = $state({ type: "Free" });
 
     function setScrollState(v: ScrollState) {
         if (v.type == "StayAtBottom") {
@@ -148,7 +154,7 @@
 
     // ? If we are waiting for network, try again.
     let sessionState = session.state;
-    $: {
+    run(() => {
         switch ($sessionState) {
             case "Online":
                 if (renderer.state == "WAITING_FOR_NETWORK") {
@@ -164,7 +170,7 @@
                 renderer.markStale();
                 break;
         }
-    }
+    });
 
     // ? When the container is scrolled.
     // ? Also handle StayAtBottom
@@ -199,29 +205,33 @@
         }
     };
 
-    $: stbOnResize = function () {
+    let stbOnResize = $derived(function () {
         if (!atBottom() && scrollState.type == "Bottom") {
             ref.scrollTo({ behavior: "instant", top: ref.scrollHeight });
             setScrollState({ type: "Bottom" });
         }
-    };
+    });
 
-    $: height && stbOnResize();
+    run(() => {
+        height && stbOnResize();
+    });
 
-    $: keyUp = function (e: KeyboardEvent) {
+    let keyUp = $derived(function (e: KeyboardEvent) {
         if (e.key == "Escape" && !modalController.isVisible) {
             renderer.jumpToBottom(true);
             internalEmit("TextArea", "focus", "message");
         }
-    };
+    });
 
-    $: setContext("MessageAreaWidth", (width ?? 0) - MESSAGE_AREA_PADDING);
+    run(() => {
+        setContext("MessageAreaWidth", (width ?? 0) - MESSAGE_AREA_PADDING);
+    });
 </script>
 
 <svelte:window bind:innerWidth={width} bind:innerHeight={height} />
-<svelte:document on:resize={stbOnResize} on:keyup={keyUp} />
+<svelte:document onresize={stbOnResize} onkeyup={keyUp} />
 
-<div class="MessageArea" bind:this={ref} on:scroll={onScroll}>
+<div class="MessageArea" bind:this={ref} onscroll={onScroll}>
     <div>
         {#if renderer.state == "LOADING"}
             <Preloader type="ring" />

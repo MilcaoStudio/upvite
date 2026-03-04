@@ -3,9 +3,26 @@
     import BxChevronRight from "svelte-boxicons/BxChevronRight.svelte";
     import BxLinkExternal from "svelte-boxicons/BxLinkExternal.svelte";
 
-    export let disabled = false,
-        account = false, icon: ConstructorOfATypedSvelteComponent, description = '', onClick=function(){}, action: 'chevron' | 'external' | ConstructorOfATypedSvelteComponent = 'chevron';
-    $: CategoryButton = cx(
+    interface Props {
+        disabled?: boolean;
+        account?: boolean;
+        icon: ConstructorOfATypedSvelteComponent;
+        description?: string;
+        onClick?: any;
+        action?: 'chevron' | 'external' | ConstructorOfATypedSvelteComponent;
+        children?: import('svelte').Snippet;
+    }
+
+    let {
+        disabled = false,
+        account = false,
+        icon,
+        description = '',
+        onClick = function(){},
+        action = 'chevron',
+        children
+    }: Props = $props();
+    let CategoryButton = $derived(cx(
         "CategoryButton",
         css`
             ${account
@@ -30,7 +47,9 @@
                 }`
                 : ``}
         `,
-    );
+    ));
+
+    const SvelteComponent = $derived(icon);
 </script>
 
 <style>
@@ -90,12 +109,12 @@
     }
 </style>
 
-<!-- svelte-ignore a11y-missing-attribute -->
-<a class="{CategoryButton} {disabled ? "disabled" : ""}" role="button" tabindex="0" on:click={onClick} on:keydown={onClick}>
-    <svelte:component this={icon} size={24} />
+<!-- svelte-ignore a11y_missing_attribute -->
+<a class="{CategoryButton} {disabled ? "disabled" : ""}" role="button" tabindex="0" onclick={onClick} onkeydown={onClick}>
+    <SvelteComponent size={24} />
     <div class="content">
         <div class="title">
-            <slot />
+            {@render children?.()}
         </div>
         {#if description}
             <div class="description">{description}</div>
@@ -109,7 +128,8 @@
                 <BxLinkExternal size="20"/>
             {/if}
         {:else}
-            <svelte:component this={action} size="32" />
+            {@const SvelteComponent_1 = action}
+            <SvelteComponent_1 size="32" />
         {/if}
     </div>
 </a>

@@ -3,8 +3,13 @@
     import { modalController } from "$lib/components/modals/ModalController";
     import type { Channel, ServerMember, User } from "stoat.js";
     import UserButton from "../items/UserButton.svelte";
-    export let member: ServerMember | undefined = undefined, user: User | undefined = member?.user, context: Channel;
-    $: info = userInformation(user, member);
+    interface Props {
+        member?: ServerMember | undefined;
+        user?: User | undefined;
+        context: Channel;
+    }
+
+    let { member = undefined, user = member?.user, context }: Props = $props();
     /**
      * Create user information from an user or member
      */
@@ -18,6 +23,7 @@
             member,
         };
     }
+    let info = $derived(userInformation(user, member));
 </script>
 
 <UserButton

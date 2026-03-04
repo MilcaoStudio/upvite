@@ -2,7 +2,23 @@
     import { css, cx } from "@emotion/css";
     import type { EventHandler } from "svelte/elements";
 
-    export let sticky = false, large = false, open = false, onToggle: EventHandler<Event, HTMLDetailsElement> = function(){};
+    interface Props {
+        sticky?: boolean;
+        large?: boolean;
+        open?: boolean;
+        onToggle?: EventHandler<Event, HTMLDetailsElement>;
+        children?: import('svelte').Snippet;
+        [key: string]: any
+    }
+
+    let {
+        sticky = false,
+        large = false,
+        open = false,
+        onToggle = function(){},
+        children,
+        ...rest
+    }: Props = $props();
     const Details = cx('Details', css`
         summary {
             ${sticky ? `
@@ -75,6 +91,6 @@
     `);
 </script>
 
-<details class={Details} {open} on:toggle={onToggle} {...$$restProps}>
-    <slot />
+<details class={Details} {open} ontoggle={onToggle} {...rest}>
+    {@render children?.()}
 </details>

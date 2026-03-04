@@ -1,4 +1,6 @@
 <script lang="ts">
+    import { run } from 'svelte/legacy';
+
     import { LocalStream, type Constraints } from "$lib/voice/Stream";
     import { VoiceStatus, voiceState } from "$lib/voice/VoiceState";
     import Row from "$lib/components/atoms/layout/Row.svelte";
@@ -13,29 +15,21 @@
     import BxMicrophone from "svelte-boxicons/BxMicrophone.svelte";
     import BxMicrophoneOff from "svelte-boxicons/BxMicrophoneOff.svelte";
 
-    export let channel: Channel;
-    let client = useClient();
-    $: user = client.user;
-    let localStream: LocalStream | null;
-    let localVideo: HTMLVideoElement | undefined;
-    $: participants = voiceState.participants;
-
-    let video = false;
-    let simulcast = false;
-    let audio = true;
-    let resolution = "hd";
-    let streams: MediaStream[] | undefined;
-    $: autorun(() => {
-        streams = [...voiceState.streams.values()];
-    });
-
-    $: if (localVideo) {
-        localVideo.srcObject = localStream;
-        localVideo.controls = false;
+    interface Props {
+        channel: Channel;
     }
-    $: status = voiceState.status;
-    $: internalSubscribe("voice", "join", init);
-    $: internalSubscribe("voice", "leave", removeTracks);
+
+    let { channel }: Props = $props();
+    let client = useClient();
+    let localStream: LocalStream | null = $state();
+    let localVideo: HTMLVideoElement | undefined = $state();
+
+    let video = $state(false);
+    let simulcast = false;
+    let audio = $state(true);
+    let resolution = "hd";
+    let streams: MediaStream[] | undefined = $state();
+
 
     function removeTracks() {
         console.debug("removeTracks");
@@ -62,6 +56,26 @@
         localStream = media;
         return media;
     }
+    let user = $derived(client.user);
+    let participants = $derived(voiceState.participants);
+    run(() => {
+        autorun(() => {
+            streams = [...voiceState.streams.values()];
+        });
+    });
+    run(() => {
+        if (localVideo) {
+            localVideo.srcObject = localStream;
+            localVideo.controls = false;
+        }
+    });
+    let status = $derived(voiceState.status);
+    run(() => {
+        internalSubscribe("voice", "join", init);
+    });
+    run(() => {
+        internalSubscribe("voice", "leave", removeTracks);
+    });
 </script>
 
 {#if $status == VoiceStatus.CONNECTED}

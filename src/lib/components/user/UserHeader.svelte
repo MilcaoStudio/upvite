@@ -1,15 +1,30 @@
 <script lang="ts">
+    import { run } from 'svelte/legacy';
+
     import { User, UserProfile } from "stoat.js";
     import UserIcon from "./UserIcon.svelte";
-    export let user: User | undefined,
-        placeholderProfile: UserProfile | undefined = undefined, profile: UserProfile | undefined;
-    let backgroundURL: string | undefined;
-    
-    $: if (profile) {
-        backgroundURL = profile.animatedBannerURL;
-    } else if (placeholderProfile) {
-        backgroundURL = placeholderProfile.animatedBannerURL;
+    interface Props {
+        user: User | undefined;
+        placeholderProfile?: UserProfile | undefined;
+        profile: UserProfile | undefined;
+        action?: import('svelte').Snippet;
     }
+
+    let {
+        user,
+        placeholderProfile = undefined,
+        profile,
+        action
+    }: Props = $props();
+    let backgroundURL: string | undefined = $state();
+    
+    run(() => {
+        if (profile) {
+            backgroundURL = profile.animatedBannerURL;
+        } else if (placeholderProfile) {
+            backgroundURL = placeholderProfile.animatedBannerURL;
+        }
+    });
 </script>
 
 <div
@@ -22,7 +37,7 @@
             <h2>{user?.username}</h2>
         </div>
         <div class="action">
-            <slot name="action" />
+            {@render action?.()}
         </div>
     </div>
     <div class="medals"></div>

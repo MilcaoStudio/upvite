@@ -1,10 +1,16 @@
 <script>
-    export let onClick = () => {};
+    /** @type {{onClick?: any, svg?: import('svelte').Snippet, title?: import('svelte').Snippet, children?: import('svelte').Snippet}} */
+    let {
+        onClick = () => {},
+        svg,
+        title,
+        children
+    } = $props();
 </script>
 
-<button class="base" on:click={onClick}>
+<button class="base" onclick={onClick}>
     <div class="iconContainer">
-        <slot name="svg">
+        {#if svg}{@render svg()}{:else}
             <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"
@@ -23,11 +29,11 @@
                     d="M16 12v1.5a2.5 2.5 0 0 0 5 0v-1.5a9 9 0 1 0 -5.5 8.28"
                 />
             </svg>
-        </slot>
+        {/if}
     </div>
     <div class="content">
-        <h3 class="title"><slot name="title" /></h3>
-        <span class="text"><slot /></span>
+        <h3 class="title">{@render title?.()}</h3>
+        <span class="text">{@render children?.()}</span>
     </div>
     <div class="click">
         <svg

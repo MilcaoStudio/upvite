@@ -5,8 +5,12 @@
     import { t } from "svelte-i18n";
     import { DONATION } from "$lib/links";
 
-    export let user: User;
-    $: badges = user.badges;
+    interface Props {
+        user: User;
+    }
+
+    let { user }: Props = $props();
+    let badges = $derived(user.badges);
 </script>
 
 <!-- if badges.bits != 0 -->
@@ -19,8 +23,10 @@
                         alt={$t("app.navigation.tabs.dev")}
                         src="/badges/developer.svg"
                     />
-                    <span slot="tooltip">{$t("app.navigation.tabs.dev")}</span
-                    ></Tooltip
+                    {#snippet tooltip()}
+                                        <span >{$t("app.navigation.tabs.dev")}</span
+                        >
+                                    {/snippet}</Tooltip
                 >
             {/if}
             {#if badges & (UserBadges.Supporter | UserBadges.ActiveSupporter)}
@@ -33,11 +39,13 @@
                             src="/badges/supporter.svg"
                         />
                     </a>
-                    <span slot="tooltip"
-                        >{$t(
-                            "app.special.popovers.user_profile.badges.supporter",
-                        )}</span
-                    >
+                    {#snippet tooltip()}
+                                        <span 
+                            >{$t(
+                                "app.special.popovers.user_profile.badges.supporter",
+                            )}</span
+                        >
+                                    {/snippet}
                 </Tooltip>
             {/if}
         </Row>

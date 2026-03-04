@@ -16,8 +16,12 @@
     import { LocalStream, type Constraints } from "$lib/voice/Stream";
     import VoiceUi from "./VoiceUI.svelte";
 
-    export let channel: Channel;
-    let icon: ComponentType, recipient: User | null = null;
+    interface Props {
+        channel: Channel;
+    }
+
+    let { channel }: Props = $props();
+    let icon: ComponentType = $state(), recipient: User | null = null;
     switch (channel.type) {
         case "TextChannel":
             icon = channel.isVoice ? BxPhoneCall : BxHash;
@@ -39,7 +43,7 @@
             <ChannelName {channel} />
         </span>
         {#if isTouchscreenDevice() && channel.type == "DirectMessage"}
-            <div class="divider" />
+            <div class="divider"></div>
             <span class="desc">
                 <div class="status" style:background-color={useStatusColor(recipient)}>
                     <!-- <UserStatus user={recipient} />-->
@@ -47,9 +51,9 @@
             </span>
         {/if}
         {#if !isTouchscreenDevice() && (channel.type == "Group" || channel.type == "TextChannel") && channel.description}
-            <div class="divider" />
-            <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
-            <span class="desc" role="complementary" on:click={()=>modalController.push({type: "channel_info", channel})} on:keydown={()=>modalController.push({type: "channel_info", channel})}>
+            <div class="divider"></div>
+            <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+            <span class="desc" role="complementary" onclick={()=>modalController.push({type: "channel_info", channel})} onkeydown={()=>modalController.push({type: "channel_info", channel})}>
                 <!--Markdown here-->
                 <Markdown content={channel.description} />
             </span>

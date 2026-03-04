@@ -7,7 +7,11 @@
     import Preloader from "$lib/components/indicators/Preloader.svelte";
     import { useClient } from "$lib/controllers/ClientController";
     const client = useClient();
-    export let data;
+    interface Props {
+        data: any;
+    }
+
+    let { data }: Props = $props();
     let { channel_id, message_id } = data;
 
     let channel = client.channels.get(channel_id);

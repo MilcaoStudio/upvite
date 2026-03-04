@@ -9,19 +9,37 @@
     import Category from "../atoms/Category.svelte";
 
     
-    export let schema: FormTemplate,
-        data: MapFormToData<FormTemplate>,
-        defaults: Partial<MapFormToValues<FormTemplate>> | undefined = undefined,
-        callback: (values: MapFormToValues<FormTemplate>)=>Promise<void>,
-        submit: Omit<HTMLButtonAttributes, "type"> & {children?: string} | undefined,
-        submitBtn: Omit<HTMLButtonAttributes, "type"> & {children?: string} | undefined = undefined,
-        actions: Action[] = [{
+    interface Props {
+        schema: FormTemplate;
+        data: MapFormToData<FormTemplate>;
+        defaults?: Partial<MapFormToValues<FormTemplate>> | undefined;
+        callback: (values: MapFormToValues<FormTemplate>)=>Promise<void>;
+        submit: Omit<HTMLButtonAttributes, "type"> & {children?: string} | undefined;
+        submitBtn?: Omit<HTMLButtonAttributes, "type"> & {children?: string} | undefined;
+        actions?: Action[];
+        title?: import('svelte').Snippet;
+        description?: import('svelte').Snippet;
+        [key: string]: any
+    }
+
+    let {
+        schema,
+        data,
+        defaults = undefined,
+        callback,
+        submit,
+        submitBtn = undefined,
+        actions = [{
             onClick: () => true,
             children: "Cancel",
             palette: "plain",
-        }];
+        }],
+        title,
+        description,
+        ...rest
+    }: Props = $props();
     const values = getInitialValues(schema, defaults);
-    let error = '', processing = false;
+    let error = $state(''), processing = $state(false);
     async function onSubmit() {
         try {
             processing = true;
@@ -35,7 +53,7 @@
     }
 </script>
 
-<Modal {...$$restProps} disabled={processing} actions={[
+<Modal {...rest} disabled={processing} actions={[
     {
         onClick: onSubmit,
         children: "Submit",
@@ -44,10 +62,16 @@
     },
     ...actions,
 ]} >
-    <svelte:fragment slot="title"><slot name="title" /></svelte:fragment>
-    <svelte:fragment slot="description"><slot name="description" /></svelte:fragment>
+    {#snippet title()}
+        {@render title?.()}
+    {/snippet}
+    {#snippet description()}
+        {@render description?.()}
+    {/snippet}
     <Form schema={schema} data={data} defaults={defaults} submitBtn={submitBtn} observed={values}>
-        <svelte:fragment slot="submit">{submitBtn?.children}</svelte:fragment>
+        {#snippet submit()}
+                {submitBtn?.children}
+            {/snippet}
     </Form>
     {#if error}
         <Category><Error error={$_('error')}>{error}</Error></Category>

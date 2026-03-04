@@ -1,10 +1,23 @@
 <script lang="ts">
     import { css, cx } from "@emotion/css";
 
-    export let rotate: string | null = null,
-        shape: "default" | "circle" | undefined = undefined,
-        href: string | undefined = undefined,
-        onClick = ()=>{};
+    interface Props {
+        rotate?: string | null;
+        shape?: "default" | "circle" | undefined;
+        href?: string | undefined;
+        onClick?: any;
+        children?: import('svelte').Snippet;
+        [key: string]: any
+    }
+
+    let {
+        rotate = null,
+        shape = undefined,
+        href = undefined,
+        onClick = ()=>{},
+        children,
+        ...rest
+    }: Props = $props();
     const normal = `var(--secondary-foreground)`;
     const hover = `var(--foreground)`;
     const Icon = cx(
@@ -60,6 +73,6 @@
     );
 </script>
 
-<a class={Icon} {...$$restProps} {href} on:click={onClick}>
-    <slot />
+<a class={Icon} {...rest} {href} onclick={onClick}>
+    {@render children?.()}
 </a>

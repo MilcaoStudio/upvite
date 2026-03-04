@@ -1,4 +1,4 @@
-<script context="module" lang="ts">
+<script module lang="ts">
     export enum Docked {
         None,
         Left,
@@ -14,26 +14,43 @@
 </script>
 
 <script lang="ts">
+    import { run } from 'svelte/legacy';
+
     type Panel = {
         width?: number;
         height?: number;
         showIf?: ShowIf;
         component: ConstructorOfATypedSvelteComponent;
     };
-    export let width: string,
-        height: string,
-        docked: Docked,
-        leftPanel: Panel | undefined = undefined,
-        rightPanel: Panel | undefined = undefined,
-        bottomNav: Panel | undefined = undefined;
-    $: gridTemplateColumns =
-        (leftPanel ? (leftPanel.width || 0) + "px" : "") +
-        ` ${width} ` +
-        (rightPanel ? (rightPanel.width || 0) + "px" : "");
-    // $effect
-    let scrollRef: HTMLDivElement, bottomNavRef: HTMLDivElement;
+    interface Props {
+        width: string;
+        height: string;
+        docked: Docked;
+        leftPanel?: Panel | undefined;
+        rightPanel?: Panel | undefined;
+        bottomNav?: Panel | undefined;
+        children?: import('svelte').Snippet;
+        left?: import('svelte').Snippet;
+        right?: import('svelte').Snippet;
+    }
 
-    $: recalculate = function () {
+    let {
+        width,
+        height = $bindable(),
+        docked,
+        leftPanel = undefined,
+        rightPanel = undefined,
+        bottomNav = undefined,
+        children,
+        left,
+        right
+    }: Props = $props();
+    let gridTemplateColumns =
+        $derived((leftPanel ? (leftPanel.width || 0) + "px" : "") +
+        ` ${width} ` +
+        (rightPanel ? (rightPanel.width || 0) + "px" : ""));
+    // $effect
+    let scrollRef: HTMLDivElement = $state(), bottomNavRef: HTMLDivElement = $derived(function () {
         const el = scrollRef;
         const bEl = bottomNavRef;
         if (!bEl || !bottomNav || !bottomNav.height) return;
@@ -79,29 +96,35 @@
         }
 
         bEl.style.top = hidden;
-    };
-    $: {
+    });
+
+    
+    run(() => {
         scrollRef,
             leftPanel,
             rightPanel,
             !bottomNav ? undefined : bottomNav.showIf;
         recalculate();
-    }
-    $: if (!docked) {
-        height = `calc(${height} - ${bottomNav?.height}px)`;
-    }
+    });
+    run(() => {
+        if (!docked) {
+            height = `calc(${height} - ${bottomNav?.height}px)`;
+        }
+    });
 </script>
 
 {#if docked}
     <div class="docked" style:width style:height>
         {#if docked & 1}
-            <svelte:component this={leftPanel?.component} />
+            {@const SvelteComponent = leftPanel?.component}
+            <SvelteComponent />
         {/if}
         <div class="main">
-            <slot />
+            {@render children?.()}
         </div>
         {#if docked & 2}
-            <svelte:component this={rightPanel?.component} />
+            {@const SvelteComponent_1 = rightPanel?.component}
+            <SvelteComponent_1 />
         {/if}
     </div>
 {:else}
@@ -112,32 +135,30 @@
             style:height
             style:grid-template-columns={gridTemplateColumns}
             bind:this={scrollRef}
-            on:scroll={recalculate}
+            onscroll={recalculate}
         >
             {#if leftPanel}
-                <svelte:component
-                    this={leftPanel.component}
+                <leftPanel.component
                     style={`height: ${height};`}
                     snap
                 >
-                    <slot name="left" />
-                </svelte:component>
+                    {@render left?.()}
+                </leftPanel.component>
             {/if}
-            <slot />
+            {@render children?.()}
             {#if rightPanel}
-                <svelte:component
-                    this={rightPanel.component}
+                <rightPanel.component
                     style={`height: ${height};`}
                     snap
                 >
-                    <slot name="right" />
-                </svelte:component>
+                    {@render right?.()}
+                </rightPanel.component>
             {/if}
         </div>
         {#if bottomNav}
             <div class="nav" style:height="{bottomNav.height}px">
                 <div bind:this={bottomNavRef} style:width>
-                    <svelte:component this={bottomNav.component} />
+                    <bottomNav.component />
                 </div>
             </div>
         {/if}

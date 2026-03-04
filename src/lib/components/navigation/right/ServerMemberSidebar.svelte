@@ -1,4 +1,6 @@
 <script lang="ts">
+    import { run } from 'svelte/legacy';
+
     import type { Channel } from "stoat.js";
     import GenericSidebarBase from "../GenericSidebarBase.svelte";
     import MemberList from "./MemberList.svelte";
@@ -6,7 +8,11 @@
     import { useClient, useSession } from "$lib/controllers/ClientController";
     import { writable } from "svelte/store";
 
-    export let channel: Channel | undefined = undefined;
+    interface Props {
+        channel?: Channel | undefined;
+    }
+
+    let { channel = undefined }: Props = $props();
     const FETCHED = new Set;
     const client = useClient();
     let entries = fetchMembers(
@@ -17,12 +23,12 @@
             },
         );
     let server_id = channel?.serverId;
-    $: {
+    run(() => {
         if (server_id && client.ready() && !FETCHED.has(server_id)) {
             FETCHED.add(server_id);
             channel?.server?.syncMembers(false).catch(()=>FETCHED.delete(server_id));
         }
-    }
+    });
 </script>
 
 {#if channel}

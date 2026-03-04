@@ -5,20 +5,32 @@
     import type { SvelteNode } from "$lib/markdown/runtime/svelteRuntime";
     import BxChevronDown from "svelte-boxicons/BxChevronDown.svelte";
 
-    export let id: string,
-        defaultValue: boolean,
+    interface Props {
+        id: string;
+        defaultValue: boolean;
         summary: SvelteNode;
+        children?: import('svelte').Snippet;
+        [key: string]: any
+    }
+
+    let {
+        id,
+        defaultValue,
+        summary,
+        children,
+        ...rest
+    }: Props = $props();
     const layout = state.layout;
 </script>
 
 <Details open={layout.getSectionState(id, defaultValue)} onToggle={(e) =>
     layout.setSectionState(id, e.currentTarget.open, defaultValue)
-} {...$$restProps}>
+} {...rest}>
     <summary>
         <div class="padding">
             <BxChevronDown size={20} />
             <JSXRender node={summary} />
         </div>
     </summary>
-    <slot />
+    {@render children?.()}
 </Details>

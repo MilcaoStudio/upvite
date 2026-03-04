@@ -1,4 +1,6 @@
 <script lang="ts">
+    import { run } from 'svelte/legacy';
+
     import TextAreaAutoSize from "$lib/components/atoms/TextAreaAutoSize.svelte";
     import H3 from "$lib/components/atoms/heading/H3.svelte";
     import FileReader from "$lib/controllers/FileReader.svelte";
@@ -9,11 +11,17 @@
     import { validateText } from "w3c-css-validator";
 
     let theme = settings.theme;
-    $: value = theme.getCSS();
-    $: disabled = value?.trim() == theme.getCSS()?.trim();
+    let value;
+    run(() => {
+        value = theme.getCSS();
+    });
+    let disabled;
+    run(() => {
+        disabled = value?.trim() == theme.getCSS()?.trim();
+    });
     let enableValidator = true;
     let showWarnings = true;
-    let syncRef: HTMLButtonElement | null = null;
+    let syncRef: HTMLButtonElement | null = $state(null);
     function sync() {
         theme.setCSS(value?.trim());
         disabled = true;
@@ -49,7 +57,7 @@
 {/if}
 
 <div class="Actions">
-    <button bind:this={syncRef} {disabled} on:click={sync}
+    <button bind:this={syncRef} {disabled} onclick={sync}
         >Apply changes</button
     >
     <FileReader

@@ -11,13 +11,17 @@
     import ServerMemberSidebar from "$lib/components/navigation/right/ServerMemberSidebar.svelte";
     const client = useClient();
 
-    export let data: LayoutData;
+    interface Props {
+        data: LayoutData;
+    }
+
+    let { data }: Props = $props();
     
     
-    $: id = data.channel;
-    $: server_id = data.server;
-    $: message = data.message;
-    $: server = client.servers.get(server_id);
+    let id = $derived(data.channel);
+    let server_id = $derived(data.server);
+    let message = $derived(data.message);
+    let server = $derived(client.servers.get(server_id));
 
     if (!client.channels.has(id)) {
         if (server_id) {
@@ -38,7 +42,7 @@
         }
     }
 
-    $: channel = client.channels.get(id);
+    let channel = $derived(client.channels.get(id));
 </script>
 
 <UprisingApp>

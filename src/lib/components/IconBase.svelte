@@ -1,10 +1,26 @@
 <script lang="ts">
     import { css, cx } from "@emotion/css";
 
-    export let borderRadius = '--border-radius', hover = false, onClick: ((e: MouseEvent)=>void) | null = null;
-    export let ref: SVGElement | null = null;
-    let className = "";
-    export {className as class};
+    interface Props {
+        borderRadius?: string;
+        hover?: boolean;
+        onClick?: ((e: MouseEvent)=>void) | null;
+        ref?: SVGElement | null;
+        class?: string;
+        children?: import('svelte').Snippet;
+        [key: string]: any
+    }
+
+    let {
+        borderRadius = '--border-radius',
+        hover = false,
+        onClick = null,
+        ref = $bindable(null),
+        class: className = "",
+        children,
+        ...rest
+    }: Props = $props();
+    
     const IconBase = cx('IconBase', className, css`
     flex-shrink: 0;
     cursor: pointer;
@@ -23,7 +39,7 @@
     `)
 </script>
 
-<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
-<svg class={IconBase} role="img" bind:this={ref} on:click={onClick} {...$$restProps} >
-    <slot />
+<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+<svg class={IconBase} role="img" bind:this={ref} onclick={onClick} {...rest} >
+    {@render children?.()}
 </svg>

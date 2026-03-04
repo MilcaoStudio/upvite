@@ -5,7 +5,11 @@
     import Dialog from "./Dialog.svelte";
     import { noopTrue } from "$lib";
 
-    export let props: ModalProps<"link_warning">;
+    interface Props {
+        props: ModalProps<"link_warning">;
+    }
+
+    let { props }: Props = $props();
     const settings = state.settings;
 </script>
 

@@ -3,10 +3,19 @@
     import DefaultPermissionSelect from "./DefaultPermissionSelect.svelte";
     import PermissionSelect from "./PermissionSelect.svelte";
 
-    export let value: bigint | {a: bigint, d: bigint},
-        onChange: (value: bigint | {a: bigint, d: bigint}) => void,
-        target: Channel | Server,
-        items: Set<keyof typeof Permission> | null = null;
+    interface Props {
+        value: bigint | {a: bigint, d: bigint};
+        onChange: (value: bigint | {a: bigint, d: bigint}) => void;
+        target: Channel | Server;
+        items?: Set<keyof typeof Permission> | null;
+    }
+
+    let {
+        value,
+        onChange,
+        target,
+        items = null
+    }: Props = $props();
     const serverPermissions = new Set([
         "GrantAllSafe",
         "ReadMessageHistory",
@@ -17,9 +26,9 @@
         "MoveMembers",
         "ManageWebhooks",
     ]);
-    $: selections = (
+    let selections = $derived((
         Object.keys(Permission) as (keyof typeof Permission)[]
-    ).filter((key) => !serverPermissions.has(key) && (!items || items.has(key)));
+    ).filter((key) => !serverPermissions.has(key) && (!items || items.has(key))));
 </script>
 
 {#if target}

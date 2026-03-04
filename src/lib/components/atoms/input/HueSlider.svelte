@@ -1,12 +1,19 @@
 <script lang="ts">
-    export let onchange: ((value: number)=>void) | undefined = undefined, value = 0;
+    interface Props {
+        onchange?: ((value: number)=>void) | undefined;
+        value?: number;
+        children?: import('svelte').Snippet;
+        [key: string]: any
+    }
+
+    let { onchange = undefined, value = $bindable(0), children, ...rest }: Props = $props();
 </script>
 
 
 <div class="HueSlider">
-    <label><slot/></label>
+    <label>{@render children?.()}</label>
     <div>
-        <input type="range" min="0" max="360" step="1" bind:value on:change={()=>onchange?.(value)} {...$$restProps} />
+        <input type="range" min="0" max="360" step="1" bind:value onchange={()=>onchange?.(value)} {...rest} />
     </div>
 </div>
 

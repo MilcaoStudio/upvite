@@ -1,23 +1,38 @@
 <script lang="ts">
+    import { run } from 'svelte/legacy';
+
     import Button from "$lib/components/atoms/Button.svelte";
     import Item from "$lib/components/atoms/input/Item.svelte";
     import type { Server } from "stoat.js";
     import BxLock from "svelte-boxicons/BxLock.svelte";
     import { t } from "svelte-i18n";
 
-    export let server: Server,
-        showDefault = false,
-        selected: string,
-        rank: number,
-        onSelect: (value: string) => void,
-        onCreateRole:
+    interface Props {
+        server: Server;
+        showDefault?: boolean;
+        selected: string;
+        rank: number;
+        onSelect: (value: string) => void;
+        onCreateRole?: 
             | ((callback: (role_id: string) => void) => void)
-            | undefined = undefined;
-    $: if (server.roles) {
-        if (selected != "default" && !server.roles.get(selected)) {
-            onSelect("default");
-        }
+            | undefined;
     }
+
+    let {
+        server,
+        showDefault = false,
+        selected,
+        rank,
+        onSelect,
+        onCreateRole = undefined
+    }: Props = $props();
+    run(() => {
+        if (server.roles) {
+            if (selected != "default" && !server.roles.get(selected)) {
+                onSelect("default");
+            }
+        }
+    });
 
     let roles = server.orderedRoles;
 </script>

@@ -5,8 +5,13 @@
     import { isTouchscreenDevice } from "$lib";
     import TextAreaAutoSize from "../atoms/TextAreaAutoSize.svelte";
 
-    export let message: Message, onFinish: () => void;
-    let content = message.content ?? "";
+    interface Props {
+        message: Message;
+        onFinish: () => void;
+    }
+
+    let { message, onFinish }: Props = $props();
+    let content = $state(message.content ?? "");
 
     function setContent(c: string) {
         content = c;
@@ -43,7 +48,7 @@
 </script>
 
 <svelte:document
-    on:keyup={(e) =>
+    onkeyup={(e) =>
         e.key == "Escape" && !modalController.isVisible && onFinish()}
 />
 
@@ -72,14 +77,14 @@
         {onBlur}
     />
     <span class="caption">
-        <!-- svelte-ignore a11y-click-events-have-key-events -->
-        <!-- svelte-ignore a11y-no-static-element-interactions -->
-        <!-- svelte-ignore a11y-missing-attribute -->
-        escape to <a on:click={onFinish}>cancel</a> &middot; enter to{" "}
-        <!-- svelte-ignore a11y-click-events-have-key-events -->
-        <!-- svelte-ignore a11y-no-static-element-interactions -->
-        <!-- svelte-ignore a11y-missing-attribute -->
-        <a on:click={save}>save</a>
+        <!-- svelte-ignore a11y_click_events_have_key_events -->
+        <!-- svelte-ignore a11y_no_static_element_interactions -->
+        <!-- svelte-ignore a11y_missing_attribute -->
+        escape to <a onclick={onFinish}>cancel</a> &middot; enter to{" "}
+        <!-- svelte-ignore a11y_click_events_have_key_events -->
+        <!-- svelte-ignore a11y_no_static_element_interactions -->
+        <!-- svelte-ignore a11y_missing_attribute -->
+        <a onclick={save}>save</a>
     </span>
 </div>
 

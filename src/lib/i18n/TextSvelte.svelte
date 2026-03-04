@@ -3,7 +3,12 @@
     import type { SvelteNode } from "$lib/markdown/runtime/svelteRuntime";
     import { json } from "svelte-i18n";
 
-    export let id: string, fields: Record<string, SvelteNode> = {};
+    interface Props {
+        id: string;
+        fields?: Record<string, SvelteNode>;
+    }
+
+    let { id, fields = {} }: Props = $props();
 
     function recursiceReplaceSlots(input: string, _fields: Record<string, SvelteNode>): (string|SvelteNode)[] {
         const key = Object.keys(_fields)[0];
@@ -20,7 +25,7 @@
         return [input]
     }
 
-    $: definition = $json(id)
+    let definition = $derived($json(id))
 </script>
 
 {#if typeof definition == 'string'}

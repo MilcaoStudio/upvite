@@ -2,7 +2,11 @@
     import UserShort from "$lib/components/user/UserShort.svelte";
     import { clientController } from "$lib/controllers/ClientController";
     import { css, cx } from "@emotion/css";
-    export let match: string;
+    interface Props {
+        match: string;
+    }
+
+    let { match }: Props = $props();
     const Mention = cx("Mention", css`
         gap: 4px;
         flex-shrink: 0;
@@ -35,7 +39,7 @@
         }`);
 </script>
 
-<!-- svelte-ignore a11y-missing-attribute -->
+<!-- svelte-ignore a11y_missing_attribute -->
 <a class={Mention}>
     <UserShort
         showServerIdentity

@@ -4,7 +4,12 @@
     import { t } from "svelte-i18n";
     import MemberItem from "./MemberItem.svelte";
 
-    export let entries: UserListGroup[], channel: Channel;
+    interface Props {
+        entries: UserListGroup[];
+        channel: Channel;
+    }
+
+    let { entries, channel }: Props = $props();
 </script>
 
 {#each entries as entry, index}

@@ -1,4 +1,6 @@
 <script lang="ts">
+    import { run } from 'svelte/legacy';
+
     import { page } from "$app/stores";
     import { useClient } from "$lib/controllers/ClientController";
     import { css, cx } from "@emotion/css";
@@ -37,15 +39,17 @@
         `,
     );
     const client = useClient();
-    $: pathname = $page.url.pathname;
-    $: channel_id = $page.params.channel;
-    $: channel = client.channels.get(channel_id || "");
-    let channels: Channel[] = [];
-    $: autorun(() => channels = [...client.channels.values()].filter(
-        (x) =>
-            (x.type == "DirectMessage" && x.active) ||
-            x.type == "Group",
-    ));
+    let pathname = $derived($page.url.pathname);
+    let channel_id = $derived($page.params.channel);
+    let channel = $derived(client.channels.get(channel_id || ""));
+    let channels: Channel[] = $state([]);
+    run(() => {
+        autorun(() => channels = [...client.channels.values()].filter(
+            (x) =>
+                (x.type == "DirectMessage" && x.active) ||
+                x.type == "Group",
+        ));
+    });
     channels.sort((b, a) =>
         (a.lastMessageId || "").localeCompare(b.lastMessageId || ""),
     );
@@ -53,7 +57,7 @@
         (user) => user?.relationship == "Incoming",
     );
 
-    $: channelList = channels.map((channel) => {
+    let channelList = $derived(channels.map((channel) => {
         let user;
         if (channel.type == "DirectMessage") {
             if (!channel.active) return null;
@@ -82,7 +86,7 @@
                 active: channel.id == channel_id,
             }),
         );
-    });
+    }));
 </script>
 
 <GenericSidebarBase >

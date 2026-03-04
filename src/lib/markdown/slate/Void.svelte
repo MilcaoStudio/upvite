@@ -1,8 +1,18 @@
 <script lang="ts">
 
-    export let isInline: boolean,
-        ref: HTMLElement,
-        dir: "rtl" | "ltr" | undefined = undefined;
+    interface Props {
+        isInline: boolean;
+        ref: HTMLElement;
+        dir?: "rtl" | "ltr" | undefined;
+        children?: import('svelte').Snippet;
+    }
+
+    let {
+        isInline,
+        ref = $bindable(),
+        dir = undefined,
+        children
+    }: Props = $props();
 </script>
 
 <svelte:element
@@ -15,5 +25,5 @@
     contenteditable="false"
 >
     <!-- TODO: Render void elements -->
-    <slot />
+    {@render children?.()}
 </svelte:element>

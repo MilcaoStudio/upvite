@@ -1,5 +1,7 @@
 <script>
     import { css, cx } from "@emotion/css";
+    /** @type {{children?: import('svelte').Snippet}} */
+    let { children } = $props();
 
     const MarkdownTip = cx(
         "MarkdownTip",
@@ -26,4 +28,4 @@
     );
 </script>
 
-<div class={MarkdownTip}><slot /></div>
+<div class={MarkdownTip}>{@render children?.()}</div>

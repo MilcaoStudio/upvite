@@ -1,4 +1,6 @@
 <script lang="ts">
+    import { run } from 'svelte/legacy';
+
     import { goto, pushState } from "$app/navigation";
     import { state } from "$lib/State";
     import { modalController } from "$lib/components/modals/ModalController.js";
@@ -28,17 +30,28 @@
         permissions: Permissions,
     };
 
-    export let data;
-    $: tab = data.tab;
-    let client = useClient();
-    $: channel = client.channels.get(data.channel);
-    let isVertical = state.layout.getViewport() == Viewport.SMALL;
-    $: autorun(() => {
-        isVertical = state.layout.getViewport() == Viewport.SMALL;
-    });
-    $: if (!tab && !isVertical) {
-        tab = "overview";
+    interface Props {
+        data: any;
     }
+
+    let { data }: Props = $props();
+    let tab;
+    run(() => {
+        tab = data.tab;
+    });
+    let client = useClient();
+    let channel = $derived(client.channels.get(data.channel));
+    let isVertical = $state(state.layout.getViewport() == Viewport.SMALL);
+    run(() => {
+        autorun(() => {
+            isVertical = state.layout.getViewport() == Viewport.SMALL;
+        });
+    });
+    run(() => {
+        if (!tab && !isVertical) {
+            tab = "overview";
+        }
+    });
 
     function exitSettings() {
         setTimeout(() => goto(state.layout.getLastPath()), 200);
@@ -52,7 +65,7 @@
     }
 </script>
 
-<svelte:body on:keydown={keyDown} />
+<svelte:body onkeydown={keyDown} />
 
 {#if channel}
     {#if tab}
@@ -61,11 +74,15 @@
                 <Scroller>
                     <Category>{channel.name}</Category>
                     <Item onClick={()=>tab = "overview"} active={tab == "overview"}>
-                        <Info size={20} slot="svg" />
+                        {#snippet svg()}
+                                                <Info size={20}  />
+                                            {/snippet}
                         {$t("app.settings.channel_pages.overview.title")}
                     </Item>
                     <Item onClick={()=>tab="permissions"} active={tab == "permissions"}>
-                        <List size={20} slot="svg" />
+                        {#snippet svg()}
+                                                <List size={20}  />
+                                            {/snippet}
                         {$t("app.settings.channel_pages.permissions.title")}
                     </Item>
                 </Scroller>
@@ -76,7 +93,8 @@
                         default: tab[0].toUpperCase().concat(tab.slice(1)),
                     })}
                 </h1>
-                <svelte:component this={Pages[tab]} {channel} />
+                {@const SvelteComponent_1 = Pages[tab]}
+                <SvelteComponent_1 {channel} />
             </ScrollerContent>
             <CloseButton />
         </Row>
@@ -85,11 +103,15 @@
         <SettingsMenu>
             <Category>{channel.name}</Category>
             <Item href="settings/overview" large active>
-                <Info size={20} slot="svg" />
+                {#snippet svg()}
+                                <Info size={20}  />
+                            {/snippet}
                 {$t("app.settings.channel_pages.overview.title")}
             </Item>
             <Item href="settings/permissions" large active>
-                <List size={20} slot="svg" />
+                {#snippet svg()}
+                                <List size={20}  />
+                            {/snippet}
                 {$t("app.settings.channel_pages.permissions.title")}
             </Item>
         </SettingsMenu>

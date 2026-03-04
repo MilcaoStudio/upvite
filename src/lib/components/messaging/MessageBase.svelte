@@ -2,16 +2,33 @@
     import { isTouchscreenDevice } from "$lib";
     import { css, cx } from "@emotion/css";
 
-    export let head = false,
+    interface Props {
+        head?: boolean;
+        failed?: boolean;
+        mention?: boolean;
+        blocked?: boolean;
+        sending?: boolean;
+        contrast?: boolean;
+        highlight?: boolean;
+        onMouseEnter?: (() => void) | null;
+        onMouseLeave?: (() => void) | null;
+        onContextMenu?: (() => void) | null;
+        children?: import('svelte').Snippet;
+    }
+
+    let {
+        head = false,
         failed = false,
         mention = false,
         blocked = false,
         sending = false,
         contrast = false,
         highlight = false,
-        onMouseEnter: (() => void) | null = null,
-        onMouseLeave: (() => void) | null = null,
-        onContextMenu: (() => void) | null = null;
+        onMouseEnter = null,
+        onMouseLeave = null,
+        onContextMenu = null,
+        children
+    }: Props = $props();
     const Base = cx(
         "Message",
         css`
@@ -90,9 +107,9 @@
 <div
     class={Base}
     role="listitem"
-    on:mouseenter={onMouseEnter}
-    on:mouseleave={onMouseLeave}
-    on:contextmenu={onContextMenu}
+    onmouseenter={onMouseEnter}
+    onmouseleave={onMouseLeave}
+    oncontextmenu={onContextMenu}
 >
-    <slot />
+    {@render children?.()}
 </div>

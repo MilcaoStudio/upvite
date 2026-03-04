@@ -2,7 +2,12 @@
     import type { Channel } from "stoat.js";
     import { _ } from "svelte-i18n";
 
-    export let channel: Channel | undefined = undefined, prefix = false;
+    interface Props {
+        channel?: Channel | undefined;
+        prefix?: boolean;
+    }
+
+    let { channel = undefined, prefix = false }: Props = $props();
 </script>
 
 {#if channel}

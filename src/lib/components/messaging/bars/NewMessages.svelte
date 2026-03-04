@@ -1,4 +1,6 @@
 <script lang="ts">
+    import { run } from 'svelte/legacy';
+
     import { internalSubscribe } from "$lib/InternalEmitter";
     import { getRenderer } from "$lib/rendered/Singleton";
     import { dayjs } from "$lib/i18n";
@@ -12,29 +14,38 @@
     import { state } from "$lib/State";
 
 
-    export let channel: Channel, lastId: string | undefined = undefined;
-    let hidden = false, timeAgo = '';
+    interface Props {
+        channel: Channel;
+        lastId?: string | undefined;
+    }
+
+    let { channel, lastId = undefined }: Props = $props();
+    let hidden = $state(false), timeAgo = $state('');
     function hide(){hidden=true}
-    $: lastId && (hidden=false);
+    run(() => {
+        lastId && (hidden=false);
+    });
     internalSubscribe("NewMessages", "hide", hide);
     function onKeyDown(e: KeyboardEvent) {
         e.key == "Escape" && hide()
     }
 
-    $: if (lastId) {
-        try {
-            timeAgo = (dayjs(decodeTime(lastId)) as any).fromNow() as string;
-        } catch (err) {}
-    }
+    run(() => {
+        if (lastId) {
+            try {
+                timeAgo = (dayjs(decodeTime(lastId)) as any).fromNow() as string;
+            } catch (err) {}
+        }
+    });
 
     const renderer = getRenderer(channel, state);
 </script>
 
-<svelte:document on:keydown={onKeyDown} />
+<svelte:document onkeydown={onKeyDown} />
 
 {#if renderer.state == "RENDER" && lastId && !hidden}
     <Bar position="top" accent>
-        <button on:click={()=>{
+        <button onclick={()=>{
             hidden = true;
             if (channel.type == "TextChannel") {
                 goto(`/server/${channel.serverId}/channel/${channel.id}/${lastId}`)

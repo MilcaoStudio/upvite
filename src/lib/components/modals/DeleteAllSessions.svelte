@@ -4,7 +4,11 @@
     import Dialog from "./Dialog.svelte";
     import { noopTrue } from "$lib";
 
-    export let props: ModalProps<"sign_out_sessions">;
+    interface Props {
+        props: ModalProps<"sign_out_sessions">;
+    }
+
+    let { props }: Props = $props();
     function onClick(){
         props.onDeleting();
         props.client.api.delete("/auth/session/all").then(props.onDelete);

@@ -1,11 +1,21 @@
 <script lang="ts">
     import ConditionalLink from "$lib/components/atoms/ConditionalLink.svelte";
     import Download from "svelte-boxicons/BxDownload.svelte";
-    export let data = "",
+    interface Props {
+        data?: string;
+        fileType?: string;
+        encoding?: string;
+        filename?: string;
+        disabled?: boolean;
+    }
+
+    let {
+        data = "",
         fileType = "text/plain",
         encoding = "utf8",
         filename = "unknown.txt",
-        disabled = false;
+        disabled = false
+    }: Props = $props();
 </script>
 
 <ConditionalLink

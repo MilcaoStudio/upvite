@@ -5,7 +5,11 @@
     import { createElement } from "$lib/markdown/runtime/svelteRuntime";
     import Message from "../messaging/Message.svelte";
 
-    export let props: ModalProps<"delete_message">;
+    interface Props {
+        props: ModalProps<"delete_message">;
+    }
+
+    let { props }: Props = $props();
     let data = {
         message: {
             element: createElement(Message, {
@@ -30,7 +34,9 @@
         children: $t("app.special.modals.actions.delete"),
     }}
 >
-    <span slot="description"
-        >{$t("app.special.modals.prompt.confirm_delete_message_long")}</span
-    >
+    {#snippet description()}
+        <span 
+            >{$t("app.special.modals.prompt.confirm_delete_message_long")}</span
+        >
+    {/snippet}
 </DialogForm>

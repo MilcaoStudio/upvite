@@ -16,17 +16,17 @@
     document.title = "Sandbox | Uprising";
     const entryPlaceholder =
         "ctx => {\n\treturn {\n\t\tonUnload(){},\n\t\tonUpdate(){}\n\t}\n}";
-    const ctx = state.plugins.ctx;
-    let entrypoint = "";
-    let format = 1;
-    let namespace = "";
-    let id = "";
-    let version = "1.0.0";
-    let enabled = true;
-    let error: string = "";
-    let channel_id: string = "";
-    $: ctx.channel = clientController.availableClient.channels.get(channel_id);
-    $: ctx.server = ctx.channel?.server;
+    const ctx = $state(state.plugins.ctx);
+    let entrypoint = $state("");
+    let format = $state(1);
+    let namespace = $state("");
+    let id = $state("");
+    let version = $state("1.0.0");
+    let enabled = $state(true);
+    let error: string = $state("");
+    let channel_id: string = $state("");
+    let ctx.channel = $derived(clientController.availableClient.channels.get(channel_id));
+    let ctx.server = $derived(ctx.channel?.server);
 
     function setEntrypoint(content?: string) {
         entrypoint = content ?? "";
@@ -94,7 +94,7 @@
 </script>
 
 <!--Only the entrypoint matters-->
-<svelte:window on:beforeunload={(ev)=>entrypoint && ev.preventDefault()} />
+<svelte:window onbeforeunload={(ev)=>entrypoint && ev.preventDefault()} />
 
 <section>
     <H1>Make your own plugin</H1>

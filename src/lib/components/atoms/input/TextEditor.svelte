@@ -18,18 +18,31 @@
         RE_MENTION,
     } from "$lib/markdown/plugins/remarkRegex";
     import Prism from "$lib/markdown/prism";
-    export let value = "uwu",
-        minHeight = 0,
+    interface Props {
+        value?: string;
+        minHeight?: number;
         onChange: (
             value: string,
             selectionStart?: number,
             selectionEnd?: number,
-        ) => void,
-        onKeyDown: KeyboardEventHandler<HTMLDivElement>,
-        onFocus: () => void,
-        onBlur: (() => void) | undefined = undefined;
+        ) => void;
+        onKeyDown: KeyboardEventHandler<HTMLDivElement>;
+        onFocus: () => void;
+        onBlur?: (() => void) | undefined;
+        [key: string]: any
+    }
 
-    let ref: HTMLDivElement | undefined;
+    let {
+        value = "uwu",
+        minHeight = 0,
+        onChange,
+        onKeyDown,
+        onFocus,
+        onBlur = undefined,
+        ...rest
+    }: Props = $props();
+
+    let ref: HTMLDivElement | undefined = $state();
     function stringifyNodes(nodes: Descendant[]) {
         return nodes.map((n) => Node.string(n)).join("\n");
     }
@@ -154,7 +167,7 @@
                 {...$$restProps}
             />
             -->
-            <Editable bind:ref autoFocus {...$$restProps} />
+            <Editable bind:ref autoFocus {...rest} />
         </div>
     </Slate>
 </div>

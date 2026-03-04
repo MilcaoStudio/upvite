@@ -1,12 +1,17 @@
 <script lang="ts">
-    let className = "";
-    export {className as class};
+    
 
-    export let onClick: (()=>void) | null = null; 
+    interface Props {
+        class?: string;
+        onClick?: (()=>void) | null;
+        children?: import('svelte').Snippet;
+    }
+
+    let { class: className = "", onClick = null, children }: Props = $props();
 </script>
 
-<button class="EmptyEntry {className}" on:click={onClick}>
-    <slot />
+<button class="EmptyEntry {className}" onclick={onClick}>
+    {@render children?.()}
 </button>
 
 <style>

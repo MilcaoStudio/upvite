@@ -2,9 +2,13 @@
     import { InfoBadge, PersonPicture } from "fluent-svelte";
     import type { Channel } from "stoat.js";
     import Tooltip from "../atoms/Tooltip.svelte";
-    export let channel: Channel;
-    $: unread = channel.unread;
-    $: count = channel.mentions?.size;
+    interface Props {
+        channel: Channel;
+    }
+
+    let { channel }: Props = $props();
+    let unread = $derived(channel.unread);
+    let count = $derived(channel.mentions?.size);
 </script>
 
 <Tooltip content={channel.name ?? channel.recipient?.username} div right>

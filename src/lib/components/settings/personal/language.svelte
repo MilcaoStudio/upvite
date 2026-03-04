@@ -4,7 +4,7 @@
     import RadioLanguage from "$lib/components/atoms/input/RadioLanguage.svelte";
 
     import { Languages } from "../../../../lang/Languages";
-    let group = state.locale.getLanguage();
+    let group = $state(state.locale.getLanguage());
     let languages = Object.entries(Languages).sort(([localeA, _a],[localeB, _b])=>localeB == group ? 1 : (localeA.localeCompare(localeB)));
     let naturalLangs = languages.filter(([_, entry])=>!entry.cat)
     let conLangs = languages.filter(([_, entry])=>entry.cat);
@@ -17,18 +17,22 @@
     <InDevelopment />
     {#each naturalLangs as [locale, entry]}
         <RadioLanguage bind:group value={locale} >
-            <div slot="svg">
-                {entry.emoji}
-            </div>
+            {#snippet svg()}
+                        <div >
+                    {entry.emoji}
+                </div>
+                    {/snippet}
             {entry.display}
         </RadioLanguage>
     {/each}
     CONLANGS
     {#each conLangs as [locale, entry]}
         <RadioLanguage bind:group value={locale} >
-            <div slot="svg">
-                {entry.emoji}
-            </div>
+            {#snippet svg()}
+                        <div >
+                    {entry.emoji}
+                </div>
+                    {/snippet}
             {entry.display}
         </RadioLanguage>
     {/each}

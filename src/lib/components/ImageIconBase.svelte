@@ -1,7 +1,14 @@
 <script lang="ts">
     import { css } from "@emotion/css";
 
-    export let borderRadius: string | null = null, hover = false, alt: string | null = null;
+    interface Props {
+        borderRadius?: string | null;
+        hover?: boolean;
+        alt?: string | null;
+        [key: string]: any
+    }
+
+    let { borderRadius = null, hover = false, alt = null, ...rest }: Props = $props();
     let Base = css`
         flex-shrink: 0;
         object-fit: cover;
@@ -9,4 +16,4 @@
     `;
 </script>
 
-<img class={Base} style:border-radius="var({borderRadius})" {alt} {...$$restProps} />
+<img class={Base} style:border-radius="var({borderRadius})" {alt} {...rest} />

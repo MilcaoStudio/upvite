@@ -1,3 +1,8 @@
+<script>
+    /** @type {{children?: import('svelte').Snippet}} */
+    let { children } = $props();
+</script>
+
 <style>
     div.Sidebar {
         height: 100%;
@@ -16,5 +21,5 @@
 </style>
 
 <div class="Sidebar">
-    <slot />
+    {@render children?.()}
 </div>

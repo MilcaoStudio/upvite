@@ -1,4 +1,6 @@
 <script lang="ts">
+    import { run } from 'svelte/legacy';
+
     import { page } from "$app/stores";
     import { isTouchscreenDevice } from "$lib";
     import { state } from "$lib/State";
@@ -11,7 +13,21 @@
 
     import type { ComponentType } from "svelte";
     import { autorun } from "mobx";
-    export let withBackground = false, withTransparency = false, noBurger = false, icon: ComponentType;
+    interface Props {
+        withBackground?: boolean;
+        withTransparency?: boolean;
+        noBurger?: boolean;
+        icon: ComponentType;
+        children?: import('svelte').Snippet;
+    }
+
+    let {
+        withBackground = false,
+        withTransparency = false,
+        noBurger = false,
+        icon,
+        children
+    }: Props = $props();
     const IconContainer = cx('IconContainer', css`
     display: flex;
     align-items: center;
@@ -25,12 +41,14 @@
 
     `);
     const layout = state.layout;
-    let visible: boolean;
+    let visible: boolean = $state();
     let isVertical = layout.getViewport() == Viewport.SMALL;
-    $: autorun(()=>{
-        visible = layout.getSectionState(SIDEBAR_CHANNELS, true);
+    run(() => {
+        autorun(()=>{
+            visible = layout.getSectionState(SIDEBAR_CHANNELS, true);
+        });
     });
-    $: pathname = $page.url.pathname;
+    let pathname = $derived($page.url.pathname);
     function toggleState(){
         layout.toggleSectionState(SIDEBAR_CHANNELS, visible)
     }
@@ -40,15 +58,16 @@
     {#if !noBurger}
         <HamburgerAction />
     {/if}
-    <!-- svelte-ignore a11y-no-static-element-interactions -->
-    <div class={IconContainer} on:click={toggleState} on:keydown={toggleState}>
+    <!-- svelte-ignore a11y_no_static_element_interactions -->
+    {@const SvelteComponent = icon}
+    <div class={IconContainer} onclick={toggleState} onkeydown={toggleState}>
         {#if !isVertical && visible}
             <BxChevronLeft width="18" />
         {/if}
-        <svelte:component this={icon} width="24px" />
+        <SvelteComponent width="24px" />
         {#if !isVertical && !visible}
             <BxChevronRight width="18" />
         {/if}
     </div>
-    <slot />
+    {@render children?.()}
 </Header>

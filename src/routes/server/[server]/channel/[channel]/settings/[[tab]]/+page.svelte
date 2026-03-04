@@ -6,11 +6,15 @@
     import { useClient } from "$lib/controllers/ClientController";
     import { t } from "svelte-i18n";
 
-    export let data;
+    interface Props {
+        data: any;
+    }
+
+    let { data }: Props = $props();
     let client = useClient();
-    $: channel = client.channels.get(data.channel);
-    $: server = client.servers.get(data.server);
-    $: tab = data.tab;
+    let channel = $derived(client.channels.get(data.channel));
+    let server = $derived(client.servers.get(data.server));
+    let tab = $derived(data.tab);
 </script>
 
 {#if channel}

@@ -3,7 +3,11 @@
     import InputElement from "./InputElement.svelte";
     import type { FormContext, Value } from "$lib/types/Form";
 
-    export let id: string;
+    interface Props {
+        id: string;
+    }
+
+    let { id }: Props = $props();
     const { schema, disabled, values, onChange, data } = getContext<FormContext>('form');
     const props = {
         type: schema[id],

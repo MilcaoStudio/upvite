@@ -1,7 +1,19 @@
 <script lang="ts">
     import { css, cx } from "@emotion/css";
 
-    export let width: number, height: number, className = "";
+    interface Props {
+        width: number;
+        height: number;
+        className?: string;
+        children?: import('svelte').Snippet;
+    }
+
+    let {
+        width,
+        height,
+        className = "",
+        children
+    }: Props = $props();
     const Grid = cx("Grid", className, css`
         --width: ${width}px;
         --height: ${height}px;
@@ -55,5 +67,5 @@
 </script>
 
 <div class={Grid}>
-    <slot />
+    {@render children?.()}
 </div>

@@ -5,8 +5,12 @@
     import { onDestroy } from "svelte";
 
     const plugins = state.plugins;
-    export let plugin: PluginInfo;
-    let checked = plugin.enabled;
+    interface Props {
+        plugin: PluginInfo;
+    }
+
+    let { plugin }: Props = $props();
+    let checked = $state(plugin.enabled);
     function onChange() {
         console.log(plugin.id);
         // checked value updates slower than onChange
@@ -24,4 +28,4 @@
 
 <Checkbox bind:checked on:change={onChange}>{plugin.namespace}/{plugin.id} {plugin.version}</Checkbox>
 <a href={url} target="_blank"><button>View entrypoint</button></a>
-<button on:click={()=>plugins.remove(plugin.namespace, plugin.id)}>Remove</button>
+<button onclick={()=>plugins.remove(plugin.namespace, plugin.id)}>Remove</button>

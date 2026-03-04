@@ -12,7 +12,11 @@
 
     import VoiceActions from "./VoiceActions.svelte";
 
-    export let channel: Channel;
+    interface Props {
+        channel: Channel;
+    }
+
+    let { channel }: Props = $props();
     let isVertical = state.layout.getViewport() == Viewport.SMALL;
     function slideOpen() {
         if (!isVertical) return;

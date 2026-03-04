@@ -1,7 +1,13 @@
 <script lang="ts">
     import { css, cx } from "@emotion/css";
 
-    export let palette: "primary" | "accent" = "primary", compact = false;
+    interface Props {
+        palette?: "primary" | "accent";
+        compact?: boolean;
+        children?: import('svelte').Snippet;
+    }
+
+    let { palette = "primary", compact = false, children }: Props = $props();
     const Line = cx("LineDivider", css`
         display: flex;
         user-select: none;
@@ -14,5 +20,5 @@
 </script>
 
 <div class={Line}>
-    <slot />
+    {@render children?.()}
 </div>

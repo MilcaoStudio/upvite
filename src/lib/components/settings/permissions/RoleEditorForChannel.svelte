@@ -1,4 +1,6 @@
 <script lang="ts">
+    import { run } from 'svelte/legacy';
+
     import Button from "$lib/components/atoms/Button.svelte";
     import H1 from "$lib/components/atoms/heading/H1.svelte";
     import { translate } from "$lib/i18n";
@@ -8,7 +10,12 @@
     import { t } from "svelte-i18n";
     import PermissionList from "./PermissionList.svelte";
 
-    export let selected: string, channel: Channel;
+    interface Props {
+        selected: string;
+        channel: Channel;
+    }
+
+    let { selected, channel }: Props = $props();
     let currentRoles =
         channel?.type == "Group"
             ? ([
@@ -29,10 +36,18 @@
                       d: 0n,
                   },
               }))!;
-    $: currentRole = currentRoles.find((x) => x.id == selected)!;
-    $: currentPermission = currentRole.permissions;
-    $: currentValue = currentPermission;
-    $: console.log(currentPermission, "=>", currentValue);
+    let currentRole = $derived(currentRoles.find((x) => x.id == selected)!);
+    let currentPermission;
+    run(() => {
+        currentPermission = currentRole.permissions;
+    });
+    let currentValue;
+    run(() => {
+        currentValue = currentPermission;
+    });
+    run(() => {
+        console.log(currentPermission, "=>", currentValue);
+    });
 
     let items = new Set<keyof typeof Permission>([
                 "ReadMessageHistory",
@@ -46,7 +61,9 @@
                 "ManageChannel",
                 "ManagePermissions",
     ]);
-    $: channel.type != "Group" && items.add("ViewChannel");
+    run(() => {
+        channel.type != "Group" && items.add("ViewChannel");
+    });
     function onChange(value: bigint | {a: bigint, d: bigint}) {
         currentValue = value;
     }

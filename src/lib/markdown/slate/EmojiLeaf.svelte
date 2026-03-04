@@ -1,6 +1,11 @@
 <script lang="ts">
     import { RE_EMOJI } from "../plugins/remarkRegex";
-    export let leaf;
+    interface Props {
+        leaf: any;
+        children?: import('svelte').Snippet;
+    }
+
+    let { leaf, children }: Props = $props();
     let match = RE_EMOJI.exec(leaf.text);
     let group: string | undefined,
         id = "",
@@ -23,7 +28,7 @@
 </script>
 
 <span style:background="var(--block)" data-slate-leaf="true">
-    <slot />
+    {@render children?.()}
 </span>
 
 <style>

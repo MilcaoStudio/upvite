@@ -11,11 +11,15 @@
     import { detect } from "detect-browser";
     import IconButton from "$lib/components/atoms/input/IconButton.svelte";
 
-    export let attachment: File;
+    interface Props {
+        attachment: File;
+    }
+
+    let { attachment }: Props = $props();
     let { filename, metadata, size } = attachment;
     let url = attachment.createFileURL(true);
-    $: open_url = `${url}/${filename}`;
-    $: download_url = url?.replace("attachments", "attachments/download");
+    let open_url = $derived(`${url}/${filename}`);
+    let download_url = $derived(url?.replace("attachments", "attachments/download"));
     let filesize = determineFileSize(size || 0);
     let isFirefox = detect()?.name == "firefox";
 </script>

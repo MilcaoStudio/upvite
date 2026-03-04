@@ -3,9 +3,13 @@
     import Switch from "./Switch.svelte";
     import Check from "svelte-boxicons/BxCheck.svelte";
 
-    export let state: SwitchState,
-        disabled = false,
+    interface Props {
+        state: SwitchState;
+        disabled?: boolean;
         onChange: (state: SwitchState) => void;
+    }
+
+    let { state, disabled = false, onChange }: Props = $props();
 </script>
 
 <div

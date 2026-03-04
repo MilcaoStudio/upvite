@@ -1,4 +1,4 @@
-<script context="module" lang="ts">
+<script module lang="ts">
     export type GradientStep = {
         stop?: number;
         colour: string;
@@ -42,9 +42,13 @@
   import BxRotateLeft from "svelte-boxicons/BxRotateLeft.svelte";
   import Column from "../layout/Column.svelte";
   import IconButton from "./IconButton.svelte";
-  export let shape = "linear",
-    onchange: ((value: string) => void) | undefined = undefined,
-    steps: GradientStep[] = [
+  interface Props {
+    shape?: string;
+    onchange?: ((value: string) => void) | undefined;
+    steps?: GradientStep[];
+  }
+
+  let { shape = "linear", onchange = undefined, steps = [
       {
         stop: 50,
         colour: "#000000",
@@ -53,7 +57,7 @@
         stop: 100,
         colour: "#ffffff",
       },
-    ];
+    ] }: Props = $props();
   let rotation = 0;
 
   function toString() {
@@ -77,7 +81,7 @@
       style:background-image="{shape}-gradient(to right, {steps
         .map((s) => `${s.colour}` + (s.stop ? ` ${s.stop}%` : ""))
         .join(",")})"
-    />
+></div>
   </div>
   <Column>
     <table>
@@ -85,7 +89,7 @@
         {#each steps as step}
           <tr>
             <td>{step.stop ? `${step.stop}%` : "-"}</td>
-            <td class="sample" style:background-color={step.colour} />
+            <td class="sample" style:background-color={step.colour}></td>
             <td>{step.colour}</td>
           </tr>
         {/each}

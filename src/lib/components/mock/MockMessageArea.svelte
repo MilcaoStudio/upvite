@@ -1,4 +1,6 @@
 <script lang="ts">
+    import { run } from 'svelte/legacy';
+
     import { defer } from "$lib";
     import { internalEmit, internalSubscribe } from "$lib/InternalEmitter";
     import { state } from "$lib/State";
@@ -13,19 +15,24 @@
     import { getRenderer } from "./MockRenderer";
 
     const MESSAGE_AREA_PADDING = 82;
-    export let channel: Channel, lastId: string | undefined = undefined;
+    interface Props {
+        channel: Channel;
+        lastId?: string | undefined;
+    }
+
+    let { channel, lastId = undefined }: Props = $props();
     let messageId = null;
     // ? This is the scroll container.
-    let ref: HTMLDivElement;
-    let width: number;
-    let height: number;
+    let ref: HTMLDivElement = $state();
+    let width: number = $state();
+    let height: number = $state();
 
-    let highlight: string | undefined;
+    let highlight: string | undefined = $state();
     // ? Current channel state.
-    const renderer = getRenderer(channel, state);
+    const renderer = $state(getRenderer(channel, state));
 
     // ? avoid re-renders
-    let scrollState: ScrollState = { type: "Free" };
+    let scrollState: ScrollState = $state({ type: "Free" });
 
     function setScrollState(v: ScrollState) {
         if (v.type == "StayAtBottom") {
@@ -157,29 +164,33 @@
         }
     };
 
-    $: stbOnResize = function () {
+    let stbOnResize = $derived(function () {
         if (!atBottom() && scrollState.type == "Bottom") {
             ref.scrollTo({ behavior: "instant", top: ref.scrollHeight });
             setScrollState({ type: "Bottom" });
         }
-    };
+    });
 
-    $: height && stbOnResize();
+    run(() => {
+        height && stbOnResize();
+    });
 
-    $: keyUp = function (e: KeyboardEvent) {
+    let keyUp = $derived(function (e: KeyboardEvent) {
         if (e.key == "Escape" && !modalController.isVisible) {
             renderer.jumpToBottom(true);
             internalEmit("TextArea", "focus", "message");
         }
-    };
+    });
 
-    $: setContext("MessageAreaWidth", (width ?? 0) - MESSAGE_AREA_PADDING);
+    run(() => {
+        setContext("MessageAreaWidth", (width ?? 0) - MESSAGE_AREA_PADDING);
+    });
 </script>
 
 <svelte:window bind:innerWidth={width} bind:innerHeight={height} />
-<svelte:document on:resize={stbOnResize} on:keyup={keyUp} />
+<svelte:document onresize={stbOnResize} onkeyup={keyUp} />
 
-<div class="MessageArea" bind:this={ref} on:scroll={onScroll}>
+<div class="MessageArea" bind:this={ref} onscroll={onScroll}>
     <div>
         {#if renderer.state == "RENDER"}
             <!--Force renderer update on highlight-->

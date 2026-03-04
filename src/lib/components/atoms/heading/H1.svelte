@@ -1,3 +1,8 @@
+<script>
+    /** @type {{children?: import('svelte').Snippet}} */
+    let { children } = $props();
+</script>
+
 <style>
     h1 {
         margin: 0;
@@ -8,4 +13,4 @@
     }
 </style>
 
-<h1><slot /></h1>
+<h1>{@render children?.()}</h1>

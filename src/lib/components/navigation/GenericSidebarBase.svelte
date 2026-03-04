@@ -1,5 +1,11 @@
 <script lang="ts">
     import { css, cx } from "@emotion/css";
+    interface Props {
+        children?: import('svelte').Snippet;
+        [key: string]: any
+    }
+
+    let { children, ...rest }: Props = $props();
 
     const Base = cx("GenericSidebar", css`
         width: 232px;
@@ -13,6 +19,6 @@
     `)
 </script>
 
-<div class={Base} {...$$restProps}>
-    <slot />
+<div class={Base} {...rest}>
+    {@render children?.()}
 </div>

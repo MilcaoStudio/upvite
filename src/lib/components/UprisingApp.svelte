@@ -1,4 +1,6 @@
 <script lang="ts">
+    import { run } from 'svelte/legacy';
+
     import { page } from "$app/stores";
     import { isTouchscreenDevice } from "$lib";
     import OverlapPanel, { Docked, ShowIf } from "./OverlapPanel.svelte";
@@ -8,12 +10,17 @@
     import BottomNavigation from "./navigation/BottomNavigation.svelte";
     import { state } from "$lib/State";
     import { Viewport } from "$lib/stores/Layout";
+    interface Props {
+        children?: import('svelte').Snippet;
+    }
+
+    let { children }: Props = $props();
 
     // Make true on worker alert
     // let showStatusBar = false;
-    let path: string, fixedBottomNav: boolean, inChannel: boolean, inServer: boolean, inSpecial: boolean;
+    let path: string = $state(), fixedBottomNav: boolean = $state(), inChannel: boolean = $state(), inServer: boolean = $state(), inSpecial: boolean = $state();
     let isTouch = isTouchscreenDevice();
-    $: {
+    run(() => {
         path = $page.url.pathname;
         fixedBottomNav =
             path === "/" ||
@@ -25,7 +32,7 @@
         inSpecial =
             (path.startsWith("/friends") && isTouch) ||
             path.startsWith("/invite") || path.startsWith("/settings");
-    };
+    });;
     let isVertical = state.layout.getViewport() == Viewport.SMALL;
 </script>
 
@@ -53,6 +60,6 @@
         }}
         docked={isVertical ? Docked.None: Docked.Both}
     >
-        <slot />
+        {@render children?.()}
     </OverlapPanel>
 </div>

@@ -8,10 +8,19 @@
         | "password"
         | "invite"
         | "current_password";
-    export let type: FieldType,
+    interface Props {
+        type: FieldType;
+        showOverline?: boolean;
+        name?: string | undefined;
+        value?: string | undefined;
+    }
+
+    let {
+        type,
         showOverline = false,
-        name: string | undefined = undefined,
-        value: string | undefined = undefined;
+        name = undefined,
+        value = $bindable(undefined)
+    }: Props = $props();
 </script>
 
 {#if showOverline}

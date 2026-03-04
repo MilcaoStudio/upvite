@@ -4,7 +4,11 @@
     import Tooltip from "../atoms/Tooltip.svelte";
     import BxCheck  from "svelte-boxicons/BxCheck.svelte";
 
-    export let server: Server;
+    interface Props {
+        server: Server;
+    }
+
+    let { server }: Props = $props();
     let bannerURL = server.bannerURL;
 
     const ServerBanner = cx('ServerBanner', css`
@@ -80,8 +84,8 @@
             </Tooltip>
         {/if}
         <!--push modal server_info-->
-        <!-- svelte-ignore a11y-missing-attribute -->
-        <a class="title" on:click={() =>{}} on:keydown={null} role="button" tabindex=0>
+        <!-- svelte-ignore a11y_missing_attribute -->
+        <a class="title" onclick={() =>{}} onkeydown={null} role="button" tabindex=0>
             {server.name}
         </a>
 

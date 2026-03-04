@@ -3,7 +3,12 @@
     import { clientController, useClient } from "$lib/controllers/ClientController";
     import { css, cx } from "@emotion/css";
 
-    export let match: string | null = null, arg1: string;
+    interface Props {
+        match?: string | null;
+        arg1: string;
+    }
+
+    let { match = null, arg1 }: Props = $props();
     const client = useClient();
     const Icon = cx("emoji", match, css`
         object-fit: contain;
@@ -22,12 +27,12 @@
             background-image: url(ishere.jpg);
         }
     `);
-    let fail = false;
+    let fail = $state(false);
     
-    $: url = //RE_ULID.test(arg1) ?
+    let url = //RE_ULID.test(arg1) ?
         // Matches ULID
-        match == "RV" ? `https://autumn.revolt.chat/emojis/${arg1}` :
-        `${client.configuration?.features.autumn.url}/emojis/${arg1}` 
+        $derived(match == "RV" ? `https://autumn.revolt.chat/emojis/${arg1}` :
+        `${client.configuration?.features.autumn.url}/emojis/${arg1}`) 
         /*
         :
         // Not matches ULID
@@ -39,5 +44,5 @@
 {#if fail}
     <span>{#if match}:{match}{/if}:{arg1}:</span>
 {:else}
-    <img class={Icon} alt=":{arg1}:" loading="lazy" draggable="false" src={url} on:error={()=>(fail=true)} />
+    <img class={Icon} alt=":{arg1}:" loading="lazy" draggable="false" src={url} onerror={()=>(fail=true)} />
 {/if}

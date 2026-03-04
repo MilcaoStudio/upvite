@@ -1,9 +1,13 @@
 <script>
     import { css, cx } from "@emotion/css";
 
-    export let head = false,
+    /** @type {{head?: boolean, fail?: boolean, preview?: boolean, children?: import('svelte').Snippet}} */
+    let {
+        head = false,
         fail = false,
-        preview = false;
+        preview = false,
+        children
+    } = $props();
     const Base = cx(
         css`
             .content {
@@ -63,7 +67,7 @@
 </script>
 
 <div class="Reply {Base}">
-    <slot />
+    {@render children?.()}
 </div>
 
 <style>

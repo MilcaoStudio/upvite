@@ -1,20 +1,33 @@
 <script lang="ts">
+    import Tooltip from './Tooltip.svelte';
     import { _ } from "svelte-i18n";
     import tippy, { type TippyProps } from "svelte-tippy";
 
-    export let div = false,
+    interface Props {
+        div?: boolean;
+        right?: boolean;
+        i18n?: string;
+        content?: string | undefined;
+        placement?: TippyProps["placement"] |undefined;
+        children?: import('svelte').Snippet;
+    }
+
+    let {
+        div = false,
         right = false,
-        i18n: string = '',
-        content: string | undefined = undefined,
-        placement: TippyProps["placement"] |undefined = undefined;
+        i18n = '',
+        content = undefined,
+        placement = undefined,
+        children
+    }: Props = $props();
 </script>
 
 {#if div}
-    <svelte:self {right} {i18n} {content} {placement}>
-        <div ><slot /></div>
-    </svelte:self>
+    <Tooltip {right} {i18n} {content} {placement}>
+        <div >{@render children?.()}</div>
+    </Tooltip>
 {:else if i18n}
-    <svelte:self content={$_(i18n)} {right} {placement}/>
+    <Tooltip content={$_(i18n)} {right} {placement}/>
 {:else}
     <div 
         use:tippy={{
@@ -22,5 +35,5 @@
             placement: right ? "right" : placement,
             content,
         }}
-    ><slot /></div>
+    >{@render children?.()}</div>
 {/if}

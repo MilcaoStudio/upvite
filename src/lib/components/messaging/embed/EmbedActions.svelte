@@ -3,8 +3,12 @@
     import type { ImageEmbed } from "stoat.js";
     import LinkExternal from "svelte-boxicons/BxLinkExternal.svelte";
 
-    export let embed: ImageEmbed;
-    $: filename = embed.url.split("/").pop();
+    interface Props {
+        embed: ImageEmbed;
+    }
+
+    let { embed }: Props = $props();
+    let filename = $derived(embed.url.split("/").pop());
 </script>
 
 <div class="actions">

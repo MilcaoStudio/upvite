@@ -6,7 +6,12 @@
     import List from "../atoms/layout/List.svelte";
     import UserCheckbox from "../user/UserCheckbox.svelte";
 
-    export let props: ModalProps<"user_picker">;
+    interface Props {
+        props: ModalProps<"user_picker">;
+        [key: string]: any
+    }
+
+    let { props, ...rest }: Props = $props();
     let selected = new Set<string>();
     let omitted = new Set([
         ...(props.omit || []),
@@ -14,13 +19,13 @@
     ]);
     let client = useClient();
 
-    $: friends = [...client.users.values()].filter(
+    let friends = $derived([...client.users.values()].filter(
         (u) => u.relationship == "Friend" && !omitted.has(u.id),
-    );
+    ));
 </script>
 
 <Dialog
-    {...$$restProps}
+    {...rest}
     title={$t("app.special.popovers.user_picker.select")}
     actions={[
         {
