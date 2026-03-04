@@ -94,6 +94,8 @@
     --header-height: 50px;
     --header-height-rgb: undefined,undefined,undefined;
 
+    --banner-height: 120px;
+    
     --input-border-width: 2px;
     --textarea-padding: 16px;
     --textarea-line-height: 20px;
@@ -152,6 +154,15 @@ body {
     -webkit-text-size-adjust: 100%;
     overscroll-behavior: none;
     scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+    scrollbar-width: none;
+}
+
+#root {
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    bottom: 0px;
+    right: 0px;
 }
 
 * {
@@ -159,7 +170,6 @@ body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     box-sizing: border-box;
-    scrollbar-width: var(--scrollbar-thickness-ff);
     -webkit-touch-callout: none;
 }
 
@@ -247,6 +257,7 @@ foreignObject > svg {
 .app-container {
     background-size: cover;
     background-position: center;
+    overflow-y: hidden;
 }
 
 .status-bar {
