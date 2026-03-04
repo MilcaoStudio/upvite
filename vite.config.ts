@@ -38,33 +38,6 @@ function getVersion() {
 }
 
 export default defineConfig({
-  build: {
-    rollupOptions: {
-      output: {
-        manualChunks(id) {
-          if (id.includes("@sveltejs/kit")) {
-            return "sveltekit"
-          }
-          if (id.includes("svelte/")) {
-            return "svelte"
-          }
-          if (id.includes("lib/stores/")) {
-            return "stores"
-          }
-          if (id.includes("revolt") || id.includes("revkit")) {
-            return "revolt"
-          }
-          if (id.includes("boxicons")) {
-            return "icons"
-          }
-          if (id.includes("prism")) {
-            return "prism"
-          }
-          
-        }
-      }
-    }
-  },
   optimizeDeps: {
 		exclude: ['svelte-slate']
 	},
@@ -77,15 +50,4 @@ export default defineConfig({
       preventAssignment: true,
     }),
   ],
-  server: {
-    fs: {
-      allow: [
-        searchForWorkspaceRoot(process.cwd()),
-        "external"
-      ]
-    }
-  },
-  resolve: {
-    preserveSymlinks: true,
-  },
 },);

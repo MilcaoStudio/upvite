@@ -46,17 +46,21 @@
     "@types/prismjs": "^1.26.3",
     "@types/unist": "^3.0.2",
     "comma-separated-tokens": "^2.0.3",
+    "deepmerge": "^4.3.1",
     "devlop": "^1.1.0",
     "dotenv": "^16.3.2",
     "estree-util-is-identifier-name": "^3.0.0",
     "hast-util-whitespace": "^3.0.0",
+    "intl-messageformat": "^11.1.2",
     "mdast-util-mdx-expression": "^2.0.0",
     "mdast-util-mdx-jsx": "^3.1.0",
     "mdast-util-mdxjs-esm": "^2.0.1",
+    "mdast-util-to-hast": "^13.2.1",
     "property-information": "^6.4.1",
+    "slate": "^0.123.0",
     "space-separated-tokens": "^2.0.2",
     "style-to-object": "^1.0.5",
-    "svelte": "^4.2.7",
+    "svelte": "^4.2.20",
     "svelte-adapter-bun": "^0.5.2",
     "svelte-boxicons": "^1.0.4",
     "svelte-check": "^3.6.0",
@@ -65,7 +69,7 @@
     "unist-util-visit": "^5.0.0",
     "vfile": "^6.0.1",
     "vfile-message": "^4.0.2",
-    "vite": "^5.0.3"
+    "vite": "^5.4.21"
   },
   "type": "module",
   "dependencies": {
@@ -92,8 +96,7 @@
     "remark-math": "^6.0.0",
     "remark-parse": "^11.0.0",
     "remark-rehype": "^11.1.0",
-    "revkit": "^1.1.14",
-    "revolt.js": "6.0.20-patch.2",
+    "stoat.js": "^7.3.6",
     "svelte-dnd-action": "^0.9.39",
     "svelte-i18n": "^4.0.0",
     "svelte-mobx": "^1.0.0",
@@ -106,5 +109,6 @@
   },
   "trustedDependencies": [
     "svelte-slate"
-  ]
+  ],
+  "packageManager": "pnpm@10.11.0+sha512.6540583f41cc5f628eb3d9773ecee802f4f9ef9923cc45b69890fb47991d4b092964694ec3a4f738a420c918a333062c8b925d312f42e4f0c263eb603551f977"
 }

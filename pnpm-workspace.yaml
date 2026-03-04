@@ -1,0 +1,5 @@
+onlyBuiltDependencies:
+  - es5-ext
+  - esbuild
+  - svelte-preprocess
+  - svelte-slate
