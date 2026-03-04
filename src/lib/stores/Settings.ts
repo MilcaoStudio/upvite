@@ -2,7 +2,7 @@ import { mapToRecord } from "$lib";
 import type { Overrides, Fonts, MonospaceFonts } from "$lib/components/context/Theme.svelte";
 import type Persistent from "$lib/types/Persistent";
 import type Syncable from "$lib/types/Syncable";
-import type Plugin from "./Plugins"
+//import type Plugin from "./Plugins"
 import { ObservableMap, makeAutoObservable, action, computed } from "mobx";
 import SAudio,{ type SoundOptions } from "./helpers/SAudio";
 import SSecurity from "./helpers/SSecurity";
@@ -158,14 +158,14 @@ export default class Settings
     }
     
     @computed toSyncable() {
-        const data: Record<"appearance" | "theme", Partial<ISettings>> = {
-            appearance: this.pullKeys([
+        const data: Record<"appearance" | "theme", string> = {
+            appearance: JSON.stringify(this.pullKeys([
                 "appearance:emoji",
                 "appearance:seasonal",
                 "appearance:transparency",
                 "appearance:compact_chat",
-            ]),
-            theme: this.pullKeys([
+            ])),
+            theme: JSON.stringify(this.pullKeys([
                 "appearance:ligatures",
                 "appearance:theme:base",
                 "appearance:theme:css",
@@ -173,9 +173,11 @@ export default class Settings
                 "appearance:theme:light",
                 "appearance:theme:monoFont",
                 "appearance:theme:overrides",
-            ]),
+            ])),
         };
 
         return data;
     }
 }
+
+export const settings = new Settings();

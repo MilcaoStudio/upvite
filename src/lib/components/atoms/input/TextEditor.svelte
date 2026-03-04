@@ -8,8 +8,6 @@
         type Descendant,
         Node,
     } from "slate";
-    import Leaf from "$lib/markdown/slate/Leaf.svelte";
-    import ElementRenderer from "$lib/markdown/slate/ElementRenderer.svelte";
     import type { KeyboardEventHandler } from "svelte/elements";
     import withMarkdown from "$lib/markdown/withMarkdown";
     import type { IElement } from "svelte-slate/plugins";
@@ -20,7 +18,7 @@
         RE_MENTION,
     } from "$lib/markdown/plugins/remarkRegex";
     import Prism from "$lib/markdown/prism";
-    export let value = "",
+    export let value = "uwu",
         minHeight = 0,
         onChange: (
             value: string,
@@ -36,10 +34,13 @@
         return nodes.map((n) => Node.string(n)).join("\n");
     }
 
-    let ASTValue: IElement[] = [
-        { type: "paragraph", children: [{ text: "" }] },
+    let ASTValue: ({type?: string, children: (IElement | Text)[]})[] = [
+        {
+		    children: [{text: ""}]
+        }
     ];
 
+    /*
     function effect_value(_value: string) {
         const _ASTValue = [];
         for (const line of _value.split("\n")) {
@@ -48,6 +49,7 @@
         ASTValue = _ASTValue;
     }
     $: effect_value(value);
+    */
 
     function tokenLen(token: Prism.Token | string): number {
         return typeof token == "string"
@@ -126,6 +128,7 @@
         {editor}
         value={ASTValue}
         on:value={(v) => {
+            /*
             const content = stringifyNodes(v.detail);
             editor.move({ unit: "line" });
             console.debug(JSON.stringify(editor.selection));
@@ -133,22 +136,25 @@
                 content,
                 editor.selection?.anchor.offset,
                 editor.selection?.focus.offset,
-            );
+            );*/
+            console.debug(v.detail);
+            console.debug(JSON.stringify(editor.selection));
         }}
     >
         <div style:min-height="{minHeight}px">
+        <!--
             <Editable
-                bind:ref
                 {Leaf}
                 Element={ElementRenderer}
-                {decorate}
-                placeholder=""
+                placeholder="Message"
                 autoFocus
                 onKeyDown={(e) => {
                     onKeyDown(e);
                 }}
                 {...$$restProps}
             />
+            -->
+            <Editable bind:ref autoFocus {...$$restProps} />
         </div>
     </Slate>
 </div>

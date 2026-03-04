@@ -1,21 +1,24 @@
 <script lang="ts">
-    import type { Channel } from "revolt.js";
+    import type { Channel } from "stoat.js";
     import GenericSidebarBase from "../GenericSidebarBase.svelte";
     import MemberList from "./MemberList.svelte";
-    import { shouldSkipOffline, fetchMembers } from "$lib/MemberList";
-    import { useSession } from "$lib/controllers/ClientController";
+    import { fetchMembers } from "$lib/MemberList";
+    import { useClient, useSession } from "$lib/controllers/ClientController";
+    import { writable } from "svelte/store";
 
     export let channel: Channel | undefined = undefined;
     const FETCHED = new Set;
-    let session = useSession();
+    const client = useClient();
     let entries = fetchMembers(
             channel!,
-            () => [...session!.client!.members.keys()],
-            true,
+            async () => {
+                await channel?.server?.syncMembers(false);
+                return client.serverMembers.filter((members) => members.id.server == channel?.serverId);
+            },
         );
+    let server_id = channel?.serverId;
     $: {
-        let server_id = channel?.server_id;
-        if (server_id && session?.state == "Online" && !FETCHED.has(server_id)) {
+        if (server_id && client.ready() && !FETCHED.has(server_id)) {
             FETCHED.add(server_id);
             channel?.server?.syncMembers(false).catch(()=>FETCHED.delete(server_id));
         }

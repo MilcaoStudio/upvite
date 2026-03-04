@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type { Message } from "revolt.js";
+    import type { Message } from "stoat.js";
     import { modalController } from "../modals/ModalController";
     import Autocomplete, { useAutoComplete } from "../Autocomplete.svelte";
     import { isTouchscreenDevice } from "$lib";
@@ -34,10 +34,10 @@
         onBlur,
         ...autoCompleteProps
     } = useAutoComplete((v) => setContent(v ?? ""), {
-        users: { type: "channel", id: message.channel!._id },
+        users: { type: "channel", id: message.channel!.id },
         channels:
-            message.channel!.channel_type == "TextChannel"
-                ? { server: message.channel!.server_id! }
+            message.channel!.type == "TextChannel"
+                ? { server: message.channel!.serverId }
                 : undefined,
     });
 </script>
@@ -56,7 +56,7 @@
         maxLength={2000}
         padding="var(--message-box-padding)"
         onChange={(ev) => {
-            onChange(ev);
+            onChange(ev.currentTarget.value);
             setContent(ev.currentTarget.value);
         }}
         onKeyDown={(e) => {

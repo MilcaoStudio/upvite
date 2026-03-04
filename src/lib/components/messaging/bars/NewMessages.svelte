@@ -2,7 +2,7 @@
     import { internalSubscribe } from "$lib/InternalEmitter";
     import { getRenderer } from "$lib/rendered/Singleton";
     import { dayjs } from "$lib/i18n";
-    import type { Channel } from "revolt.js";
+    import type { Channel } from "stoat.js";
     import { decodeTime } from "ulid";
     import Bar from "./Bar.svelte";
     import { goto } from "$app/navigation";
@@ -36,10 +36,10 @@
     <Bar position="top" accent>
         <button on:click={()=>{
             hidden = true;
-            if (channel.channel_type == "TextChannel") {
-                goto(`/server/${channel.server_id}/channel/${channel._id}/${lastId}`)
+            if (channel.type == "TextChannel") {
+                goto(`/server/${channel.serverId}/channel/${channel.id}/${lastId}`)
             } else {
-                goto(`/channel/${channel._id}/${lastId}`)
+                goto(`/channel/${channel.id}/${lastId}`)
             }
         }}>
             <div>{translate("app.main.channel.misc.new_messages", {time_ago: timeAgo})}</div>

@@ -7,7 +7,7 @@
     import UserPlus from "svelte-boxicons/BxUserPlus.svelte";
     import Cog from "svelte-boxicons/BxCog.svelte";
     import { SIDEBAR_MEMBERS, Viewport } from "$lib/stores/Layout";
-    import type { Channel } from "revolt.js";
+    import type { Channel } from "stoat.js";
     import { modalController } from "$lib/components/modals/ModalController";
 
     import VoiceActions from "./VoiceActions.svelte";
@@ -36,18 +36,18 @@
 <div class="Container">
     <!--TODO: Actions-->
     
-    {#if channel.channel_type == "VoiceChannel"}
+    {#if channel.isVoice}
         <VoiceActions {channel} />
     {/if}
-    {#if channel.channel_type == "Group"}
-        <IconButton href="/channel/{channel._id}/settings">
+    {#if channel.type == "Group"}
+        <IconButton href="/channel/{channel.id}/settings">
             <Cog size={24} />
         </IconButton>
         <IconButton
             onClick={() =>
                 modalController.push({
                     type: "user_picker",
-                    omit: channel.recipient_ids ?? [],
+                    omit: [...channel.recipientIds.keys()],
                     callback: async (users) =>
                         users.forEach((user) => channel.addMember(user)),
                 })}

@@ -1,9 +1,9 @@
 <script lang="ts">
     import IconButton from "$lib/components/atoms/input/IconButton.svelte";
-    import type { API } from "revolt.js";
+    import type { ImageEmbed } from "stoat.js";
     import LinkExternal from "svelte-boxicons/BxLinkExternal.svelte";
 
-    export let embed: API.Image;
+    export let embed: ImageEmbed;
     $: filename = embed.url.split("/").pop();
 </script>
 

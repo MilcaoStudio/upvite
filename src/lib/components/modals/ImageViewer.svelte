@@ -13,9 +13,7 @@
         {#if attachment && attachment.metadata.type == "Image"}
             <img
                 alt={attachment.filename}
-                src={clientController.availableClient.generateFileURL(
-                    attachment,
-                )}
+                src={attachment.filename}
                 
                 loading="eager"
             />

@@ -1,12 +1,12 @@
 <script lang="ts">
-  import { dictionary, locale, waitLocale } from "svelte-i18n";
+  import { dictionary, isLoading, locale, waitLocale } from "svelte-i18n";
   import { browser } from "$app/environment";
   import { setContext } from "svelte";
   import { Languages } from "../../../lang/Languages";
   import { defaultDictionary, type Dictionary, transformLanguage, dayjs, defaultLocale } from "$lib/i18n";
   import { state } from "$lib/State";
   import { findLanguage } from "$lib/stores/LocaleOptions";
-    import { autorun } from "mobx";
+  import { autorun } from "mobx";
     
 
   let definitions: Dictionary = defaultDictionary;
@@ -61,6 +61,8 @@
 </script>
 
 {#await loadLanguage($locale || defaultLocale) then }
-  <slot />
+  {#if !$isLoading}
+    <slot />
+  {/if}
 {/await}
 

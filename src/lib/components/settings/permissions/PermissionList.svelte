@@ -1,10 +1,10 @@
 <script lang="ts">
-    import { Channel, Permission, type API, type Server } from "revolt.js";
+    import { Channel, Permission, type API, type Server } from "stoat.js";
     import DefaultPermissionSelect from "./DefaultPermissionSelect.svelte";
     import PermissionSelect from "./PermissionSelect.svelte";
 
-    export let value: number | API.OverrideField,
-        onChange: (value: number | API.OverrideField) => void,
+    export let value: bigint | {a: bigint, d: bigint},
+        onChange: (value: bigint | {a: bigint, d: bigint}) => void,
         target: Channel | Server,
         items: Set<keyof typeof Permission> | null = null;
     const serverPermissions = new Set([
@@ -23,7 +23,7 @@
 </script>
 
 {#if target}
-    {#if typeof value == "number"}
+    {#if typeof value == "bigint"}
         {#each selections as select (select)}
             <DefaultPermissionSelect
                 id={select}

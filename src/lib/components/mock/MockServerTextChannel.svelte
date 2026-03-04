@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type { Channel } from "revolt.js";
+    import type { Channel } from "stoat.js";
     import ChannelLayout from "../channels/ChannelLayout.svelte";
     import JumpToBottom from "../messaging/bars/JumpToBottom.svelte";
     import MockMessageArea from "./MockMessageArea.svelte";

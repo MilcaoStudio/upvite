@@ -1,7 +1,7 @@
 <script lang="ts">
     import type { QueuedMessage } from "$lib/stores/MessageQueue";
     import { css, cx } from "@emotion/css";
-    import type { Message as MessageType } from "revolt.js";
+    import type { Message as MessageType } from "stoat.js";
     import { modalController } from "../modals/ModalController";
     import { internalEmit } from "$lib/InternalEmitter";
     import UserIcon from "../user/UserIcon.svelte";
@@ -16,6 +16,7 @@
     import Attachment from "./attachments/Attachment.svelte";
     import MessageReply from "./attachments/MessageReply.svelte";
     import Embed from "./embed/Embed.svelte";
+    import { useClient } from "$lib/controllers/ClientController";
     export let message: MessageType & {
             webhook?: { name: string; avatar?: string };
         },
@@ -34,22 +35,22 @@
         `,
     );
 
-    $: client = message.client;
+    $: client = useClient();
     $: user = message.author;
     $: content = message.content;
-    head = head || (message.reply_ids ? message.reply_ids.length > 0 : false);
+    head = head || (message.replyIds ? message.replyIds.length > 0 : false);
 
     function openProfile() {
         modalController.push({
             type: "user_profile",
-            user_id: message.author_id,
-            contextualServer: message.channel?.server_id ?? undefined
+            user_id: message.authorId ?? "",
+            contextualServer: message.channel?.serverId ?? undefined
         });
     }
 
     function handleUserClick(e: MouseEvent) {
-        if (e.shiftKey && user?._id) {
-            internalEmit("MessageBox", "append", `<@${user._id}>`, "mention");
+        if (e.shiftKey && user?.id) {
+            internalEmit("MessageBox", "append", `<@${user.id}>`, "mention");
         } else {
             openProfile();
         }
@@ -59,19 +60,19 @@
     let reactionOpen = false;
 </script>
 
-<div class={Wrapper} id={message._id}>
-    {#if !hideReply && message.reply_ids}
-        {#each message.reply_ids as id, index}
+<div class={Wrapper} id={message.id}>
+    {#if !hideReply && message.replyIds}
+        {#each message.replyIds as id, index}
             <MessageReply
                 {index}
                 {id}
                 channel={message.channel}
-                mentions={message.mention_ids ?? []}
+                mentions={message.mentionIds ?? []}
             />
         {/each}
     {/if}
     <ContextMenu
-        data={{ message, contextualChannel: message.channel_id, queued }}
+        data={{ message, contextualChannel: message.channelId, queued }}
     >
         {#key message}
             <MessageBase
@@ -80,13 +81,13 @@
                     ? false
                     : (head &&
                           !(
-                              message.reply_ids && message.reply_ids.length > 0
+                              message.replyIds && message.replyIds.length > 0
                           )) ??
                       false}
                 {contrast}
                 sending={typeof queued != "undefined"}
-                mention={message.mention_ids && client.user
-                    ? message.mention_ids.includes(client.user._id)
+                mention={message.mentionIds && client.user
+                    ? message.mentionIds.includes(client.user.id)
                     : undefined}
                 failed={typeof queued?.error != "undefined"}
             >
@@ -94,12 +95,12 @@
                     {#if head && !compact}
                         <ContextMenu
                             data={{
-                                user: user?._id,
-                                contextualMessage: message._id,
+                                user: user?.id,
+                                contextualMessage: message.id,
                             }}
                         >
                             <UserIcon
-                                url={message.generateMasqAvatarURL()}
+                                url={message.masqueradeAvatarURL}
                                 override={message.webhook?.avatar
                                     ? `https://autumn.revolt.chat/avatars/${message.webhook.avatar}`
                                     : undefined}
@@ -149,7 +150,7 @@
                         <Category>{$_(queued.error)}</Category>
                     {/if}
                     {#if message.attachments}
-                        {#each message.attachments as attachment (attachment._id)}
+                        {#each message.attachments as attachment (attachment.id)}
                             <Attachment {attachment} />
                         {/each}
                     {/if}

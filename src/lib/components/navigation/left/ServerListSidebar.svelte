@@ -1,21 +1,20 @@
 <script lang="ts">
     import { state } from "$lib/State";
     import { modalController } from "$lib/components/modals/ModalController";
-    import { Client } from "revolt.js";
+    import { orderingStore } from "$lib/stores/Ordering";
 
     import ServerList from "../servers/ServerList.svelte";
-    export let client: Client, server_id: string;
+    export let server_id: string | undefined = undefined;
     function createServer() {
         modalController.push({ type: "create_server" });
     }
+    let servers = orderingStore.orderedServers;
 </script>
 
 <ServerList
-    {client}
     active={server_id}
     {createServer}
-    permit={state.notifications}
     home={state.layout.getLastHomePath}
-    servers={state.ordering.orderedServers}
-    reorder={state.ordering.reorderServer}
+    servers={$servers}
+    reorder={(servers)=>orderingStore.hydrate({servers: servers.map(s=>s.id)})}
 />

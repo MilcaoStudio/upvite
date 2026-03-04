@@ -3,7 +3,7 @@
     import TextSvelte from "$lib/i18n/TextSvelte.svelte";
     import Markdown from "$lib/markdown/Markdown.svelte";
     import { createElement } from "$lib/markdown/runtime/svelteRuntime";
-    import { User, type Message } from "revolt.js";
+    import { TextSystemMessage, User, UserSystemMessage, type Message } from "stoat.js";
     import UserShort from "../user/UserShort.svelte";
     import MessageBase from "./MessageBase.svelte";
     import MessageInfo from "./MessageInfo.svelte";
@@ -29,10 +29,11 @@
     export let message: Message,
         highlight = false,
         hideInfo = false;
-    $: data = message.asSystemMessage;
+    // I don't have time for fixing this
+    $: data = message.systemMessage as any;
     $: createdAt =
-        data.type == "user_joined" && data.user
-            ? decodeTime(data.user._id)
+        data?.type == "user_joined"
+            ? decodeTime((data as UserSystemMessage).userId)
             : null;
     let settings = state.settings;
 </script>
@@ -47,9 +48,7 @@
         {/if}
         <div class="SystemContent">
             {#if data.type == "text"}
-                {#if message.system?.type == "text"}
-                    <Markdown content={message.system.content} />
-                {/if}
+                <Markdown content={data.content} />
             {:else if data.type == "channel_description_changed" || data.type == "channel_icon_changed"}
                 <TextSvelte
                     id="app.main.channel.system.{data.type}"

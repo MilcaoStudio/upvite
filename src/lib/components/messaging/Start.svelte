@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type { Channel } from "revolt.js";
+    import type { Channel } from "stoat.js";
     import ChannelName from "../channels/ChannelName.svelte";
     import { _ } from "svelte-i18n";
 

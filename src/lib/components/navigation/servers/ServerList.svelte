@@ -1,42 +1,25 @@
 <script lang="ts">
     import { dndzone } from "svelte-dnd-action";
-    import type { Client, Server } from "revolt.js";
-    import type { INotificationChecker } from "revolt.js/dist/util/Unreads";
-    import { isTouchscreenDevice } from "$lib";
+    import type { Client, Server } from "stoat.js";
     import { css, cx } from "@emotion/css";
     import Item from "./Item.svelte";
     import { useCustomReorder } from "$lib/dnd";
     import ListFooter from "./ListFooter.svelte";
     import ListHeader from "./ListHeader.svelte";
 
-    export const active: string | undefined = undefined;
+    export let active: string | undefined = undefined;
     export let createServer: ()=>void,
-        client: Client,
         home: () => string = ()=>"/",
         servers: Server[],
-        reorder: (items: Server[]) => void,
-        permit: INotificationChecker;
-    
-    servers = servers.map((s)=>{
-        Object.defineProperty(s, 'id', {value: s._id});
-        return s
-    })
+        reorder: (items: Server[]) => void;
     const Base = cx(
         "ServerList",
         css`
             width: 56px;
             display: flex;
             flex-direction: column;
-
-            .list {
-                flex-grow: 1;
-                scrollbar-width: none;
-            }
-
-            .list::-webkit-scrollbar {
-                width: 0;
-                height: 0;
-            }
+            scrollbar-width: none;
+            overflow-y: scroll;
         `,
     );
     const Shadow = cx(
@@ -62,14 +45,14 @@
 </script>
 
 <div class={Base}>
-    <ListHeader {client} {home} {permit} />
+    <ListHeader {home} />
     <ListFooter {createServer}/>
     <div
         use:dndzone={{ items: servers }}
         on:finalize={useCustomReorder(reorder)}
     >
-        {#each servers as server (server._id)}
-            <Item item={server} {permit} />
+        {#each servers as server (server.id)}
+            <Item item={server} active={server.id == active} />
         {/each}
     </div>
     

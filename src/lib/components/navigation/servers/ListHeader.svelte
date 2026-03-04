@@ -1,20 +1,20 @@
 <script lang="ts">
     import UserTooltip from "$lib/components/indicators/UserTooltip.svelte";
-    import type { Client } from "revolt.js";
+    import type { Client } from "stoat.js";
     import { ItemContainer } from "./Item.svelte";
     import LineDivider from "$lib/components/atoms/LineDivider.svelte";
     import ChannelInner from "$lib/components/channels/ChannelInner.svelte";
-    import type { INotificationChecker } from "revolt.js/dist/util/Unreads";
     import { PersonPicture } from "fluent-svelte";
+    import { useClient } from "$lib/controllers/ClientController";
 
-    export let client: Client,
+    export let home: () => string;
+        //client: Client,
         //active = false,
-        home: () => string,
-        permit: INotificationChecker;
+    const client = useClient();
     $: channels = [...client.channels.values()].filter(
         (x) =>
-            ((x.channel_type == "DirectMessage" && x.active) ||
-                x.channel_type == "Group") && x.unread,
+            ((x.type == "DirectMessage" && x.active) ||
+                x.type == "Group") && x.unread,
     );
 </script>
 
@@ -22,20 +22,15 @@
     <a href={home()}>
         <UserTooltip user={client.user} div right>
             {#if client.user}
-            <PersonPicture src={client.user.generateAvatarURL(
-                {
-                    max_side: 256,
-                },
-                false,
-            )} size={42} />
+            <PersonPicture src={client.user.animatedAvatarURL} size={42} />
             {/if}
         </UserTooltip>
     </a>
     {#if channels.length}
         <div class="List">
             {#each channels as channel}
-                <a href={`/channel/${channel._id}`}>
-                    <ChannelInner {channel} {permit} />
+                <a href={`/channel/${channel.id}`}>
+                    <ChannelInner {channel} />
                 </a>
             {/each}
         </div>

@@ -21,7 +21,7 @@
             flex-direction: row;
             padding-inline-end: 16px;
             align-items: flex-start;
-            ${isTouchscreenDevice ? `user-select: none;` : ``}
+            ${isTouchscreenDevice() ? `user-select: none;` : ``}
             ${contrast
                 ? `
             padding: 0.3rem;

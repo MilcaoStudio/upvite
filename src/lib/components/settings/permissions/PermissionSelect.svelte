@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { type Permission, type Channel, Server, type API } from "revolt.js";
+    import { type Permission, type Channel, Server, type API } from "stoat.js";
     import Long from "long";
     import OverrideSwitch from "$lib/components/atoms/input/OverrideSwitch.svelte";
     import type { SwitchState } from "$lib/types/Form";
@@ -7,14 +7,14 @@
 
     export let id: keyof typeof Permission,
         target: Channel | Server,
-        permission: number,
-        value: API.OverrideField,
-        onChange: (value: API.OverrideField) => void;
+        permission: bigint,
+        value: {a: bigint, d: bigint},
+        onChange: (value: {a: bigint, d: bigint}) => void;
 
     let state: SwitchState = "Neutral";
-    $: if (Long.fromNumber(value.d).and(permission).eq(permission)) {
+    $: if (Long.fromBigInt(value.d).and(permission).eq(permission)) {
         state = "Deny";
-    } else if (Long.fromNumber(value.a).and(permission).eq(permission)) {
+    } else if (Long.fromBigInt(value.a).and(permission).eq(permission)) {
         state = "Allow";
     } else {
         state = "Neutral";
@@ -26,8 +26,8 @@
                 "value should be an object. Friendly reminder: You may report this issue in GitHub.",
             );
         // Convert to Long so we can do bitwise ops.
-        let allow = Long.fromNumber(value.a);
-        let deny = Long.fromNumber(value.d);
+        let allow = Long.fromBigInt(value.a);
+        let deny = Long.fromBigInt(value.d);
 
         // Clear the current permission value.
         if (allow.and(permission).eq(permission)) {
@@ -49,8 +49,8 @@
 
         // Invoke state change.
         onChange({
-            a: allow.toNumber(),
-            d: deny.toNumber(),
+            a: allow.toBigInt(),
+            d: deny.toBigInt(),
         });
     }
 

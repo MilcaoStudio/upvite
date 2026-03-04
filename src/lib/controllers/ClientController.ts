@@ -1,14 +1,17 @@
-import { Client, type API } from "revolt.js";
+import { Client, ConnectionState, type API } from "stoat.js";
 import { modalController } from "../components/modals/ModalController";
-import type Auth from "$lib/stores/Auth";
 import { detect } from "detect-browser";
 import { env } from "$env/dynamic/public"
-import { state } from "$lib/State";
 import { injectWindow, takeError } from "$lib";
 import { ObservableMap, action, computed, makeAutoObservable, observable } from "mobx";
 import { browser } from "$app/environment";
 import { voiceState } from "$lib/voice/VoiceState";
 import { goto } from "$app/navigation";
+import { auth, $auth } from "$lib/stores/Auth";
+import { settings } from "$lib/stores/Settings";
+import { notificationsStore } from "$lib/stores/NotificationOptions";
+import { get, writable } from "svelte/store";
+
 /**
  * Current lifecycle state
  */
@@ -28,8 +31,10 @@ type Transition =
     }
     | {
         action:
-        | "SUCCESS"
+        | "CONNECT"
+        | "READY"
         | "DISCONNECT"
+        | "RECONNECT"
         | "RETRY"
         | "LOGOUT"
         | "ONLINE"
@@ -37,10 +42,13 @@ type Transition =
     };
 
 export default class Session {
-    state: SessionState = navigator.onLine ? "Ready" : "Offline";
-    user_id: string | null = null;
+    //_state: SessionState = navigator.onLine ? "Online" : "Offline";
+    state = writable<SessionState>(navigator.onLine ? "Online" : "Offline"); 
+    user_id: string | undefined;
     client: Client | null = null;
-
+    #retryTimeout: number | undefined;
+    #permanentError: string | undefined;
+    #connectionFailures = 0;
     /**
      * Create a new Session
      */
@@ -50,6 +58,7 @@ export default class Session {
         this.onReady = this.onReady.bind(this);
         this.onOnline = this.onOnline.bind(this);
         this.onOffline = this.onOffline.bind(this);
+        this.onError = this.onError.bind(this);
 
         window.addEventListener("online", this.onOnline);
         window.addEventListener("offline", this.onOffline);
@@ -58,9 +67,10 @@ export default class Session {
      * Initiate logout and destroy client
      */
     @action destroy() {
+        console.debug("[destroy]");
         if (this.client) {
-            this.client.logout(false);
-            this.state = "Ready";
+            this.client.events.disconnect();
+            this.state.set("Ready");
             this.client = null;
         }
     }
@@ -92,13 +102,24 @@ export default class Session {
         });
     }
 
+    private onError(err: {type: "Error", data: API.Error}) {
+        if (err.type == "Error") {
+            if (err.data.type == "InvalidSession") {
+                $auth.logout();
+                this.destroyClient();
+            } else {
+                modalController.push({type: "error", error: err.data.type})
+            }
+        }
+    }
+
     /**
      * Called when the client signals it has received the Ready packet
      */
     private onReady() {
         //resetMemberSidebarFetched();
         this.emit({
-            action: "SUCCESS",
+            action: "READY",
         });
     }
 
@@ -108,23 +129,34 @@ export default class Session {
      */
     private createClient(apiUrl?: string) {
         this.client = new Client({
-            unreads: true,
+            baseURL: apiUrl ?? env.PUBLIC_API_URL,
             autoReconnect: false,
-            onPongTimeout: "EXIT",
-            apiURL: apiUrl ?? env.PUBLIC_API_URL,
+            syncUnreads: true,
+            //debug: import.meta.env.DEV,
+            /** 
+            channelIsMuted: (channel) =>
+              this.#controller.state.notifications.isMuted(channel),
+            channelExclusiveMuted: (channel) =>
+              this.#controller.state.notifications.isChannelMuted(channel),*/
         });
 
-        this.client.addListener("dropped", this.onDropped);
+        //this.client.addListener("dropped", this.onDropped);
+        this.client.events.on("state", this.onState);
+        this.client.addListener("disconnected", this.onDropped);
         this.client.addListener("ready", this.onReady);
+        this.client.addListener("error", this.onError);
     }
 
     /**
      * Destroy the client including any listeners.
      */
     private destroyClient() {
-        this.client!.removeAllListeners();
-        this.client!.logout();
-        this.user_id = null;
+        if (this.client) {
+            this.client!.events.removeAllListeners();
+            this.client!.removeAllListeners();
+            this.client!.events.disconnect();
+        }
+        this.user_id = undefined;
         this.client = null;
         goto("/login");
     }
@@ -134,16 +166,11 @@ export default class Session {
      * @param state Possible states
      */
     private assert(...state: SessionState[]) {
-        let found = false;
-        for (const target of state) {
-            if (this.state === target) {
-                found = true;
-                break;
-            }
-        }
+        const actual = get(this.state);
+        let found = state.some((target) => actual == target);
 
         if (!found) {
-            throw `State must be ${state} in order to transition! (currently ${this.state})`;
+            console.warn(`State must be ${state} in order to transition! (currently ${state})`);
         }
     }
 
@@ -151,14 +178,13 @@ export default class Session {
      * Continue logging in provided onboarding is successful
      * @param data Transition Data
      */
-    private async continueLogin(data: Transition & { action: "LOGIN" }) {
+    private continueLogin(data: Transition & { action: "LOGIN" }) {
         try {
-            await this.client!.useExistingSession(data.session);
-            this.user_id = this.client!.user!._id;
-            state.auth.setSession(data.session);
-            voiceState.loadVoice(this.client!);
+            this.user_id = this.client!.user?.id;
+            $auth.setSession(data.session);
+            //voiceState.loadVoice(this.client!);
         } catch (err) {
-            this.state = "Ready";
+            this.state.set("Online");
             throw err;
         }
     }
@@ -170,28 +196,35 @@ export default class Session {
     @action async emit(data: Transition) {
         console.info(`[FSM ${this.user_id ?? "Anonymous"}]`, data);
 
+        // Clean up retry timer
+        if (this.#retryTimeout) {
+            clearTimeout(this.#retryTimeout);
+            this.#retryTimeout = undefined;
+        }
+
         switch (data.action) {
             // Login with session
             case "LOGIN": {
-                this.assert("Ready");
-                this.state = "Connecting";
+                this.assert("Online");
+                this.state.set("Connecting");
                 this.createClient(data.apiUrl);
 
-                if (data.configuration) {
-                    this.client!.configuration = data.configuration;
-                } else {
-                    await this.client!.fetchConfiguration();
+                
+                if (this.client) {
+                    this.client.configuration = data.configuration || await this.client.api.get("/");
+                    this.client.useExistingSession(data.session);
                 }
 
                 if (data.knowledge == "new") {
+                    /*
                     this.client!.session = data.session;
-                    (this.client! as any).$updateHeaders();
-
+                    (this.client! as any).$updateHeaders();*/
                     const { onboarding } = await this.client!.api.get(
                         "/onboard/hello",
                     );
 
                     if (onboarding) {
+                        /*
                         modalController.push({
                             type: "onboarding",
                             callback: async (username: string) =>
@@ -200,67 +233,74 @@ export default class Session {
                                     false,
                                 ).then(() => this.continueLogin(data)),
                         });
-
+*/
                         return;
                     }
+                    
+                    this.continueLogin(data);
                 }
-
-                await this.continueLogin(data);
+                this.emit({action: "CONNECT"});
+                break;
+            }
+            case "CONNECT":
+            case "RECONNECT": {
+                this.state.set("Connecting");
+                this.client?.connect();
                 break;
             }
             // Ready successfully received
-            case "SUCCESS": {
+            case "READY": {
                 this.assert("Connecting");
-                this.state = "Online";
+                this.state.set("Ready");
+                this.#connectionFailures = 0;
                 break;
             }
             // Client got disconnected
             case "DISCONNECT": {
-                if (navigator.onLine) {
-                    this.assert("Online");
-                    this.state = "Disconnected";
-
-                    setTimeout(() => {
-                        // Check we are still disconnected before retrying.
-                        if (this.state === "Disconnected") {
-                            this.emit({
-                                action: "RETRY",
-                            });
-                        }
-                    }, 1000);
-                }
-
+                this.state.set("Disconnected");
                 break;
             }
             // We should try reconnecting
             case "RETRY": {
-                this.assert("Disconnected");
-                this.client!.websocket.connect();
-                this.state = "Connecting";
+                this.#connectionFailures++;
+                this.assert("Disconnected", "Connecting");
+                const retryIn =
+                   (Math.pow(2, this.#connectionFailures) - 1) * (0.8 + Math.random() * 0.4);
+
+                console.info(
+                    "Will try to reconnect in",
+                    retryIn.toFixed(2),
+                    "seconds!",
+                );
+
+                this.#retryTimeout = setTimeout(() => {
+                    this.#retryTimeout = undefined;
+                    this.emit({action: "RECONNECT"});
+                }, retryIn * 1e3) as never;
                 break;
             }
             // User instructed logout
             case "LOGOUT": {
-                this.assert("Connecting", "Online", "Disconnected");
-                this.state = "Ready";
+                this.assert("Connecting", "Online", "Ready");
+                this.state.set("Disconnected");
                 this.destroyClient();
                 break;
             }
             // Browser went offline
             case "OFFLINE": {
-                this.state = "Offline";
+                this.state.set("Offline");
                 break;
             }
             // Browser went online
             case "ONLINE": {
                 this.assert("Offline");
                 if (this.client) {
-                    this.state = "Disconnected";
+                    this.state.set("Connecting");
                     this.emit({
                         action: "RETRY",
                     });
                 } else {
-                    this.state = "Ready";
+                    this.state.set("Online");
                 }
                 break;
             }
@@ -273,6 +313,10 @@ export default class Session {
      */
     @computed get ready() {
         return !!this.client?.user;
+    }
+
+    private onState(state: ConnectionState) {
+        console.debug(state);
     }
 }
 export class ClientController {
@@ -290,6 +334,9 @@ export class ClientController {
      * Map of user IDs to sessions
      */
     private sessions: ObservableMap<string, Session>
+    
+    ready = writable(false);
+    loggedIn = writable(false);
 
     /**
      * User ID of active session
@@ -297,21 +344,24 @@ export class ClientController {
     private current: string | null;
 
     constructor() {
+        this.configuration = null;
         if (browser) {
             if (!env.PUBLIC_API_URL) {
                 throw ReferenceError("PUBLIC_API_URL environment variable is undefined. PUBLIC_API_URL is mandatory for client controller.");
             }
 
             this.apiClient = new Client({
-                apiURL: env.PUBLIC_API_URL,
+                baseURL: env.PUBLIC_API_URL,
             });
 
+            /*
             this.apiClient
                 .fetchConfiguration()
                 .then(() => (this.configuration = this.apiClient!.configuration!));
+                */
+            this.apiClient?.api.get("/").then((config) => this.configuration = config);
         }
 
-        this.configuration = null;
         this.sessions = observable.map();
         this.current = null;
 
@@ -333,10 +383,10 @@ export class ClientController {
      * Hydrate sessions and start client lifecycles.
      * @param auth Authentication store
      */
-    @action hydrate(auth: Auth) {
-        for (const entry of auth.accounts) {
-            console.log("[hydrate] Add existing session:", entry.session._id);
-            this.addSession(entry, "existing");
+    @action hydrate() {
+        for (const session of get($auth.accounts)) {
+            console.log("[hydrate] Add existing session:", session._id);
+            this.addSession(session, "existing");
         }
 
         this.pickNextSession();
@@ -382,38 +432,28 @@ export class ClientController {
     @computed get serverConfig() {
         return this.configuration;
     }
-
-    @computed get isLoggedIn() {
-        return !!this.current
-    }
-    /**
-     * Check whether we are currently ready
-     * @returns Whether we are ready to render
-     */
-    @computed get isReady() {
-        return this.activeSession?.ready;
-    }
-
+    
     /**
      * Start a new client lifecycle
      * @param entry Session Information
      * @param knowledge Whether the session is new or existing
      */
     @action addSession(
-        entry: { session: SessionPrivate; apiUrl?: string },
+        session: SessionPrivate,
         knowledge: "new" | "existing",
     ) {
-        const user_id = entry.session.user_id!;
-        const session = new Session();
-        this.sessions.set(user_id, session);
-        session
+        const user_id = session.user_id!;
+        const sessionController = new Session();
+        this.sessions.set(user_id, sessionController);
+        this.loggedIn.set(true);
+        console.debug("[addSession] Session set! Check reactive changes", this.sessions.size);
+        sessionController
             .emit({
                 action: "LOGIN",
-                session: entry.session,
-                apiUrl: entry.apiUrl,
+                session,
                 configuration: this.configuration!,
                 knowledge,
-            }).then(()=>{
+            }).then(() => {
                 this.pickNextSession();
             })
             .catch((err) => {
@@ -422,11 +462,11 @@ export class ClientController {
                     this.sessions.delete(user_id);
                     this.current = null;
                     this.pickNextSession();
-                    state.auth.removeSession(user_id);
+                    auth.removeSession(user_id);
                     if (user_id == this.current) {
                         modalController.push({ type: "signed_out" });
                     }
-                    session.destroy();
+                    sessionController.destroy();
                 } else {
                     modalController.push({
                         type: "error",
@@ -434,6 +474,7 @@ export class ClientController {
                     });
                 }
             });
+            sessionController.state.subscribe((state) => this.ready.set(state == "Ready"));
     }
 
     /**
@@ -513,9 +554,7 @@ export class ClientController {
 
         // Start client lifecycle
         this.addSession(
-            {
-                session: session as never,
-            },
+            session as never,
             "new",
         );
     }
@@ -528,19 +567,22 @@ export class ClientController {
         const session = this.sessions.get(user_id);
         if (session) {
             // Safe logout
-            session.emit({action: "LOGOUT"});
+            session.emit({ action: "LOGOUT" });
 
-            if(this.sessions.delete(user_id)) {
-                state.auth.removeSession(user_id);
+            if (this.sessions.delete(user_id)) {
+                auth.removeSession(user_id);
                 console.debug("Session %s deleted", user_id);
             } else {
                 console.warn("No sessions deleted");
             }
 
-            state.sync.reset();
+            settings.reset();
+            notificationsStore.reset();
 
             if (user_id == this.current) {
                 this.current = null;
+                this.loggedIn.set(false);
+                this.ready.set(false);
             }
 
             this.pickNextSession();
@@ -557,6 +599,7 @@ export class ClientController {
 
     @action switchAccount(user_id: string | null) {
         this.current = user_id;
+        //this.ready.set(user_id != null);
         console.log('account switched to', user_id);
     }
 }

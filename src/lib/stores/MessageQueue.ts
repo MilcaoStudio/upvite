@@ -1,4 +1,4 @@
-import type { Message } from "revolt.js";
+import type { Message } from "stoat.js";
 import { makeAutoObservable, observable, type IObservableArray, action, computed } from "mobx";
 
 export enum QueueStatus {
@@ -106,7 +106,7 @@ export default class MessageQueue {
      */
     @action onMessage(message: Message) {
         if (!message.nonce) return;
-        if (!this.get(message.channel_id).find((x) => x.id == message.nonce))
+        if (!this.get(message.channelId).find((x) => x.id == message.nonce))
             return;
 
         this.remove(message.nonce);

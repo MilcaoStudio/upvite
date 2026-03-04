@@ -10,7 +10,13 @@
     title={$_("app.special.modals.error")}
     actions={[
         {
-            onClick: () => true,
+            onClick: () => {
+                if (props.error == "InvalidSession") {
+                    console.debug("OK clicked");
+                    return true;
+                }
+                return true;
+            },
             confirmation: true,
             children: $_("app.special.modals.actions.ok"),
         },

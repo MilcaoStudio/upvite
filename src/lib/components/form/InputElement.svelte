@@ -43,7 +43,9 @@
     </Column>
     {:else if type == "text" || type == "password"}
         <InputBox {type} value={v} onChange={ev=>onChange?.(ev.currentTarget.value)} {..._props} />
+    <!-- TODO: Add props for FileUploader
     {:else if type == "file"}
         <FileUploader {..._props} />
+        -->
     {/if}
 {/key}

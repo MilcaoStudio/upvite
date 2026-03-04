@@ -25,7 +25,7 @@
                             const channel = client.channels.get(
                                 searchClues.users.id,
                             );
-                            switch (channel?.channel_type) {
+                            switch (channel?.type) {
                                 case "Group":
                                 case "DirectMessage":
                                     users = channel.recipients!.filter(
@@ -34,15 +34,15 @@
                                     break;
                                 case "TextChannel":
                                     {
-                                        const server = channel.server_id;
-                                        users = [...client.members.keys()]
+                                        const server = channel.serverId;
+                                        users = [...client.serverMembers.keys()]
                                             .map((x) => JSON.parse(x))
-                                            .filter((x) => x.server === server)
+                                            .filter((x) => x.server == server)
                                             .map((x) =>
                                                 client.users.get(x.user),
                                             )
                                             .filter(
-                                                (x) => typeof x !== "undefined",
+                                                (x) => typeof x != "undefined",
                                             ) as User[];
                                     }
                                     break;
@@ -53,7 +53,7 @@
                     }
 
                     users = users.filter(
-                        (x) => x._id != "00000000000000000000000000",
+                        (x) => x.id != "00000000000000000000000000",
                     );
 
                     const matches = (
@@ -163,7 +163,7 @@
                             index,
                             search.length + 1,
                             "<@",
-                            _state.matches[_state.selected]._id,
+                            _state.matches[_state.selected].id,
                             "> ",
                         );
                     } else {
@@ -171,7 +171,7 @@
                             index,
                             search.length + 1,
                             "<#",
-                            _state.matches[_state.selected]._id,
+                            _state.matches[_state.selected].id,
                             "> ",
                         );
                     }
@@ -304,7 +304,7 @@
 <script lang="ts">
     import type { AutoCompleteState, SearchClues } from "$lib/types/messaging";
     import { css, cx } from "@emotion/css";
-    import type { Channel, User } from "revolt.js";
+    import type { Channel, User } from "stoat.js";
     import type {
         MouseEventHandler,
     } from "svelte/elements";
@@ -374,7 +374,7 @@
 <div class={Base}>
     <div>
         {#if $state.type == "user"}
-            {#each $state.matches as match, i (match._id)}
+            {#each $state.matches as match, i (match.id)}
                 <button
                     class:active={i == $state.selected}
                     on:mouseenter={() => {
@@ -402,7 +402,7 @@
             {/each}
         {/if}
         {#if $state.type == "channel"}
-            {#each $state.matches as match, i (match._id)}
+            {#each $state.matches as match, i (match.id)}
                 <button class:active={i == $state.selected}
                 on:mouseenter={()=>{
                     (i != $state.selected || !$state.within) && state.update(_state=>({

@@ -9,7 +9,7 @@
     let email = ".";
     const session = useSession();
     const client = session?.client;
-    $: if (session?.state == "Online" && email == ".") {
+    $: if (session?._state == "Online" && email == ".") {
         client?.api
             .get("/auth/account/")
             .then((account) => (email = account.email));

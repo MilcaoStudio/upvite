@@ -1,9 +1,9 @@
 <script lang="ts">
-    import type { User } from "revolt.js";
+    import type { User } from "stoat.js";
     import Tooltip from "../atoms/Tooltip.svelte";
     import { css, cx } from "@emotion/css";
 
-    export let user: User | null;
+    export let user: User | undefined;
     const Base = cx(
         "UserTooltip",
         css`

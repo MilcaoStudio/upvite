@@ -1,5 +1,5 @@
 import { ObservableMap, action, makeAutoObservable, runInAction } from "mobx";
-import { Channel, type Nullable, toNullable, Client } from "revolt.js";
+import { Client } from "stoat.js";
 
 import type { ProduceType, VoiceUser } from "../types/Voice";
 import type VoiceClient from "./VoiceClient";
@@ -28,7 +28,7 @@ class VoiceStateReference {
     connecting?: boolean;
 
     status: Writable<VoiceStatus>;
-    roomId: Nullable<string>;
+    roomId: string | null;
     participants: Map<string, VoiceUser>;
     streams: ObservableMap<string, RemoteStream>;
 
@@ -53,7 +53,7 @@ class VoiceStateReference {
     // client and applies it to the state here.
     @action syncState() {
         if (!this.client) return;
-        this.roomId = toNullable(this.client.roomId);
+        this.roomId = this.client.roomId || null;
         this.participants.clear();
         this.client.participants.forEach((v, k) => this.participants.set(k, v));
     }
@@ -62,7 +62,7 @@ class VoiceStateReference {
     @action async loadVoice(apiClient: Client) {
         this.status.set(VoiceStatus.LOADING);
 
-        const userId = apiClient.user?._id ?? "guest";
+        const userId = apiClient.user?.id ?? "guest";
         try {
             const { default: VoiceClient } = await import("./VoiceClient");
             const client = new VoiceClient();
@@ -76,7 +76,7 @@ class VoiceStateReference {
             client.on("userStopProduce", this.syncState);
 
             this.status.set(VoiceStatus.CONNECTING);
-            const voiceURL = apiClient.configuration?.features.voso.url ?? "localhost:4000";
+            const voiceURL = apiClient.configuration?.features.livekit.nodes[0].public_url ?? "localhost:4000";
             await client.connect(voiceURL);
             this.client = client;
             this.status.set(VoiceStatus.AUTHENTICATING);

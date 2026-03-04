@@ -2,7 +2,7 @@
     import { LocalStream, type Constraints } from "$lib/voice/Stream";
     import { VoiceStatus, voiceState } from "$lib/voice/VoiceState";
     import Row from "$lib/components/atoms/layout/Row.svelte";
-    import type { Channel } from "revolt.js";
+    import type { Channel } from "stoat.js";
     import { useClient } from "$lib/controllers/ClientController";
     import { internalSubscribe } from "$lib/InternalEmitter";
     import { autorun } from "mobx";
@@ -48,7 +48,7 @@
         if (!voiceState.client?.supported()) {
             return;
         }
-        requestUserMedia().then((media) => voiceState.init(media, channel._id));
+        requestUserMedia().then((media) => voiceState.init(media, channel.id));
     }
 
     async function requestUserMedia() {

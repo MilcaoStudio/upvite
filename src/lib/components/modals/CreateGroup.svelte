@@ -12,13 +12,11 @@
     schema={{ name: "text" }}
     data={{ name: { field: $t("app.main.groups.name") } }}
     callback={async ({ name }) => {
+        // TODO: Friend (user) picker
         const group = await client.channels
-            .createGroup({
-                name,
-                users: [],
-            })
+            .createGroup(name, [],)
             .catch(mapError);
-        return goto(`/channel/` + group._id);
+        return goto(`/channel/` + group.id);
     }}
     submit={{ children: $t("app.special.modals.actions.create") }}
 />

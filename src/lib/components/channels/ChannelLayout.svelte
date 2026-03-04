@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type { Channel } from "revolt.js";
+    import type { Channel } from "stoat.js";
     import ChannelHeader from "./ChannelHeader.svelte";
     import NewMessages from "../messaging/bars/NewMessages.svelte";
     export let channel: Channel, lastId: string | undefined = undefined;

@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type { Channel, User } from "revolt.js";
+    import type { Channel, User } from "stoat.js";
     import BxAt from "svelte-boxicons/BxAt.svelte";
     import BxHash from "svelte-boxicons/BxHash.svelte";
     import PageHeader from "../atoms/PageHeader.svelte";
@@ -18,22 +18,19 @@
 
     export let channel: Channel;
     let icon: ComponentType, recipient: User | null = null;
-    switch (channel.channel_type) {
+    switch (channel.type) {
         case "TextChannel":
-            icon = BxHash;
+            icon = channel.isVoice ? BxPhoneCall : BxHash;
             break;
         // case "DirectMessage":
         // case "Group":
-        case "VoiceChannel":
-            icon = BxPhoneCall;
-            break;
         case "SavedMessages":
             icon = BxNotepad;
             break;
         default:
             icon = BxAt;
     }
-    document.title = (channel.channel_type == "SavedMessages" ? $t('app.navigation.tabs.saved') : channel.server ? `#${channel.name} - ${channel.server.name}` : channel.recipient ? `${channel.recipient.username}` : `${channel.name}`) + " | Uprising";
+    document.title = (channel.type == "SavedMessages" ? $t('app.navigation.tabs.saved') : channel.server ? `#${channel.name} - ${channel.server.name}` : channel.recipient ? `${channel.recipient.username}` : `${channel.name}`) + " | Uprising";
 </script>
 
 <PageHeader {icon} withTransparency>
@@ -41,7 +38,7 @@
         <span class="name">
             <ChannelName {channel} />
         </span>
-        {#if isTouchscreenDevice() && channel.channel_type == "DirectMessage"}
+        {#if isTouchscreenDevice() && channel.type == "DirectMessage"}
             <div class="divider" />
             <span class="desc">
                 <div class="status" style:background-color={useStatusColor(recipient)}>
@@ -49,7 +46,7 @@
                 </div>
             </span>
         {/if}
-        {#if !isTouchscreenDevice() && (channel.channel_type == "Group" || channel.channel_type == "TextChannel") && channel.description}
+        {#if !isTouchscreenDevice() && (channel.type == "Group" || channel.type == "TextChannel") && channel.description}
             <div class="divider" />
             <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
             <span class="desc" role="complementary" on:click={()=>modalController.push({type: "channel_info", channel})} on:keydown={()=>modalController.push({type: "channel_info", channel})}>
@@ -60,7 +57,7 @@
     </div>
     <HeaderActions {channel} />
 </PageHeader>
-{#if channel.channel_type == "VoiceChannel"}
+{#if channel.isVoice}
     <VoiceUi {channel} />
 {/if}
 

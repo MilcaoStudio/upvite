@@ -1,12 +1,11 @@
 import { pushState } from "$app/navigation";
 import { mapToRecord } from "$lib";
-import type State from "$lib/State";
 import { routeInformation } from "$lib/components/context/history";
+import { useClient } from "$lib/controllers/ClientController";
 import type Persistent from "$lib/types/Persistent";
 import type Syncable from "$lib/types/Syncable";
 import { ObservableMap, action, computed, makeAutoObservable } from "mobx";
-import { Server, Channel, type Message, User } from "revolt.js";
-import { decodeTime } from "ulid";
+import { Server, Channel, type Message, User, Client, UserSystemMessage, UserModeratedSystemMessage, ChannelRenamedSystemMessage, ChannelEditSystemMessage } from "stoat.js";
 
 export type NotificationState = "all" | "mention" | "none" | "muted";
 
@@ -14,13 +13,12 @@ export type NotificationState = "all" | "mention" | "none" | "muted";
  * Default notification states for various types of channels.
  */
 export const DEFAULT_STATES: {
-    [key in Channel["channel_type"]]: NotificationState;
+    [key in Channel["type"]]: NotificationState;
 } = {
     SavedMessages: "all",
     DirectMessage: "all",
     Group: "all",
     TextChannel: "mention",
-    VoiceChannel: "mention",
 };
 
 /**
@@ -57,7 +55,6 @@ async function createNotification(
 export default class NotificationOptions
     implements Persistent<Data>, Syncable
 {
-    private state: State;
     private activeNotifications: Record<string, Notification>;
 
     private server: ObservableMap<string, NotificationState>;
@@ -66,7 +63,7 @@ export default class NotificationOptions
     /**
      * Construct new Experiments store.
      */
-    constructor(state: State) {
+    constructor() {
         this.server = new ObservableMap();
         this.channel = new ObservableMap();
 
@@ -75,7 +72,6 @@ export default class NotificationOptions
             onRelationship: false,
         });
 
-        this.state = state;
         this.activeNotifications = {};
 
         this.onMessage = this.onMessage.bind(this);
@@ -114,15 +110,15 @@ export default class NotificationOptions
      * @returns Notification state
      */
     computeForChannel(channel: Channel) {
-        if (this.channel.has(channel._id)) {
-            return this.channel.get(channel._id);
+        if (this.channel.has(channel.id)) {
+            return this.channel.get(channel.id);
         }
 
-        if (channel.server_id) {
-            return this.computeForServer(channel.server_id);
+        if (channel.serverId) {
+            return this.computeForServer(channel.serverId);
         }
 
-        return DEFAULT_STATES[channel.channel_type];
+        return DEFAULT_STATES[channel.type];
     }
 
     /**
@@ -130,25 +126,29 @@ export default class NotificationOptions
      * @param message Message
      * @returns Whether it should notify the user
      */
-    shouldNotify(message: Message) {
+    shouldNotify(message: Message, client: Client) {
+        const user = client.user;
+        if (!user) {
+            console.debug("[shouldNotify] user is undefined");
+            return false;
+        }
         // Make sure the author is not blocked.
-        if (message.author?.relationship === "Blocked") {
+        if (message.author?.relationship == "Blocked") {
             return false;
         }
 
         // Check if the message was sent by us.
-        const user = message.client.user!;
-        if (message.author_id === user._id) {
+        if (message.authorId == user.id) {
             return false;
         }
 
         // Check whether we are busy.
-        if (user.status?.presence === "Busy") {
+        if (user.status?.presence == "Busy") {
             return false;
         }
 
         // Check channel notification settings
-        const mentioned = message.mention_ids?.includes(user._id);
+        const mentioned = message.mentionIds?.includes(user.id);
         switch (this.computeForChannel(message.channel!)) {
             case "muted":
             case "none":
@@ -160,7 +160,7 @@ export default class NotificationOptions
         }
 
         // Check if we are in focus mode
-        if (user.status?.presence === "Focus" && !mentioned) {
+        if (user.status?.presence == "Focus" && !mentioned) {
             return false;
         }
 
@@ -234,10 +234,10 @@ export default class NotificationOptions
         if (target instanceof Channel) {
             value = this.computeForChannel(target);
         } else if (target instanceof Server) {
-            value = this.computeForServer(target._id);
+            value = this.computeForServer(target.id);
         }
 
-        if (value === "muted") {
+        if (value == "muted") {
             return true;
         }
 
@@ -249,15 +249,17 @@ export default class NotificationOptions
      * @param message Message
      */
     async onMessage(message: Message) {
+
+        const client = useClient();
         // Ignore if we are currently looking and focused on the channel.
         if (
-            message.channel_id == routeInformation.getChannel() &&
+            message.channelId == routeInformation.getChannel() &&
             document.hasFocus()
         )
             return;
 
         // Ignore if muted.
-        if (!this.shouldNotify(message)) return;
+        if (!this.shouldNotify(message, client)) return;
 
         // Play a sound and skip notif if disabled.
         //this.state.settings.sounds.playSound("message");
@@ -267,14 +269,14 @@ export default class NotificationOptions
             message.masquerade?.name ?? message.author?.username;
 
         let title;
-        switch (message.channel?.channel_type) {
+        switch (message.channel?.type) {
             case "SavedMessages":
                 return;
             case "DirectMessage":
                 title = `@${effectiveName}`;
                 break;
             case "Group":
-                if (message.author?._id == "00000000000000000000000000") {
+                if (message.author?.id == "00000000000000000000000000") {
                     title = message.channel.name;
                 } else {
                     title = `@${effectiveName} - ${message.channel.name}`;
@@ -284,7 +286,7 @@ export default class NotificationOptions
                 title = `@${effectiveName} (#${message.channel.name}, ${message.channel.server?.name})`;
                 break;
             default:
-                title = message.channel?._id;
+                title = message.channel?.id;
                 break;
         }
 
@@ -294,36 +296,35 @@ export default class NotificationOptions
                 (x) => x.metadata.type == "Image",
             );
             if (imageAttachment) {
-                image = message.client.generateFileURL(imageAttachment, {
-                    max_side: 720,
-                });
+                imageAttachment.createFileURL(true);
             }
         }
 
         let body, icon;
         if (message.content) {
-            body = message.client.markdownToText(message.content);
+            body = client.markdownToText(message.content);
 
             if (message.masquerade?.avatar) {
-                icon = message.client.proxyFile(message.masquerade.avatar);
+                icon = client.proxyFile(message.masquerade.avatar);
             } else {
-                icon = message.author?.generateAvatarURL({ max_side: 256 });
+                icon = message.author?.animatedAvatarURL;
             }
-        } else if (message.system) {
-            const users = message.client.users;
+        } else if (message.systemMessage) {
+            let system = message.systemMessage;
+            const users = client.users;
 
             // ! FIXME: I've had to strip translations while
             // ! I move stuff into the new project structure
-            switch (message.system.type) {
+            switch (system.type) {
                 case "user_added":
                 case "user_remove":
                     {
-                        const user = users.get(message.system.id);
-                        body = `${user?.username} ${
-                            message.system.type === "user_added"
+                        const userSystem = system as UserModeratedSystemMessage;
+                        body = `${userSystem.user?.username} ${
+                            system.type == "user_added"
                                 ? "added by"
                                 : "removed by"
-                        } ${users.get(message.system.by)?.username}`;
+                        } ${userSystem.by?.username}`;
                         /*body = translate(
                             `app.main.channel.system.${
                                 message.system.type === "user_added"
@@ -336,9 +337,7 @@ export default class NotificationOptions
                                     ?.username,
                             },
                         );*/
-                        icon = user?.generateAvatarURL({
-                            max_side: 256,
-                        });
+                        icon = userSystem.user?.animatedAvatarURL;
                     }
                     break;
                 case "user_joined":
@@ -346,21 +345,21 @@ export default class NotificationOptions
                 case "user_kicked":
                 case "user_banned":
                     {
-                        const user = users.get(message.system.id);
+                        const userSystem = system as UserSystemMessage;
+                        const user = userSystem.user;
                         body = `${user?.username}`;
                         /*body = translate(
                             `app.main.channel.system.${message.system.type}`,
                             { user: user?.username },
                         );*/
-                        icon = user?.generateAvatarURL({
-                            max_side: 256,
-                        });
+                        icon = user?.animatedAvatarURL;
                     }
                     break;
                 case "channel_renamed":
                     {
-                        const user = users.get(message.system.by);
-                        body = `${user?.username} renamed channel to ${message.system.name}`;
+                        const channelSystem = system as ChannelRenamedSystemMessage;
+                        const user = channelSystem.by;
+                        body = `${user?.username} renamed channel to ${channelSystem.name}`;
                         /*body = translate(
                             `app.main.channel.system.channel_renamed`,
                             {
@@ -368,23 +367,20 @@ export default class NotificationOptions
                                 name: message.system.name,
                             },
                         );*/
-                        icon = user?.generateAvatarURL({
-                            max_side: 256,
-                        });
+                        icon = user?.animatedAvatarURL;
                     }
                     break;
                 case "channel_description_changed":
                 case "channel_icon_changed":
                     {
-                        const user = users.get(message.system.by);
+                        const channelSystem = system as ChannelEditSystemMessage;
+                        const user = channelSystem.by;
                         /*body = translate(
                             `app.main.channel.system.${message.system.type}`,
                             { user: users.get(message.system.by)?.username },
                         );*/
-                        body = `${users.get(message.system.by)?.username}`;
-                        icon = user?.generateAvatarURL({
-                            max_side: 256,
-                        });
+                        body = `${user?.username}`;
+                        icon = user?.animatedAvatarURL;
                     }
                     break;
             }
@@ -395,7 +391,7 @@ export default class NotificationOptions
             //image,
             body,
             //timestamp: decodeTime(message._id),
-            tag: message.channel?._id,
+            tag: message.channelId,
             badge: "/assets/icons/android-chrome-512x512.png",
             silent: true,
         });
@@ -404,12 +400,12 @@ export default class NotificationOptions
             notif.addEventListener("click", () => {
                 window.focus();
 
-                const id = message.channel_id;
-                if (id !== routeInformation.getChannel()) {
-                    const channel = message.client.channels.get(id);
+                const id = message.channelId;
+                if (id != routeInformation.getChannel()) {
+                    const channel = client.channels.get(id);
                     if (channel) {
-                        if (channel.channel_type === "TextChannel") {
-                            pushState(`/server/${channel.server_id}/channel/${id}`, {});
+                        if (channel.type == "TextChannel") {
+                            pushState(`/server/${channel.serverId}/channel/${id}`, {});
                         } else {
                             pushState(`/channel/${id}`, {});
                         }
@@ -417,11 +413,11 @@ export default class NotificationOptions
                 }
             });
 
-            this.activeNotifications[message.channel_id] = notif;
+            this.activeNotifications[message.channelId] = notif;
 
             notif.addEventListener(
                 "close",
-                () => delete this.activeNotifications[message.channel_id],
+                () => delete this.activeNotifications[message.channelId],
             );
         }
     }
@@ -459,7 +455,7 @@ export default class NotificationOptions
         }
 
         const notif = await createNotification(event, {
-            icon: user.generateAvatarURL({ max_side: 256 }),
+            icon: user.animatedAvatarURL,
             badge: "/assets/icons/android-chrome-512x512.png",
             //timestamp: +new Date(),
         });
@@ -491,7 +487,9 @@ export default class NotificationOptions
     }
     @computed toSyncable() {
         return {
-            notifications: this.toJSON(),
+            notifications: JSON.stringify(this.toJSON()),
         };
     }
 }
+
+export const notificationsStore = new NotificationOptions();

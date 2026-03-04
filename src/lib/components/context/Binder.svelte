@@ -5,7 +5,6 @@
     import { onDestroy } from "svelte";
     let dispose = ()=>{};
     $: autorun(()=>{
-        dispose();
         dispose = state.registerListeners(clientController.readyClient);
         console.log('[Binder.svelte] listeners registered!');
     });

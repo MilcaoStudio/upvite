@@ -10,7 +10,7 @@
     import { useClient } from "$lib/controllers/ClientController";
     import { Viewport } from "$lib/stores/Layout";
     import { autorun } from "mobx";
-    import type { Channel } from "revolt.js";
+    import type { Channel } from "stoat.js";
     import type { ComponentType, SvelteComponent } from "svelte";
     import { t } from "svelte-i18n";
     import Info from "svelte-boxicons/BxInfoCircle.svelte";

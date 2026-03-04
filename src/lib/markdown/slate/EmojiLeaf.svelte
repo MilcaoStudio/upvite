@@ -1,13 +1,11 @@
 <script lang="ts">
-    import { RE_ULID } from "$lib";
-    import { RevoltEmojiDictionary, unicodeEmojiURL } from "revkit";
     import { RE_EMOJI } from "../plugins/remarkRegex";
-    import { clientController } from "$lib/controllers/ClientController";
     export let leaf;
     let match = RE_EMOJI.exec(leaf.text);
     let group: string | undefined,
         id = "",
         fail = false;
+        /*
     while (match) {
         group = match[1];
         id = match[2];
@@ -21,7 +19,7 @@
         : // Not matches ULID
           match == "DC"
           ? `https://cdn.discordapp.com/emojis/${id}?quality=lossless`
-          : unicodeEmojiURL(RevoltEmojiDictionary[id] || id);
+          : unicodeEmojiURL(RevoltEmojiDictionary[id] || id);*/
 </script>
 
 <span style:background="var(--block)" data-slate-leaf="true">

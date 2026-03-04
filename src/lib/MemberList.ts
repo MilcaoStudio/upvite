@@ -1,10 +1,15 @@
 import { autorun } from "mobx";
-import type { API, Channel, Server, User } from "revolt.js";
+import type { Channel, Server, ServerMember, User } from "stoat.js";
 import { writable, type Writable } from "svelte/store";
 
 export type MemberListGroup = {
     type: "online" | "offline" | "role" | "no_offline";
     name?: string;
+    members: ServerMember[];
+};
+
+export type UserListGroup = {
+    type: "online" | "offline";
     users: User[];
 };
 
@@ -21,89 +26,56 @@ export function shouldSkipOffline(offline_count: number) {
     return globalSkipOffline || offline_count > skipThreshold;
 }
 
-export function fetchMembers(channel: Channel, getKeys: ()=>string[], isServer?: boolean) {
-    const client = channel.client;
+export function fetchMembers(channel: Channel, getMembers: () => Promise<ServerMember[]>) {
     let entries: Writable<MemberListGroup[]> = writable([]);
-    function sort(keys: string[]) {
-        const categories: { [key: string]: [User, string][] } = {
+    function sort(keys: ServerMember[]) {
+        const categories: { [key: string]: ServerMember[] } = {
             online: [],
             offline: [],
         };
         const categoryInfo: { [key: string]: string } = {};
-        let roles: Server["roles"] | undefined;
-        let roleList: string[];
-        if (
-            channel.channel_type == "TextChannel" ||
-            channel.channel_type == "VoiceChannel"
-        ) {
-            roles = channel.server?.roles;
+        let roles: Server["orderedRoles"] | undefined;
+        let roleIds: Set<string>;
+
+        // Order roles (by ranking)
+        if (channel.server) {
+            roles = channel.server.orderedRoles;
             if (roles) {
-                const list = Object.keys(roles)
-                    .map((id) => {
-                        return [id, roles![id], roles![id].rank ?? 0] as [
-                            string,
-                            API.Role,
-                            number,
-                        ];
-                    })
-                    .filter(([, role]) => role.hoist);
-
-                list.sort((b, a) => b[2] - a[2]);
-
-                list.forEach(([id, role]) => {
-                    if (categories[id]) return;
-                    categories[id] = [];
-                    categoryInfo[id] = role.name;
-                });
-
-                roleList = list.map((x) => x[0]);
+                const hoistedRoles = roles.filter((role) => role.hoist);
+                for (const role of hoistedRoles) {
+                    if (categories[role.id]) {
+                        continue;
+                    }
+                    categories[role.id] = [];
+                    categoryInfo[role.id] = role.name;
+                }
+                roleIds = new Set(hoistedRoles.map((role) => role.id));
             }
         }
 
-        keys.forEach((key) => {
-            let u;
-            if (isServer) {
-                const { server, user } = JSON.parse(key);
-                if (server != channel.server_id) return;
-                u = client.users.get(user);
-            } else {
-                u = client.users.get(key);
-            }
-
-            if (!u) return;
-
-            const member = client.members.get(key);
-            const sort = member?.nickname ?? u.username;
-            const entry = [u, sort] as [User, string];
-
-            if (!u.online || u.status?.presence === "Invisible") {
-                categories.offline.push(entry);
-            } else {
-                if (isServer) {
-                    // Sort users into hoisted roles here.
-                    if (member?.roles && roles) {
-                        let success = false;
-                        for (const role of roleList) {
-                            if (member.roles.includes(role)) {
-                                categories[role].push(entry);
-                                success = true;
-                                break;
-                            }
-                        }
-
-                        if (success) return;
+        // Assign each member to a category
+        keys.forEach((member) => {
+            if (member.user?.online) {
+                // Sort users into hoisted roles here.
+                if (member?.roles) {
+                    const roleId = member.roles.find(role => roleIds.has(role));
+                    if (roleId) {
+                        categories[roleId].push(member);
+                    } else {
+                        categories.online.push(member);
                     }
-                } else {
-                    // Sort users into "participants" list here.
-                    // For voice calls.
                 }
-
-                categories.online.push(entry);
+            } else {
+                categories.offline.push(member);
             }
         });
 
+        
         Object.keys(categories).forEach((key) =>
-            categories[key].sort((a, b) => a[1].localeCompare(b[1])),
+            categories[key].sort((a, b) =>
+          (a.nickname ?? a.user?.displayName)?.localeCompare(
+            b.nickname ?? b.user?.displayName ?? "",
+          ) || 0),
         );
 
         const temp_entries: MemberListGroup[] = [];
@@ -113,7 +85,7 @@ export function fetchMembers(channel: Channel, getKeys: ()=>string[], isServer?:
                 temp_entries.push({
                     type: "role",
                     name: categoryInfo[key],
-                    users: categories[key].map((x) => x[0]),
+                    members: categories[key],
                 });
             }
         });
@@ -121,25 +93,69 @@ export function fetchMembers(channel: Channel, getKeys: ()=>string[], isServer?:
         if (categories.online.length) {
             temp_entries.push({
                 type: "online",
-                users: categories.online.map((x) => x[0]),
+                members: categories.online,
             });
         }
 
         if (shouldSkipOffline(categories.offline.length)) {
             temp_entries.push({
                 type: "no_offline",
-                users: [null!],
+                members: [null!],
             });
         } else if (categories.offline.length) {
             temp_entries.push({
                 type: "offline",
-                users: categories.offline.map((x) => x[0]),
+                members: categories.offline,
+            });
+        }
+        entries.set(temp_entries);
+    }
+
+    autorun(() => getMembers().then((members) => sort(members)).catch((err)=>{
+        console.warn(err);
+    }));
+    return entries;
+}
+
+export function fetchRecipients(getRecipients: () => User[]) {
+    const entries: Writable<UserListGroup[]> = writable([]);
+    function sort(users: User[]) {
+        const categories: { [key: string]: User[] } = {
+            online: [],
+            offline: [],
+        };
+
+        users.forEach((user) => {
+            if (user.online) {
+                categories.online.push(user);
+            } else {
+                categories.offline.push(user);
+            }
+        });
+
+        Object.keys(categories).forEach((key) =>
+            categories[key].sort((a, b) => a.displayName.localeCompare(b.displayName)),
+        );
+
+        const temp_entries: UserListGroup[] = [];
+
+        if (categories.online.length) {
+            temp_entries.push({
+                type: "online",
+                users: categories.online,
+            });
+        }
+
+        if (!shouldSkipOffline(categories.offline.length)) {
+            temp_entries.push({
+                type: "offline",
+                users: categories.offline,
             });
         }
 
         entries.set(temp_entries);
     }
 
-    autorun(() => sort(getKeys()));
+    autorun(() => sort(getRecipients()));
     return entries;
 }

@@ -3,7 +3,7 @@
     import ConditionalLink from "$lib/components/atoms/ConditionalLink.svelte";
     import JSXRender from "$lib/components/JSXRender.svelte";
     import { css, cx } from "@emotion/css";
-    import type { Channel, Server } from "revolt.js";
+    import type { Client, Channel, Server } from "stoat.js";
     import { internalEmit } from "$lib/InternalEmitter";
     import ChannelButton from "../items/ChannelButton.svelte";
     import CollapsibleSection from "$lib/components/CollapsibleSection.svelte";
@@ -16,7 +16,7 @@
     } from "$lib/markdown/runtime/svelteRuntime";
     import UserPanel from "./UserPanel.svelte";
     import { autorun } from "mobx";
-    import type { Client } from "revolt.js";
+    import { notificationsStore } from "$lib/stores/NotificationOptions";
 
     export let server: Server, channel: Channel | undefined, client: Client;
     const ServerBase = cx(
@@ -46,11 +46,11 @@
         `,
     );
 
-    $: channel && state.layout.setLastOpened(server._id, channel._id);
+    $: channel && state.layout.setLastOpened(server.id, channel.id);
     let uncategorised = new Set<string>();
     let elements: SvelteElement[] = [];
     autorun(() => {
-        uncategorised = new Set(server.channel_ids);
+        uncategorised = new Set(server.channelIds);
         elements = [];
         if (server.categories) {
             for (const category of server.categories) {
@@ -89,9 +89,9 @@
             return;
         }
 
-        const active = channel?._id == entry._id;
-        const isUnread = entry.isUnread(state.notifications);
-        const mentionCount = entry.getMentions(state.notifications);
+        const active = channel?.id == entry.id;
+        const isUnread = entry.unread;
+        const mentionCount = entry.mentions?.size || 0;
 
         return createElement(
             ConditionalLink,
@@ -101,26 +101,26 @@
                         internalEmit(
                             "MessageBox",
                             "append",
-                            `<#${entry._id}>`,
+                            `<#${entry.id}>`,
                             "channel_mention",
                         );
                         e.preventDefault();
                     }
                 },
                 active,
-                href: `/server/${server!._id}/channel/${entry._id}`,
+                href: `/server/${server!.id}/channel/${entry.id}`,
             },
             createElement(ChannelButton, {
                 channel: entry,
                 active,
                 alert:
-                    mentionCount.length > 0
+                    mentionCount > 0
                         ? "mention"
                         : isUnread
                           ? "unread"
                           : undefined,
                 compact: true,
-                muted: state.notifications.isMuted(entry),
+                muted: notificationsStore.isMuted(entry),
             }),
         );
     }
@@ -129,12 +129,12 @@
 <div class={ServerBase}>
     <ServerHeader {server} />
     <!--<ConnectionStatus />-->
-    <ContextMenu data={{ server_list: server._id }}>
+    <ContextMenu data={{ server_list: server.id }}>
         <div class={ServerList}>
             {#each elements as element}
                 <JSXRender node={element} />
             {/each}
         </div>
     </ContextMenu>
-    <UserPanel {client} />
+    <UserPanel />
 </div>

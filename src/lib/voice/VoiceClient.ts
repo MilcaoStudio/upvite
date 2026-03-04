@@ -13,7 +13,7 @@ import {
 } from "../types/Voice";
 import { state } from "$lib/State";
 import Signaling from "./Signaling";
-import { clientController, useClient } from "$lib/controllers/ClientController";
+import { useClient } from "$lib/controllers/ClientController";
 import { LocalStream, makeRemote, type Constraints, type RemoteStream } from "./Stream";
 import { voiceState } from "./VoiceState";
 
@@ -306,7 +306,7 @@ export default class VoiceClient extends EventEmitter<VoiceEvents> {
     }
 
     async authenticate(userId: string) {
-        this.signaling.authenticate(userId, [...this.apiClient.channels.values()].filter(c => c.channel_type == "VoiceChannel").map(c => c._id));
+        this.signaling.authenticate(userId, [...this.apiClient.channels.values()].filter(c => c.isVoice).map(c => c.id));
         // Response should be a token
         this.userId = userId;
     }

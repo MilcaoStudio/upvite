@@ -16,14 +16,13 @@
     import Category from "$lib/components/atoms/Category.svelte";
     import { modalController } from "$lib/components/modals/ModalController";
     import placeholder from "../items/placeholder.svg";
-    import { state } from "$lib/State";
     import { createElement } from "$lib/markdown/runtime/svelteRuntime";
     import ChannelButton from "../items/ChannelButton.svelte";
     import JsxRender from "$lib/components/JSXRender.svelte";
     import IconButton from "$lib/components/atoms/input/IconButton.svelte";
     import UserPanel from "./UserPanel.svelte";
     import { autorun } from "mobx";
-    import type { Channel } from "revolt.js";
+    import type { Channel } from "stoat.js";
 
     const Navbar = cx(
         "Navbar",
@@ -40,15 +39,15 @@
     const client = useClient();
     $: pathname = $page.url.pathname;
     $: channel_id = $page.params.channel;
-    $: channel = client.channels.get(channel_id);
+    $: channel = client.channels.get(channel_id || "");
     let channels: Channel[] = [];
     $: autorun(() => channels = [...client.channels.values()].filter(
         (x) =>
-            (x.channel_type == "DirectMessage" && x.active) ||
-            x.channel_type == "Group",
+            (x.type == "DirectMessage" && x.active) ||
+            x.type == "Group",
     ));
     channels.sort((b, a) =>
-        a.last_message_id_or_past.localeCompare(b.last_message_id_or_past),
+        (a.lastMessageId || "").localeCompare(b.lastMessageId || ""),
     );
     let incoming = [...client.users.values()].filter(
         (user) => user?.relationship == "Incoming",
@@ -56,19 +55,19 @@
 
     $: channelList = channels.map((channel) => {
         let user;
-        if (channel.channel_type == "DirectMessage") {
+        if (channel.type == "DirectMessage") {
             if (!channel.active) return null;
             user = channel.recipient;
             if (!user) return null;
         }
 
-        const isUnread = channel.isUnread(state.notifications);
-        const mentionCount = channel.getMentions(state.notifications).length;
+        const isUnread = channel.unread;
+        const mentionCount = channel.mentions?.size || 0;
         return createElement(
             ConditionalLink,
             {
-                active: channel._id == channel_id,
-                href: `/channel/${channel._id}`,
+                active: channel.id == channel_id,
+                href: `/channel/${channel.id}`,
             },
             createElement(ChannelButton, {
                 user,
@@ -80,7 +79,7 @@
                           ? "unread"
                           : undefined,
                 alertCount: mentionCount,
-                active: channel._id == channel_id,
+                active: channel.id == channel_id,
             }),
         );
     });
@@ -111,10 +110,10 @@
             </ConditionalLink>
       
         <ConditionalLink
-            active={channel?.channel_type == "SavedMessages"}
+            active={channel?.type == "SavedMessages"}
             href="/open/saved"
         >
-            <ButtonItem active={channel?.channel_type == "SavedMessages"}>
+            <ButtonItem active={channel?.type == "SavedMessages"}>
                 <BxNotepad size={20} />
                 <span>{$t("app.navigation.tabs.saved")}</span>
             </ButtonItem>
@@ -137,5 +136,5 @@
             <JsxRender node={channel} />
         {/each}
     </GenericSidebarList>
-    <UserPanel {client}/>
+    <UserPanel />
 </GenericSidebarBase>

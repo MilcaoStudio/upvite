@@ -6,19 +6,19 @@
     import InputBox from "$lib/components/form/InputBox.svelte";
     import FileUploader from "$lib/controllers/FileUploader.svelte";
     import { Checkbox } from "fluent-svelte";
-    import type { Channel } from "revolt.js";
+    import type { API, Channel } from "stoat.js";
     import { t } from "svelte-i18n";
     export let channel: Channel;
     let editable = channel.havePermission("ManageChannel");
     $: name = channel.name;
     $: description = channel.description;
-    $: nsfw = channel.nsfw;
+    $: nsfw = channel.mature;
     $: changed =
         name != channel.name ||
         description != channel.description ||
-        nsfw != channel.nsfw;
+        nsfw != channel.mature;
     function save() {
-        const changes: Record<string, string | boolean> = {};
+        const changes: API.DataEditChannel = {};
         if (name) {
             changes.name = name;
         }
@@ -38,12 +38,9 @@
             <FileUploader
                 style={{
                     type: "icon",
-                    previewURL: channel.generateIconURL(
-                        { max_side: 256 },
-                        true,
-                    ),
+                    previewURL: channel.animatedIconURL,
                     defaultPreview:
-                        channel.channel_type == "Group"
+                        channel.type == "Group"
                             ? "$lib/assets/group.png"
                             : undefined,
                 }}
@@ -62,7 +59,7 @@
 
     <div>
         <h3>
-            {channel.channel_type == "Group"
+            {channel.type == "Group"
                 ? $t("app.main.groups.name")
                 : $t("app.main.servers.channel_name")}
         </h3>
@@ -79,7 +76,7 @@
     </div>
 </Row>
 <h3>
-    {channel.channel_type == "Group"
+    {channel.type == "Group"
         ? $t("app.main.groups.description")
         : $t("app.main.servers.channel_description")}
 </h3>
@@ -94,11 +91,9 @@
         description = ev.currentTarget.value;
     }}
 />
-{#if channel.channel_type != "VoiceChannel"}
-    <Checkbox disabled={!editable} bind:value={nsfw}>
-        Set this channel to NSFW
-    </Checkbox>
-{/if}
+<Checkbox disabled={!editable} bind:value={nsfw}>
+    Set this channel to NSFW
+</Checkbox>
 {#if editable}
     <p>
         <Button palette="secondary" disabled={!changed} onClick={save}>

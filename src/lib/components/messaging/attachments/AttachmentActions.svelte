@@ -7,17 +7,16 @@
     import BxImage from "svelte-boxicons/BxImage.svelte";
     import { determineFileSize } from "$lib";
     import { useClient } from "$lib/controllers/ClientController";
-    import type { API } from "revolt.js";
+    import type { API, File } from "stoat.js";
     import { detect } from "detect-browser";
     import IconButton from "$lib/components/atoms/input/IconButton.svelte";
 
-    export let attachment: API.File;
-    const client = useClient();
+    export let attachment: File;
     let { filename, metadata, size } = attachment;
-    let url = client.generateFileURL(attachment);
+    let url = attachment.createFileURL(true);
     $: open_url = `${url}/${filename}`;
     $: download_url = url?.replace("attachments", "attachments/download");
-    let filesize = determineFileSize(size);
+    let filesize = determineFileSize(size || 0);
     let isFirefox = detect()?.name == "firefox";
 </script>
 

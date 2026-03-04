@@ -2,11 +2,8 @@ import EventEmitter from "eventemitter3";
 
 import {
     type AuthenticationResult,
-    type TransportInitDataTuple,
     WSCommandType,
     WSErrorCode,
-    type ProduceType,
-    type ConsumerData,
     type Trickle,
 } from "../types/Voice";
 

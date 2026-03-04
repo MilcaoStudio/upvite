@@ -1,10 +1,9 @@
 <script lang="ts">
     import Button from "$lib/components/atoms/Button.svelte";
-import Item from "$lib/components/atoms/input/Item.svelte";
-import type { Server } from "revolt.js";
+    import Item from "$lib/components/atoms/input/Item.svelte";
+    import type { Server } from "stoat.js";
     import BxLock from "svelte-boxicons/BxLock.svelte";
     import { t } from "svelte-i18n";
-
 
     export let server: Server,
         showDefault = false,
@@ -15,7 +14,7 @@ import type { Server } from "revolt.js";
             | ((callback: (role_id: string) => void) => void)
             | undefined = undefined;
     $: if (server.roles) {
-        if (selected != "default" && !server.roles[selected]) {
+        if (selected != "default" && !server.roles.get(selected)) {
             onSelect("default");
         }
     }
@@ -25,7 +24,12 @@ import type { Server } from "revolt.js";
 
 <div class="RoleList" role="list">
     {#each roles as role (role.id)}
-        <Item selected={selected == role.id} onclick={()=>onSelect(role.id)} backgroundSelected={role.colour ?? "var(--hover)"} role="item">
+        <Item
+            selected={selected == role.id}
+            onclick={() => onSelect(role.id)}
+            backgroundSelected={role.colour ?? "var(--hover)"}
+            role="item"
+        >
             <span class="rank">{role.rank ?? 0}</span>
             <strong>{role.name}</strong>
             {#if rank && (role.rank ?? 0) <= rank}
@@ -34,11 +38,17 @@ import type { Server } from "revolt.js";
         </Item>
     {/each}
     {#if showDefault}
-        <Item selected={selected == "default"} onclick={()=>onSelect("default")}>
-            <strong style:padding-left="24px">@everyone</strong></Item>
+        <Item
+            selected={selected == "default"}
+            onclick={() => onSelect("default")}
+        >
+            <strong style:padding-left="24px">@everyone</strong></Item
+        >
     {/if}
     {#if onCreateRole && server.havePermission("ManageRole")}
-       <Button palette="plain-secondary" onClick={()=>onCreateRole(onSelect)}>{$t("app.settings.permissions.create_role")}</Button> 
+        <Button palette="plain-secondary" onClick={() => onCreateRole(onSelect)}
+            >{$t("app.settings.permissions.create_role")}</Button
+        >
     {/if}
 </div>
 
@@ -54,7 +64,7 @@ import type { Server } from "revolt.js";
         color: var(--tertiary-foreground);
         opacity: 0;
     }
-    
+
     .RoleList:hover .rank {
         opacity: 1;
     }

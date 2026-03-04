@@ -2,10 +2,7 @@
     import { dayjs } from "$lib/i18n";
     import TextSvelte from "$lib/i18n/TextSvelte.svelte";
     import { _ } from "svelte-i18n";
-    import {
-        clientController,
-        useClient,
-    } from "$lib/controllers/ClientController";
+    import { useClient } from "$lib/controllers/ClientController";
     import { useClient as useMockClient } from "../mock/MockClient";
     import BxHappyBeaming from "svelte-boxicons/BxHappyBeaming.svelte";
     import BxSend from "svelte-boxicons/BxSend.svelte";
@@ -15,8 +12,7 @@
     import { internalEmit, internalSubscribe } from "$lib/InternalEmitter";
     import { ulid } from "ulid";
     import type { Reply } from "$lib/stores/MessageQueue";
-    import TextAreaAutoSize from "../atoms/TextAreaAutoSize.svelte";
-    import type { API, Channel } from "revolt.js";
+    import type { API, Channel } from "stoat.js";
     import {
         CAN_UPLOAD_AT_ONCE,
         ATTACHMENT_SIZE_LIMIT,
@@ -36,7 +32,6 @@
     import { Checkbox, Flyout } from "fluent-svelte";
     import IconButton from "../atoms/input/IconButton.svelte";
     import Picker from "../atoms/media/Picker.svelte";
-    import { RevoltEmojiDictionary } from "revkit";
     import { autorun } from "mobx";
     import FileUploader from "$lib/controllers/FileUploader.svelte";
     import { grabFiles, uploadFile } from "$lib/types/FileUpload";
@@ -44,6 +39,8 @@
     import { modalController } from "../modals/ModalController";
     import ReplyBar from "./bars/ReplyBar.svelte";
     import TextEditor from "../atoms/input/TextEditor.svelte";
+    import { orderingStore } from "$lib/stores/Ordering";
+    import TextAreaAutoSize from "../atoms/TextAreaAutoSize.svelte";
 
     export let channel: Channel,
         mock = false;
@@ -54,7 +51,7 @@
 
     let value = "";
     $: autorun(() => {
-        value = state.draft.get(channel._id)?.content ?? "";
+        value = state.draft.get(channel.id)?.content ?? "";
     });
     const Base = cx(
         "MessageBox",
@@ -140,12 +137,12 @@
         if (mock) return;
         if (typeof typing == "number" && +new Date() < typing) return;
 
-        const ws = client.websocket;
-        if (ws.connected) {
+        const ws = client.events;
+        if (ws.state() == 2) {
             typing = +new Date() + 2500;
             ws.send({
                 type: "BeginTyping",
-                channel: channel._id,
+                channel: channel.id,
             });
         }
     }
@@ -153,13 +150,13 @@
     $: debounceStopTyping = debounce(stopTyping, 1000);
     function stopTyping(force?: boolean) {
         if (mock) return;
-        if (force || typing) {
-            const ws = client.websocket;
-            if (ws.connected) {
+        if (typing) {
+            const ws = client.events;
+            if (ws.state() == 2) {
                 typing = 0;
                 ws.send({
                     type: "EndTyping",
-                    channel: channel._id,
+                    channel: channel.id,
                 });
             }
         }
@@ -167,7 +164,7 @@
 
     let setMessage = function (content?: string) {
         const dobj: DraftObject = { content };
-        state.draft.set(channel._id, dobj);
+        state.draft.set(channel.id, dobj);
         value = content ?? value;
     };
 
@@ -180,10 +177,10 @@
                       .join("\n")}\n\n`
                 : `${content} `;
 
-        if (!state.draft.has(channel._id)) {
+        if (!state.draft.has(channel.id)) {
             setMessage(text);
         } else {
-            setMessage(`${state.draft.get(channel._id)?.content} ${text}`);
+            setMessage(`${state.draft.get(channel.id)?.content} ${text}`);
         }
     }
 
@@ -199,7 +196,7 @@
     function mockSend() {
         if (uploadState.type == "uploading" || uploadState.type == "sending")
             return;
-        const content = state.draft.get(channel._id)?.content?.trim() ?? "";
+        const content = state.draft.get(channel.id)?.content?.trim() ?? "";
         if (uploadState.type != "none") {
             return mockSendFile(content);
         }
@@ -222,10 +219,10 @@
         } else {
             //state.settings.sounds.playSound("outbound");
 
-            state.queue.add(nonce, channel._id, {
+            state.queue.add(nonce, channel.id, {
                 _id: nonce,
-                channel: channel._id,
-                author: client.user!._id,
+                channel: channel.id,
+                author: client.user!.id,
 
                 content,
                 replies: messageReplies,
@@ -234,14 +231,20 @@
             defer(() => renderer.jumpToBottom(SMOOTH_SCROLL_ON_RECEIVE));
 
             try {
-                client.emit("message", client.messages.createObj({
-                    _id: ulid(),
-                    channel: channel._id,
-                    author: client.user!._id,
-                    content,
-                    nonce,
-                    replies: messageReplies.filter(r => r.mention).map(r => r.id),
-                }));
+                const messageId = ulid();
+                client.emit(
+                    "message",
+                    client.messages.getOrCreate(messageId, {
+                        _id: messageId,
+                        channel: channel.id,
+                        author: client.user!.id,
+                        content,
+                        nonce,
+                        replies: messageReplies
+                            .filter((r) => r.mention)
+                            .map((r) => r.id),
+                    }),
+                );
             } catch (error) {
                 state.queue.fail(nonce, takeError(error));
             }
@@ -320,12 +323,13 @@
             const nonce = ulid();
             try {
                 // Emits message to client
+                const messageId = ulid();
                 client.emit(
                     "message",
-                    client.messages.createObj({
-                        _id: ulid(),
-                        channel: channel._id,
-                        author: client.user!._id,
+                    client.messages.getOrCreate(messageId, {
+                        _id: messageId,
+                        channel: channel.id,
+                        author: client.user!.id,
                         content,
                         nonce,
                         replies: replies
@@ -357,7 +361,7 @@
     async function replaceMessage(content: string, mock = false) {
         renderer.messages.reverse();
         const msg = renderer.messages.find(
-            (msg) => msg.author_id == client.user!._id,
+            (msg) => msg.authorId == client.user!.id,
         );
         renderer.messages.reverse();
 
@@ -376,7 +380,7 @@
             if (newContent != msg.content) {
                 if (newContent.length == 0) {
                     if (mock) {
-                        client.emit("message/delete", msg._id, channel)
+                        client.emit("message/delete", msg.id, channel);
                     } else {
                         msg.delete().catch(console.error);
                     }
@@ -388,9 +392,13 @@
                                 content: newContent.slice(0, 2000),
                             });
                         } else {
-                            await msg.edit({ content: newContent.slice(0, 2000) });
+                            await msg.edit({
+                                content: newContent.slice(0, 2000),
+                            });
                         }
-                        defer(() =>renderer.jumpToBottom(SMOOTH_SCROLL_ON_RECEIVE),)
+                        defer(() =>
+                            renderer.jumpToBottom(SMOOTH_SCROLL_ON_RECEIVE),
+                        );
                     } catch (error) {
                         console.error(error);
                     }
@@ -404,7 +412,7 @@
     async function send() {
         if (uploadState.type == "uploading" || uploadState.type == "sending")
             return;
-        const content = state.draft.get(channel._id)?.content?.trim() ?? "";
+        const content = state.draft.get(channel.id)?.content?.trim() ?? "";
         if (uploadState.type != "none") {
             return sendFile(content);
         }
@@ -424,10 +432,10 @@
         } else {
             //state.settings.sounds.playSound("outbound");
 
-            state.queue.add(nonce, channel._id, {
+            state.queue.add(nonce, channel.id, {
                 _id: nonce,
-                channel: channel._id,
-                author: client.user!._id,
+                channel: channel.id,
+                author: client.user!.id,
 
                 content,
                 replies: messageReplies,
@@ -549,35 +557,35 @@
         onBlur,
         ...autoCompleteProps
     } = useAutoComplete(setMessage, {
-        users: { type: "channel", id: channel._id },
+        users: { type: "channel", id: channel.id },
         channels:
-            channel.channel_type == "TextChannel"
-                ? { server: channel.server_id! }
+            channel.type == "TextChannel"
+                ? { server: channel.serverId }
                 : undefined,
     });
 
-    let emojis: Record<string, EmojiInfo[]> = {
-        default: Object.keys(RevoltEmojiDictionary).map((id) => ({ id })),
-    };
+    let servers = orderingStore.orderedServers;
+
+    let emojis: Record<string, EmojiInfo[]> = {};
     let categories: EmojiCategory[] = [];
     $: autorun(() => {
         categories = [];
-        for (const server of state.ordering.orderedServers) {
+        for (const server of $servers) {
             // ! FIXME: add a separate map on each server for emoji
-            const list = [...clientController.readyClient!.emojis.values()]
+            const list = [...client.emojis.values()]
                 .filter(
                     (emoji) =>
                         emoji.parent.type != "Detached" &&
-                        emoji.parent.id == server._id,
+                        emoji.parent.id == server.id,
                 )
-                .map(({ _id, name }) => ({ id: _id, name }));
+                .map(({ id, name }) => ({ id, name }));
 
             if (list.length) {
-                emojis[server._id] = list;
+                emojis[server.id] = list;
                 categories.push({
-                    id: server._id,
+                    id: server.id,
                     name: server.name,
-                    iconURL: server.generateIconURL({ max_side: 256 }),
+                    iconURL: server.animatedIconURL,
                 });
             }
         }
@@ -659,11 +667,7 @@
             }
         }}
     />
-    <ReplyBar
-        {channel}
-        {replies}
-        setReplies={(_replies) => (replies = _replies)}
-    />
+    <ReplyBar {replies} setReplies={(_replies) => (replies = _replies)} />
 
     <div class={Base}>
         {#if channel.havePermission("UploadFiles")}
@@ -706,62 +710,68 @@
                 />
             </div>
         {/if}
-        
-            <TextEditor
-                id="message"
-                minHeight={60}
-                {value}
-                onChange={(value, selectionStart, selectionEnd) => {
-                    setMessage(value);
-                    startTyping();
-                    onChange(value, selectionStart, selectionEnd);
-                }}
-                onKeyDown={(e) => {
-                    if (e.ctrlKey && e.key == "Enter") {
-                        e.preventDefault();
-                        return mock ? mockSend() : send();
-                    }
 
-                    if (onKeyDown(e)) return;
+        <TextAreaAutoSize
+            maxRows={20}
+            id="message"
+            maxlength="2000"
+            minHeight={60}
+            {value}
+            onChange={(e) => {
+                setMessage(e.currentTarget.value);
+                startTyping();
+                const t = e.currentTarget;
+                onChange(t.value, t.selectionStart, t.selectionEnd);
+            }}
+            {onKeyUp}
+            onKeyDown={(e) => {
+                if (e.ctrlKey && e.key == "Enter") {
+                    e.preventDefault();
+                    return send();
+                }
 
-                    if (e.key == "ArrowUp" && !state.draft.has(channel._id)) {
-                        e.preventDefault();
-                        internalEmit("MessageRenderer", "edit_last");
-                        return;
-                    }
+                if (onKeyDown(e)) return;
 
-                    if (
-                        !e.shiftKey &&
-                        !e.isComposing &&
-                        e.key == "Enter" &&
-                        !isTouchscreenDevice()
+                if (e.key == "ArrowUp" && !state.draft.has(channel.id)) {
+                    e.preventDefault();
+                    internalEmit("MessageRenderer", "edit_last");
+                    return;
+                }
+
+                if (
+                    !e.shiftKey &&
+                    !e.isComposing &&
+                    e.key == "Enter" &&
+                    !isTouchscreenDevice()
+                ) {
+                    e.preventDefault();
+                    return send();
+                }
+
+                if (e.key == "Escape") {
+                    if (replies.length) {
+                        replies = replies.slice(0, -1);
+                    } else if (
+                        uploadState.type == "attached" &&
+                        uploadState.files.length
                     ) {
-                        e.preventDefault();
-                        return mock ? mockSend() : send();
+                        uploadState = {
+                            type:
+                                uploadState.files.length > 1
+                                    ? "attached"
+                                    : "none",
+                            files: uploadState.files.slice(0, -1),
+                        };
                     }
+                }
 
-                    if (e.key == "Escape") {
-                        if (replies.length) {
-                            replies = replies.slice(0, -1);
-                        } else if (
-                            uploadState.type == "attached" &&
-                            uploadState.files.length
-                        ) {
-                            uploadState = {
-                                type:
-                                    uploadState.files.length > 1
-                                        ? "attached"
-                                        : "none",
-                                files: uploadState.files.slice(0, -1),
-                            };
-                        }
-                    }
-
-                    debounceStopTyping(true);
-                }}
-                {onFocus}
-                {onBlur}
-            />
+                debounceStopTyping(true);
+            }}
+            {onFocus}
+            {onBlur}
+            disabled={uploadState.type == "uploading" ||
+                uploadState.type == "sending"}
+        />
         <div class={Action}>
             <Flyout offset={24} alignment="end">
                 <IconButton>
@@ -775,8 +785,12 @@
                 />
             </Flyout>
         </div>
-        <div class="{Action}">
-            <BxSend class="mobile" size={20} on:click={mock ? mockSend : send} />
+        <div class={Action}>
+            <BxSend
+                class="mobile"
+                size={20}
+                on:click={mock ? mockSend : send}
+            />
         </div>
     </div>
 {/if}

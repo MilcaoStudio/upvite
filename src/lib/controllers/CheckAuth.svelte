@@ -8,17 +8,15 @@
     export let auth: boolean = false,
         blockRender: boolean = false;
 
-    $: loggedIn = false;
-    let ready = false;
+    let loggedIn = clientController.loggedIn;
+    let ready = clientController.ready;
     let invite_code: string = getContext("invite");
     $: autorun(async () => {
-        loggedIn = clientController.isLoggedIn;
-        ready = clientController.isReady || false;
         try {
-            if (auth && !loggedIn) {
+            if (auth && !$loggedIn) {
                 console.debug("[CheckAuth] Redirect to login");
                 if (!blockRender) await goto("/login");
-            } else if (!auth && loggedIn) {
+            } else if (!auth && $loggedIn) {
                 console.debug("[CheckAuth] Redirect to home");
                 if (!blockRender)
                     await goto(invite_code ? `/invite/${invite_code}` : `/`);
@@ -29,7 +27,7 @@
     });
 </script>
 
-{#if auth && loggedIn && !ready}
+{#if auth && $loggedIn && !$ready}
     <Preloader type="spinner" />
 {:else}
     <slot />

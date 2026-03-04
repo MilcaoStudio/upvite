@@ -12,15 +12,14 @@
 </script>
 
 <script lang="ts">
-  import type { INotificationChecker } from "revolt.js/dist/util/Unreads";
   import { InfoBadge, PersonPicture } from "fluent-svelte";
   import { css, cx } from "@emotion/css";
-  import type { Server } from "revolt.js";
+  import type { Server } from "stoat.js";
   import Tooltip from "$lib/components/atoms/Tooltip.svelte";
   import ContextMenu from "$lib/components/context/ContextMenu.svelte";
   export let head = false,
     item: Server,
-    permit: INotificationChecker; //, active = false;
+    active = false;
   const ItemContainer = cx(
     "ItemContainer",
     css`
@@ -34,20 +33,24 @@
       ${head ? `padding-top: 6px;` : ``}
     `
   );
-  const unread = !!item.isUnread(permit);
+  const unread = item.unread;
+  let iconUrl = item.icon?.previewUrl;
+  $: if (active) {
+    console.debug("active", item.id);
+  }
   //const count = item.getMentions(permit).length;
 </script>
 
 <div class={ItemContainer}>
   <!--TODO: Show Swoosh component if active-->
   <Tooltip content={item.name} div right>
-    <ContextMenu data={{ server: item._id, unread }}>
-      <a href={`/server/${item._id}`}>
+    <ContextMenu data={{ server: item.id, unread }}>
+      <a href={`/server/${item.id}`}>
         <!--TODO: Custom component that includes unread slot-->
         <PersonPicture
           size={42}
           alt={item.name}
-          src={item.generateIconURL({ max_side: 256 }, false)}
+          src={iconUrl}
         />
       </a>
     </ContextMenu>

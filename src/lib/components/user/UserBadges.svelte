@@ -1,20 +1,19 @@
 <script lang="ts">
     import { Tooltip } from "fluent-svelte";
     import Row from "../atoms/layout/Row.svelte";
-    import type { User } from "revolt.js";
-    import { RevoltBadges, UserBadges } from "revkit";
+    import { User, UserBadges } from "stoat.js";
     import { t } from "svelte-i18n";
     import { DONATION } from "$lib/links";
 
     export let user: User;
-    $: badges = new UserBadges(user.badges ?? 0);
+    $: badges = user.badges;
 </script>
 
 <!-- if badges.bits != 0 -->
-{#if badges.bits}
+{#if badges}
     <div class="UserBadges">
         <Row centred>
-            {#if badges.has(RevoltBadges.Developer)}
+            {#if badges & UserBadges.Developer}
                 <Tooltip delay={300} alignment="center">
                     <img
                         alt={$t("app.navigation.tabs.dev")}
@@ -24,7 +23,7 @@
                     ></Tooltip
                 >
             {/if}
-            {#if badges.has(RevoltBadges.Supporter) || badges.has(RevoltBadges.ActiveSupporter)}
+            {#if badges & (UserBadges.Supporter | UserBadges.ActiveSupporter)}
                 <Tooltip delay={300} alignment="center">
                     <a href={DONATION}>
                         <img

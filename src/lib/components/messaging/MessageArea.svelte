@@ -5,7 +5,7 @@
     import { getRenderer } from "$lib/rendered/Singleton";
     import type { ScrollState } from "$lib/rendered/types";
     import { autorun, runInAction } from "mobx";
-    import type { Channel } from "revolt.js";
+    import type { Channel } from "stoat.js";
     import { onDestroy, onMount, setContext } from "svelte";
     import { modalController } from "../modals/ModalController";
 
@@ -16,9 +16,7 @@
     import Preloader from "../indicators/Preloader.svelte";
     import MessageRenderer from "./MessageRenderer.svelte";
     import Start from "./Start.svelte";
-    import { _autoAction } from "mobx";
     import { afterNavigate, beforeNavigate } from "$app/navigation";
-    import { page } from "$app/stores";
     import { state } from "$lib/State";
 
     export let lastId: string | undefined = undefined,
@@ -142,15 +140,16 @@
         if (!params || !params.message) return;
 
         // Prevents searching message from another channel
-        if (params.channel == channel._id) {
+        if (params.channel == channel.id) {
             highlight = params.message;
             renderer.init(params.message);
         }
     });
 
     // ? If we are waiting for network, try again.
-    $: autorun(() => {
-        switch (session.state) {
+    let sessionState = session.state;
+    $: {
+        switch ($sessionState) {
             case "Online":
                 if (renderer.state == "WAITING_FOR_NETWORK") {
                     renderer.init();
@@ -165,7 +164,7 @@
                 renderer.markStale();
                 break;
         }
-    });
+    }
 
     // ? When the container is scrolled.
     // ? Also handle StayAtBottom

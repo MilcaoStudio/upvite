@@ -19,10 +19,10 @@
     $: message = data.message;
     $: server = client.servers.get(server_id);
 
-    if (!client.channels.exists(id)) {
+    if (!client.channels.has(id)) {
         if (server_id) {
-            if (server && server.channel_ids.length > 0) {
-                let target_id = server.channel_ids[0];
+            if (server && server.channelIds.size > 0) {
+                let target_id = server.channels[0].id;
                 const last_id = state.layout.getLastOpened(server_id);
                 if (last_id) {
                     if (client.channels.has(last_id)) {

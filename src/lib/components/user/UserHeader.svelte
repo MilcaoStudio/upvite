@@ -1,26 +1,14 @@
 <script lang="ts">
-    import { useClient, useSession } from "$lib/controllers/ClientController";
-    import { UserPermission, type API, User } from "revolt.js";
+    import { User, UserProfile } from "stoat.js";
     import UserIcon from "./UserIcon.svelte";
     export let user: User | undefined,
-        placeholderProfile: API.UserProfile | undefined = undefined, profile: API.UserProfile | undefined;
-    const session = useSession()!;
-    const client = useClient();
+        placeholderProfile: UserProfile | undefined = undefined, profile: UserProfile | undefined;
     let backgroundURL: string | undefined;
     
-    $: if (profile && profile.background) {
-        backgroundURL = client.generateFileURL(
-            profile.background,
-            { width: 1000 },
-            true,
-        );
-    } else {
-        placeholderProfile?.background &&
-            (backgroundURL = client.generateFileURL(
-                placeholderProfile.background,
-                { width: 1000 },
-                true,
-            ));
+    $: if (profile) {
+        backgroundURL = profile.animatedBannerURL;
+    } else if (placeholderProfile) {
+        backgroundURL = placeholderProfile.animatedBannerURL;
     }
 </script>
 

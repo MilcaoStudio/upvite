@@ -1,9 +1,10 @@
 import { action, makeAutoObservable } from "mobx";
-import type { Channel, Message, Nullable } from "revolt.js";
+import type { Channel, Message } from "stoat.js";
 
 import { SimpleRenderer } from "./SimpleRenderer";
 import type { RendererRoutines, ScrollState } from "./types";
 import type State from "$lib/State";
+import { useClient } from "$lib/controllers/ClientController";
 
 export const SMOOTH_SCROLL_ON_RECEIVE = false;
 
@@ -12,8 +13,8 @@ export class ChannelRenderer {
 
     state: "LOADING" | "WAITING_FOR_NETWORK" | "EMPTY" | "RENDER" = "LOADING";
     scrollState: ScrollState = { type: "ScrollToBottom" };
-    atTop: Nullable<boolean> = null;
-    atBottom: Nullable<boolean> = null;
+    atTop: boolean = false;
+    atBottom: boolean = false;
     messages: Message[] = [];
     limit: number;
 
@@ -39,14 +40,14 @@ export class ChannelRenderer {
         this.updated = this.updated.bind(this);
         this.delete = this.delete.bind(this);
 
-        const client = this.channel.client;
+        const client = useClient();
         client.addListener("message", this.receive);
         client.addListener("message/updated", this.updated);
         client.addListener("message/delete", this.delete);
     }
 
     destroy() {
-        const client = this.channel.client;
+        const client = useClient();
         client.removeListener("message", this.receive);
         client.removeListener("message/updated", this.updated);
         client.removeListener("message/delete", this.delete);
@@ -67,7 +68,7 @@ export class ChannelRenderer {
     @action async init(message_id?: string) {
         if (message_id) {
             if (this.state == "RENDER") {
-                const message = this.messages.find((x) => x._id == message_id);
+                const message = this.messages.find((x) => x.id == message_id);
 
                 if (message) {
                     this.emitScroll({
@@ -214,15 +215,15 @@ export class ChannelRenderer {
 const renderers: Record<string, ChannelRenderer> = {};
 
 export function getRenderer(channel: Channel, currentState: State) {
-    let renderer = renderers[channel._id];
+    let renderer = renderers[channel.id];
     if (!renderer) {
         renderer = new ChannelRenderer(channel, currentState);
-        renderers[channel._id] = renderer;
+        renderers[channel.id] = renderer;
     }
 
     return renderer;
 }
 
-export function deleteRenderer(channel_id: string) {
-    delete renderers[channel_id];
+export function deleteRenderer(channelId: string) {
+    delete renderers[channelId];
 }

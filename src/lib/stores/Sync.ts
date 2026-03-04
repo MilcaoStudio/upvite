@@ -1,5 +1,4 @@
 import { mapToRecord } from "$lib";
-import type State from "$lib/State";
 import type Persistent from "$lib/types/Persistent";
 import {
     action,
@@ -9,7 +8,10 @@ import {
     ObservableSet,
     runInAction,
 } from "mobx";
-import { Client } from "revolt.js";
+import { Client } from "stoat.js";
+import { settings } from "./Settings";
+import { notificationsStore } from "./NotificationOptions";
+import { orderingStore } from "./Ordering";
 
 export type SyncKeys =
     | "theme"
@@ -41,15 +43,13 @@ export interface Data {
  * Handles syncing settings data.
  */
 export default class Sync implements Persistent<Data> {
-    private state: State;
     private disabled: ObservableSet<SyncKeys>;
     private revision: ObservableMap<string, number>;
 
     /**
      * Construct new Sync store.
      */
-    constructor(state: State) {
-        this.state = state;
+    constructor() {
         this.disabled = new ObservableSet;
         this.revision = new ObservableMap;
         makeAutoObservable(this);
@@ -70,7 +70,7 @@ export default class Sync implements Persistent<Data> {
     @action hydrate(data: Data) {
         if (data.disabled) {
             for (const key of data.disabled) {
-                this.disabled.add(key as SyncKeys);
+                this.disabled.add(key);
             }
         }
 
@@ -110,7 +110,7 @@ export default class Sync implements Persistent<Data> {
         return this.revision.get(key);
     }
 
-    @action apply(data: Record<string, [number, string]>) {
+    @action apply(_id: string | undefined, data: Record<string, [number, string]>) {
         const tryRead = (key: string) => {
             if (key in data) {
                 const revision = data[key][0];
@@ -132,8 +132,8 @@ export default class Sync implements Persistent<Data> {
         runInAction(() => {
             const appearance = tryRead("appearance");
             if (appearance) {
-                this.state.setDisabled("appearance");
-                this.state.settings.apply(
+                //this.state.setDisabled("appearance");
+                settings.apply(
                     "appearance",
                     appearance[1],
                     appearance[0],
@@ -143,15 +143,15 @@ export default class Sync implements Persistent<Data> {
 
             const theme = tryRead("theme");
             if (theme) {
-                this.state.setDisabled("theme");
-                this.state.settings.apply("theme", theme[1], theme[0]);
+                //this.state.setDisabled("theme");
+                settings.apply("theme", theme[1], theme[0]);
                 this.setRevision("theme", theme[0]);
             }
 
             const notifications = tryRead("notifications");
             if (notifications) {
-                this.state.setDisabled("notifications");
-                this.state.notifications.apply(
+                //this.state.setDisabled("notifications");
+                notificationsStore.apply(
                     "notifications",
                     notifications[1],
                     notifications[0],
@@ -161,31 +161,26 @@ export default class Sync implements Persistent<Data> {
 
             const ordering = tryRead("ordering");
             if (ordering) {
-                this.state.setDisabled("ordering");
-                this.state.ordering.apply("ordering", ordering[1], ordering[0]);
+                //this.state.setDisabled("ordering");
+                orderingStore.apply("ordering", ordering[1], ordering[0]);
                 this.setRevision("ordering", ordering[0]);
             }
 
             const plugins = tryRead("plugins");
             if (plugins) {
-                this.state.setDisabled("plugins");
-                this.state.plugins.apply("plugins", plugins[1], plugins[0]);
+                //this.state.setDisabled("plugins");
+                //this.state.plugins.apply("plugins", plugins[1], plugins[0]);
                 this.setRevision("plugins", plugins[0]);
             }
         });
     }
 
     async pull(client: Client) {
-        const data = await client.syncFetchSettings(
-            SYNC_KEYS.filter(this.isEnabled),
-        );
-
-        this.apply(data);
+        const data = await client.account.fetchSettings(SYNC_KEYS.filter(this.isEnabled));
+        console.debug("[pull]", data);
+        this.apply(client.sessionId, data);
     }
 
-    reset() {
-        this.state.settings.reset();
-        this.state.notifications.reset();
-        this.state.plugins.reset();
-    }
 }
+
+export const sync = new Sync();

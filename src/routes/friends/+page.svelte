@@ -23,12 +23,6 @@
 
 <CheckAuth auth>
     <UprisingApp>
-        <SidebarBase slot="left">
-            <ServerListSidebar />
-            {#if open}
-                <HomeSidebar />
-            {/if}
-        </SidebarBase>
         <Friends />
     </UprisingApp>
 </CheckAuth>

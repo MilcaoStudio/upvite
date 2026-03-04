@@ -9,23 +9,26 @@
     import { useSession } from "$lib/controllers/ClientController";
     import FileUploader from "$lib/controllers/FileUploader.svelte";
     import { autorun } from "mobx";
-    import type { API } from "revolt.js";
+    import type { UserProfile } from "stoat.js";
     import { t } from "svelte-i18n";
     const session = useSession()!;
     const client = session.client!;
     const user = client.user!;
-    let profile: API.UserProfile | undefined;
-    function refreshProfile() {
-        user.fetchProfile().then((p) => (profile = p ?? {}));
+    let profile: UserProfile | undefined;
+    let profileContent: string | undefined;
+    async function refreshProfile() {
+        const result = await user.fetchProfile();
+        profile = result;
+        profileContent = result.content;
     }
     $: autorun(() => {
-        if (!profile && session.state == "Online") {
+        if (!profile && session._state == "Online") {
             refreshProfile();
         }
     });
 
     function setContent(content?: string) {
-        profile = { ...profile, content };
+        profileContent = content;
     }
 
     let {
@@ -51,8 +54,8 @@
         <FileUploader
             style={{
                 type: "icon",
-                defaultPreview: user.generateAvatarURL({ max_side: 256 }, true),
-                previewURL: user.generateAvatarURL({ max_side: 256 }, true),
+                defaultPreview: user.animatedAvatarURL,
+                previewURL: user.animatedAvatarURL,
                 width: 92,
                 height: 92,
             }}
@@ -60,10 +63,10 @@
             behavior={{
                 type: "upload",
                 onUpload: (avatar) =>
-                    client.users.edit({ avatar }).finally(refreshProfile),
+                    user.edit({ avatar }).finally(refreshProfile),
             }}
             maxFileSize={4_000_000}
-            remove={() => client.users.edit({ remove: ["Avatar"] })}
+            remove={() => user.edit({ remove: ["Avatar"] })}
         />
     </div>
 
@@ -75,23 +78,17 @@
             style={{
                 type: "banner",
                 height: 92,
-                previewURL: profile?.background
-                    ? client.generateFileURL(
-                          profile.background,
-                          { width: 1000 },
-                          true,
-                      )
-                    : undefined,
+                previewURL: profile?.animatedBannerURL,
             }}
             behavior={{
                 type: "upload",
                 async onUpload(background) {
-                    client.users
+                    user
                         .edit({ profile: { background } })
                         .finally(refreshProfile);
                 },
             }}
-            remove={() => client.users.edit({ remove: ["ProfileBackground"] })}
+            remove={() => user.edit({ remove: ["ProfileBackground"] })}
             fileType="backgrounds"
             maxFileSize={6_000_000}
         />
@@ -107,9 +104,10 @@
     value={profile?.content ?? ""}
     disabled={typeof profile == "undefined"}
     onChange={(ev) => {
-        onChange(ev);
+        onChange(ev.currentTarget.value);
         setContent(ev.currentTarget.value);
-        client.users.edit({profile: { content: profile?.content }});
+        // TODO: DEBOUNCE
+        user.edit({profile: { content: profile?.content }});
     }}
     placeholder={$t(
         `app.settings.pages.profile.${

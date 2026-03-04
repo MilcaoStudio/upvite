@@ -1,36 +1,26 @@
 <script lang="ts">
-    import type { MemberListGroup } from "$lib/MemberList";
+    import type { UserListGroup } from "$lib/MemberList";
     import type { Channel } from "stoat.js";
     import { t } from "svelte-i18n";
     import MemberItem from "./MemberItem.svelte";
 
-    export let entries: MemberListGroup[], channel: Channel;
+    export let entries: UserListGroup[], channel: Channel;
 </script>
 
 {#each entries as entry, index}
     <div class="CategoryList" class:first={!index}>
-        {#if entry.type == "role"}
-            {entry.name}
-        {:else if entry.type == "online"}
+        {#if entry.type == "online"}
             {$t("app.status.online")}
         {:else}
             {$t("app.status.offline")}
         {/if}
-        {#if entry.type != "no_offline"}
-            {" – "}
-            {entry.members.length}
-        {/if}
+        
     </div>
-    {#if entry.type == "no_offline"}
-        Offline users have temporarily been disabled for larger servers
-    {:else}
-    {#each entry.members as member (member.id.user)}
+    {#each entry.users as user (user.id)}
         <div style:padding-bottom="8px">
-            <MemberItem member={member} context={channel} />
+            <MemberItem user={user} context={channel} />
         </div>
     {/each}
-    {/if}
-    
 {/each}
 
 <style>

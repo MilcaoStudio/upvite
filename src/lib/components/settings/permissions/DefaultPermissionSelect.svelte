@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { type Permission, type Channel, Server } from "revolt.js";
+    import { type Permission, type Channel, Server } from "stoat.js";
     import Long from "long";
     import { Checkbox } from "fluent-svelte";
     import { useClient } from "$lib/controllers/ClientController";
@@ -7,17 +7,17 @@
 
     export let id: keyof typeof Permission,
         target: Channel | Server,
-        permission: number,
-        value: number,
-        onChange: (value: number) => void;
+        permission: bigint,
+        value: bigint,
+        onChange: (value: bigint) => void;
     
-    let checked = Long.fromNumber(value).and(permission).eq(permission);
+    let checked = Long.fromBigInt(value).and(permission).eq(permission);
     let lastChecked = checked;
-    let disabled = target instanceof Server ? !target.member?.hasPermission(target, "ManageRole")  : target.owner_id != useClient().user?._id;
+    let disabled = target instanceof Server ? !target.member?.hasPermission(target, "ManageRole")  : target.ownerId != useClient().user?.id;
     $: if (lastChecked != checked) {
-        console.log(Long.fromNumber(value, false).xor(permission).toNumber());
+        console.log(Long.fromBigInt(value, false).xor(permission).toBigInt());
         lastChecked = checked;
-        onChange(Long.fromNumber(value, false).xor(permission).toNumber());
+        onChange(Long.fromBigInt(value, false).xor(permission).toBigInt());
     }
 </script>
 

@@ -1,19 +1,16 @@
 <script lang="ts">
-    import type { Channel } from "revolt.js";
+    import type { Channel } from "stoat.js";
     import GenericSidebarBase from "../GenericSidebarBase.svelte";
     import MemberList from "./MemberList.svelte";
-    import { fetchMembers } from "$lib/MemberList";
+    import { fetchRecipients } from "$lib/MemberList";
+    import GroupList from "./GroupList.svelte";
 
     export let channel: Channel | undefined = undefined;
-    let entries = fetchMembers(
-            channel!,
-            () => channel!.recipient_ids!,
-            false,
-        );
+    let entries = fetchRecipients(() => channel!.recipients)
 </script>
 
 {#if channel}
     <GenericSidebarBase data-scroll-offset="with_padding">
-        <MemberList entries={$entries} {channel} />
+        <GroupList entries={$entries} {channel} />
     </GenericSidebarBase>
 {/if}

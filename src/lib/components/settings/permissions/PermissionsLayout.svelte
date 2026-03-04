@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type { Channel } from "revolt.js";
+    import type { Channel } from "stoat.js";
     import EditorForChannel from "./RoleEditorForChannel.svelte";
     import RoleList from "../permissions/RoleList.svelte";
     import { modalController } from "$lib/components/modals/ModalController";

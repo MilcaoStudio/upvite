@@ -313,9 +313,9 @@ export const PRESETS: Record<string, Theme> = {
 
 <script lang="ts">
     import { state } from "$lib/State";
+    import { settings } from "$lib/stores/Settings";
     import { autorun } from "mobx";
 
-    const settings = state.settings;
     const theme = settings.theme;
     const root = document.documentElement.style;
     let css = "";

@@ -14,7 +14,7 @@
     $: demo = $page.data.demo || false;
     $: channel_id = $page.params.channel;
     $: server_id = $page.params.server;
-    console.log($page.data);
+    console.debug("<Page> params", $page.data);
     $: client = demo ? useMockClient() : useClient();
     $: channel = demo ? servers[0].channels[0] : channel_id ? client.channels.get(channel_id) : undefined;
     $: server = demo ? servers[0] : server_id ? client.servers.get(server_id) : undefined;
@@ -36,7 +36,7 @@
 </script>
 
 <SidebarBase>
-    <ServerListSidebar {server_id} {client} />
+    <ServerListSidebar {server_id} />
     {#if openLeft || snap}
         {#if server}
             {#key channel}

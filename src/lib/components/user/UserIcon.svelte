@@ -1,13 +1,13 @@
 <script context="module" lang="ts">
-    import { state } from "$lib/State";
     import { useClient } from "$lib/controllers/ClientController";
-    import type { API, User } from "revolt.js";
+    import type { API, File, User } from "stoat.js";
     import fallback from "$lib/assets/user.png";
     import IconBase from "../IconBase.svelte";
     import { page } from "$app/stores";
+    import { settings } from "$lib/stores/Settings";
 
     export function useStatusColor(user: User | null) {
-        const theme = state.settings.theme;
+        const theme = settings.theme;
 
         return user?.online && user?.status?.presence != "Invisible"
             ? user?.status?.presence == "Idle"
@@ -23,7 +23,7 @@
 
 <script lang="ts">
     export let target: User | null = null,
-        attachment: any = undefined,
+        attachment: File | undefined = undefined,
         size: number,
         status = false,
         animate = false,
@@ -33,36 +33,27 @@
         masquerade: API.Masquerade | null = null,
         innerRef: SVGElement | undefined = undefined,
         override: string | undefined = undefined,
-        url: string | undefined = undefined,
         onClick: ((e: MouseEvent)=>void) | null = null;
     const client = useClient();
-    let { shrinkMedia } = state.network.media;
+
+    let url: string | undefined;
     $: if (masquerade?.avatar) {
         url = client.proxyFile(masquerade.avatar);
     } else if (override) {
         url = override;
     } else if (!url) {
-        let override;
+        let memberAvatarUrl;
         if (target && showServerIdentity) {
             const server = $page.params.server;
             if (server) {
-                const member = client.members.getKey({
-                    server,
-                    user: target._id,
-                });
-
+                const member = client.serverMembers.getByKey({server, user: target.id});
                 if (member?.avatar) {
-                    override = member?.avatar;
+                    memberAvatarUrl = animate ? member.animatedAvatarURL : member.avatarURL;
                 }
             }
         }
-
-        url =
-            client.generateFileURL(
-                override ?? target?.avatar ?? attachment ?? undefined,
-                { max_side: shrinkMedia ? 64 : 256 },
-                animate,
-            ) ?? (target ? target.defaultAvatarURL : fallback);
+        let avatarUrl = animate ? target?.animatedAvatarURL : target?.avatarURL;
+        url = memberAvatarUrl || avatarUrl || attachment?.createFileURL(animate) || fallback;
     }
 </script>
 

@@ -2,7 +2,7 @@
     import { page } from "$app/stores";
     import { useClient } from "$lib/controllers/ClientController";
     import { css, cx } from "@emotion/css";
-    import { API, User } from "revolt.js";
+    import { API, User } from "stoat.js";
     import BxTimeFive from "svelte-boxicons/BxTimeFive.svelte";
     import { t } from "svelte-i18n";
 
@@ -15,7 +15,7 @@
         const server_id = $page.params.server;
         if (server_id) {
             const client = useClient();
-            const member = client.members.getKey({server: server_id, user: user._id,});
+            const member = client.serverMembers.getByKey({server: server_id, user: user.id});
             if (member) {
                 if (member.nickname) {
                     if (showServerIdentity == "both") {
@@ -30,7 +30,7 @@
                 }
 
                 if (!color) {
-                    for (const [_, { colour }] of member.orderedRoles) {
+                    for (const {colour} of member.orderedRoles) {
                         if (colour) {
                             color = colour;
                         }

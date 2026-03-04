@@ -4,5 +4,5 @@
 export default interface Syncable {
     get id(): string;
     apply(key: string, data: unknown, revision: number): void;
-    toSyncable(): { [key: string]: object };
+    toSyncable(): { [key: string]: string };
 }

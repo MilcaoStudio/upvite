@@ -73,6 +73,7 @@
         display: -webkit-box;
         -webkit-box-orient: vertical;
         -webkit-line-clamp: 2;
+        line-clamp: 2;
         overflow: hidden;
     }
     a.CategoryButton .description {
@@ -80,6 +81,7 @@
         display: -webkit-box;
         -webkit-box-orient: vertical;
         -webkit-line-clamp: 3;
+        line-clamp: 3;
         overflow: hidden;
         color: var(--secondary-foreground);
     }

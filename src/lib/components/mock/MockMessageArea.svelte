@@ -4,7 +4,7 @@
     import { state } from "$lib/State";
     import type { ScrollState } from "$lib/rendered/types";
     import { autorun, runInAction } from "mobx";
-    import type { Channel } from "revolt.js";
+    import type { Channel } from "stoat.js";
     import { onMount, setContext } from "svelte";
     import { modalController } from "../modals/ModalController";
     import Preloader from "../indicators/Preloader.svelte";

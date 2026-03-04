@@ -15,7 +15,7 @@
     let client = useClient();
 
     $: friends = [...client.users.values()].filter(
-        (u) => u.relationship == "Friend" && !omitted.has(u._id),
+        (u) => u.relationship == "Friend" && !omitted.has(u.id),
     );
 </script>
 
@@ -30,12 +30,12 @@
     ]}
 >
     <List>
-        {#each friends as user (user._id)}
+        {#each friends as user (user.id)}
             <UserCheckbox
-                checked={selected.has(user._id)}
+                checked={selected.has(user.id)}
                 {user}
                 onChange={(v) =>
-                    v ? selected.add(user._id) : selected.delete(user._id)}
+                    v ? selected.add(user.id) : selected.delete(user.id)}
             />
         {/each}
     </List>

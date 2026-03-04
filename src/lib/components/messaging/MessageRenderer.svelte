@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { API, Message as IMessage, type Nullable } from "revolt.js";
+    import { API, Message as IMessage } from "stoat.js";
     import dayjs from "dayjs";
     import isEqual from "lodash.isequal";
     import { state } from "$lib/State";
@@ -41,7 +41,7 @@
         `,
     );
     const client = useClient()!;
-    const userId = client.user!._id;
+    const userId = client.user!.id;
     const queue = state.queue;
     let render: SvelteElement[] = [];
 
@@ -64,11 +64,11 @@
 
     function compare(
         current: string,
-        curAuthor: string,
-        currentMasq: Nullable<API.Masquerade>,
+        curAuthor: string | undefined,
+        currentMasq: API.Masquerade | undefined,
         previous: string,
-        prevAuthor: string,
-        previousMasq: Nullable<API.Masquerade>,
+        prevAuthor?: string,
+        previousMasq?: API.Masquerade,
     ) {
         head = false;
         const atime = decodeTime(current),
@@ -127,8 +127,8 @@
         function editLast() {
             if (renderer.state != "RENDER") return;
             for (let i = renderer.messages.length - 1; i >= 0; i--) {
-                if (renderer.messages[i].author_id == userId) {
-                    editing = renderer.messages[i]._id;
+                if (renderer.messages[i].authorId == userId) {
+                    editing = renderer.messages[i].id;
                     internalEmit("MessageArea", "jump_to_bottom");
                     return;
                 }
@@ -156,18 +156,18 @@
         for (const message of renderer.messages) {
             if (previous) {
                 compare(
-                    message._id,
-                    message.author_id,
+                    message.id,
+                    message.authorId,
                     message.masquerade,
-                    previous._id,
-                    previous.author_id,
+                    previous.id,
+                    previous.authorId,
                     previous.masquerade,
                 );
             }
 
             // System messages
-            if (message.author_id == "00000000000000000000000000") {
-                render.push(createElement(SystemMessage, {message, highlight: highlight == message._id}))
+            if (message.authorId == "00000000000000000000000000") {
+                render.push(createElement(SystemMessage, {message, highlight: highlight == message.id}))
             } else if (message.author?.relationship == "Blocked") {
                 blocked++;
             } else {
@@ -179,10 +179,10 @@
                         {
                             message,
                             head,
-                            highlight: highlight == message._id,
+                            highlight: highlight == message.id,
                         },
                         // FIXME: can this be faster?
-                        editing == message._id ? createElement(MessageEditor, {message, onFinish: stopEditing}) : createElement(Markdown, {content: message.content})
+                        editing == message.id ? createElement(MessageEditor, {message, onFinish: stopEditing}) : createElement(Markdown, {content: message.content})
                     ),
                 );
             }
@@ -210,33 +210,34 @@
     autorun(() => {
         const nonces = renderer.messages.map((x) => x.nonce);
         if (renderer.atBottom) {
-            for (const message of queue.get(renderer.channel._id)) {
+            for (const message of queue.get(renderer.channel.id)) {
                 if (nonces.includes(message.id)) continue;
 
                 if (previous) {
                     compare(
                         message.id,
                         userId!,
-                        null,
-                        previous._id,
-                        previous.author_id,
+                        undefined,
+                        previous.id,
+                        previous.authorId,
                         previous.masquerade,
                     );
 
+                    /*
                     previous = {
                         _id: message.id,
                         author_id: userId!,
-                    } as IMessage;
+                    } as IMessage;*/
                 }
 
                 console.info("Message created:", JSON.stringify(message.data));
 
                 render.push(
                     createElement(Message, {
-                        message: new IMessage(client, {
-                            ...message.data,
-                            replies: message.data.replies.map((x: any) => x.id),
-                        }),
+                        message: client.messages.getOrCreate(
+                            message.id,
+                            {...message.data, replies: message.data.replies.map((x) => x.id)},
+                            false),
                         queued: message,
                         head,
                     }),

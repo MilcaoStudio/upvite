@@ -119,6 +119,7 @@
 
     const rehypeProcessor = remarkProcessor()
         // Mdast to Hast
+        //@ts-ignore 
         .use(remarkRehype, { handlers, })
         // code block highlight
         .use(rehypePrism)

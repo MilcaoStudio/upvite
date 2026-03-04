@@ -1,4 +1,4 @@
-import type { Channel, User } from "revolt.js";
+import type { Channel, User } from "stoat.js";
 
 export type UploadState =
         | { type: "none" }

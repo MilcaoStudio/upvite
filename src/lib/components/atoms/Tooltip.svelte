@@ -7,7 +7,6 @@
         i18n: string = '',
         content: string | undefined = undefined,
         placement: TippyProps["placement"] |undefined = undefined;
-    console.log('[Tooltip] Tooltip rendered!');
 </script>
 
 {#if div}

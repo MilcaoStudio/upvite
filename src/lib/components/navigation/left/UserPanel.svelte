@@ -2,11 +2,10 @@
     import { page } from "$app/stores";
     import UserIcon from "$lib/components/user/UserIcon.svelte";
     import Username from "$lib/components/user/Username.svelte";
-import { css, cx } from "@emotion/css";
-    import type { Client } from "revolt.js";
+    import { useClient } from "$lib/controllers/ClientController";
+    import { css, cx } from "@emotion/css";
 
-
-    export let client: Client;
+    const client = useClient();
     $: demo = $page.data.demo || false;
     let user = client.user;
     const Base = cx("UserPanel", css`

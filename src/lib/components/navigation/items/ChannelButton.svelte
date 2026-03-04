@@ -1,6 +1,6 @@
 <script lang="ts">
   import { css, cx } from "@emotion/css";
-  import type { Channel, User } from "revolt.js";
+  import type { Channel, User } from "stoat.js";
   import ChannelIcon from "../../channels/ChannelIcon.svelte";
   import ContextMenu from "$lib/components/context/ContextMenu.svelte";
   import "./Item.css";
@@ -17,24 +17,27 @@
     user: User | undefined = undefined,
     compact = false,
     muted = false;
-  let client = channel?.client;
   let participants: User[] = [];
+  /*
+  TODO: Use current voice state
+  https://github.com/stoatchat/for-web/blob/main/packages/client/components/rtc/state.tsx
   $: autorun(
     () =>
       (participants = Array.from(voiceState.participants.keys())
         .map((id) => client.users.get(id))
         .filter((u) => u) as User[]),
   );
+  */
   const alerting = alert && !muted && !active;
 </script>
 
 {#if channel}
-  {#if channel.channel_type == "DirectMessage" && user}
-    <ContextMenu data={{ channel: channel._id, unread: !!alert }}>
+  {#if channel.type == "DirectMessage" && user}
+    <ContextMenu data={{ channel: channel.id, unread: !!alert }}>
       <UserButton {...{ active, alert, channel, user }} />
     </ContextMenu>
   {:else}
-    <ContextMenu data={{ channel: channel._id, unread: !!alert }}>
+    <ContextMenu data={{ channel: channel.id, unread: !!alert }}>
       <div
         data-active={active}
         data-alert={alerting}
@@ -44,15 +47,15 @@
         {...$$restProps}
       >
         <div class="avatar">
-          <ChannelIcon target={channel} size={compact ? 24 : 32} showBadge={channel.channel_type != "Group"} />
+          <ChannelIcon target={channel} size={compact ? 24 : 32} showBadge={channel.type != "Group"} />
         </div>
         <div class="name">
           <div>{channel.name}</div>
         </div>
-        {#if channel.channel_type == "Group"}
+        {#if channel.type == "Group"}
           <div class="subText">
-            {#if channel.last_message?.content}
-              {channel.last_message.content.slice(0, 32)}
+            {#if channel.lastMessage?.content}
+              {channel.lastMessage.content.slice(0, 32)}
             {/if}
           </div>
         {/if}
@@ -65,7 +68,7 @@
           <!--TODO: Add leave group action for touchscreens-->
         </div>
       </div>
-      {#if channel.channel_type == "VoiceChannel"}
+      {#if channel.isVoice}
         <div>
           {#each participants as participant}
             <li>

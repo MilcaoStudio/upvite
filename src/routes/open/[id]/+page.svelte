@@ -13,15 +13,15 @@
     $: {
         if (id == "saved") {
             for (const channel of client.channels.values()) {
-                if (channel?.channel_type == "SavedMessages") {
-                    goto(`/channel/${channel._id}`);
+                if (channel?.type == "SavedMessages") {
+                    goto(`/channel/${channel.id}`);
                     break;
                 }
             }
 
             client
                 .user!.openDM()
-                .then((channel) => goto(`/channel/${channel?._id}`))
+                .then((channel) => goto(`/channel/${channel?.id}`))
                 .catch((error) => {
                     modalController.push({
                         type: "error",
@@ -34,16 +34,16 @@
         if (client.users.has(id)) {
             const channel = [...client.channels.values()].find(
                 (channel) =>
-                    channel?.channel_type == "DirectMessage" &&
-                    channel.recipient_ids!.includes(id),
-            )?._id;
+                    channel?.type == "DirectMessage" &&
+                    channel.recipientIds.has(id),
+            )?.id;
             if (channel) {
                 goto(`/channel/${channel}`);
             } else {
                 client.users
                     .get(id)
                     ?.openDM()
-                    .then((channel) => goto(`/channel/${channel?._id}`))
+                    .then((channel) => goto(`/channel/${channel?.id}`))
                     .catch((error) => {
                         modalController.push({
                             type: "error",

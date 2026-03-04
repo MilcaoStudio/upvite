@@ -4,7 +4,7 @@
     import Row from "$lib/components/atoms/layout/Row.svelte";
     import Form from "$lib/components/form/Form.svelte";
     import FormElement from "$lib/components/form/FormElement.svelte";
-    import type { Server } from "revolt.js";
+    import type { Server } from "stoat.js";
     import { t } from "svelte-i18n";
     export let server: Server;
     let id = "";
@@ -38,10 +38,8 @@
         if (!/^[a-z0-9_]+$/.test(String(name))) {
             throw new Error("Invalid emoji name");
         }
-        await server.client.api.put(`/custom/emoji/${id}`, {
-            name: String(name),
-            parent: { type: "Server", id: server._id },
-        });
+        const emoji = await server.createEmoji(id, {name: String(name)});
+        console.debug("Emoji :%s: (%s) uploaded!", emoji.id, emoji.name)
         id = "";
     }}
 >

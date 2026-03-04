@@ -4,7 +4,7 @@
     import { SECTION_MENTION } from "$lib/stores/Layout";
     import type { Reply } from "$lib/stores/MessageQueue";
     import { MAX_REPLIES } from "$lib/types/messaging";
-    import type { Channel, Message } from "revolt.js";
+    import type { Message } from "stoat.js";
     import { onDestroy, onMount } from "svelte";
     import ReplyBase from "../attachments/Reply.svelte";
     import { t } from "svelte-i18n";
@@ -15,18 +15,18 @@
     import Tooltip from "$lib/components/atoms/Tooltip.svelte";
     import At from "svelte-boxicons/BxAt.svelte";
     import XCircle from "svelte-boxicons/BxXCircle.svelte";
+    import { useClient } from "$lib/controllers/ClientController";
 
-    export let channel: Channel,
-        replies: Reply[],
+    export let replies: Reply[],
         setReplies: (replies: Reply[]) => void;
-    let client = channel.client;
+    let client = useClient();
     const layout = state.layout;
 
     // Add new messages to reply bar.
     function addReply(msg: Message) {
         if (
             replies.length >= MAX_REPLIES ||
-            replies.find((x) => x.id == msg._id)
+            replies.find((x) => x.id == msg.id)
         ) {
             return;
         }
@@ -34,9 +34,9 @@
         setReplies([
             ...replies,
             {
-                id: msg._id,
+                id: msg.id,
                 mention:
-                    msg.author_id == client.user!._id
+                    msg.authorId == client.user!.id
                         ? false
                         : layout.getSectionState(SECTION_MENTION, false),
             },
@@ -63,7 +63,7 @@
 
 
 <div>
-    {#each messages as message, index (message?._id)}
+    {#each messages as message, index (message?.id)}
         {#if message}
             <div class="ReplyBar">
                 <ReplyBase preview>
@@ -92,7 +92,7 @@
                                           )}</em
                                 >
                             {/if}
-                            {#if message.author_id == "00000000000000000000000000"}
+                            {#if message.authorId == "00000000000000000000000000"}
                                 <!--TODO: System message-->
                                 <div></div>
                             {:else if message.content}
@@ -105,7 +105,7 @@
                     </div>
                 </ReplyBase>
                 <span class="actions">
-                    {#if message.author_id != client.user?._id}
+                    {#if message.authorId != client.user?.id}
                         <IconButton onClick={()=>replies[index].mention = !replies[index].mention}>
                             <Tooltip
                                 content={$t("app.main.channel.reply.toggle")}

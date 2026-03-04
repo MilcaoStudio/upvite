@@ -1,7 +1,7 @@
 <script lang="ts">
     import { takeError } from "$lib";
     import { clientController } from "$lib/controllers/ClientController";
-    import { _ } from "svelte-i18n";
+    import { _, locale } from "svelte-i18n";
     import Preloader from "../indicators/Preloader.svelte";
     import FormField from "./FormField.svelte";
     import Button from "../atoms/Button.svelte";
@@ -60,7 +60,7 @@
     </div>
 {:else if loading}
     <Preloader type="spinner" />
-{:else}
+{:else} 
     <div class="formModal">
         <div class="welcome">
             <div class="title">

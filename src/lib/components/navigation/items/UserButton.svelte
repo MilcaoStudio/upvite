@@ -1,6 +1,6 @@
 <script lang="ts">
     import { cx } from "@emotion/css";
-    import type { Channel, User } from "revolt.js";
+    import type { Channel, User } from "stoat.js";
     import UserIcon from "../../user/UserIcon.svelte";
     import Username from "../../user/Username.svelte";
     import Tooltip from "../../atoms/Tooltip.svelte";
@@ -18,7 +18,7 @@
         alertCount = 0,
         margin = false,
         muted = false,
-        user: User,
+        user: User | undefined,
         context: Channel | undefined = undefined,
         channel: Channel | undefined = undefined,
         onClick: MouseEventHandler<HTMLDivElement> | null = null;
@@ -34,7 +34,7 @@
     data-muted={muted}
     data-alert={typeof alert == "string"}
     data-online={typeof channel != undefined ||
-        (user.online && user.status?.presence != "Invisible")}
+        (user?.online && user.status?.presence != "Invisible")}
 >
     <UserIcon
         class="avatar"
@@ -48,15 +48,15 @@
             <Username {user} showServerIdentity />
         </div>
         <div class="subText">
-            {#if channel?.last_message?.content}
-                {channel.last_message.content.slice(0, 32)}
+            {#if channel?.lastMessage?.content}
+                {channel.lastMessage.content.slice(0, 32)}
             {:else}
                 <!--<UserStatus user={user} tooltip />-->
             {/if}
         </div>
     </div>
     <div class="button">
-        {#if context?.channel_type == "Group" && context.owner_id == user._id}
+        {#if context?.type == "Group" && context.ownerId == user?.id}
             <Tooltip content={$t("app.main.groups.owner")}>
                 <BxCrown size={20} />
             </Tooltip>

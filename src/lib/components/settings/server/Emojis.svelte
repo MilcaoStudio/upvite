@@ -2,20 +2,18 @@
     import "./Emojis.css";
     import Column from "$lib/components/atoms/layout/Column.svelte";
     import { autorun } from "mobx";
-    import type { Server } from "revolt.js";
+    import type { Server } from "stoat.js";
     import EmojiUploader from "./EmojiUploader.svelte";
     import { t } from "svelte-i18n";
     import EmojiEditor from "./EmojiEditor.svelte";
     import Row from "$lib/components/atoms/layout/Row.svelte";
     import H3 from "$lib/components/atoms/heading/H3.svelte";
     export let server: Server;
-    let emojis = [...server.client.emojis.values()].filter(
-        (x) => x.parent.type == "Server" && x.parent.id == server._id,
-    );
+
+    let emojis = server.emojis;
     $: autorun(() => {
-        emojis = [...server.client.emojis.values()].filter(
-            (x) => x.parent.type == "Server" && x.parent.id == server._id,
-        );
+        emojis = server.emojis;
+        console.debug("[Emojis.svelte] Emoji list for %s updated", server.id);
     });
 </script>
 
@@ -32,7 +30,7 @@
             <H3 class="label">name</H3>
             <H3 class="label">uploaded by</H3>
         </Row>
-        {#each emojis as emoji (emoji._id)}
+        {#each emojis as emoji (emoji.id)}
             <EmojiEditor {emoji} {server} />
         {/each}
     </div>

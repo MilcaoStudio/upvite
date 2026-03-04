@@ -1,12 +1,14 @@
 <script lang="ts">
     import { internalSubscribe } from "$lib/InternalEmitter";
     import { reaction } from "mobx";
-    import type { Channel } from "revolt.js";
+    import type { Channel } from "stoat.js";
     import MessageArea from "../messaging/MessageArea.svelte";
     import MessageBox from "../messaging/MessageBox.svelte";
     import JumpToBottom from "../messaging/bars/JumpToBottom.svelte";
     import ChannelLayout from "./ChannelLayout.svelte";
+    import { useClient } from "$lib/controllers/ClientController";
 
+    const client = useClient();
     export let channel: Channel,
         message: string | null = null;
 
@@ -16,21 +18,13 @@
         if (typeof id == "string") lastId = id;
     });
     $: {
-        lastId = channel.unread
-            ? channel.client.unreads?.getUnread(channel._id)?.last_id ??
-              undefined
-            : undefined;
-        const checkUnread = () =>
-            channel.unread &&
-            channel.client.unreads!.markRead(
-                channel._id,
-                channel.last_message_id!,
-                true,
-            );
+        let unreads = client.channelUnreads.for(channel);
+        lastId = unreads.lastMessageId;
+        const checkUnread = () => channel.ack();
         checkUnread();
         reaction(
-            () => channel.last_message_id,
-            () => checkUnread(),
+            () => channel.lastMessageId,
+            checkUnread,
         );
     }
 </script>

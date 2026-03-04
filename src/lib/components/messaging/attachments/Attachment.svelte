@@ -2,18 +2,17 @@
     import ContextMenu from "$lib/components/context/ContextMenu.svelte";
     import { useClient } from "$lib/controllers/ClientController";
     import { cx } from "@emotion/css";
-    import type { API } from "revolt.js";
+    import type { API, File } from "stoat.js";
     import SizedGrid from "./SizedGrid.svelte";
     import ImageView from "./ImageView.svelte";
     import AttachmentActions from "./AttachmentActions.svelte";
     import { state } from "$lib/State";
     import TextView from "./TextView.svelte";
 
-    const client = useClient();
-    export let attachment: API.File,
+    export let attachment: File,
         hasContent = false;
     let { filename, metadata } = attachment;
-    let spoiler = filename.startsWith("SPOILER_");
+    let spoiler = filename?.startsWith("SPOILER_");
     const style = getComputedStyle(document.documentElement);
     let MAX_ATTACHMENT_WIDTH = parseInt(
         style.getPropertyValue("--attachment-max-width"),
@@ -22,11 +21,7 @@
         style.getPropertyValue("--attachment-max-height"),
     );
     let { shrinkMedia } = state.network.media;
-    let url = client.generateFileURL(
-        attachment,
-        { width: shrinkMedia ? MAX_ATTACHMENT_WIDTH / 2 : MAX_ATTACHMENT_WIDTH * 1.5},
-        true,
-    );
+    let url = attachment.createFileURL(true);
 </script>
 
 {#if metadata.type == "Audio"}

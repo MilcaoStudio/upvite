@@ -2,46 +2,46 @@
     import IconButton from "../atoms/input/IconButton.svelte";
     import Modal from "./Modal.svelte";
     import type { ModalProps } from "$lib/types/Modal";
-    import { useSession } from "$lib/controllers/ClientController";
     import UserHeader from "../user/UserHeader.svelte";
     import Edit from "svelte-boxicons/BxEdit.svelte";
     import Envelope from "svelte-boxicons/BxEnvelope.svelte";
-    import { API, UserPermission } from "revolt.js";
+    import { API, ServerMember, UserPermission, UserProfile } from "stoat.js";
     import { mapError } from "$lib";
     import H3 from "../atoms/heading/H3.svelte";
-    import { t } from "svelte-i18n";
     import Markdown from "$lib/markdown/Markdown.svelte";
     import UserBadges from "../user/UserBadges.svelte";
+    import { useClient } from "$lib/controllers/ClientController";
 
     export let props: ModalProps<"user_profile">;
-    const session = useSession()!;
-    const client = session.client!;
-    const user = client.users.get(props.user_id);
-    let profile: API.UserProfile | undefined;
-    $: {
-        if (session.state == "Online" && !profile) {
-            if (user?.permission! & UserPermission.ViewProfile) {
+    const client = useClient();
+    let user = client.users.get(props.user_id);
+    let profile: UserProfile | undefined;
+    $: if (!profile) {
+        if ((user?.permission || 0) & UserPermission.ViewProfile) {
                 user?.fetchProfile()
                     .then((p) => (profile = p))
                     .catch(mapError);
-            }
         }
+    }
+
+    $: if (!user) {
+        client.users.fetch(props.user_id).then((u)=>(user = u)).catch(mapError);
     }
 
     $: server =
         props.contextualServer && client.servers.get(props.contextualServer);
-    let roles: API.Role[] = [];
+    let roles: ServerMember["orderedRoles"] = [];
     $: if (server && user) {
         server
             .fetchMember(user)
             .then((member) => member.orderedRoles ?? [])
-            .then((or) => (roles = or.map((r) => r[1])));
+            .then((or) => (roles = or));
     }
 </script>
 
 <Modal {...props}>
-    <div class="container" slot="override">
-        <div class="userProfile">
+    <div slot="override">
+        <div class="UserProfile">
             <UserHeader
                 {user}
                 placeholderProfile={props.placeholderProfile}
@@ -57,13 +57,13 @@
                         </IconButton>
                     {:else if user?.relationship == "Friend" || user?.bot}
                         <IconButton
-                            href="/open/{user._id}"
+                            href="/open/{user.id}"
                             onClick={props.onClose}
                         >
                             <Envelope size={24} />
                         </IconButton>
                     {:else if user?.relationship == "Outgoing"}
-                        <IconButton onClick={() => user.removeFriend()}>
+                        <IconButton onClick={() => user?.removeFriend()}>
                             <svg
                                 width="24"
                                 height="24"
@@ -145,43 +145,16 @@
 </Modal>
 
 <style>
-    .container {
-        -webkit-animation:
-            svelte-1qibxfp-menu-open var(--fds-control-normal-duration)
-                var(--fds-control-fast-out-slow-in-easing),
-            svelte-1qibxfp-menu-shadow var(--fds-control-fast-duration)
-                var(--fds-control-fast-out-slow-in-easing)
-                var(--fds-control-normal-duration) forwards;
-        animation:
-            svelte-1qibxfp-menu-open var(--fds-control-normal-duration)
-                var(--fds-control-fast-out-slow-in-easing),
-            svelte-1qibxfp-menu-shadow var(--fds-control-fast-duration)
-                var(--fds-control-fast-out-slow-in-easing)
-                var(--fds-control-normal-duration) forwards;
-        backdrop-filter: blur(2px);
-        background: rgba(0, 0, 0, 0.5);
-        min-height: 200px;
-        max-width: min(100% - 50px, 560px);
-        max-height: min(-20px + 100vh, 650px);
-        margin: 20px;
-        position: relative;
+    .UserProfile {
         display: flex;
         flex-direction: column;
-        border-radius: var(--border-radius-inner);
-        width: 100%;
-        background-color: var(--tertiary-background);
-        -webkit-backdrop-filter: blur(8px) !important;
-        backdrop-filter: blur(8px) !important;
-        z-index: 20 !important;
-        background-color: rgba(
-            var(--tertiary-background-rgb),
-            max(0, 0.7)
-        ) !important;
     }
 
     .content {
         padding: 1rem;
         font-size: 14px;
+        overflow: auto;
+        max-height: 400px;
     }
 
     .colour {

@@ -3,14 +3,14 @@
     import H1 from "$lib/components/atoms/heading/H1.svelte";
     import { translate } from "$lib/i18n";
     import { getRoles, type RoleOrDefault } from "$lib/types/Permissions";
-    import { isEqual } from "lodash";
-    import { API, Channel, DEFAULT_PERMISSION_DIRECT_MESSAGE, Permission } from "revolt.js";
+    import isEqual from "lodash.isequal";
+    import { Channel, DEFAULT_PERMISSION_DIRECT_MESSAGE, Permission } from "stoat.js";
     import { t } from "svelte-i18n";
     import PermissionList from "./PermissionList.svelte";
 
     export let selected: string, channel: Channel;
     let currentRoles =
-        channel?.channel_type == "Group"
+        channel?.type == "Group"
             ? ([
                   {
                       id: "default",
@@ -19,14 +19,14 @@
                           channel.permissions ??
                           DEFAULT_PERMISSION_DIRECT_MESSAGE,
                   },
-              ] as RoleOrDefault[])
+              ])
             : getRoles(channel.server!).map((role) => ({
                   ...role,
                   permissions: (role.id == "default"
-                      ? channel.default_permissions
-                      : channel.role_permissions?.[role.id]) ?? {
-                      a: 0,
-                      d: 0,
+                      ? channel.defaultPermissions
+                      : channel.rolePermissions?.[role.id]) ?? {
+                      a: 0n,
+                      d: 0n,
                   },
               }))!;
     $: currentRole = currentRoles.find((x) => x.id == selected)!;
@@ -46,20 +46,19 @@
                 "ManageChannel",
                 "ManagePermissions",
     ]);
-    $: channel.channel_type != "Group" && items.add("ViewChannel");
-    function onChange(value: number | API.OverrideField) {
+    $: channel.type != "Group" && items.add("ViewChannel");
+    function onChange(value: bigint | {a: bigint, d: bigint}) {
         currentValue = value;
     }
 
     function save() {
+        const permissions = typeof currentValue == "bigint" ? Number(currentValue) : {
+            allow: Number(currentValue.a),
+            deny: Number(currentValue.d)
+        }
         channel.setPermissions(
             selected,
-            !currentValue || typeof currentValue == "number"
-                ? currentValue
-                : ({
-                      allow: currentValue.a,
-                      deny: currentValue.d,
-                  } as any),
+            permissions,
         ).then(_=>currentPermission = currentValue);
     }
 </script>

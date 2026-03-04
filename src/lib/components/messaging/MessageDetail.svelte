@@ -1,6 +1,6 @@
 <script lang="ts">
     import { getContext } from "svelte";
-    import type { Message } from "revolt.js";
+    import type { Message } from "stoat.js";
     import { decodeTime } from "ulid";
     import Tooltip from "../atoms/Tooltip.svelte";
     import { t } from "svelte-i18n";
@@ -11,21 +11,21 @@
 </script>
 
 {#if position == "left" && dict}
-    {#if message.edited}
+    {#if message.editedAt}
         <time class="copyTime">
             <i class="copyBracket">[</i>
-            {dayjs(decodeTime(message._id)).format(dict.dayjs?.timeFormat)}
+            {dayjs(decodeTime(message.id)).format(dict.dayjs?.timeFormat)}
             <i class="copyBracket">]</i>
         </time>
         <span class="edited">
-            <Tooltip content={dayjs(message.edited).format("LLLL")}
+            <Tooltip content={dayjs(message.editedAt).format("LLLL")}
                 >{$t("app.main.channel.edited")}</Tooltip
             >
         </span>
     {:else}
         <time>
             <i class="copyBracket">[</i>
-            {dayjs(decodeTime(message._id)).format(
+            {dayjs(decodeTime(message.id)).format(
                 dict.dayjs?.timeFormat || "HH:mm",
             )}
             <i class="copyBracket">]</i>
@@ -33,9 +33,9 @@
     {/if}
 {:else}
     <div class="Detail">
-        <time>{dayjs(decodeTime(message._id)).calendar()}</time>
-        {#if message.edited}
-            <Tooltip content={dayjs(message.edited).format("LLLL")}>
+        <time>{dayjs(decodeTime(message.id)).calendar()}</time>
+        {#if message.editedAt}
+            <Tooltip content={dayjs(message.editedAt).format("LLLL")}>
                 <span class="edited">
                     {$t("app.main.channel.edited")}
                 </span>

@@ -21,7 +21,6 @@
         clientController,
         useClient,
     } from "$lib/controllers/ClientController";
-    import { LIBRARY_VERSION } from "revolt.js";
     import Account from "$lib/components/settings/personal/account.svelte";
     import Chat from "$lib/components/settings/personal/chat.svelte";
     import Notifications from "$lib/components/settings/personal/notifications.svelte";
@@ -357,7 +356,7 @@
                         </span>
                         <span>API: {client.configuration?.revolt ?? "N/A"}</span
                         >
-                        <span>revolt.js: {LIBRARY_VERSION}</span>
+                        <span>stoat.js</span>
                     </div>
                 </SettingsMenu>
             {/if}
@@ -609,7 +608,7 @@
                         {APP_VERSION}
                     </span>
                     <span>API: {client.configuration?.revolt ?? "N/A"}</span>
-                    <span>revolt.js: {LIBRARY_VERSION}</span>
+                    <span>stoat.js</span>
                 </div>
             </Scroller>
             <ScrollerContent>

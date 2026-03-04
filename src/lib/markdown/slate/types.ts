@@ -1,5 +1,5 @@
-import type { BaseText } from "slate";
-export interface RichText extends BaseText {
+export interface RichText {
+    text: string,
     type: string,
     match?: string,
 }

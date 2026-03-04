@@ -8,7 +8,7 @@ import { clientController } from "$lib/controllers/ClientController";
 import type Persistent from "$lib/types/Persistent";
 import localforage from "localforage";
 import { action, computed, makeAutoObservable, ObservableMap } from "mobx";
-import type { Channel, Nullable, Server } from "revolt.js";
+import type { Channel, Server } from "stoat.js";
 
 type Plugin = PluginInfo & {
     
@@ -100,8 +100,8 @@ export default class Plugins implements Persistent<Data> {
     @computed get ctx() {
         let channel: Channel | undefined, server: Server | undefined;
         page.subscribe(p => {
-            const channel_id = p.params.channel;
-            const server_id = p.params.server;
+            const channel_id = p.params.channel || "";
+            const server_id = p.params.server || "";
             try {
                 channel = clientController.availableClient.channels.get(channel_id);
                 server = clientController.availableClient.servers.get(server_id);

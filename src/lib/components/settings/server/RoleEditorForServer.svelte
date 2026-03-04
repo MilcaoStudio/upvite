@@ -3,7 +3,7 @@
   import ColorSwatches from "$lib/components/atoms/input/ColorSwatches.svelte";
   import InputBox from "$lib/components/form/InputBox.svelte";
   import { t } from "svelte-i18n";
-  import type { API, Server } from "revolt.js";
+  import type { API, Server } from "stoat.js";
   import { getRoles, type RoleOrDefault } from "$lib/types/Permissions";
   import { Button, Checkbox } from "fluent-svelte";
   import PermissionList from "../permissions/PermissionList.svelte";
@@ -18,7 +18,7 @@
   $: disabled =
     !server.member?.hasPermission(server, "ManageRole") ||
     (server.member?.ranking ?? Infinity) > (currentRole.rank ?? 0);
-  function onPermissionsChange(permissions: number | API.OverrideField) {
+  function onPermissionsChange(permissions: bigint | {a: bigint, d: bigint}) {
     role = { ...role, permissions } as RoleOrDefault;
   }
 
@@ -28,11 +28,11 @@
     if (!isEqual(permsCurrent, permsValue)) {
       server.setPermissions(
         selected,
-        typeof permsValue == "number"
-          ? permsValue
+        typeof permsValue == "bigint"
+          ? Number(permsValue)
           : {
-              allow: permsValue.a,
-              deny: permsValue.d,
+              allow: Number(permsValue.a),
+              deny: Number(permsValue.d),
             }
       );
     }

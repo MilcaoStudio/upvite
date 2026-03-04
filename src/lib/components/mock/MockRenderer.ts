@@ -1,6 +1,6 @@
 import { ChannelRenderer, SMOOTH_SCROLL_ON_RECEIVE } from "$lib/rendered/Singleton";
 import type { RendererRoutines, ScrollState } from "$lib/rendered/types";
-import type { Channel, Message } from "revolt.js";
+import type { Channel, Message } from "stoat.js";
 import { mockFetchMessagesWithUsers } from "./MockClient";
 import { runInAction } from "mobx";
 import type State from "$lib/State";
@@ -9,8 +9,8 @@ const MAX_MESSAGES = 200;
 export const MockRenderer: RendererRoutines = {
     init: async function (renderer, nearby, smooth) {
         if (nearby) {
-            mockFetchMessagesWithUsers(renderer.channel, {nearby, limit: renderer.limit}).then(({ messages }) => {
-                messages.sort((a, b) => a._id.localeCompare(b._id));
+            mockFetchMessagesWithUsers(renderer.channel, {limit: renderer.limit}).then(({ messages }) => {
+                messages.sort((a, b) => a.id.localeCompare(b.id));
 
                 runInAction(() => {
                     renderer.state = "RENDER";
@@ -43,9 +43,9 @@ export const MockRenderer: RendererRoutines = {
         }
     },
     receive: async function (renderer, message) {
-        if (message.channel_id != renderer.channel._id) return;
+        if (message.channel_id != renderer.channel.id) return;
         if (renderer.state != "RENDER") return;
-        if (renderer.messages.find((x) => x._id == message._id)) return;
+        if (renderer.messages.find((x) => x.id == message._id)) return;
         if (!renderer.atBottom) return;
         let messages = [...renderer.messages, message];
         let atTop = renderer.atTop;
@@ -74,7 +74,7 @@ export const MockRenderer: RendererRoutines = {
         if (!renderer.channel) return;
         if (renderer.state != "RENDER") return;
 
-        const index = renderer.messages.findIndex((x) => x._id == id);
+        const index = renderer.messages.findIndex((x) => x.id == id);
 
         if (index > -1) {
             runInAction(() => {
@@ -92,7 +92,7 @@ export const MockRenderer: RendererRoutines = {
 
         const { messages: data } =
             await mockFetchMessagesWithUsers(channel, {
-                before: renderer.messages[0]._id,
+                before: renderer.messages[0].id,
                 limit: renderer.limit,
             });
 
@@ -116,7 +116,7 @@ export const MockRenderer: RendererRoutines = {
 
             renderer.emitScroll(
                 generateScroll(
-                    renderer.messages[renderer.messages.length - 1]._id,
+                    renderer.messages[renderer.messages.length - 1].id,
                 ),
             );
         });
@@ -130,7 +130,7 @@ export const MockRenderer: RendererRoutines = {
 
         const { messages: data } =
             await mockFetchMessagesWithUsers(channel, {
-                after: renderer.messages[renderer.messages.length - 1]._id,
+                after: renderer.messages[renderer.messages.length - 1].id,
                 sort: "Oldest",
             });
 
@@ -151,17 +151,17 @@ export const MockRenderer: RendererRoutines = {
                 renderer.atTop = false;
             }
 
-            renderer.emitScroll(generateScroll(renderer.messages[0]._id));
+            renderer.emitScroll(generateScroll(renderer.messages[0].id));
         });
     }
 }
 const renderers: Record<string, ChannelRenderer> = {};
 export function getRenderer(channel: Channel, currentState: State) {
-    let renderer = renderers[channel._id];
+    let renderer = renderers[channel.id];
     if (!renderer) {
         renderer = new ChannelRenderer(channel, currentState);
         renderer.currentRenderer = MockRenderer;
-        renderers[channel._id] = renderer;
+        renderers[channel.id] = renderer;
     }
 
     return renderer;

@@ -2,9 +2,9 @@
     import { modalController } from "$lib/components/modals/ModalController";
     import { ImageState } from "$lib/types/messaging";
     import { cx } from "@emotion/css";
-    import type { API } from "revolt.js";
+    import type { File } from "stoat.js";
 
-    export let attachment: API.File, src = "";
+    export let attachment: File, src = "";
     let loading = ImageState.Loading;
 </script>
 

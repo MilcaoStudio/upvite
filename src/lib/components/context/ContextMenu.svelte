@@ -15,7 +15,7 @@
     import { state } from "$lib/State";
     import { takeError } from "$lib";
     import JsxRender from "../JSXRender.svelte";
-    import { Permission, UserPermission } from "revolt.js";
+    import { Permission, UserPermission } from "stoat.js";
     import Tooltip from "../atoms/Tooltip.svelte";
     import { setContext } from "svelte";
     import { goto } from "$app/navigation";
@@ -26,7 +26,7 @@
     $: demo = $page.data.demo || false;
     let client = useClient();
     $: client = demo ? useMockClient() : useClient();
-    let userId = client.user?._id;
+    let userId = client.user?.id;
     export let data: ContextMenuData;
     let lastDivider = false;
     let elements: SvelteElement[] = [];
@@ -44,45 +44,39 @@
                     break;
                 case "copy_message_link":
                     {
-                        let pathname = `/channel/${data.message.channel_id}/${data.message._id}`;
+                        let pathname = `/channel/${data.message.channelId}/${data.message.id}`;
                         const channel = data.message.channel;
                         if (
-                            channel?.channel_type == "TextChannel" ||
-                            channel?.channel_type == "VoiceChannel"
+                            channel?.type == "TextChannel"
                         ) {
-                            pathname = `/server/${channel.server_id}${pathname}`;
+                            pathname = `/server/${channel.serverId}${pathname}`;
                         }
                         modalController.writeText(origin + pathname);
                     }
                     break;
                 case "mark_as_read":
                     {
-                        if (data.channel.channel_type == "SavedMessages") {
-                            return;
-                        }
-                        client?.unreads!.markRead(
-                            data.channel._id,
-                            data.channel.last_message_id!,
-                            true,
-                            true,
-                        );
+                        data.channel.ack();
                     }
                     break;
                 case "mark_unread":
                     {
+                        // local ack
                         const messages = getRenderer(
                             data.message.channel!,
                             state,
                         ).messages;
                         const index = messages.findIndex(
-                            (x) => x._id == data.message._id,
+                            (x) => x.id == data.message.id,
                         );
 
-                        let unread_id = data.message._id;
+                        let unread_id = data.message.id;
                         if (index > 0) {
-                            unread_id = messages[index - 1]._id;
+                            unread_id = messages[index - 1].id;
                         }
                         internalEmit("NewMessages", "mark", unread_id);
+
+                        // request ack
                         data.message.channel?.ack(unread_id, true);
                     }
                     break;
@@ -134,14 +128,12 @@
                     break;
                 case "open_file":
                     window
-                        .open(client.generateFileURL(data.attachment), "_blank")
+                        .open(data.attachment.originalUrl, "_blank")
                         ?.focus();
                     break;
                 case "save_file":
                     window.open(
-                        client
-                            .generateFileURL(data.attachment)
-                            ?.replace("attachments", "attachments/download"),
+                        data.attachment.originalUrl.replace("attachments", "attachments/download"),
                         window.native ? "_blank" : "_self",
                     );
                     break;
@@ -188,7 +180,7 @@
                 case "view_profile":
                     modalController.push({
                         type: "user_profile",
-                        user_id: data.user._id,
+                        user_id: data.user.id,
                     });
             }
         } catch (err) {
@@ -260,20 +252,19 @@
         const user = uid ? client.users.get(uid) : undefined;
         const serverChannel =
             targetChannel &&
-            (targetChannel.channel_type == "TextChannel" ||
-                targetChannel.channel_type == "VoiceChannel")
+            targetChannel.type == "TextChannel"
                 ? targetChannel
                 : undefined;
-        const s = serverChannel ? serverChannel.server_id! : sid;
+        const s = serverChannel ? serverChannel.serverId! : sid;
         const server = s ? client.servers.get(s) : undefined;
 
-        const channelPermissions = targetChannel?.permission || 0;
+        const channelPermissions = targetChannel?.permission || 0n;
         const serverPermissions =
             (server
                 ? server.permission
                 : serverChannel
                   ? serverChannel.server?.permission
-                  : 0) || 0;
+                  : 0n) || 0n;
         const userPermissions = (user ? user.permission : 0) || 0;
         if (data.unread) {
             if (channel) {
@@ -289,10 +280,10 @@
             }
         }
         if (contextualChannel) {
-            if (user && user._id != userId) {
+            if (user && user.id != userId) {
                 makeAction({
                     action: "mention",
-                    user: user._id,
+                    user: user.id,
                 });
 
                 pushDivider();
@@ -333,7 +324,7 @@
                     user,
                 });
             }
-            if (user._id !== userId) {
+            if (user.id != userId) {
                 if (userPermissions & UserPermission.SendMessage) {
                     makeAction({
                         action: "message_user",
@@ -368,8 +359,8 @@
             }
 
             if (contextualChannel) {
-                if (contextualChannel.channel_type == "Group" && uid) {
-                    if (contextualChannel.owner_id == userId && userId != uid) {
+                if (contextualChannel.type == "Group" && uid) {
+                    if (contextualChannel.ownerId == userId && userId != uid) {
                         makeAction(
                             {
                                 action: "make_owner",
@@ -397,7 +388,7 @@
                 }
             }
 
-            makeAction({ action: "copy_id", id: user._id }, "copy_uid");
+            makeAction({ action: "copy_id", id: user.id }, "copy_uid");
         }
         const { queued, message, attachment } = data;
         if (queued) {
@@ -446,15 +437,15 @@
                 });
             }
 
-            if (message.author_id == userId) {
+            if (message.authorId == userId) {
                 makeAction({
                     action: "edit_message",
-                    id: message._id,
+                    id: message.id,
                 });
             }
 
             if (
-                message.author_id == userId ||
+                message.authorId == userId ||
                 channelPermissions & Permission.ManageMessages
             ) {
                 pushDivider();
@@ -470,7 +461,7 @@
                 );
             }
 
-            if (message.author_id != userId) {
+            if (message.authorId != userId) {
                 makeAction(
                     {
                         action: "report",
@@ -533,7 +524,7 @@
                 }
             }
 
-            makeAction({ action: "copy_id", id: message._id }, "copy_mid");
+            makeAction({ action: "copy_id", id: message.id }, "copy_mid");
         }
 
         if (attachment) {
@@ -573,12 +564,12 @@
                 "copy_link",
             );
         }
-        const id = sid ?? cid ?? uid ?? message?._id;
+        const id = sid ?? cid ?? uid ?? message?.id;
         if (id) {
             pushDivider();
 
             if (channel) {
-                if (channel.channel_type) {
+                if (channel.type) {
                     makeAction(
                         {
                             action: "open_notification_options",
@@ -590,13 +581,13 @@
                     );
                 }
 
-                switch (channel.channel_type) {
+                switch (channel.type) {
                     case "Group":
                         // ! makeAction({ action: "create_invite", target: channel }); FIXME: add support for group invites
                         makeAction(
                             {
                                 action: "open_channel_settings",
-                                id: channel._id,
+                                id: channel.id,
                             },
                             "open_group_settings",
                         );
@@ -615,7 +606,6 @@
                         });
                         break;
                     case "TextChannel":
-                    case "VoiceChannel":
                         if (channelPermissions & Permission.InviteOthers) {
                             makeAction({
                                 action: "create_invite",
@@ -627,8 +617,8 @@
                             makeAction(
                                 {
                                     action: "open_server_channel_settings",
-                                    server: channel.server_id!,
-                                    id: channel._id,
+                                    server: channel.serverId,
+                                    id: channel.id,
                                 },
                                 "open_channel_settings",
                             );
@@ -646,7 +636,7 @@
                             );
                         break;
                 }
-                makeAction({ action: "copy_id", id: channel._id }, "copy_cid");
+                makeAction({ action: "copy_id", id: channel.id }, "copy_cid");
             }
             if (sid && server) {
                 makeAction(
@@ -684,7 +674,7 @@
                     makeAction(
                         {
                             action: "open_server_settings",
-                            id: server._id,
+                            id: server.id,
                         },
                         "open_server_settings",
                     );

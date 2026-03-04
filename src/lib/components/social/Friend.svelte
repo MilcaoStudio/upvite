@@ -1,6 +1,6 @@
 <script lang="ts">
     import { goto } from "$app/navigation";
-    import type { User } from "revolt.js";
+    import type { User } from "stoat.js";
     import Plus from "svelte-boxicons/BxPlus.svelte";
     import X from "svelte-boxicons/BxX.svelte";
     import Envelope from "svelte-boxicons/BxEnvelope.svelte";
@@ -13,7 +13,7 @@
 </script>
 
 <div class="Friend">
-    <UserIcon target={user} size={38} onClick={()=>modalController.push({type: "user_profile", user_id: user._id})}/>
+    <UserIcon target={user} size={38} onClick={()=>modalController.push({type: "user_profile", user_id: user.id})}/>
     <Username {user} />
     <div class="Actions">
         <IconButton shape="circle" onClick={()=>{
@@ -31,7 +31,7 @@
             <Plus size={24} />
         </IconButton>
         {:else if user.relationship == "Friend"}
-        <IconButton shape="circle" onClick={()=>goto(`/open/${user._id}`)}>
+        <IconButton shape="circle" onClick={()=>goto(`/open/${user.id}`)}>
             <Envelope size={24} />
         </IconButton>
         {/if}
@@ -48,9 +48,7 @@
         padding: 2px 0px 2px 16px;
         gap: 12px;
     }
-    .Friend > :global(*) {
-        
-    }
+    
     .Actions{
         margin-left: auto;
     }

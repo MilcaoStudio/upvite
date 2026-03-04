@@ -17,7 +17,6 @@ import { svelte, svelteDEV, sveltes, type SvelteElement } from "../runtime/svelt
 import type { MdxjsEsmHast } from "mdast-util-mdxjs-esm";
 import type { MdxJsxFlowElement, MdxJsxTextElement } from "mdast-util-mdx-jsx";
 import type { Position } from "unist";
-import type { ComponentType } from "svelte";
 import type { MdxFlowExpression, MdxTextExpression } from "mdast-util-mdx-expression";
 
 const own = {}.hasOwnProperty;

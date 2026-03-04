@@ -1,14 +1,14 @@
 <script lang="ts">
-    import { state } from "$lib/State";
     import TextAreaAutoSize from "$lib/components/atoms/TextAreaAutoSize.svelte";
     import H3 from "$lib/components/atoms/heading/H3.svelte";
     import FileReader from "$lib/controllers/FileReader.svelte";
     import FileWriter from "$lib/controllers/FileWriter.svelte";
+    import { settings } from "$lib/stores/Settings";
     import { autorun } from "mobx";
     import { t } from "svelte-i18n";
     import { validateText } from "w3c-css-validator";
 
-    let theme = state.settings.theme;
+    let theme = settings.theme;
     $: value = theme.getCSS();
     $: disabled = value?.trim() == theme.getCSS()?.trim();
     let enableValidator = true;

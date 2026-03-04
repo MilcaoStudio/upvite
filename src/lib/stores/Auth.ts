@@ -1,16 +1,61 @@
 import type Persistent from "$lib/types/Persistent";
-import { MapStore } from "./Store";
 import { mapToRecord } from "$lib";
-import { clientController } from "$lib/controllers/ClientController";
 import { ObservableMap, action, computed, makeAutoObservable } from "mobx";
-
-interface Account {
-    session: Session;
-    apiUrl?: string;
-}
+import { derived, writable } from "svelte/store";
 
 export interface Data {
-    sessions: Record<string, Account>;
+    sessions: Record<string, Session>;
+}
+
+let current: string | undefined;
+const sessions = writable<Data["sessions"]>({});
+
+    function hydrate(data: Data) {
+        if (data && "sessions" in data) {
+            sessions.set(data.sessions);
+        }
+    }
+
+    function setSession(session: Session) {
+        sessions.update((sessions) => {
+            sessions[session.user_id] = session;
+            current = session.user_id;
+            return sessions;
+        });
+    }
+    
+    function removeSession(userId: string) {
+        sessions.update((sessions) => {
+            delete sessions[userId];
+            return sessions;
+        });
+    }
+
+    function logout() {
+        current && removeSession(current);
+    }
+
+    function dataToJSON(data: Data["sessions"]): Data {
+        return {
+            sessions: JSON.parse(JSON.stringify(data))
+        }
+    }
+
+    function getAccounts(data: Data["sessions"]) {
+        return Object.entries(data).map(([_, v])=>v);
+    }
+
+const accounts = derived([sessions], ([s])=>getAccounts(s));
+const asJSON = derived([sessions], ([s])=>dataToJSON(s));
+
+export const $auth = {
+    ...sessions,
+    accounts,
+    hydrate,
+    setSession,
+    removeSession,
+    logout,
+    asJSON,
 }
 
 /**
@@ -57,10 +102,9 @@ export default class Auth implements Persistent<Data> {
     /**
      * Add a new session to the auth manager.
      * @param session Session
-     * @param apiUrl Custom API URL
      */
-    @action setSession(session: Session, apiUrl?: string) {
-        this.sessions.set(session.user_id, { session, apiUrl });
+    @action setSession(session: Session) {
+        this.sessions.set(session.user_id, session);
     }
 
     /**
@@ -95,3 +139,5 @@ export default class Auth implements Persistent<Data> {
         return this.sessions.get(this.current)!.session;
     }*/
 }
+
+export const auth = new Auth();

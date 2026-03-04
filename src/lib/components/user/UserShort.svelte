@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type { API, User } from "revolt.js";
+    import type { API, User } from "stoat.js";
     import { modalController } from "../modals/ModalController";
     import { internalEmit } from "$lib/InternalEmitter";
     import UserIcon from "./UserIcon.svelte";
@@ -12,11 +12,11 @@
         showServerIdentity = false;
     const openProfile = () =>
         user &&
-        modalController.push({ type: "user_profile", user_id: user._id });
+        modalController.push({ type: "user_profile", user_id: user.id });
     const handleUserClick = (e: MouseEvent) => {
-        if (e.shiftKey && user?._id) {
+        if (e.shiftKey && user?.id) {
             e.preventDefault();
-            internalEmit("MessageBox", "append", `<@${user?._id}>`, "mention");
+            internalEmit("MessageBox", "append", `<@${user?.id}>`, "mention");
         } else {
             openProfile();
         }

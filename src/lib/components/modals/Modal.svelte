@@ -36,7 +36,7 @@
             max-height: min(calc(100vh - 20px), ${maxHeight || "650px"});
             ${!maxWidth ? "width: 100%;" : ""}
             ${!transparent
-                ? "overflow: hidden; background: var(--secondary-header); border-radius: var(--border-radius);"
+                ? "background: var(--secondary-header); border-radius: var(--border-radius);"
                 : ""}
         `,
     );
@@ -89,13 +89,13 @@
     on:click={() => !nonDismissable && closeModal()}
     on:keydown={() => !nonDismissable && closeModal()}
 >
-    <slot name="override">
         <div
             class={Container}
             role="none"
             on:click|stopPropagation
             on:keydown|stopPropagation
         >
+    <slot name="override">
             <div class={Title}>
                 <H2><slot name="title" /></H2>
                 <H4><slot name="description" /></H4>
@@ -115,6 +115,6 @@
                     {/each}
                 </div>
             {/if}
-        </div>
-    </slot>
+        </slot>
+    </div>
 </div>

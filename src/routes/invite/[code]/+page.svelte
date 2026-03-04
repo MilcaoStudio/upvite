@@ -10,7 +10,7 @@
         useSession,
     } from "$lib/controllers/ClientController.js";
     import { Button } from "fluent-svelte";
-    import { API } from "revolt.js";
+    import { API, PublicChannelInvite, ServerPublicInvite } from "stoat.js";
     import BxArrowBack from "svelte-boxicons/BxArrowBack.svelte";
     import { _ } from "svelte-i18n";
     import "../../../styles/invite.css";
@@ -29,15 +29,19 @@
 
     let processing = false;
     let error: string;
-    let invite: API.InviteResponse;
+    let invite: PublicChannelInvite;
 
     $: {
         if (!invite) {
-            client
-                .fetchInvite(code)
-                .then((data) => (invite = data))
-                .catch((err) => (error = takeError(err)));
+            fetchInvite(code).then((result)=>(invite=result)).catch((reason)=>error = takeError(reason));
         }
+    }
+
+    async function fetchInvite(code: string): Promise<PublicChannelInvite> {
+        return client.api.get(`/invites/${code as ""}`).then((result) => PublicChannelInvite.from(client, result));
+    }
+    function isServerInvite(invite: PublicChannelInvite): invite is ServerPublicInvite {
+        return invite.type == "Server";
     }
 </script>
 
@@ -68,11 +72,11 @@
 {:else if invite.type == "Group"}
     <!--TODO: Implement group invite-->
     <h1>Unimplemented!</h1>
-{:else if invite.type == "Server"}
+{:else if isServerInvite(invite)}
     <div
         class="invite"
-        style:background={invite.server_banner
-            ? `url('${client.generateFileURL(invite.server_banner)}')`
+        style:background={invite.serverBanner
+            ? `url('${invite.serverBanner.originalUrl}')`
             : null}
     >
         <div class="leave">
@@ -86,8 +90,8 @@
             <div class="icon">
                 <!--ServerIcon-->
                 <ServerIcon
-                    attachment={invite.server_icon}
-                    server_name={invite.server_name}
+                    attachment={invite.serverIcon}
+                    server_name={invite.serverName}
                     size={64}
                 />
             </div>
@@ -97,11 +101,11 @@
             {#if processing}
                 <Preloader type="ring" />
             {:else}
-                <h1>{invite.server_name}</h1>
+                <h1>{invite.serverName}</h1>
                 <h2>
-                    #{invite.channel_name} •{" "}
+                    #{invite.channelName} •{" "}
                     {translate("app.special.invite.user_count", {
-                        member_count: invite.member_count,
+                        member_count: invite.memberCount,
                     })}
                 </h2>
                 <h3>
@@ -113,9 +117,9 @@
                                 { style: "display:inline-flex;" },
                                 createElement(UserIcon, {
                                     size: 24,
-                                    attachment: invite.user_avatar,
+                                    attachment: invite.userAvatar,
                                 }),
-                                invite.user_name,
+                                invite.userName,
                             ),
                         }}
                     />
@@ -125,16 +129,16 @@
                     variant="standard"
                     on:click={async () => {
                         if (!session) {
-                            return goto("/login?invite=" + invite.code);
+                            return goto("/login?invite=" + code);
                         }
                         processing = true;
                         try {
-                            if (invite.type != "Server") {
+                            if (!isServerInvite(invite)) {
                                 throw TypeError("Invite has invalid format");
                             }
-                            await client.joinInvite(invite);
+                            await invite.join();
                             goto(
-                                `/server/${invite.server_id}/channel/${invite.channel_id}`,
+                                `/server/${invite.serverId}/channel/${invite.channelId}`,
                             );
                         } catch (err) {
                             error = takeError(err);

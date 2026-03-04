@@ -14,10 +14,10 @@
 
 <DialogForm {...props}
     callback={async ({name})=>{
-        const server = await client.servers.createServer({
+        const {id} = await client.servers.createServer({
         name: ''+name,
         }).catch(mapError);
-        goto(`/server/${server?._id}`,);
+        goto(`/server/${id}`,);
     }}
     schema={{name: "text"}}
     data={{name: {field: $_('app.main.servers.name')}}}

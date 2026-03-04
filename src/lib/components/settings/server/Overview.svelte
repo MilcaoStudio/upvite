@@ -7,7 +7,7 @@
     import FileUploader from "$lib/controllers/FileUploader.svelte";
     import isEqual from "lodash.isequal";
     import { autorun } from "mobx";
-    import type { Server } from "revolt.js";
+    import type { API, Server } from "stoat.js";
     import { t } from "svelte-i18n";
     import Md from "svelte-boxicons/BxlMarkdown.svelte";
     import H5 from "$lib/components/atoms/heading/H5.svelte";
@@ -19,18 +19,18 @@
     export let server: Server;
     let name = server.name;
     let description = server.description ?? "";
-    let systemMessages = server.system_messages;
+    let systemMessages = server.systemMessages;
     let editable = server.havePermission("ManageServer");
     $: console.log(editable);
     autorun(() => (name = server.name));
-    autorun(() => (systemMessages = server.system_messages));
+    autorun(() => (systemMessages = server.systemMessages));
     let changed = false;
     function save() {
-        const changes: Record<string, unknown> = {};
+        const changes: API.DataEditServer = {};
         if (name != server.name) changes.name = name;
         if (description != server.description)
             changes.description = description;
-        if (!isEqual(systemMessages, server.system_messages))
+        if (!isEqual(systemMessages, server.systemMessages))
             changes.system_messages = systemMessages ?? undefined;
 
         server.edit(changes);
@@ -65,7 +65,7 @@
         <PersonPicture
             alt={server.name}
             size={80}
-            src={server.generateIconURL({ max_side: 256 }, true)}
+            src={server.animatedIconURL}
         />
         {#if editable}
             <FileUploader
@@ -129,7 +129,7 @@
         {#if server.banner}
             <img
                 alt="banner"
-                src={server.generateBannerURL({ width: 1000 }, true)}
+                src={server.bannerURL}
             />
         {/if}
         {#if editable}
@@ -169,9 +169,9 @@
                 }}
             >
                 <option value="disabled">{$t("general.disabled")}</option>
-                {#each server.channels.filter((c) => c && c.channel_type == "TextChannel") as channel (channel?._id)}
+                {#each server.channels.filter((c) => c && c.type == "TextChannel") as channel (channel?.id)}
                     {#if channel}
-                        <option value={channel._id}>
+                        <option value={channel.id}>
                             <ChannelName {channel} prefix />
                         </option>
                     {/if}

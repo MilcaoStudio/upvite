@@ -11,13 +11,15 @@
         {node}
     {:else}
         {#if typeof node.type == 'string'}
-            <svelte:element this={node.type} {...node.props} >
             {#if children}
-                {#each children as child}
-                    <svelte:self node={child} />
-                {/each}
+                <svelte:element this={node.type} {...node.props} >
+                    {#each children as child}
+                        <svelte:self node={child} />
+                    {/each}
+                </svelte:element>
+            {:else}
+                <svelte:element this={node.type} {...node.props} />
             {/if}
-            </svelte:element>
         {:else}
             {#if children}
                 <svelte:component this={node.type} {...node.props} >

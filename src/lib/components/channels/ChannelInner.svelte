@@ -1,11 +1,10 @@
 <script lang="ts">
     import { InfoBadge, PersonPicture } from "fluent-svelte";
-    import type { Channel } from "revolt.js";
-    import type { INotificationChecker } from "revolt.js/dist/util/Unreads";
+    import type { Channel } from "stoat.js";
     import Tooltip from "../atoms/Tooltip.svelte";
-    export let channel: Channel, permit: INotificationChecker;
-    $: unread = channel.isUnread(permit);
-    $: count = channel.getMentions(permit).length;
+    export let channel: Channel;
+    $: unread = channel.unread;
+    $: count = channel.mentions?.size;
 </script>
 
 <Tooltip content={channel.name ?? channel.recipient?.username} div right>
@@ -14,7 +13,7 @@
         <PersonPicture
             size={42}
             alt={channel.name ?? ""}
-            src={channel.generateIconURL({ max_side: 256 }, false)}
+            src={channel.animatedIconURL}
         >
             <InfoBadge severity="critical">{count}</InfoBadge>
         </PersonPicture>
@@ -22,7 +21,7 @@
         <PersonPicture
             size={42}
             alt={channel.name ?? ""}
-            src={channel.generateIconURL({ max_side: 256 }, false)}
+            src={channel.animatedIconURL}
         />
     {/if}
 </Tooltip>

@@ -3,7 +3,7 @@
     import PhoneCall from "svelte-boxicons/BxPhoneCall.svelte";
     import PhoneOff from "svelte-boxicons/BxPhoneOff.svelte";
     import { VoiceStatus, voiceState } from "$lib/voice/VoiceState";
-    import type { Channel } from "revolt.js";
+    import type { Channel } from "stoat.js";
     import { autorun } from "mobx";
     import { internalEmit } from "$lib/InternalEmitter";
 
@@ -14,7 +14,7 @@
 </script>
 
 {#if $status >= VoiceStatus.RTC_CONNECTING}
-    {#if linkedRoom == channel._id}
+    {#if linkedRoom == channel.id}
         <IconButton onClick={()=> {
             internalEmit("voice", "leave");
         }}>

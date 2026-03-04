@@ -2,9 +2,10 @@
     import { state } from "$lib/State";
     import { modalController } from "$lib/components/modals/ModalController";
     import { useClient } from "$lib/controllers/ClientController";
-    import type { API } from "revolt.js";
+    import type { ImageEmbed, VideoEmbed, WebsiteEmbed } from "stoat.js";
+    import { isWebsiteEmbed } from "./MessageEmbed";
 
-    export let embed: API.Embed,
+    export let embed: WebsiteEmbed,
         width = 0,
         height: number;
     let client = useClient();
@@ -12,13 +13,13 @@
     
 </script>
 
-{#if embed.type == "Website"}
-    {#if embed.special?.type == "YouTube"}
+{#if isWebsiteEmbed(embed)}
+    {#if embed.specialContent?.type == "YouTube"}
         <iframe
             title="YouTube"
             {height}
             loading="lazy"
-            src="http://www.youtube-nocookie.com/embed/{embed.special.id}?modestbranding=1&hl={state.locale.getLanguage()}&start={embed.special.timestamp ?? 0}"
+            src="http://www.youtube-nocookie.com/embed/{embed.specialContent.id}?modestbranding=1&hl={state.locale.getLanguage()}&start={embed.specialContent.timestamp ?? 0}"
             frameborder="0"
             allowfullscreen
         />
@@ -28,10 +29,10 @@
             style:width="{width}px"
             style:height="{height}px"
             src={client.proxyFile(embed.video.url)}
-            loop={embed.special?.type == "GIF"}
-            controls={embed.special?.type != "GIF"}
-            autoplay={embed.special?.type == "GIF" && autoplay}
-            muted={embed.special?.type == "GIF" ? true : undefined}
+            loop={embed.specialContent?.type == "GIF"}
+            controls={embed.specialContent?.type != "GIF"}
+            autoplay={embed.specialContent?.type == "GIF" && autoplay}
+            muted={embed.specialContent?.type == "GIF" ? true : undefined}
             on:click={(ev) =>
                 ev.currentTarget.paused && ev.currentTarget.play()}
         />
@@ -40,7 +41,7 @@
         <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
         <img
             class="image"
-            alt={embed.site_name}
+            alt={embed.siteName}
             src={client.proxyFile(embed.image.url)}
             loading="lazy"
             style:width="100%"

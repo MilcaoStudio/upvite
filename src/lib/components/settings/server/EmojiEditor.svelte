@@ -2,7 +2,7 @@
     import IconButton from "$lib/components/atoms/input/IconButton.svelte";
     import InputBox from "$lib/components/form/InputBox.svelte";
     import UserShort from "$lib/components/user/UserShort.svelte";
-    import type { Emoji, Server } from "revolt.js";
+    import type { Emoji, Server } from "stoat.js";
     import BxX from "svelte-boxicons/BxX.svelte";
 
     export let emoji: Emoji, server: Server;
@@ -11,28 +11,7 @@
 
     async function onNameChange(
         ev: Event & { currentTarget: HTMLInputElement },
-    ) {
-        if (!ev.currentTarget?.value) {
-            return;
-        }
-        const value = ev.currentTarget.value;
-        if (value == emoji.name) {
-            return;
-        }
-        try {
-            if (!/^[a-z0-9_]+$/.test(value)) {
-                throw new Error("Invalid emoji name");
-            }
-            await server.client.api.put(`/custom/emoji/${emoji._id}`, {
-                name: value,
-                parent: { type: "Server", id: server._id },
-            });
-            emoji.name = value;
-        } catch (error) {
-            ev.currentTarget.value = emoji.name;
-            console.error(error);
-        }
-    }
+    ) {}
 </script>
 
 <div
@@ -42,7 +21,7 @@
     on:mouseenter={() => (mouseenter = true)}
     on:mouseleave={() => (mouseenter = false)}
 >
-    <img class="preview icon" src={emoji.imageURL} alt={emoji.name} />
+    <img class="preview icon" src={emoji.url} alt={emoji.name} />
     {#if mouseenter && editable}
         <div class="label">
             :<InputBox

@@ -1,20 +1,21 @@
 import type State from "$lib/State";
-import { clientController } from "$lib/controllers/ClientController";
+import { clientController, useClient } from "$lib/controllers/ClientController";
 import { reorder } from "$lib/dnd";
 import type Persistent from "$lib/types/Persistent";
 import type Syncable from "$lib/types/Syncable";
 import { action, computed, makeAutoObservable } from "mobx";
-import type { Server } from "revolt.js";
+import type { Server } from "stoat.js";
+import { BaseStore } from "./Store";
+import { derived, get } from "svelte/store";
 
-export interface Data {
-    servers?: string[];
+export interface OrderingData {
+    servers: string[];
 }
 
 /**
  * Keeps track of ordering of various elements
  */
-export default class Ordering implements Persistent<Data>, Syncable {
-    private state: State;
+export default class Ordering implements Persistent<OrderingData>, Syncable {
 
     /**
      * Ordered list of server IDs
@@ -24,11 +25,9 @@ export default class Ordering implements Persistent<Data>, Syncable {
     /**
      * Construct new Layout store.
      */
-    constructor(state: State) {
+    constructor() {
         this.servers = [];
         makeAutoObservable(this);
-
-        this.state = state;
         this.reorderServer = this.reorderServer.bind(this);
     }
 
@@ -42,19 +41,19 @@ export default class Ordering implements Persistent<Data>, Syncable {
         };
     }
 
-    @action hydrate(data: Data) {
+    @action hydrate(data: OrderingData) {
         if (data.servers) {
             this.servers = data.servers;
         }
     }
 
     apply(_key: string, data: unknown, _revision: number): void {
-        this.hydrate(data as Data);
+        this.hydrate(data as OrderingData);
     }
 
-    toSyncable(): { [key: string]: object } {
+    toSyncable() {
         return {
-            ordering: this.toJSON(),
+            ordering: JSON.stringify(this.toJSON()),
         };
     }
 
@@ -62,7 +61,7 @@ export default class Ordering implements Persistent<Data>, Syncable {
      * All known servers with ordering applied
      */
     @computed get orderedServers() {
-        const client = clientController.readyClient;
+        const client = useClient();
         const known = new Set(client?.servers.keys() ?? []);
         const ordered = [...this.servers];
 
@@ -74,7 +73,7 @@ export default class Ordering implements Persistent<Data>, Syncable {
         }
 
         for (const id of known) {
-            out.push(client!.servers.get(id)!);
+            out.push(client.servers.get(id)!);
         }
 
         return out;
@@ -84,10 +83,68 @@ export default class Ordering implements Persistent<Data>, Syncable {
      * Re-order a server
      */
     @action reorderServer(items: Server[]) {
-        this.servers = reorder(items.map((x) => x._id));
+        this.servers = reorder(items.map((x) => x.id));
     }
 
     @action reset() {
         this.servers = [];
     }
 }
+
+
+export class OrderingStore extends BaseStore<OrderingData> implements Syncable {
+    get id() {
+        return "ordering";
+    }
+
+    apply(_key: string, data: unknown, _revision: number) {
+        this.hydrate(data as OrderingData);
+    }
+
+    toSyncable() {
+        return {
+            ordering: JSON.stringify(get(this.store)),
+        }
+    }
+
+    hydrate(value: OrderingData): void {
+        if (value.servers) {
+            this.store.set({servers: value.servers});
+        } else {
+            throw TypeError("'servers' cannot be undefined");
+        }
+    }
+
+    reset(): void {
+        this.store.set({servers: []});
+    }
+
+    get orderedServers() {
+        return derived([this.store], ([data])=>{
+            const client = useClient();
+            const known = new Set(client.servers.keys());
+            const out = [];
+            for (const id of data.servers) {
+                if (known.delete(id)) {
+                    const server = client.servers.get(id);
+                    if (server) {
+                        out.push(server);
+                    } else {
+                        console.warn("Server %s not found", id);
+                    }
+                }
+            }
+
+            for (const id of known) {
+                const server = client.servers.get(id);
+                if (server) {
+                    out.push(server);
+                }
+            }
+
+            return out;
+        });
+    }
+}
+
+export const orderingStore = new OrderingStore({servers: []});

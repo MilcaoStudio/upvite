@@ -1,22 +1,22 @@
 <script lang="ts">
     import { css, cx } from "@emotion/css";
-    import type { Server } from "revolt.js";
+    import type { Server } from "stoat.js";
     import Tooltip from "../atoms/Tooltip.svelte";
     import BxCheck  from "svelte-boxicons/BxCheck.svelte";
 
-    export let server: Server, background = false;
+    export let server: Server;
+    let bannerURL = server.bannerURL;
+
     const ServerBanner = cx('ServerBanner', css`
+    margin: 8px;
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
+    
 
-    background-size: cover;
-    background-repeat: norepeat;
-    background-position: center center;
-
-    ${background ? `
-        height: 120px;
+    ${bannerURL ? `
+        height: var(--banner-height);
+        justify-content: flex-end;
 
         .container {
             background: linear-gradient(
@@ -25,21 +25,15 @@
                 transparent
             );
         }` : `
-           
+        height: 48px;
+        justify-content: center;
         `}
 
-    
-
     .container {
-        height: var(--header-height);
-
         display: flex;
-        align-items: center;
-        padding: 0 14px;
+        padding: 0 16px;
         font-weight: 600;
         white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
         gap: 8px;
 
         .title {
@@ -52,11 +46,9 @@
             color: var(--foreground);
         }
     }`);
-    const bannerURL = server.generateBannerURL({ width: 480 });
-
 </script>
 
-<div class={ServerBanner} style:background={bannerURL ? `url('${bannerURL}')` : undefined}>
+<div class={ServerBanner} style:background={bannerURL ? `url('${bannerURL}') center/cover no-repeat` : undefined}>
     <div class="container">
         {#if server.flags && server.flags & 1}
             <Tooltip i18n="app.special.server-badges.official" placement="bottom-start">

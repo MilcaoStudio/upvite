@@ -1,7 +1,5 @@
 import { RE_ULID } from "$lib";
-import { clientController } from "$lib/controllers/ClientController";
 import type { Handler } from "mdast-util-to-hast";
-import { RevoltEmojiDictionary } from "revkit";
 import type { Plugin } from "unified";
 import { visit } from "unist-util-visit";
 
@@ -69,7 +67,7 @@ export function createComponent(
                     if (
                         result.length > 0 &&
                         parent &&
-                        typeof index === "number"
+                        typeof index == "number"
                     ) {
                         if (start < node.value.length) {
                             result.push({
@@ -120,7 +118,9 @@ export const remarkChannel = createComponent("channel", RE_CHANNEL, (_, match) =
     RE_ULID.test(match),
 );
 
-export const remarkEmoji = createComponent("emoji", RE_EMOJI, (_, arg1, arg2) => arg1 == "DC" ? /[0-9]+/.test(arg2) :  arg2 in RevoltEmojiDictionary || RE_ULID.test(arg2));
+export const remarkEmoji = createComponent("emoji", RE_EMOJI, (_, arg1, arg2) => arg1 == "DC" ? /[0-9]+/.test(arg2) 
+//:  arg2 in RevoltEmojiDictionary ||
+: RE_ULID.test(arg2));
 
 export function isOnlyEmoji(text: string) {
     return !text.replaceAll(RE_EMOJI, "").trim().length;

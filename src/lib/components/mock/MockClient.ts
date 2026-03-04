@@ -1,5 +1,5 @@
 import { faker } from "@faker-js/faker";
-import { Client, DEFAULT_PERMISSION_SERVER, type API, type Channel, type Member, type User } from "revolt.js";
+import { Client, DEFAULT_PERMISSION_SERVER, type API, type Channel, type ServerMember, type User } from "stoat.js";
 import { ulid } from "ulid";
 
 const server_id = "01J0ERKYEA7A1S0K95W4C78FAS";
@@ -12,13 +12,14 @@ export const channels = [{
     channel_type: "TextChannel" as "TextChannel",
     server: server_id,
     description: "This channel is not connected to any API",
-}].map(c => client.channels.createObj(c));
+}].map(c => client.channels.getOrCreate(c._id, c));
 
-client.user = client.users.createObj({
+client.user = client.users.getOrCreate("01J0EX4S6623T1JTVEAXDZTQBV",{
     _id: "01J0EX4S6623T1JTVEAXDZTQBV",
     username: "official_tester",
     online: true,
     relationship: "User",
+    discriminator: "0000",
     badges: 0b11111111111,
     //avatar:
     //profile:
@@ -38,11 +39,11 @@ client.user = client.users.createObj({
         presence: "Online"
     }
 });
-console.debug("Fake user client registered, id:", client.user!._id);
-export const servers = [client.servers.createObj({
+console.debug("Fake user client registered, id:", client.user!.id);
+export const servers = [client.servers.getOrCreate(server_id, {
     _id: server_id,
-    channels: channels.map(c => c._id),
-    default_permissions: DEFAULT_PERMISSION_SERVER,
+    channels: channels.map(c => c.id),
+    default_permissions: Number(DEFAULT_PERMISSION_SERVER),
     name: "TEST",
     owner: "01J0EXEAJW7KJ3YM984PZBT0H6"
 })];
@@ -51,14 +52,16 @@ export function createMockClient() {
 
     for (let i = 0; i < user_ids.length; i++) {
         const online = i % 2 == 0;
-        client.users.createObj({
+        client.users.getOrCreate(user_ids[i], {
             _id: user_ids[i],
+            discriminator: faker.number.int({min: 0, max: 9999}).toString(),
             username: faker.person.firstName(),
             online,
             status: {
                 presence: "Busy",
                 text: faker.company.buzzPhrase(),
-            }
+            },
+            relationship: "None",
         })
     }
 
@@ -73,24 +76,26 @@ export function useClient() {
 function* generateMessage(channel: string) {
     for (let i = 0; i < 5_000; i++) {
         const author = user_ids[Math.floor(Math.random() * user_ids.length)];
-        yield client.messages.createObj({
-            _id: ulid(),
+        const id = ulid();
+        yield client.messages.getOrCreate(id, {
+            _id: id,
             channel,
             author,
             content: faker.company.catchPhrase(),
             nonce: ulid(),
         });
     }
-    return client.messages.createObj({
+    const messageId = ulid();
+    return client.messages.getOrCreate(messageId, {
         system: { type: "text", content: "Limit for message generation has been reached" },
-        _id: ulid(),
+        _id: messageId,
         author: "00000000000000000000000000",
         channel,
     });
 }
 
-export function mockFetchMessagesWithUsers(channel: Channel, options: API.MessageQuery) {
-    const messageGen = generateMessage(channel._id);
+export function mockFetchMessagesWithUsers(channel: Channel, options: API.DataMessageSearch) {
+    const messageGen = generateMessage(channel.id);
     const limit = options.limit || 50;
     const messages = [];
     for (let i = 0; i < limit; i++) {
@@ -101,7 +106,7 @@ export function mockFetchMessagesWithUsers(channel: Channel, options: API.Messag
         }
     }
     const users = [...new Set(messages.map(msg => msg.author).filter(author => author) as User[])];
-    const members = [...new Set(messages.map(msg => client.members.getKey({ server: server_id, user: msg.author?._id ?? "" })).filter(author => author) as Member[])];
+    const members = [...new Set(messages.map(msg => client.serverMembers.getByKey({ server: server_id, user: msg.authorId ?? "" })).filter(author => author) as ServerMember[])];
     return Promise.resolve({
         messages,
         users,

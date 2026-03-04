@@ -10,11 +10,11 @@
     export let snap = false;
     let client = useClient();
     $: server_id = $page.params.server;
-    $: server = client.servers.get(server_id);
+    $: server = server_id ? client.servers.get(server_id) : undefined;
     let openRight = state.layout.getSectionState(SIDEBAR_MEMBERS, true);
     $: autorun(()=> openRight = state.layout.getSectionState(SIDEBAR_MEMBERS, true));
     $: channel_id = $page.params.channel;
-    $: channel = client.channels.get(channel_id);
+    $: channel = channel_id ? client.channels.get(channel_id): undefined;
 </script>
 
 {#if openRight || snap}

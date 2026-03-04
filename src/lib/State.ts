@@ -1,19 +1,19 @@
 import stringify from "json-stringify-deterministic";
 import localforage from "localforage";
-import type { Client, ClientboundNotification } from "revolt.js";
+import type { Client } from "stoat.js";
 import type Persistent from "./types/Persistent";
 import MessageQueue from "./stores/MessageQueue";
-import Auth from "./stores/Auth";
+import { $auth, type Data as AuthData } from "./stores/Auth";
 import type { Data as DataSync, SyncKeys } from './stores/Sync'
 import { clientController } from "./controllers/ClientController";
-import { action, makeAutoObservable, reaction, runInAction } from "mobx";
+import { makeAutoObservable, reaction, runInAction } from "mobx";
 import { injectWindow } from "$lib";
 import Layout from "./stores/Layout";
-import NotificationOptions from "./stores/NotificationOptions";
-import Ordering from "./stores/Ordering";
-import Settings from "./stores/Settings";
+import { notificationsStore } from "./stores/NotificationOptions";
+import { orderingStore, type OrderingData } from "./stores/Ordering";
+import { settings } from "./stores/Settings";
 import Draft from "./stores/Draft";
-import Sync from "./stores/Sync";
+import { sync } from "./stores/Sync";
 import Changelog from "./stores/Changelog";
 import type Syncable from "./types/Syncable";
 import Plugins from "./stores/Plugins";
@@ -21,30 +21,31 @@ import LocaleOptions from "./stores/LocaleOptions";
 import NetworkOptions from "./stores/NetworkOptions";
 
 export default class State {
-    private persistent: [string, Persistent<unknown>][] = [];
-    private disabled: Set<string> = new Set;
-    auth = new Auth;
+    private persistent: [string, Persistent<unknown>][];
+    //auth = new Auth;
     changelog = new Changelog;
     queue = new MessageQueue;
     layout = new Layout;
     locale = new LocaleOptions;
     network = new NetworkOptions;
-    notifications: NotificationOptions;
-    ordering: Ordering;
+    //notifications: NotificationOptions;
+    //ordering: Ordering;
     plugins: Plugins;
-    settings = new Settings;
-    sync: Sync;
+    //settings = new Settings;
+    //sync: Sync;
     draft = new Draft;
 
     constructor() {
+        this.persistent = [["notifications", notificationsStore],
+            //["settings", settings]
+        ]
         makeAutoObservable(this);
 
-        this.disable = this.disable.bind(this);
-        this.onPacket = this.onPacket.bind(this);
+        //this.disable = this.disable.bind(this);
 
-        this.notifications = new NotificationOptions(this);
-        this.ordering = new Ordering(this);
-        this.sync = new Sync(this);
+        //this.notifications = new NotificationOptions();
+        //this.ordering = new Ordering();
+        //this.sync = new Sync();
         this.plugins = new Plugins(this);
         this.register();
         injectWindow('state', this);
@@ -77,9 +78,10 @@ export default class State {
         }
     }
 
+    /*
     disable(key: string) {
         this.disabled.add(key);
-    }
+    }*/
 
     /**
      * Save to local storage
@@ -91,42 +93,40 @@ export default class State {
                 JSON.parse(stringify(store.toJSON())),
             );
         }
+        console.debug("[save] Local data saved");
     }
 
-    /**
-     * Temporarily ignore updates to a key.
-     * @param key Key to ignore
-     */
-    setDisabled(key: string) {
-        this.disabled.add(key);
-    }
-    
     async hydrate() {
-        const sync = (await localforage.getItem("sync")) as DataSync;
-        const { revision } = sync ?? { revision: {} };
-        for (const [id, store] of this.persistent) {
-            if (id == "sync") continue;
-            const data = await localforage.getItem(id);
-            if (typeof data == "object" && data !== null) {
-                store.hydrate(data, revision[id] ?? +new Date());
-            }
-        }
-        await this.save();
-        clientController.hydrate(this.auth);
+        try {
+            const sync = (await localforage.getItem("sync")) as DataSync;
+            const { revision } = sync ?? { revision: {} };
 
-        // Post-hydration, init plugins.
-        this.plugins.init();
+            const authData = await localforage.getItem<AuthData>("auth");
+            if (authData) {
+                $auth.hydrate(authData);
+            }
+            const ordering = await localforage.getItem<OrderingData>("ordering");
+            if (ordering) {
+                orderingStore.hydrate(ordering);
+            }
+
+            for (const [id, store] of this.persistent) {
+                if (id == "sync") continue;
+                const data = await localforage.getItem(id);
+                if (typeof data == "object" && data !== null) {
+                    store.hydrate(data, revision[id] ?? +new Date());
+                }
+            }
+            await this.save();
+            clientController.hydrate();
+
+            // Post-hydration, init plugins.
+            this.plugins.init();
+        } catch (error) {
+            console.error(error)
+        }
     }
 
-    @action onPacket(packet: ClientboundNotification) {
-        if (packet.type == "UserSettingsUpdate") {
-            try {
-                this.sync.apply(packet.update);
-            } catch (err) {
-                //reportError(err as any, "failed_sync_apply");
-            }
-        }
-    }
     /**
          * Register reaction listeners for persistent data stores.
          * @returns Function to dispose of listeners
@@ -137,28 +137,37 @@ export default class State {
             // Register message listener for clearing queue.
             client.addListener("message", this.queue.onMessage);
 
-            // Register listener for incoming packets.
-            client.addListener("packet", this.onPacket);
+            // Register listener for user settings update
+            client.addListener("userSettingsUpdate", sync.apply);
 
-            
             // Register events for notifications.
-            client.addListener("message", this.notifications.onMessage);
+            client.addListener("message", notificationsStore.onMessage);
             client.addListener(
                 "user/relationship",
-                this.notifications.onRelationship,
+                notificationsStore.onRelationship,
             );
             document.addEventListener(
                 "visibilitychange",
-                this.notifications.onVisibilityChange,
+                notificationsStore.onVisibilityChange,
             );
-            
+
             // Sync settings from remote server.
-            state.sync
+            sync
                 .pull(client)
                 .catch(console.error)
                 .finally(() => state.changelog.checkForUpdates());
         }
 
+        const authUnsubscribe = $auth.subscribe((sessions) => {
+            localforage.setItem("auth", JSON.parse(stringify({ sessions }))).then(() => {
+                console.debug("[$auth] auth saved in localforage");
+            });
+        });
+        const orderingUnsubscribe = orderingStore.subscribe((data) => {
+            localforage.setItem("ordering", JSON.parse(stringify(data))).then(() => {
+                console.debug("[$ordering] ordering saved in localforage");
+            });
+        })
         // Register all the listeners required for saving and syncing state.
         const listeners = this.persistent.map(([id, store]) => {
             return reaction(
@@ -175,62 +184,39 @@ export default class State {
 
                         // Generate a new revision and upload changes.
                         const revision = +new Date();
-                        
+
                         switch (id) {
                             case "settings": {
-                                const { appearance, theme } =
-                                    this.settings.toSyncable();
-    
+                                const { appearance, theme } = settings.toSyncable();
+
                                 const obj: Record<string, unknown> = {};
-                                if (this.sync.isEnabled("appearance")) {
-                                    if (this.disabled.has("appearance")) {
-                                        this.disabled.delete("appearance");
-                                    } else {
-                                        obj["appearance"] = appearance;
-                                        this.sync.setRevision(
-                                            "appearance",
-                                            revision,
-                                        );
-                                    }
+                                if (sync.isEnabled("appearance")) {
+                                    obj["appearance"] = appearance;
+                                    sync.setRevision(
+                                        "appearance",
+                                        revision,
+                                    );
                                 }
-    
-                                if (this.sync.isEnabled("theme")) {
-                                    if (this.disabled.has("theme")) {
-                                        this.disabled.delete("theme");
-                                    } else {
-                                        obj["theme"] = theme;
-                                        this.sync.setRevision(
-                                            "theme",
-                                            revision,
-                                        );
-                                    }
+
+                                if (sync.isEnabled("theme")) {
+                                    obj["theme"] = theme;
+                                    sync.setRevision(
+                                        "theme",
+                                        revision,
+                                    );
                                 }
-    
-                                if (Object.keys(obj).length) {
-                                    if (client.websocket.connected) {
-                                        client.syncSetSettings(
-                                            obj as any,
-                                            revision,
-                                        );
-                                    }
+
+                                if (Object.keys(obj).length && client.ready()) {
+                                    await client.account.setSettings(obj, revision);
                                 }
                                 break;
                             }
                             default: {
-                                if (this.sync.isEnabled(id as SyncKeys)) {
-                                    if (this.disabled.has(id)) {
-                                        this.disabled.delete(id);
-                                    }
-    
-                                    this.sync.setRevision(id, revision);
-                                    if (client.websocket.connected) {
+                                if (sync.isEnabled(id as SyncKeys)) {
+                                    sync.setRevision(id, revision);
+                                    if (client.ready()) {
                                         console.log("Syncing", store.id, "to API");
-                                        client.syncSetSettings(
-                                            (
-                                                store as unknown as Syncable
-                                            ).toSyncable(),
-                                            revision,
-                                        );
+                                        await client.account.setSettings((store as unknown as Syncable).toSyncable(), revision);
                                     }
                                 }
                             }
@@ -248,17 +234,20 @@ export default class State {
             // Remove any listeners attached to client.
             if (client) {
                 client.removeListener("message", this.queue.onMessage);
-                client.removeListener("packet", this.onPacket);
-                client.removeListener("message", this.notifications.onMessage);
+                client.removeListener("userSettingsUpdate", sync.apply);
+                client.removeListener("message", notificationsStore.onMessage);
                 client.removeListener(
                     "user/relationship",
-                    this.notifications.onRelationship,
+                    notificationsStore.onRelationship,
                 );
                 document.removeEventListener(
                     "visibilitychange",
-                    this.notifications.onVisibilityChange,
+                    notificationsStore.onVisibilityChange,
                 );
             }
+
+            authUnsubscribe();
+            orderingUnsubscribe();
 
             // Wipe all listeners.
             listeners.forEach((x) => x());
@@ -269,12 +258,12 @@ export default class State {
             this.draft = new Draft();
             //this.experiments = new Experiments();
             this.layout = new Layout();
-            this.notifications = new NotificationOptions(this);
+            //this.notifications = new NotificationOptions();
             this.queue = new MessageQueue();
-            
-            this.settings = new Settings();
-            this.sync = new Sync(this);
-            this.ordering = new Ordering(this);
+
+            //this.settings = new Settings();
+            //this.sync = new Sync();
+            //this.ordering = new Ordering();
             this.save();
 
             this.persistent = [];

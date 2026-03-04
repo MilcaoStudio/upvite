@@ -75,9 +75,9 @@ export default class Changelog implements Persistent<Data>, Syncable {
         this.hydrate(data as Data);
     }
 
-    toSyncable(): { [key: string]: object } {
+    toSyncable() {
         return {
-            changelog: this.toJSON(),
+            changelog: JSON.stringify(this.toJSON()),
         };
     }
 

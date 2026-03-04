@@ -1,33 +1,24 @@
 import { writable, type Writable } from "svelte/store";
 
-export class CollectionStore<T> {
-    private state: Writable<T[]>;
-    collection: T[];
-    constructor(items?: T[]){
-        this.collection = items ?? [];
-        this.state = writable(this.collection);
-        this.state.subscribe(this.onUpdate.bind(this));
+export abstract class BaseStore<T> {
+    protected store: Writable<T>;
+
+    constructor(initialValue?: T){
+        this.store = writable(initialValue);
     }
 
-    push(item: T) {
-        this.state.update(items => [...items, item]);
-    }
+    /**
+     * Updates this store to the provided value
+     */
+    abstract hydrate(value: T): void;
 
-    remove(target: T){
-        this.state.update(items => {
-            const i = items.findIndex(item => item == target);
-            items.splice(i, 1);
-            return items;
-        });
-    }
+    /**
+     * Updates this store to a default value
+     */
+    abstract reset(): void;
 
-    removeIf(condition: (item: T)=>boolean){
-        this.state.update(items=>items.filter(condition));
-    }
-
-    onUpdate(items: T[]){
-        console.log('onUpdate - ', items);
-        this.collection = items;
+    get subscribe() {
+        return this.store.subscribe;
     }
 }
 

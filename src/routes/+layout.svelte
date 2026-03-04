@@ -20,6 +20,7 @@
     if (browser) {
         state.hydrate().then(() => (ready = true));
     }
+    $: console.debug("<Layout> ready:", ready);
 
     afterUpdate(()=>{state.plugins.onUpdate()});
 
@@ -28,7 +29,6 @@
 
 
 {#if ready}
-    
     <Locale>
         <slot />
         <Binder />

@@ -6,7 +6,7 @@ import { action, computed, makeObservable, observable } from "mobx";
 import { injectWindow } from "$lib";
 import CreateServer from "./CreateServer.svelte";
 import { determineLink } from "$lib/links";
-import { state } from "$lib/State";
+//import { state } from "$lib/State";
 import { goto } from "$app/navigation";
 import Confirmation from "./Confirmation.svelte";
 import ClipboardModal from "./ClipboardModal.svelte";
@@ -22,6 +22,7 @@ import SignedOut from "./SignedOut.svelte";
 import Error from "./Error.svelte";
 import ImageViewer from "./ImageViewer.svelte";
 import CreateInvite from "./CreateInvite.svelte";
+import Settings from "$lib/stores/Settings";
 
 export class ModalController {
     @observable stack: Modal[] = [];
@@ -99,7 +100,7 @@ export class ModalController {
      */
     openLink(href?: string, trusted?: boolean, mismatch?: boolean) {
         const link = determineLink(href);
-        const settings = state.settings;
+        const settings = new Settings();
 
         if (mismatch) {
             if (href) {

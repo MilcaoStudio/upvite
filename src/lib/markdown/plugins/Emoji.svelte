@@ -1,10 +1,10 @@
 <script lang="ts">
     import { RE_ULID } from "$lib";
-    import { clientController } from "$lib/controllers/ClientController";
+    import { clientController, useClient } from "$lib/controllers/ClientController";
     import { css, cx } from "@emotion/css";
-    import { RevoltEmojiDictionary, unicodeEmojiURL } from "revkit";
 
     export let match: string | null = null, arg1: string;
+    const client = useClient();
     const Icon = cx("emoji", match, css`
         object-fit: contain;
 
@@ -23,14 +23,16 @@
         }
     `);
     let fail = false;
-    $: url = RE_ULID.test(arg1)
+    
+    $: url = //RE_ULID.test(arg1) ?
         // Matches ULID
-        ? match == "RV" ? `https://autumn.revolt.chat/emojis/${arg1}` :
-        `${clientController.anonymousClient.configuration?.features.autumn.url}/emojis/${arg1}` 
+        match == "RV" ? `https://autumn.revolt.chat/emojis/${arg1}` :
+        `${client.configuration?.features.autumn.url}/emojis/${arg1}` 
+        /*
         :
         // Not matches ULID
         match == "DC" ? `https://cdn.discordapp.com/emojis/${arg1}?quality=lossless`
-        : unicodeEmojiURL(RevoltEmojiDictionary[arg1] || arg1);
+        : unicodeEmojiURL(RevoltEmojiDictionary[arg1] || arg1);*/
     
 </script>
 

@@ -1,6 +1,6 @@
 <script lang="ts">
     import { getRenderer } from "$lib/rendered/Singleton";
-    import type { Channel } from "revolt.js";
+    import type { Channel } from "stoat.js";
     import Bar from "./Bar.svelte";
     import { internalEmit } from "$lib/InternalEmitter";
     import { t } from "svelte-i18n";

@@ -1,21 +1,31 @@
 <script lang="ts">
-    import type { API } from "revolt.js";
+    import type {
+        MessageEmbed,
+    } from "stoat.js";
     import EmbedMedia from "./EmbedMedia.svelte";
     import { modalController } from "$lib/components/modals/ModalController";
     import Markdown from "$lib/markdown/Markdown.svelte";
     import Attachment from "../attachments/Attachment.svelte";
-    import { useClient } from "$lib/controllers/ClientController";
     import { state } from "$lib/State";
+    import {
+        isImageEmbed,
+        isTextEmbed,
+        isVideoEmbed,
+        isWebsiteEmbed,
+    } from "./MessageEmbed";
 
-    export let embed: API.Embed;
-    let client = useClient();
+    export let embed: MessageEmbed;
     let shrinkMedia = state.network.media.shrinkMedia;
     let root = getComputedStyle(document.documentElement);
-    let maxWidth = parseInt(root.getPropertyValue("--embed-max-width")) / (shrinkMedia ? 2 : 1);
-    let maxHeight = parseInt(root.getPropertyValue("--embed-max-height")) / (shrinkMedia ? 2 : 1);
-    let maxPreviewSize = parseInt(
-        root.getPropertyValue("--embed-max-preview-size"),
-    ) / (shrinkMedia ? 2 : 1);
+    let maxWidth =
+        parseInt(root.getPropertyValue("--embed-max-width")) /
+        (shrinkMedia ? 2 : 1);
+    let maxHeight =
+        parseInt(root.getPropertyValue("--embed-max-height")) /
+        (shrinkMedia ? 2 : 1);
+    let maxPreviewSize =
+        parseInt(root.getPropertyValue("--embed-max-preview-size")) /
+        (shrinkMedia ? 2 : 1);
     let padding = parseInt(root.getPropertyValue("--embed-padding"));
     function calculateSize(
         w: number,
@@ -32,17 +42,17 @@
     }
     let mw = 0,
         mh = 0;
-    $: largeMedia =
-        embed.type == "Text"
-            ? typeof embed.media != "undefined"
-            : embed.type == "Website" &&
-              (embed.special?.type != "None" || embed.image?.size == "Large");
+    $: largeMedia = isTextEmbed(embed)
+        ? typeof embed.media != "undefined"
+        : isWebsiteEmbed(embed) &&
+          (embed.specialContent?.type != "None" ||
+              embed.image?.size == "Large");
     $: if (embed.type == "Text") {
         mw = maxWidth;
         mh = 1;
     }
-    $: if (embed.type == "Website") {
-        switch (embed.special?.type) {
+    $: if (isWebsiteEmbed(embed)) {
+        switch (embed.specialContent?.type) {
             case "YouTube":
             case "Bandcamp":
                 mw = embed.video?.width ?? 1280;
@@ -67,8 +77,8 @@
     $: size = calculateSize(mw, mh);
 </script>
 
-{#if embed.type == "Website" || embed.type == "Text"}
-    {#if embed.type == "Website" && embed.special?.type == "GIF"}
+{#if isWebsiteEmbed(embed)}
+    {#if embed.specialContent?.type == "GIF"}
         <EmbedMedia
             {embed}
             width={maxHeight *
@@ -83,71 +93,47 @@
             style:width="{size.width + padding}px"
         >
             <div>
-                {#if embed.type == "Text"}
-                    {#if embed.title}
-                        <div class="siteinfo">
-                            {#if embed.icon_url}
-                                <img
-                                    loading="lazy"
-                                    class="favicon"
-                                    alt="embed icon"
-                                    src={client.proxyFile(embed.icon_url)}
-                                    draggable="false"
-                                    crossorigin="anonymous"
-                                />
-                            {/if}
-                            <div class="site">{embed.title}</div>
-                        </div>
-                    {/if}
-                    {#if embed.description}
-                        <Markdown content={embed.description} />
-                    {/if}
-                    {#if largeMedia && embed.media}
-                        <Attachment attachment={embed.media} />
-                    {/if}
-                {:else}
-                    {#if embed.site_name}
-                        <div class="siteinfo">
-                            {#if embed.icon_url}
-                                <img
-                                    loading="lazy"
-                                    class="favicon"
-                                    alt=""
-                                    src={client.proxyFile(embed.icon_url)}
-                                    draggable="false"
-                                    crossorigin="anonymous"
-                                />
-                            {/if}
-                            <div class="site">{embed.site_name}</div>
-                        </div>
-                    {/if}
-                    {#if embed.title}
-                        <span>
-                            <!-- svelte-ignore a11y-no-static-element-interactions -->
-                            <!-- svelte-ignore a11y-missing-attribute -->
-                            <a
-                                on:mousedown={(ev) =>
-                                    embed.type == "Website" &&
-                                    (ev.button == 0 || ev.button == 1) &&
-                                    modalController.openLink(
-                                        embed.url ?? undefined,
-                                        undefined,
-                                        true,
-                                    )}
-                                class="title"
-                            >
-                                {embed.title}
-                            </a>
-                        </span>
-                    {/if}
-                    {#if embed.description}
-                        <div class="description">
-                            {embed.description}
-                        </div>
-                    {/if}
-                    {#if largeMedia}
-                        <EmbedMedia {embed} height={size.height} />
-                    {/if}
+                {#if embed.siteName}
+                    <div class="siteinfo">
+                        {#if embed.iconUrl}
+                            <img
+                                loading="lazy"
+                                class="favicon"
+                                alt=""
+                                src={embed.proxiedIconURL}
+                                draggable="false"
+                                crossorigin="anonymous"
+                            />
+                        {/if}
+                        <div class="site">{embed.siteName}</div>
+                    </div>
+                {/if}
+                {#if embed.title}
+                    <span>
+                        <!-- svelte-ignore a11y-no-static-element-interactions -->
+                        <!-- svelte-ignore a11y-missing-attribute -->
+                        <a
+                            on:mousedown={(ev) =>
+                                embed.type == "Website" &&
+                                (ev.button == 0 || ev.button == 1) &&
+                                modalController.openLink(
+                                    embed.url ?? undefined,
+                                    undefined,
+                                    true,
+                                )}
+                            class="title"
+                        >
+                            {embed.title}
+                        </a>
+                    </span>
+                {/if}
+                {#if embed.description}
+                    <div class="description">
+                        {embed.description}
+                    </div>
+                {/if}
+                {#if largeMedia}
+                    <EmbedMedia {embed} height={size.height} />
                 {/if}
             </div>
             {#if !largeMedia && embed.type == "Website"}
@@ -163,7 +149,38 @@
             {/if}
         </div>
     {/if}
-{:else if embed.type == "Image"}
+{:else if isTextEmbed(embed)}
+    <div
+        class="embed website"
+        style:border-inline-start-color={embed.colour ??
+            "var(--tertiary-backgrond)"}
+        style:width="{size.width + padding}px"
+    >
+        <div>
+            {#if embed.title}
+                <div class="siteinfo">
+                    {#if embed.proxiedIconURL}
+                        <img
+                            loading="lazy"
+                            class="favicon"
+                            alt="embed icon"
+                            src={embed.proxiedIconURL}
+                            draggable="false"
+                            crossorigin="anonymous"
+                        />
+                    {/if}
+                    <div class="site">{embed.title}</div>
+                </div>
+            {/if}
+            {#if embed.description}
+                <Markdown content={embed.description} />
+            {/if}
+            {#if largeMedia && embed.media}
+                <Attachment attachment={embed.media} />
+            {/if}
+        </div>
+    </div>
+{:else if isImageEmbed(embed)}
     <!-- svelte-ignore a11y-click-events-have-key-events -->
     <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
     <img
@@ -173,7 +190,7 @@
         style:height="{size.height}px"
         style:max-width="{maxWidth}px"
         style:max-height="{maxHeight}px"
-        src={client.proxyFile(embed.url)}
+        src={embed.proxiedURL}
         loading="lazy"
         on:click={() =>
             embed.type == "Image" &&
@@ -183,7 +200,7 @@
             embed.type == "Image" &&
             modalController.openLink(embed.url, undefined, true)}
     />
-{:else if embed.type == "Video"}
+{:else if isVideoEmbed(embed)}
     <!-- svelte-ignore a11y-media-has-caption -->
     <video
         class="embed image"
@@ -191,7 +208,7 @@
         style:height="{size.height}px"
         style:max-width="{maxWidth}px"
         style:max-height="{maxHeight}px"
-        src={client.proxyFile(embed.url)}
+        src={embed.proxiedURL}
         controls
     />
 {/if}
@@ -251,6 +268,7 @@
         overflow: hidden;
         display: -webkit-box;
         -webkit-line-clamp: 2;
+        line-clamp: 2;
         -webkit-box-orient: vertical;
     }
 
@@ -264,6 +282,7 @@
         display: -webkit-box;
         white-space: pre-wrap;
         -webkit-line-clamp: 6;
+        line-clamp: 6;
         -webkit-box-orient: vertical;
     }
 
