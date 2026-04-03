@@ -1,7 +1,9 @@
 import { RE_ULID } from "$lib";
 import type { Handler } from "mdast-util-to-hast";
+import { RE_CHANNELS, RE_MENTIONS } from "stoat.js";
 import type { Plugin } from "unified";
-import { visit } from "unist-util-visit";
+import type { Root, Nodes } from "mdast";
+import { SKIP, visit } from "unist-util-visit";
 
 /**
  * Props given to custom components
@@ -9,16 +11,15 @@ import { visit } from "unist-util-visit";
 export interface CustomComponentProps {
     type?: string;
     match: string;
-    arg1?: string;
 }
 
 /**
  * Create a new custom component matched by a given RegExp
- * @param type hast node type
+ * @param type mdast node type
  * @param regex Regex to match (must have at least one capture group)
  * @returns Unified Plugin
  */
-export function createComponent(
+export function createRemarkPlugin(
     type: string,
     regex: RegExp,
     validator?: (...args: string[]) => boolean,
@@ -27,15 +28,12 @@ export function createComponent(
      * Plugin which transforms a given RegExp into a custom component with given name.
      */
     return () => {
-        return (tree) => {
-            visit(
+        return (tree: Root) => {
+            visit<Root, "text">(
                 tree,
                 "text",
-                (
-                    node: { value: string },
-                    index: number,
-                    parent: { children: any[] },
-                ) => {
+                (node, index, parent,) => {
+                    if (!parent || typeof index == "undefined") return;
                     const result = [];
                     let start = 0;
 
@@ -56,7 +54,6 @@ export function createComponent(
                             result.push({
                                 type,
                                 match: match[1],
-                                arg1: match[2],
                             });
                             start = position + match[0].length;
                         }
@@ -64,20 +61,18 @@ export function createComponent(
                         match = regex.exec(node.value);
                     }
 
-                    if (
-                        result.length > 0 &&
-                        parent &&
-                        typeof index == "number"
-                    ) {
+                    if (result.length) {
                         if (start < node.value.length) {
                             result.push({
-                                type: "text",
+                                type: 'text',
                                 value: node.value.slice(start),
                             });
                         }
 
+                        //@ts-expect-error
                         parent.children.splice(index, 1, ...result);
-                        return index + result.length;
+
+                        return SKIP;
                     }
                 },
             );
@@ -90,9 +85,29 @@ export function createComponent(
  * @param name Tag name
  * @returns Handler
  */
-export const passThroughRehype: (name: string) => Handler =
-    (name: string) => (s, node) => { return { type: "element", tagName: name, properties: { ...node }, children: s.all(node) } }
-
+export const passThroughRehype = (tagName: string): Handler => {
+    return (state, node: Nodes & {properties: Record<string, any>},) => {
+        // Extraer propiedades del nodo mdast
+        const { properties = {}, ...rest } = node;
+        
+        // Construir elemento hast
+        return {
+            type: 'element',
+            tagName,
+            properties: {
+                // Propiedades explícitas del nodo
+                ...properties,
+                // Propiedades adicionales del resto del nodo (si las hay)
+                ...Object.fromEntries(
+                    Object.entries(rest).filter(([k]) => 
+                        !['type', 'position', 'children'].includes(k)
+                    )
+                ),
+            },
+            children: state.all(node),
+        };
+    };
+};
 /**
  * Pass-through multiple components at once
  * @param keys Tags
@@ -106,21 +121,17 @@ export const passThroughComponents = (...keys: string[]) => {
     return obj;
 };
 
-export const RE_MENTION = /<@([A-z0-9]{26})>/g;
-export const RE_CHANNEL = /<#([A-z0-9]{26})>/g;
-export const RE_EMOJI = /:(?:(UP|RV|DC):)?([a-zA-Z0-9\-_]+):/g;
+export const RE_EMOJI = /:([a-zA-Z0-9\-_]+):/g;
 
-export const remarkMention = createComponent("mention", RE_MENTION, (_, match) =>
+export const remarkMention = createRemarkPlugin("mention", RE_MENTIONS, (_, match) =>
     RE_ULID.test(match),
 );
 
-export const remarkChannel = createComponent("channel", RE_CHANNEL, (_, match) =>
+export const remarkChannel = createRemarkPlugin("channel", RE_CHANNELS, (_, match) =>
     RE_ULID.test(match),
 );
 
-export const remarkEmoji = createComponent("emoji", RE_EMOJI, (_, arg1, arg2) => arg1 == "DC" ? /[0-9]+/.test(arg2) 
-//:  arg2 in RevoltEmojiDictionary ||
-: RE_ULID.test(arg2));
+export const remarkEmoji = createRemarkPlugin("emoji", RE_EMOJI, (_, match) => RE_ULID.test(match));
 
 export function isOnlyEmoji(text: string) {
     return !text.replaceAll(RE_EMOJI, "").trim().length;

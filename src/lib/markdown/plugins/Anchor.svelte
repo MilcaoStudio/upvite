@@ -1,17 +1,15 @@
 <script lang="ts">
-    import { preventDefault } from 'svelte/legacy';
-
     import { modalController } from "$lib/components/modals/ModalController";
     import { determineLink } from "$lib/links";
+    import type { Snippet } from "svelte";
+    import type { HTMLAnchorAttributes } from "svelte/elements";
 
-    interface Props {
-        href?: string | undefined;
-        children?: import('svelte').Snippet;
-        [key: string]: any
+    interface Props extends HTMLAnchorAttributes {
+        children?: Snippet;
     }
 
     let { href = undefined, children, ...rest }: Props = $props();
-    let link = $derived(determineLink(href));
+    let link = $derived(determineLink(href || ""));
 </script>
 
 {#if !href || href.startsWith("#")}
@@ -31,14 +29,22 @@
         {href}
         target="_blank"
         rel="noreferrer"
-        onclick={preventDefault((ev) =>
+        onclick={(ev) =>{
+            ev.preventDefault();
             modalController.openLink(
                 href,
                 false,
                 ev.currentTarget.innerText != href,
-            ))}
+            );
+            }}
         {...rest}
     >
         {@render children?.()}
     </a>
 {/if}
+
+<style>
+    a:hover {
+        text-decoration: underline;
+    }
+</style>

@@ -1,24 +1,28 @@
 <script lang="ts">
     import { goto } from "$app/navigation";
-    import { page } from "$app/stores";
-    import { state } from "$lib/State";
+    import { page } from "$app/state";
     import UprisingApp from "$lib/components/UprisingApp.svelte";
     import TextChannel from "$lib/components/channels/TextChannel.svelte";
+    import { useClient } from "$lib/components/client/ClientContext.svelte";
     import Preloader from "$lib/components/indicators/Preloader.svelte";
-    import { useClient } from "$lib/controllers/ClientController";
+    import { useState } from "$lib/components/state/StateContext.svelte";
+    import type { LayoutData } from "./$types";
     const client = useClient();
     interface Props {
-        data: any;
+        data: LayoutData;
     }
 
     let { data }: Props = $props();
-    let { channel_id, message_id } = data;
+    let { channel_id, message_id } = $derived(data);
 
-    let channel = client.channels.get(channel_id);
-    if (!channel) {
-        goto(state.layout.getLastHomePath());
-    }
-    state.layout.setLastHomePath($page.url.pathname);
+    const layout = useState().layout;
+    let channel = $derived(client.channels.get(channel_id));
+    $effect(()=>{
+        if (!channel) {
+            goto(layout.getLastHomePath());
+        }
+    })
+    layout.setLastHomePath(page.url.pathname);
 </script>
 
 <UprisingApp>

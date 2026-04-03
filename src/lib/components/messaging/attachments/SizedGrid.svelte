@@ -14,7 +14,7 @@
         className = "",
         children
     }: Props = $props();
-    const Grid = cx("Grid", className, css`
+    const Grid = $derived(cx("Grid", className, css`
         --width: ${width}px;
         --height: ${height}px;
         display: grid;
@@ -63,7 +63,7 @@
             clear: both;
         }
     }
-    `);
+    `));
 </script>
 
 <div class={Grid}>

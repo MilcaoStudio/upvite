@@ -21,12 +21,12 @@
         onClick: noopTrue,
         palette: "accent",
         confirmation: true,
-        children: $t("app.special.modals.actions.back"),
+        text: $t("app.special.modals.actions.back"),
     },
     {
         onClick,
         confirmation: true,
-        children: $t("app.special.modals.sessions.accept"),
+        text: $t("app.special.modals.sessions.accept"),
     },
 ]}>
 {$t("app.special.modals.sessions.short")}

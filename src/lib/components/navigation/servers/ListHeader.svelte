@@ -1,17 +1,13 @@
 <script lang="ts">
     import UserTooltip from "$lib/components/indicators/UserTooltip.svelte";
-    import type { Client } from "stoat.js";
     import { ItemContainer } from "./Item.svelte";
     import LineDivider from "$lib/components/atoms/LineDivider.svelte";
     import ChannelInner from "$lib/components/channels/ChannelInner.svelte";
     import { PersonPicture } from "fluent-svelte";
-    import { useClient } from "$lib/controllers/ClientController";
+    import { useClient } from "$lib/components/client/ClientContext.svelte";
+    import { useState } from "$lib/components/state/StateContext.svelte";
 
-    interface Props {
-        home: () => string;
-    }
-
-    let { home }: Props = $props();
+    
         //client: Client,
         //active = false,
     const client = useClient();
@@ -23,7 +19,7 @@
 </script>
 
 <div class={ItemContainer} style="padding-top: 6px;">
-    <a href={home()}>
+    <a href={useState().layout.getLastHomePath()}>
         <UserTooltip user={client.user} div right>
             {#if client.user}
             <PersonPicture src={client.user.animatedAvatarURL} size={42} />

@@ -4,9 +4,7 @@
     import External from "svelte-boxicons/BxLinkExternal.svelte";
     import BxFile from "svelte-boxicons/BxFile.svelte";
     import BxVideo from "svelte-boxicons/BxVideo.svelte";
-    import BxImage from "svelte-boxicons/BxImage.svelte";
     import { determineFileSize } from "$lib";
-    import { useClient } from "$lib/controllers/ClientController";
     import type { API, File } from "stoat.js";
     import { detect } from "detect-browser";
     import IconButton from "$lib/components/atoms/input/IconButton.svelte";
@@ -16,11 +14,11 @@
     }
 
     let { attachment }: Props = $props();
-    let { filename, metadata, size } = attachment;
-    let url = attachment.createFileURL(true);
+    let { filename, metadata, size } = $derived(attachment);
+    let url = $derived(attachment.createFileURL(true));
     let open_url = $derived(`${url}/${filename}`);
     let download_url = $derived(url?.replace("attachments", "attachments/download"));
-    let filesize = determineFileSize(size || 0);
+    let filesize = $derived(determineFileSize(size || 0));
     let isFirefox = detect()?.name == "firefox";
 </script>
 

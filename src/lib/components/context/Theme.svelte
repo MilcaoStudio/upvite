@@ -312,21 +312,19 @@ export const PRESETS: Record<string, Theme> = {
 </script>
 
 <script lang="ts">
-    import { run } from 'svelte/legacy';
+    import { useState } from "../state/StateContext.svelte";
 
-    import { state } from "$lib/State";
-    import { settings } from "$lib/stores/Settings";
-    import { autorun } from "mobx";
-
+    let layout = useState().layout;
+    layout.setViewport();
+    
+    const settings = useState().settings;
     const theme = settings.theme;
     const root = document.documentElement.style;
-    let css = $state("");
-    run(() => {
-        autorun(() => {
-            css = theme.getCSS() ?? "";
-        });
-    });
-    autorun(() => {
+    let css = $derived(theme.getCSS() ?? "");
+
+    $effect(() => {
+        root.setProperty("--ligatures", settings.get("appearance:ligatures") ? "normal" : "none");
+
         const font = theme.getFont() ?? DEFAULT_FONT;
         root.setProperty("--font", `"${font}"`);
         try {
@@ -334,34 +332,19 @@ export const PRESETS: Record<string, Theme> = {
         } catch (err) {
             console.error(`Failed to load font: ${font}`)
         }
-    });
 
-    autorun(()=> {
-        const font = theme.getMonospaceFont() ?? DEFAULT_MONO_FONT;
-        root.setProperty("--monospace-font", `"${font}"`);
+        const monofont = theme.getMonospaceFont() ?? DEFAULT_MONO_FONT;
+        root.setProperty("--monospace-font", `"${monofont}"`);
         try {
-            MONOSPACE_FONTS[font]?.load()
+            MONOSPACE_FONTS[monofont]?.load()
         } catch (err) {
-            console.error(`Failed to load monospace font: ${font}`)
+            console.error(`Failed to load monospace font: ${monofont}`)
         }
-    });
-
-    autorun(() => {
-        root.setProperty("--ligatures", settings.get("appearance:ligatures") ? "normal" : "none")
     });
 
     // TODO: Change --app-height on resize
     function onResize() {
     }
-
-    let variables = $state(theme.computeVariables());
-    run(() => {
-        autorun(() => {
-            variables = theme.computeVariables();
-        });
-    });
-
-    state.layout.setViewport();
 </script>
 
 {@html `<style>${css}</style>`}

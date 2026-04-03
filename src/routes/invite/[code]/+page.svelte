@@ -1,16 +1,9 @@
 <script lang="ts">
-    import { run } from 'svelte/legacy';
-
     import { goto, pushState } from "$app/navigation";
     import { takeError } from "$lib";
-    import { state } from "$lib/State.js";
     import Category from "$lib/components/atoms/Category.svelte";
     import Error from "$lib/components/atoms/Error.svelte";
     import Preloader from "$lib/components/indicators/Preloader.svelte";
-    import {
-        useClient,
-        useSession,
-    } from "$lib/controllers/ClientController.js";
     import { Button } from "fluent-svelte";
     import { API, PublicChannelInvite, ServerPublicInvite } from "stoat.js";
     import BxArrowBack from "svelte-boxicons/BxArrowBack.svelte";
@@ -20,31 +13,33 @@
     import { translate } from "$lib/i18n";
     import ServerIcon from "$lib/components/ServerIcon.svelte";
     import UserIcon from "$lib/components/user/UserIcon.svelte";
-    import { createElement } from "$lib/markdown/runtime/svelteRuntime";
+    import { useClient, useSession } from '$lib/components/client/ClientContext.svelte';
+    import { useState } from '$lib/components/state/StateContext.svelte';
+    import type { PageData } from "./$types";
 
     interface Props {
-        data: any;
+        data: PageData;
     }
 
     let { data }: Props = $props();
 
-    const code = data.code;
+    const code = $derived(data.code);
     const session = useSession();
     const client = useClient();
-    const layout = state.layout;
+    const layout = useState().layout;
 
     let processing = $state(false);
-    let error: string = $state();
-    let invite: PublicChannelInvite = $state();
+    let error= $state<string>();
+    let invite = $state<PublicChannelInvite>();
 
 
     async function fetchInvite(code: string): Promise<PublicChannelInvite> {
         return client.api.get(`/invites/${code as ""}`).then((result) => PublicChannelInvite.from(client, result));
     }
-    function isServerInvite(invite: PublicChannelInvite): invite is ServerPublicInvite {
-        return invite.type == "Server";
+    function isServerInvite(invite?: PublicChannelInvite): invite is ServerPublicInvite {
+        return invite?.type == "Server";
     }
-    run(() => {
+    $effect(() => {
         if (!invite) {
             fetchInvite(code).then((result)=>(invite=result)).catch((reason)=>error = takeError(reason));
         }
@@ -115,18 +110,18 @@
                     })}
                 </h2>
                 <h3>
+                    {#snippet invitedBy()}
+                    {#if isServerInvite(invite)}
+                        <span style:display="inline-flex">
+                            <UserIcon size={24} attachment={invite.userAvatar}></UserIcon>
+                            {invite.userName}
+                        </span>
+                    {/if}
+                    {/snippet}
                     <TextSvelte
                         id="app.special.invite.invited_by"
                         fields={{
-                            user: createElement(
-                                "span",
-                                { style: "display:inline-flex;" },
-                                createElement(UserIcon, {
-                                    size: 24,
-                                    attachment: invite.userAvatar,
-                                }),
-                                invite.userName,
-                            ),
+                            user: invitedBy,
                         }}
                     />
                 </h3>

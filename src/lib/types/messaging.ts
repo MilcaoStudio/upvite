@@ -29,6 +29,10 @@ export type AutoCompleteState =
             }
 ));
 
+export function isNoneAutoComplete(state: AutoCompleteState): state is {type: "none"} {
+    return state.type == "none";
+}
+
 export type SearchClues = {
     users?: { type: "channel"; id: string } | { type: "all" };
     channels?: { server: string };

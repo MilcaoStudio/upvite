@@ -1,16 +1,13 @@
 import { Client, ConnectionState, type API } from "stoat.js";
-import { modalController } from "../components/modals/ModalController";
+import { modalController } from "$lib/components/modals/ModalController";
 import { detect } from "detect-browser";
 import { env } from "$env/dynamic/public"
 import { injectWindow, takeError } from "$lib";
 import { ObservableMap, action, computed, makeAutoObservable, observable } from "mobx";
 import { browser } from "$app/environment";
-import { voiceState } from "$lib/voice/VoiceState";
 import { goto } from "$app/navigation";
-import { auth, $auth } from "$lib/stores/Auth";
-import { settings } from "$lib/stores/Settings";
-import { notificationsStore } from "$lib/stores/NotificationOptions";
-import { get, writable } from "svelte/store";
+import Auth from "$lib/components/state/stores/Auth";
+import { notificationsStore } from "$lib/components/state/stores/NotificationOptions";
 
 /**
  * Current lifecycle state
@@ -41,9 +38,10 @@ type Transition =
         | "OFFLINE";
     };
 
-export default class Session {
+export default class SessionController {
     //_state: SessionState = navigator.onLine ? "Online" : "Offline";
-    state = writable<SessionState>(navigator.onLine ? "Online" : "Offline"); 
+    auth: Auth;
+    state = $state<SessionState>(navigator.onLine ? "Online" : "Offline"); 
     user_id: string | undefined;
     client: Client | null = null;
     #retryTimeout: number | undefined;
@@ -52,7 +50,8 @@ export default class Session {
     /**
      * Create a new Session
      */
-    constructor() {
+    constructor(auth: Auth) {
+        this.auth = auth;
         makeAutoObservable(this);
         this.onDropped = this.onDropped.bind(this);
         this.onReady = this.onReady.bind(this);
@@ -70,7 +69,7 @@ export default class Session {
         console.debug("[destroy]");
         if (this.client) {
             this.client.events.disconnect();
-            this.state.set("Ready");
+            this.state = "Ready";
             this.client = null;
         }
     }
@@ -105,7 +104,7 @@ export default class Session {
     private onError(err: {type: "Error", data: API.Error}) {
         if (err.type == "Error") {
             if (err.data.type == "InvalidSession") {
-                $auth.logout();
+                this.user_id && this.auth.removeSession(this.user_id);
                 this.destroyClient();
             } else {
                 modalController.push({type: "error", error: err.data.type})
@@ -132,7 +131,6 @@ export default class Session {
             baseURL: apiUrl ?? env.PUBLIC_API_URL,
             autoReconnect: false,
             syncUnreads: true,
-            //debug: import.meta.env.DEV,
             /** 
             channelIsMuted: (channel) =>
               this.#controller.state.notifications.isMuted(channel),
@@ -166,8 +164,7 @@ export default class Session {
      * @param state Possible states
      */
     private assert(...state: SessionState[]) {
-        const actual = get(this.state);
-        let found = state.some((target) => actual == target);
+        let found = state.some((target) => this.state == target);
 
         if (!found) {
             console.warn(`State must be ${state} in order to transition! (currently ${state})`);
@@ -181,10 +178,10 @@ export default class Session {
     private continueLogin(data: Transition & { action: "LOGIN" }) {
         try {
             this.user_id = this.client!.user?.id;
-            $auth.setSession(data.session);
+            this.auth.setSession(data.session);
             //voiceState.loadVoice(this.client!);
         } catch (err) {
-            this.state.set("Online");
+            this.state = "Online";
             throw err;
         }
     }
@@ -206,7 +203,7 @@ export default class Session {
             // Login with session
             case "LOGIN": {
                 this.assert("Online");
-                this.state.set("Connecting");
+                this.state = "Connecting";
                 this.createClient(data.apiUrl);
 
                 
@@ -244,20 +241,20 @@ export default class Session {
             }
             case "CONNECT":
             case "RECONNECT": {
-                this.state.set("Connecting");
+                this.state = "Connecting";
                 this.client?.connect();
                 break;
             }
             // Ready successfully received
             case "READY": {
                 this.assert("Connecting");
-                this.state.set("Ready");
+                this.state = "Ready";
                 this.#connectionFailures = 0;
                 break;
             }
             // Client got disconnected
             case "DISCONNECT": {
-                this.state.set("Disconnected");
+                this.state = "Disconnected";
                 break;
             }
             // We should try reconnecting
@@ -282,25 +279,25 @@ export default class Session {
             // User instructed logout
             case "LOGOUT": {
                 this.assert("Connecting", "Online", "Ready");
-                this.state.set("Disconnected");
+                this.state = "Disconnected";
                 this.destroyClient();
                 break;
             }
             // Browser went offline
             case "OFFLINE": {
-                this.state.set("Offline");
+                this.state = "Offline";
                 break;
             }
             // Browser went online
             case "ONLINE": {
                 this.assert("Offline");
                 if (this.client) {
-                    this.state.set("Connecting");
+                    this.state = "Connecting";
                     this.emit({
                         action: "RETRY",
                     });
                 } else {
-                    this.state.set("Online");
+                    this.state = "Online";
                 }
                 break;
             }
@@ -320,6 +317,12 @@ export default class Session {
     }
 }
 export class ClientController {
+
+    /**
+     * Auth store
+     */
+    private auth: Auth;
+
     /**
      * API client
      */
@@ -333,17 +336,18 @@ export class ClientController {
     /**
      * Map of user IDs to sessions
      */
-    private sessions: ObservableMap<string, Session>
+    private sessions: ObservableMap<string, SessionController>
     
-    ready = writable(false);
-    loggedIn = writable(false);
+    ready: boolean;
+    loggedIn = $state(false);
 
     /**
      * User ID of active session
      */
     private current: string | null;
 
-    constructor() {
+    constructor(auth: Auth) {
+        this.auth = auth;
         this.configuration = null;
         if (browser) {
             if (!env.PUBLIC_API_URL) {
@@ -364,6 +368,7 @@ export class ClientController {
 
         this.sessions = observable.map();
         this.current = null;
+        this.ready = $derived(this.activeSession?.state == "Ready");
 
         makeAutoObservable(this);
 
@@ -381,10 +386,9 @@ export class ClientController {
 
     /**
      * Hydrate sessions and start client lifecycles.
-     * @param auth Authentication store
      */
     @action hydrate() {
-        for (const session of get($auth.accounts)) {
+        for (const session of this.auth.accounts) {
             console.log("[hydrate] Add existing session:", session._id);
             this.addSession(session, "existing");
         }
@@ -443,9 +447,9 @@ export class ClientController {
         knowledge: "new" | "existing",
     ) {
         const user_id = session.user_id!;
-        const sessionController = new Session();
+        const sessionController = new SessionController(this.auth);
         this.sessions.set(user_id, sessionController);
-        this.loggedIn.set(true);
+        this.loggedIn = true;
         console.debug("[addSession] Session set! Check reactive changes", this.sessions.size);
         sessionController
             .emit({
@@ -462,7 +466,7 @@ export class ClientController {
                     this.sessions.delete(user_id);
                     this.current = null;
                     this.pickNextSession();
-                    auth.removeSession(user_id);
+                    this.auth.removeSession(user_id);
                     if (user_id == this.current) {
                         modalController.push({ type: "signed_out" });
                     }
@@ -474,7 +478,6 @@ export class ClientController {
                     });
                 }
             });
-            sessionController.state.subscribe((state) => this.ready.set(state == "Ready"));
     }
 
     /**
@@ -570,19 +573,18 @@ export class ClientController {
             session.emit({ action: "LOGOUT" });
 
             if (this.sessions.delete(user_id)) {
-                auth.removeSession(user_id);
+                this.auth.removeSession(user_id);
                 console.debug("Session %s deleted", user_id);
             } else {
                 console.warn("No sessions deleted");
             }
 
-            settings.reset();
-            notificationsStore.reset();
+            
 
             if (user_id == this.current) {
                 this.current = null;
-                this.loggedIn.set(false);
-                this.ready.set(false);
+                this.loggedIn = false;
+                this.ready = false;
             }
 
             this.pickNextSession();
@@ -602,30 +604,4 @@ export class ClientController {
         //this.ready.set(user_id != null);
         console.log('account switched to', user_id);
     }
-}
-
-export const clientController = new ClientController;
-/**
- * Get the currently active session.
- * @returns Session
- */
-export function useSession() {
-    return clientController.activeSession
-}
-
-/**
- * Get the currently active client or an unauthorised
- * client for API requests, whichever is available.
- * @returns Revolt.js Client
- */
-export function useClient() {
-    return clientController.availableClient
-}
-
-/**
- * Get unauthorised client for API requests.
- * @returns Revolt.js Client
- */
-export function useApi() {
-    return clientController.anonymousClient.api
 }

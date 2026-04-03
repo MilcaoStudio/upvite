@@ -1,10 +1,11 @@
 <script lang="ts">
-    import { useClient } from "$lib/controllers/ClientController";
     import type { ModalProps } from "$lib/types/Modal";
     import { t } from "svelte-i18n";
     import Dialog from "./Dialog.svelte";
     import List from "../atoms/layout/List.svelte";
     import UserCheckbox from "../user/UserCheckbox.svelte";
+    import { useClient } from "../client/ClientContext.svelte";
+    import { createTextSnippet } from "$lib/i18n/TextSvelte.svelte";
 
     interface Props {
         props: ModalProps<"user_picker">;
@@ -13,15 +14,17 @@
 
     let { props, ...rest }: Props = $props();
     let selected = new Set<string>();
-    let omitted = new Set([
+    let omitted = $derived(new Set([
         ...(props.omit || []),
         "00000000000000000000000000",
-    ]);
+    ]));
     let client = useClient();
 
     let friends = $derived([...client.users.values()].filter(
         (u) => u.relationship == "Friend" && !omitted.has(u.id),
     ));
+
+    const ok = createTextSnippet(()=>$t("app.special.modals.actions.ok"));
 </script>
 
 <Dialog
@@ -29,7 +32,7 @@
     title={$t("app.special.popovers.user_picker.select")}
     actions={[
         {
-            children: $t("app.special.modals.actions.ok"),
+            children: ok,
             onClick: () => props.callback([...selected]).then(() => true),
         },
     ]}

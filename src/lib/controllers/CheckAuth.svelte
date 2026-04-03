@@ -1,42 +1,41 @@
 <script lang="ts">
-    import { run } from 'svelte/legacy';
-
-    import { clientController } from "./ClientController";
     import Preloader from "$lib/components/indicators/Preloader.svelte";
     import { goto } from "$app/navigation";
-    import { autorun } from "mobx";
-    import { getContext } from "svelte";
+    import { getContext, type Snippet } from "svelte";
+    import { useClientController } from "$lib/components/client/ClientContext.svelte";
 
     interface Props {
+        /**
+         * Whether this page requires authentication to render.
+         */
         auth?: boolean;
-        blockRender?: boolean;
-        children?: import('svelte').Snippet;
+        disableRedirect?: boolean;
+        children?: Snippet;
     }
 
-    let { auth = false, blockRender = false, children }: Props = $props();
-
+    let { auth = false, disableRedirect = false, children }: Props = $props();
+    let clientController = useClientController();
     let loggedIn = clientController.loggedIn;
     let ready = clientController.ready;
+    $inspect(loggedIn, ready);
     let invite_code: string = getContext("invite");
-    run(() => {
-        autorun(async () => {
-            try {
-                if (auth && !$loggedIn) {
-                    console.debug("[CheckAuth] Redirect to login");
-                    if (!blockRender) await goto("/login");
-                } else if (!auth && $loggedIn) {
-                    console.debug("[CheckAuth] Redirect to home");
-                    if (!blockRender)
-                        await goto(invite_code ? `/invite/${invite_code}` : `/`);
-                }
-            } catch (error) {
-                console.error(error);
+    $effect(() => {
+        try {
+            if (auth && !loggedIn) {
+                console.debug("[CheckAuth] Redirect to login");
+                if (!disableRedirect) goto("/login");
+            } else if (!auth && loggedIn) {
+                console.debug("[CheckAuth] Redirect to home");
+                if (!disableRedirect)
+                    goto(invite_code ? `/invite/${invite_code}` : `/`);
             }
-        });
+        } catch (error) {
+            console.error(error);
+        }
     });
 </script>
 
-{#if auth && $loggedIn && !$ready}
+{#if auth && loggedIn && !ready}
     <Preloader type="spinner" />
 {:else}
     {@render children?.()}

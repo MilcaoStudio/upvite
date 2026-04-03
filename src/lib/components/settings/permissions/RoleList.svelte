@@ -1,6 +1,4 @@
 <script lang="ts">
-    import { run } from 'svelte/legacy';
-
     import Button from "$lib/components/atoms/Button.svelte";
     import Item from "$lib/components/atoms/input/Item.svelte";
     import type { Server } from "stoat.js";
@@ -26,15 +24,13 @@
         onSelect,
         onCreateRole = undefined
     }: Props = $props();
-    run(() => {
-        if (server.roles) {
-            if (selected != "default" && !server.roles.get(selected)) {
-                onSelect("default");
-            }
+    let roles = $derived(server.orderedRoles);
+
+    $effect(() => {
+        if (selected != "default" && !server.roles.get(selected)) {
+            onSelect("default");
         }
     });
-
-    let roles = server.orderedRoles;
 </script>
 
 <div class="RoleList" role="list">
@@ -57,11 +53,11 @@
             selected={selected == "default"}
             onclick={() => onSelect("default")}
         >
-            <strong style:padding-left="24px">@everyone</strong></Item
+            <strong style:padding-left="24px">{$t("app.settings.permissions.default_role")}</strong></Item
         >
     {/if}
     {#if onCreateRole && server.havePermission("ManageRole")}
-        <Button palette="plain-secondary" onClick={() => onCreateRole(onSelect)}
+        <Button palette="plain-secondary" onclick={() => onCreateRole(onSelect)}
             >{$t("app.settings.permissions.create_role")}</Button
         >
     {/if}

@@ -1,13 +1,13 @@
 <script lang="ts">
-    import type { Channel } from "stoat.js";
+    import type { Channel, Server } from "stoat.js";
     import EditorForChannel from "./RoleEditorForChannel.svelte";
     import RoleList from "../permissions/RoleList.svelte";
     import { modalController } from "$lib/components/modals/ModalController";
     import RoleEditorForServer from "../server/RoleEditorForServer.svelte";
 
     interface Props {
-        channel?: Channel | undefined;
-        server?: any;
+        channel?: Channel;
+        server?: Server;
     }
 
     let { channel = undefined, server = channel?.server }: Props = $props();

@@ -12,7 +12,7 @@
 
     let { emoji, server }: Props = $props();
     let mouseenter = $state(false);
-    let editable = server.havePermission("ManageCustomisation");
+    let editable = $derived(server.havePermission("ManageCustomisation"));
 
     async function onNameChange(
         ev: Event & { currentTarget: HTMLInputElement },
@@ -34,7 +34,7 @@
                 type="text"
                 onChange={onNameChange}
                 value={emoji.name}
-                maxlength="32"
+                maxlength={32}
             />
         </div>
         <div class="label">

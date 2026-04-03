@@ -1,4 +1,4 @@
-import type { Modal } from "$lib/types/Modal";
+import type { Modal, ModalProps } from "$lib/types/Modal";
 import { ulid } from "ulid";
 import UserProfile from "./UserProfile.svelte";
 import Onboarding from "./Onboarding.svelte";
@@ -14,7 +14,6 @@ import LinkWarning from "./LinkWarning.svelte";
 import CreateChannel from "./CreateChannel.svelte";
 import DeleteMessage from "./DeleteMessage.svelte";
 import ModifyAccount from "./ModifyAccount.svelte";
-import type { ComponentType } from "svelte";
 import CreateGroup from "./CreateGroup.svelte";
 import UserPicker from "./UserPicker.svelte";
 import DeleteAllSessions from "./DeleteAllSessions.svelte";
@@ -22,12 +21,12 @@ import SignedOut from "./SignedOut.svelte";
 import Error from "./Error.svelte";
 import ImageViewer from "./ImageViewer.svelte";
 import CreateInvite from "./CreateInvite.svelte";
-import Settings from "$lib/stores/Settings";
+import { useState } from "../state/StateContext.svelte";
 
 export class ModalController {
     @observable stack: Modal[] = [];
 
-    constructor(public components: Record<string, ComponentType>) {
+    constructor(public components: Record<string, any>) {
 
         makeObservable(this);
         this.close = this.close.bind(this);
@@ -100,7 +99,7 @@ export class ModalController {
      */
     openLink(href?: string, trusted?: boolean, mismatch?: boolean) {
         const link = determineLink(href);
-        const settings = new Settings();
+        const settings = useState().settings;
 
         if (mismatch) {
             if (href) {

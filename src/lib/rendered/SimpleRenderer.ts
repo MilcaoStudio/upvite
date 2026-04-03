@@ -1,8 +1,8 @@
 import { runInAction } from "mobx";
 
-import { SMOOTH_SCROLL_ON_RECEIVE } from "./Singleton";
+import { SMOOTH_SCROLL_ON_RECEIVE } from "./Singleton.svelte";
 import type { RendererRoutines } from "./types";
-import { useClient } from "$lib/controllers/ClientController";
+import { useClient } from "$lib/components/client/ClientContext.svelte";
 
 const MAX_MESSAGES = 150;
 export const SimpleRenderer: RendererRoutines = {

@@ -1,4 +1,5 @@
-import type { API, Client, User, ServerMember, Channel, Server, Message, UserProfile, File } from "stoat.js";
+import type { API, Client, User, ServerMember, Channel, Server, Message, UserProfile, File, ImageEmbed } from "stoat.js";
+import type { Snippet } from "svelte";
 import type { HTMLAttributes } from "svelte/elements";
 
 export type Modal = {
@@ -90,7 +91,7 @@ export type Modal = {
       }
     | {
           type: "image_viewer";
-          embed?: API.Image;
+          embed?: ImageEmbed;
           attachment?: File;
       }
     | {
@@ -204,7 +205,6 @@ export type Action = Omit<HTMLAttributes<HTMLButtonElement>, "as"> &
     Omit<ButtonProps, "onClick"> & {
         confirmation?: boolean;
         onClick: () => void | boolean | Promise<boolean>;
-        children?: string
 };
 
 export interface ButtonProps {
@@ -218,4 +218,5 @@ export interface ButtonProps {
       | "success"
       | "warning"
       | "error";
+  children?: Snippet;
 }

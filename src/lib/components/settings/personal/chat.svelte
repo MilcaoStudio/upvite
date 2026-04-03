@@ -1,21 +1,19 @@
 <script>
-    import { run } from 'svelte/legacy';
-
-    import { state } from "$lib/State";
     import H3 from "$lib/components/atoms/heading/H3.svelte";
     import InDevelopment from "$lib/components/atoms/inDevelopment.svelte";
+    import { useState } from "$lib/components/state/StateContext.svelte";
     import { Checkbox } from "fluent-svelte";
     
-    let media = state.network.media;
-    let shrinkMedia = $state(media?.shrinkMedia);
-    let autoplay = $state(media?.autoplay);
+    let network = useState().network;
+    let shrinkMedia = $state(network.media?.shrinkMedia);
+    let autoplay = $state(network.media?.autoplay);
     // make a slider instead?
-    let lessMessages = $state(state.network.channel.messagesLimit < 50);
-    run(() => {
-        state.network.set("channel", {messagesLimit: lessMessages ? 30 : 100});
+    let lessMessages = $state(network.channel.messagesLimit < 50);
+    $effect(() => {
+        network.set("channel", {messagesLimit: lessMessages ? 30 : 100});
     });
-    run(() => {
-        state.network.set("media", {shrinkMedia, autoplay});
+    $effect(() => {
+        network.set("media", {shrinkMedia, autoplay});
     });
 
 </script>

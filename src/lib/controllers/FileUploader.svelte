@@ -1,8 +1,4 @@
 <script lang="ts">
-    import { run } from 'svelte/legacy';
-
-    import { onDestroy } from "svelte";
-    import { useClient } from "./ClientController";
     import {
         grabFiles,
         type BehaviorType,
@@ -18,8 +14,9 @@
     import { translate } from "$lib/i18n";
     import IconButton from "$lib/components/atoms/input/IconButton.svelte";
     import Plus from "svelte-boxicons/BxPlus.svelte";
+    import { useClient } from "$lib/components/client/ClientContext.svelte";
 
-    const client = useClient()!;
+    const client = useClient();
     interface Props {
         fileType: 
             | "backgrounds"
@@ -43,19 +40,26 @@
     }: Props = $props();
     let uploading = $state(false),
         previewFile: File | null = $state(null),
-        previewURL = $state("");
-    run(() => {
+        previewURL = $state<string>();
+
+    $effect(()=>{
+        // free memory
+        console.debug(previewURL);
+        if (previewURL) {
+            URL.revokeObjectURL(previewURL);
+        }
+
         if (previewFile) {
-            const url = URL.createObjectURL(previewFile);
-            previewURL = url;
-        } else {
-            previewURL = "";
+            previewURL = URL.createObjectURL(previewFile);
+        }
+
+        return ()=>{
+            if (previewURL) {
+                URL.revokeObjectURL(previewURL);
+                previewURL = undefined;
+            }
         }
     });
-
-    // free memory
-    onDestroy(() => URL.revokeObjectURL(previewURL));
-
     function onClick() {
         if (uploading) {
             return;

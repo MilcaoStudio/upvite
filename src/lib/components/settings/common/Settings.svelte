@@ -1,13 +1,9 @@
 <script lang="ts">
-    import { run } from 'svelte/legacy';
-
     import { goto } from "$app/navigation";
-    import { state } from "$lib/State";
     import Row from "$lib/components/atoms/layout/Row.svelte";
     import { modalController } from "$lib/components/modals/ModalController";
-    import { Viewport } from "$lib/stores/Layout";
-    import { autorun } from "mobx";
-    import type { ComponentType } from "svelte";
+    import { Viewport } from "$lib/components/state/stores/Layout";
+    import type { Component } from "svelte";
     import ScrollerContent from "./scrollerContent.svelte";
     import { t } from "svelte-i18n";
     import CloseButton from "./CloseButton.svelte";
@@ -19,15 +15,16 @@
     import BxCrown from "svelte-boxicons/BxCrown.svelte";
     import Button from "./buttonSimple.svelte";
     import BxHappyBeaming from "svelte-boxicons/BxHappyBeaming.svelte";
+    import { useState } from '$lib/components/state/StateContext.svelte';
 
-    const icons: Record<string, ComponentType> = {
+    const icons: Record<string, ConstructorOfATypedSvelteComponent> = {
         overview: BxInfoCircle,
         permissions: BxListUl,
         roles: BxCrown,
         emojis: BxHappyBeaming,
     };
     interface Props {
-        pages: Record<string, ComponentType>;
+        pages: Record<string, Component<any>>;
         tab?: string | undefined;
         title?: string | null;
         locale?: string;
@@ -36,25 +33,21 @@
 
     let {
         pages,
-        tab = $bindable(undefined),
+        tab,
         title = null,
         locale = "pages",
         ...rest
     }: Props = $props();
-    let isVertical = $state(state.layout.getViewport() == Viewport.SMALL);
-    run(() => {
-        autorun(() => {
-            isVertical = state.layout.getViewport() == Viewport.SMALL;
-        });
-    });
-    run(() => {
+    const layout = useState().layout;
+    let isVertical = $derived(layout.getViewport() == Viewport.SMALL);
+    $effect(() => {
         if (!tab && !isVertical) {
             tab = "overview";
         }
     });
 
     function exitSettings() {
-        setTimeout(() => goto(state.layout.getLastPath()), 200);
+        setTimeout(() => goto(layout.getLastPath()), 200);
     }
 
     function keyDown(ev: KeyboardEvent) {
@@ -75,12 +68,9 @@
                 {#each Object.keys(pages) as page (page)}
                     <Button onClick={() => (tab = page)} active={tab == page}>
                         {#snippet svg()}
-                                                {@const SvelteComponent = icons[page]}
-                        <SvelteComponent
-                                size={20}
-                                
-                            />
-                                            {/snippet}
+                            {@const SvelteComponent = icons[page]}
+                            <SvelteComponent size={20} />
+                        {/snippet}
                         {$t(`app.settings.${locale}.${page}.title`)}
                     </Button>
                 {/each}
@@ -103,9 +93,9 @@
         {#each Object.keys(pages) as page (page)}
             <Button href="settings/{page}" large active>
                 {#snippet svg()}
-                                {@const SvelteComponent_2 = icons[page]}
-                <SvelteComponent_2 size={20}  />
-                            {/snippet}
+                    {@const SvelteComponent_2 = icons[page]}
+                    <SvelteComponent_2 size={20}  />
+                {/snippet}
                 {$t(`app.settings.${locale}.${page}.title`)}
             </Button>
         {/each}

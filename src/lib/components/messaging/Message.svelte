@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type { QueuedMessage } from "$lib/stores/MessageQueue";
+    import type { QueuedMessage } from "$lib/components/state/stores/MessageQueue";
     import { css, cx } from "@emotion/css";
     import type { Message as MessageType } from "stoat.js";
     import { modalController } from "../modals/ModalController";
@@ -16,23 +16,22 @@
     import Attachment from "./attachments/Attachment.svelte";
     import MessageReply from "./attachments/MessageReply.svelte";
     import Embed from "./embed/Embed.svelte";
-    import { useClient } from "$lib/controllers/ClientController";
+    import { useClient } from "../client/ClientContext.svelte";
+    import type { Snippet } from "svelte";
     interface Props {
-        message: MessageType & {
-            webhook?: { name: string; avatar?: string };
-        };
+        message: MessageType;
         head?: boolean;
         queued?: QueuedMessage | undefined;
         highlight?: boolean;
         contrast?: boolean;
         hideReply?: boolean;
         compact?: boolean;
-        children?: import('svelte').Snippet;
+        children?: Snippet;
     }
 
     let {
         message,
-        head = $bindable(false),
+        head = false,
         queued = undefined,
         highlight = false,
         contrast = false,
@@ -49,10 +48,13 @@
         `,
     );
 
-    let client = $derived(useClient());
+    let client = useClient();
     let user = $derived(message.author);
     let content = $derived(message.content);
-    head = head || (message.replyIds ? message.replyIds.length > 0 : false);
+
+    $effect(()=>{
+        head = (head || (message.replyIds ? message.replyIds.length > 0 : false));
+    })
 
     function openProfile() {
         modalController.push({
@@ -154,10 +156,17 @@
                             <MessageDetail {message} position="top" />
                         </span>
                     {/if}
+                    <svelte:boundary>
                     <!-- Slot default for message editor or markdown -->
-                    {#if children}{@render children()}{:else}
+                    {#if children}
+                        {@render children()}
+                    {:else}
                         <Markdown {content} />
+                        {#snippet failed(error)}
+                            {["<Message content cannot be displayed>", error]}
+                        {/snippet}
                     {/if}
+                    </svelte:boundary>
 
                     <!--InviteList-->
                     {#if queued?.error}

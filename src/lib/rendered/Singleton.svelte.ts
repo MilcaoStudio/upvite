@@ -3,31 +3,39 @@ import type { Channel, Message } from "stoat.js";
 
 import { SimpleRenderer } from "./SimpleRenderer";
 import type { RendererRoutines, ScrollState } from "./types";
-import type State from "$lib/State";
-import { useClient } from "$lib/controllers/ClientController";
+import { useClient } from "$lib/components/client/ClientContext.svelte";
+import { useState } from "$lib/components/state/StateContext.svelte";
 
 export const SMOOTH_SCROLL_ON_RECEIVE = false;
 
 export class ChannelRenderer {
     channel: Channel;
 
-    state: "LOADING" | "WAITING_FOR_NETWORK" | "EMPTY" | "RENDER" = "LOADING";
-    scrollState: ScrollState = { type: "ScrollToBottom" };
-    atTop: boolean = false;
-    atBottom: boolean = false;
-    messages: Message[] = [];
+    state: "LOADING" | "WAITING_FOR_NETWORK" | "EMPTY" | "RENDER" = $state("LOADING");
+    scrollState: ScrollState = $state({ type: "ScrollToBottom" });
+    atTop: boolean = $state(false);
+    atBottom: boolean = $state(false);
+    messages: Message[] = $state([]);
     limit: number;
 
     currentRenderer: RendererRoutines = SimpleRenderer;
 
-    stale = false;
-    fetching = false;
-    scrollPosition = 0;
-    scrollAnchored = false;
+    stale = $state(false);
+    fetching = $state(false);
+    scrollPosition = $state(0);
+    scrollAnchored = $state(false);
 
-    constructor(channel: Channel, currentState: State) {
+    constructor(channel: Channel) {
         this.channel = channel;
-        this.limit = currentState.network.channel.messagesLimit;
+        this.limit = $derived.by(()=>{
+            try {
+                const state = useState();
+                return state.network.channel.messagesLimit;
+            } catch (error) {
+                console.error(error);
+                return 50;
+            }
+        });
 
         makeAutoObservable(this, {
             channel: false,
@@ -214,10 +222,10 @@ export class ChannelRenderer {
 
 const renderers: Record<string, ChannelRenderer> = {};
 
-export function getRenderer(channel: Channel, currentState: State) {
+export function getRenderer(channel: Channel) {
     let renderer = renderers[channel.id];
     if (!renderer) {
-        renderer = new ChannelRenderer(channel, currentState);
+        renderer = new ChannelRenderer(channel);
         renderers[channel.id] = renderer;
     }
 

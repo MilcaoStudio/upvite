@@ -1,13 +1,12 @@
 <script lang="ts">
-    import { run } from 'svelte/legacy';
-
     import { User, UserProfile } from "stoat.js";
     import UserIcon from "./UserIcon.svelte";
+    import type { Snippet } from 'svelte';
     interface Props {
         user: User | undefined;
         placeholderProfile?: UserProfile | undefined;
         profile: UserProfile | undefined;
-        action?: import('svelte').Snippet;
+        action?: Snippet;
     }
 
     let {
@@ -16,15 +15,7 @@
         profile,
         action
     }: Props = $props();
-    let backgroundURL: string | undefined = $state();
-    
-    run(() => {
-        if (profile) {
-            backgroundURL = profile.animatedBannerURL;
-        } else if (placeholderProfile) {
-            backgroundURL = placeholderProfile.animatedBannerURL;
-        }
-    });
+    let backgroundURL = $derived(profile ? profile.animatedBannerURL : placeholderProfile ? placeholderProfile.animatedBannerURL : undefined);
 </script>
 
 <div

@@ -1,6 +1,7 @@
 <script lang="ts">
     import { isTouchscreenDevice } from "$lib";
     import { css, cx } from "@emotion/css";
+    import type { Snippet } from "svelte";
 
     interface Props {
         head?: boolean;
@@ -13,7 +14,7 @@
         onMouseEnter?: (() => void) | null;
         onMouseLeave?: (() => void) | null;
         onContextMenu?: (() => void) | null;
-        children?: import('svelte').Snippet;
+        children?: Snippet;
     }
 
     let {
@@ -29,7 +30,7 @@
         onContextMenu = null,
         children
     }: Props = $props();
-    const Base = cx(
+    const Base = $derived(cx(
         "Message",
         css`
             display: flex;
@@ -101,7 +102,7 @@
                 }
             }
         `,
-    );
+    ));
 </script>
 
 <div

@@ -26,7 +26,7 @@
   }
 
   let { head = false, item, active = false }: Props = $props();
-  const ItemContainer = cx(
+  const ItemContainer = $derived(cx(
     "ItemContainer",
     css`
       margin-top: auto;
@@ -38,14 +38,9 @@
       
       ${head ? `padding-top: 6px;` : ``}
     `
-  );
-  const unread = item.unread;
-  let iconUrl = item.icon?.previewUrl;
-  run(() => {
-    if (active) {
-      console.debug("active", item.id);
-    }
-  });
+  ));
+  const unread = $derived(item.unread);
+  const iconUrl = $derived(item.icon?.previewUrl);
   //const count = item.getMentions(permit).length;
 </script>
 

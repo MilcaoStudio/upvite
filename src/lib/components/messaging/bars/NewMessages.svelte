@@ -1,8 +1,6 @@
 <script lang="ts">
-    import { run } from 'svelte/legacy';
-
     import { internalSubscribe } from "$lib/InternalEmitter";
-    import { getRenderer } from "$lib/rendered/Singleton";
+    import { getRenderer } from "$lib/rendered/Singleton.svelte";
     import { dayjs } from "$lib/i18n";
     import type { Channel } from "stoat.js";
     import { decodeTime } from "ulid";
@@ -11,8 +9,6 @@
     import { translate } from "$lib/i18n";
     import { t } from "svelte-i18n";
     import BxUpArrowAlt from "svelte-boxicons/BxUpArrowAlt.svelte";
-    import { state } from "$lib/State";
-
 
     interface Props {
         channel: Channel;
@@ -21,24 +17,23 @@
 
     let { channel, lastId = undefined }: Props = $props();
     let hidden = $state(false), timeAgo = $state('');
-    function hide(){hidden=true}
-    run(() => {
-        lastId && (hidden=false);
+    function hide(){
+        hidden=true
+    }
+    $effect(() => {
+        if (lastId) {
+            try {
+                hidden = false;
+                timeAgo = (dayjs(decodeTime(lastId)) as any).fromNow() as string;
+            } catch (err) {}
+        }
     });
     internalSubscribe("NewMessages", "hide", hide);
     function onKeyDown(e: KeyboardEvent) {
         e.key == "Escape" && hide()
     }
 
-    run(() => {
-        if (lastId) {
-            try {
-                timeAgo = (dayjs(decodeTime(lastId)) as any).fromNow() as string;
-            } catch (err) {}
-        }
-    });
-
-    const renderer = getRenderer(channel, state);
+    const renderer = $derived(getRenderer(channel));
 </script>
 
 <svelte:document onkeydown={onKeyDown} />

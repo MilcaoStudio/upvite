@@ -1,5 +1,4 @@
 <script lang="ts">
-    import { state } from "$lib/State";
     import TextSvelte from "$lib/i18n/TextSvelte.svelte";
     import Markdown from "$lib/markdown/Markdown.svelte";
     import { createElement } from "$lib/markdown/runtime/svelteRuntime";
@@ -13,13 +12,13 @@
     import UserPlus from "svelte-boxicons/BxUserPlus.svelte";
     import UserMinus from "svelte-boxicons/BxUserMinus.svelte";
     import Key from "svelte-boxicons/BxKey.svelte";
-    import type { ComponentType } from "svelte";
     import { decodeTime } from "ulid";
     import Row from "../atoms/layout/Row.svelte";
     import Tooltip from "../atoms/Tooltip.svelte";
+    import { useState } from "../state/StateContext.svelte";
 
     const weekMs = 1000 * 60 * 60 * 24 * 7;
-    const Icons: Record<string, ComponentType> = {
+    const Icons: Record<string, ConstructorOfATypedSvelteComponent> = {
         channel_ownership_changed: Key,
         user_added: UserPlus,
         user_remove: UserMinus,
@@ -39,16 +38,31 @@
         $derived(data?.type == "user_joined"
             ? decodeTime((data as UserSystemMessage).userId)
             : null);
-    let settings = state.settings;
+    let settings = useState().settings;
 </script>
 
 {#if data}
+    {#snippet user()}
+        <UserShort user={data.user} />
+    {/snippet}
+    {#snippet byUser()}
+        <UserShort user={data.by}/>
+    {/snippet}
+    {#snippet fromUser()}
+        <UserShort user={data.from} />
+    {/snippet}
+    {#snippet toUser()}
+        <UserShort user={data.to} />
+    {/snippet}
+    {#snippet channelName()}
+        <strong>{data.name}</strong>
+    {/snippet}
     <MessageBase {highlight}>
         {#if !hideInfo}
             <MessageInfo click={false}>
                 <MessageDetail {message} position="left" />
-                {@const SvelteComponent = Icons[data.type] ?? Info}
-                <SvelteComponent />
+                {@const Icon = Icons[data.type] ?? Info}
+                <Icon />
             </MessageInfo>
         {/if}
         <div class="SystemContent">
@@ -58,39 +72,41 @@
                 <TextSvelte
                     id="app.main.channel.system.{data.type}"
                     fields={{
-                        user: createElement(UserShort, { user: data.by }),
+                        user: byUser,
                     }}
                 />
             {:else if data.type == "channel_ownership_changed"}
                 <TextSvelte
                     id="app.main.channel.system.channel_ownership_changed"
                     fields={{
-                        from: createElement(UserShort, { user: data.from }),
-                        to: createElement(UserShort, { user: data.to }),
+                        from: fromUser,
+                        to: toUser,
                     }}
                 />
             {:else if data.type == "channel_renamed"}
                 <TextSvelte
                     id="app.main.channel.system.channel_renamed"
                     fields={{
-                        user: createElement(UserShort, { user: data.by }),
-                        name: createElement("strong", null, data.name),
+                        user: byUser,
+                        name: channelName,
                     }}
                 />
             {:else if data.type == "user_added"}
+                
                 <TextSvelte
                     id="app.main.channel.system.added_by"
                     fields={{
-                        user: createElement(UserShort, { user: data.user }),
-                        other_user: createElement(UserShort, { user: data.by }),
+                        user,
+                        other_user: byUser,
                     }}
                 />
             {:else if data.type == "user_banned" || data.type == "user_left" || data.type == "user_kicked"}
                 <Row centred>
+
                     <TextSvelte
                         id="app.main.channel.system.{data.type}"
                         fields={{
-                            user: createElement(UserShort, { user: data.user }),
+                            user,
                         }}
                     />
                 </Row>
@@ -99,7 +115,7 @@
                     <TextSvelte
                         id="app.main.channel.system.{data.type}"
                         fields={{
-                            user: createElement(UserShort, { user: data.user }),
+                            user,
                         }}
                     />
                     {#if createdAt && (settings.get("appearance:show_account_age") || Date.now() - createdAt < weekMs)}
@@ -112,8 +128,8 @@
                 <TextSvelte
                     id="app.main.channel.system.removed_by"
                     fields={{
-                        user: createElement(UserShort, { user: data.user }),
-                        other_user: createElement(UserShort, { user: data.by }),
+                        user,
+                        other_user: byUser,
                     }}
                 />
             {:else}

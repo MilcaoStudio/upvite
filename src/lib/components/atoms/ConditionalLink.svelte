@@ -1,31 +1,25 @@
 <script lang="ts">
-    import type { EventHandler } from "svelte/elements";
+    import type { Snippet } from "svelte";
+    import type { HTMLAnchorAttributes } from "svelte/elements";
 
-    interface Props {
+    interface Props extends HTMLAnchorAttributes {
         active: boolean;
-        onClick?: EventHandler<MouseEvent|KeyboardEvent>;
-        href?: string | undefined;
-        class?: string;
-        children?: import('svelte').Snippet;
-        [key: string]: any
+        children?: Snippet;
     }
 
     let {
         active,
-        onClick = function(){},
-        href = undefined,
-        class: className = "",
+        href,
         children,
-        ...rest
+        ...props
     }: Props = $props();
     
 </script>
 
 {#if active}
-    <!-- svelte-ignore a11y_missing_attribute -->
-    <a role="none" class={className} onclick={onClick} onkeydown={onClick} >
+    <span class={props.class}>
         {@render children?.()}
-    </a>
+    </span>
 {:else}
-    <a class={className} {href} {...rest}>{@render children?.()}</a>
+    <a {...props}>{@render children?.()}</a>
 {/if}

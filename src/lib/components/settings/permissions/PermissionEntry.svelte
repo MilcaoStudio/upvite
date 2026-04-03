@@ -1,11 +1,12 @@
 <script lang="ts">
     import { t } from "svelte-i18n";
     import Lock from "svelte-boxicons/BxLock.svelte";
+    import type { Snippet } from "svelte";
 
     interface Props {
         disabled?: boolean;
         id: string;
-        children?: import('svelte').Snippet;
+        children?: Snippet;
     }
 
     let { disabled = false, id, children }: Props = $props();

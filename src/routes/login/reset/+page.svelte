@@ -1,6 +1,6 @@
 <script>
+    import { useClient } from "$lib/components/client/ClientContext.svelte";
     import LoginForm from "$lib/components/form/LoginForm.svelte";
-    import { useApi, useClient } from "$lib/controllers/ClientController";
     const client = useClient();
 </script>
 

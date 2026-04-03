@@ -1,6 +1,5 @@
-import type { SvelteNode } from "$lib/markdown/runtime/svelteRuntime";
-import type { QueuedMessage } from "$lib/stores/MessageQueue";
-import type { NotificationState } from "$lib/stores/NotificationOptions";
+import type { QueuedMessage } from "$lib/components/state/stores/MessageQueue";
+import type { NotificationState } from "$lib/components/state/stores/NotificationOptions";
 import type { Message, API, Channel, Server, User, ServerMember, File } from "stoat.js";
 
 export interface ContextMenuData {

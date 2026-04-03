@@ -3,9 +3,9 @@
     import { type MonospaceFonts, MONOSPACE_FONT_KEYS, MONOSPACE_FONTS } from "$lib/components/context/Theme.svelte";
     import { t } from "svelte-i18n";
     import InputElement from "$lib/components/form/InputElement.svelte";
-    import { settings } from "$lib/stores/Settings";
+    import { useState } from "$lib/components/state/StateContext.svelte";
 
-    let theme = settings.theme;
+    let theme = useState().settings.theme;
     let onChange = (value: string)=>theme.setMonospaceFont(value as MonospaceFonts);
     let options = MONOSPACE_FONT_KEYS.map(font => ({value: font, name: MONOSPACE_FONTS[font as MonospaceFonts].name}));
 </script>

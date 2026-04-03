@@ -1,6 +1,6 @@
 <script lang="ts">
     import { css, cx } from "@emotion/css";
-    import type { Server } from "stoat.js";
+    import { ServerFlags, type Server } from "stoat.js";
     import Tooltip from "../atoms/Tooltip.svelte";
     import BxCheck  from "svelte-boxicons/BxCheck.svelte";
 
@@ -9,9 +9,9 @@
     }
 
     let { server }: Props = $props();
-    let bannerURL = server.bannerURL;
+    let bannerURL = $derived(server.bannerURL);
 
-    const ServerBanner = cx('ServerBanner', css`
+    const ServerBanner = $derived(cx('ServerBanner', css`
     margin: 8px;
     flex-shrink: 0;
     display: flex;
@@ -49,12 +49,12 @@
             cursor: pointer;
             color: var(--foreground);
         }
-    }`);
+    }`));
 </script>
 
 <div class={ServerBanner} style:background={bannerURL ? `url('${bannerURL}') center/cover no-repeat` : undefined}>
     <div class="container">
-        {#if server.flags && server.flags & 1}
+        {#if server.flags && server.flags & ServerFlags.Official}
             <Tooltip i18n="app.special.server-badges.official" placement="bottom-start">
                 <svg width="20" height="20">
                     <image
@@ -65,7 +65,7 @@
                 </svg>
             </Tooltip>
         {/if}
-        {#if server.flags && server.flags & 2}
+        {#if server.flags && server.flags & ServerFlags.Verified}
             <Tooltip i18n="app.special.server-badges.verified" placement="bottom-start">
                 <svg width="20" height="20">
                     <image
@@ -83,14 +83,11 @@
                 </svg>
             </Tooltip>
         {/if}
-        <!--push modal server_info-->
+        <!--TODO: Server info modal-->
         <!-- svelte-ignore a11y_missing_attribute -->
         <a class="title" onclick={() =>{}} onkeydown={null} role="button" tabindex=0>
             {server.name}
         </a>
-
-        
-
         <!--TODO: link to server settings-->
     </div>
 </div>

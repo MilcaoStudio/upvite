@@ -4,17 +4,24 @@
   import DialogForm from "./DialogForm.svelte";
   import { goto } from "$app/navigation";
   import type { FormTemplate, MapFormToValues } from "$lib/types/Form";
+    import { createTextSnippet } from "$lib/i18n/TextSvelte.svelte";
 
   interface Props {
     props: ModalProps<"create_channel">;
   }
 
+  interface CreateChannelForm {
+    type: "Text" | "Voice",
+    name: string,
+    description: string,
+  }
+
   let { props }: Props = $props();
-  async function callback(values: MapFormToValues<FormTemplate>) {
+  async function callback(values: CreateChannelForm) {
     const channel = await props.target.createChannel({
       type: values.type as "Text" | "Voice",
-      name: "" + values.name,
-      description: "" + values.description,
+      name: values.name,
+      description: values.description,
     });
 
     if (props.cb) {
@@ -23,6 +30,8 @@
       goto(`/server/${props.target.id}/channel/${channel.id}`);
     }
   }
+
+  const createSnippet = createTextSnippet(()=>$t("app.special.modals.actions.create"));
 </script>
 
 <DialogForm
@@ -46,6 +55,6 @@
   defaults={{ type: "Text" }}
   {callback}
   submit={{
-    children: $t("app.special.modals.actions.create"),
+    children: createSnippet,
   }}
 />

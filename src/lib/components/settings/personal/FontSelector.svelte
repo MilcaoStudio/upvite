@@ -3,9 +3,9 @@
     import { FONTS, FONT_KEYS, type Fonts } from "$lib/components/context/Theme.svelte";
     import { t } from "svelte-i18n";
     import InputElement from "$lib/components/form/InputElement.svelte";
-    import { settings } from "$lib/stores/Settings";
+    import { useState } from "$lib/components/state/StateContext.svelte";
 
-    let theme = settings.theme;
+    let theme = useState().settings.theme;
     let onChange = (value: string)=>theme.setFont(value as Fonts);
     let options = FONT_KEYS.map(font => ({value: font, name: FONTS[font as Fonts].name}));
 </script>

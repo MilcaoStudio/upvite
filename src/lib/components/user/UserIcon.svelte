@@ -1,13 +1,10 @@
 <script module lang="ts">
-    import { useClient } from "$lib/controllers/ClientController";
     import type { API, File, User } from "stoat.js";
     import fallback from "$lib/assets/user.png";
     import IconBase from "../IconBase.svelte";
-    import { page } from "$app/stores";
-    import { settings } from "$lib/stores/Settings";
 
     export function useStatusColor(user: User | null) {
-        const theme = settings.theme;
+        const theme = useState().settings.theme;
 
         return user?.online && user?.status?.presence != "Invisible"
             ? user?.status?.presence == "Idle"
@@ -22,7 +19,9 @@
 </script>
 
 <script lang="ts">
-    import { run } from 'svelte/legacy';
+    import { useClient } from "../client/ClientContext.svelte";
+    import { page } from "$app/state";
+    import { useState } from "../state/StateContext.svelte";
 
     interface Props {
         target?: User | null;
@@ -57,16 +56,15 @@
     }: Props = $props();
     const client = useClient();
 
-    let url: string | undefined = $state();
-    run(() => {
+    let url = $derived.by(() => {
         if (masquerade?.avatar) {
-            url = client.proxyFile(masquerade.avatar);
+            return client.proxyFile(masquerade.avatar);
         } else if (override) {
-            url = override;
+            return override;
         } else if (!url) {
             let memberAvatarUrl;
             if (target && showServerIdentity) {
-                const server = $page.params.server;
+                const server = page.params.server;
                 if (server) {
                     const member = client.serverMembers.getByKey({server, user: target.id});
                     if (member?.avatar) {
@@ -75,7 +73,7 @@
                 }
             }
             let avatarUrl = animate ? target?.animatedAvatarURL : target?.avatarURL;
-            url = memberAvatarUrl || avatarUrl || attachment?.createFileURL(animate) || fallback;
+            return memberAvatarUrl || avatarUrl || attachment?.createFileURL(animate) || fallback;
         }
     });
 </script>

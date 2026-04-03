@@ -3,7 +3,7 @@
   import ColorSwatches from "$lib/components/atoms/input/ColorSwatches.svelte";
   import InputBox from "$lib/components/form/InputBox.svelte";
   import { t } from "svelte-i18n";
-  import type { API, Server } from "stoat.js";
+  import type { Server } from "stoat.js";
   import { getRoles, type RoleOrDefault } from "$lib/types/Permissions";
   import { Button, Checkbox } from "fluent-svelte";
   import PermissionList from "../permissions/PermissionList.svelte";
@@ -56,7 +56,7 @@
     <H3>{$t("app.settings.permissions.role_name")}</H3>
     <InputBox
       {disabled}
-      bind:value={mutableRole.name}
+      value={mutableRole.name}
       type="text"
       placeholder="Nuevo rol"
     />
@@ -73,7 +73,7 @@
       >{$t("app.settings.permissions.hoist_desc")}</Checkbox
     >
     <H3>{$t("app.settings.permissions.role_ranking")}</H3>
-    <InputBox {disabled} bind:value={mutableRole.rank} type="number" />
+    <InputBox {disabled} value={mutableRole.rank} type="number" />
   {/if}
   <H3>{$t("app.settings.permissions.edit_title")}</H3>
 

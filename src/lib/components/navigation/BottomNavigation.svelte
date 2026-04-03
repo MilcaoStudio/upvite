@@ -3,11 +3,11 @@
     import Cog from "svelte-boxicons/BxCog.svelte";
     import Group from "svelte-boxicons/BxGroup.svelte";
     import Chat from "svelte-boxicons/BxChat.svelte";
-    import { state } from "$lib/State";
+    import { useState } from "../state/StateContext.svelte";
 
 </script>
 <div class="BottomNavigation">
-    <IconButton href={state.layout.getLastHomePath()}>
+    <IconButton href={useState().layout.getLastHomePath()}>
         <Chat size={32} />
     </IconButton>
     <IconButton href="/friends">

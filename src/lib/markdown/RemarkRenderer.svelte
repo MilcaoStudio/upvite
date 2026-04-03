@@ -1,5 +1,5 @@
 <script module lang="ts">
-    import { unified } from "unified";
+    import { unified, type Processor } from "unified";
     import remarkParse from "remark-parse";
     import remarkBreaks from "remark-breaks";
     import remarkMath from "remark-math";
@@ -15,7 +15,7 @@
     import rehypeSvelte from "./plugins/rehypeSvelte";
     import {
         createElement,
-        type SvelteNode,
+        type SVNode,
     } from "./runtime/svelteRuntime";
     import { css, cx } from "@emotion/css";
 
@@ -88,19 +88,18 @@
 </script>
 
 <script lang="ts">
-    import { run } from 'svelte/legacy';
-
-    import JsxRender from "$lib/components/JSXRender.svelte";
     import Anchor from "./plugins/Anchor.svelte";
     import { remarkChannel, remarkEmoji, remarkMention } from "./plugins/remarkRegex";
     import Emoji from "./plugins/Emoji.svelte";
+    import type { Component } from "svelte";
+    import NodeRenderer from "./NodeRenderer.svelte";
 
     interface Props {
         content: string;
     }
 
     let { content }: Props = $props();
-    const components: Record<string, string | Function | null> = {
+    const components: Record<string, string | Component<any> | null> = {
         a: Anchor,
         code: "code",
         channel: ChannelLink,
@@ -123,9 +122,8 @@
         style: null,
     };
 
-    const rehypeProcessor = remarkProcessor()
+    const rehypeProcessor: Processor = remarkProcessor()
         // Mdast to Hast
-        //@ts-ignore 
         .use(remarkRehype, { handlers, })
         // code block highlight
         .use(rehypePrism)
@@ -141,28 +139,31 @@
             }
 
             // TODO: Large emoji feature
-
-            a:hover {
-                text-decoration: underline;
-            }
         `,
     );
-    let Content: SvelteNode | null = $state(null);
-    run(() => {
+    let rootNode = $state<SVNode>();
+    $effect(() => {
         rehypeProcessor
             .process(sanitisedContent)
-            .then((file) => (Content = file.result as SvelteNode))
+            .then((file) => (rootNode = file.result as SVNode))
             .catch(() => {
-                Content = sanitisedContent;
+                rootNode = {
+                    type: "text",
+                    value: sanitisedContent,
+                };
             });
     });
+    $inspect(rootNode);
     // TODO: Big emoji feature
     // $: largeEmoji = !disallowBigEmoji && isOnlyEmoji(content)
 </script>
 
-<div class={Markdown}>
-    <JsxRender node={Content} />
-</div>
+
+{#if rootNode}    
+    <div class={Markdown}>
+        <NodeRenderer node={rootNode} />
+    </div>
+{/if}
 
 <style>
     .Markdown :global(p) {

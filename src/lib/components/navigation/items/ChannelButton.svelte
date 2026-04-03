@@ -42,7 +42,7 @@
         .filter((u) => u) as User[]),
   );
   */
-  const alerting = alert && !muted && !active;
+  const alerting = $derived(alert && !muted && !active);
 </script>
 
 {#if channel}

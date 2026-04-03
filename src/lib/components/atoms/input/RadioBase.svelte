@@ -4,7 +4,6 @@
     let { children } = $props();
 
 </script>
-<!-- svelte-ignore missing_declaration -->
 <!-- svelte-ignore a11y_label_has_associated_control -->
 <label>
     <div class="flex-button">

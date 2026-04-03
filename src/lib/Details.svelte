@@ -1,44 +1,26 @@
 <script lang="ts">
     import { css, cx } from "@emotion/css";
-    import type { EventHandler } from "svelte/elements";
+    import type { Snippet } from "svelte";
+    import type { HTMLDetailsAttributes } from "svelte/elements";
 
-    interface Props {
+    interface Props extends HTMLDetailsAttributes {
         sticky?: boolean;
         large?: boolean;
         open?: boolean;
-        onToggle?: EventHandler<Event, HTMLDetailsElement>;
-        children?: import('svelte').Snippet;
-        [key: string]: any
+        summary?: Snippet<[]>,
+        children?: Snippet<[]>,
     }
 
     let {
         sticky = false,
         large = false,
         open = false,
-        onToggle = function(){},
         children,
+        summary,
         ...rest
     }: Props = $props();
     const Details = cx('Details', css`
         summary {
-            ${sticky ? `
-                top: -1px;
-                z-index: 10;
-                position: sticky;` :
-                ``}
-            ${large ? `
-                background: var(--primary-background);
-                color: var(--secondary-foreground);
-
-                .padding {
-                    /*TOFIX: make this applicable only for the friends list menu, DO NOT REMOVE.*/
-                    display: flex;
-                    align-items: center;
-                    padding: 5px 0;
-                    margin: 0.8em 0px 0.4em;
-                    cursor: pointer;
-                }`:
-                ``}
             outline: none;
             cursor: pointer;
             list-style: none;
@@ -64,9 +46,6 @@
             }
 
             .padding {
-                display: flex;
-                align-items: center;
-
                 > svg {
                     flex-shrink: 0;
                     margin-inline-end: 4px;
@@ -91,6 +70,36 @@
     `);
 </script>
 
-<details class={Details} {open} ontoggle={onToggle} {...rest}>
-    {@render children?.()}
+<details class={Details} {open} {...rest}>
+    {#if summary}
+        <summary class={{sticky, large}}>
+            <div class="padding">
+                {@render summary()}
+            </div>
+        </summary>
+    {:else}
+        {@render children?.()}
+    {/if}
 </details>
+
+<style>
+    .sticky {
+        top: -1px;
+        z-index: 10;
+        position: sticky;
+    }
+
+    .large {
+        background: var(--primary-background);
+        color: var(--secondary-foreground);
+    }
+
+    .padding {
+        /*TOFIX: make this applicable only for the friends list menu, DO NOT REMOVE.*/
+        display: flex;
+        align-items: center;
+        padding: 5px 0;
+        margin: 0.8em 0px 0.4em;
+        cursor: pointer;
+    }
+</style>

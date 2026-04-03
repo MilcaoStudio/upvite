@@ -22,12 +22,12 @@
                 return true;
             },
             confirmation: true,
-            children: $_("app.special.modals.actions.ok"),
+            text: $_("app.special.modals.actions.ok"),
         },
         {
             palette: "plain-secondary",
             onClick: () => location.reload(),
-            children: $_("app.special.modals.actions.reload"),
+            text: $_("app.special.modals.actions.reload"),
         },
     ]}
 >

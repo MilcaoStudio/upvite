@@ -10,7 +10,6 @@
     interface Props {
         active?: string | undefined;
         createServer: ()=>void;
-        home?: () => string;
         servers: Server[];
         reorder: (items: Server[]) => void;
     }
@@ -18,7 +17,6 @@
     let {
         active = undefined,
         createServer,
-        home = ()=>"/",
         servers,
         reorder
     }: Props = $props();
@@ -55,7 +53,7 @@
 </script>
 
 <div class={Base}>
-    <ListHeader {home} />
+    <ListHeader />
     <ListFooter {createServer}/>
     <div
         use:dndzone={{ items: servers }}

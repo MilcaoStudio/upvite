@@ -1,12 +1,11 @@
 <!--Experimental: Replace Modal by ContentDialog-->
 <script lang="ts">
-    import { run } from 'svelte/legacy';
-
     import type { Action } from "$lib/types/Modal";
     import { ContentDialog }  from "fluent-svelte";
     import H4 from "../atoms/heading/H4.svelte";
     import { cx } from "@emotion/css";
     import Button from "../atoms/Button.svelte";
+    import type { Snippet } from "svelte";
     interface Props {
         open?: boolean;
         disabled?: boolean;
@@ -17,9 +16,8 @@
         signal?: "close" | "confirm" | "force" | undefined;
         registerOnClose?: (fn: () => void) => () => void;
         registerOnConfirm?: (fn: () => void) => () => void;
-        description?: import('svelte').Snippet;
-        children?: import('svelte').Snippet;
-        [key: string]: any
+        description?: Snippet;
+        children?: Snippet;
     }
 
     let {
@@ -29,7 +27,7 @@
         title = undefined,
         onClose = function () {},
         actions = [],
-        signal = $bindable(undefined),
+        signal = $bindable(),
         registerOnClose = (fn) => fn,
         registerOnConfirm = (fn) => fn,
         description,
@@ -51,7 +49,7 @@
         }, 10);
         console.log("[closeModal] Closing modal");
     });
-    run(() => {
+    $effect(() => {
         if (signal == "confirm") {
             signal = undefined;
             confirm();
@@ -62,10 +60,8 @@
             }
         }
     });
-    run(() => {
+    $effect(() => {
         registerOnClose(closeModal);
-    });
-    run(() => {
         registerOnConfirm(confirm);
     });
 </script>
@@ -76,13 +72,13 @@
     {#if actions.length}
         <div class={cx("Actions")}>
             {#each actions as action}
-                <Button
-                    props={{ disabled, ...action }}
-                    on:click={async () => {
-                        if (await action.onClick()) closeModal();
+                {@const {onClick, children, ...buttonProps} = action}
+                <Button {disabled} {...buttonProps}
+                    onclick={async () => {
+                        if (await onClick()) closeModal();
                     }}
                 >
-                    {action.children}
+                    {@render children?.()}
                 </Button>
             {/each}
         </div>

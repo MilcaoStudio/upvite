@@ -179,5 +179,3 @@ export default class Settings
         return data;
     }
 }
-
-export const settings = new Settings();

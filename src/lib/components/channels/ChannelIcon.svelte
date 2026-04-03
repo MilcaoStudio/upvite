@@ -1,16 +1,13 @@
 <script lang="ts">
-    import { run } from 'svelte/legacy';
-
-    import { useClient } from "$lib/controllers/ClientController";
     import type { File, Channel } from "stoat.js";
     import IconBase from "../IconBase.svelte";
     import BxHash from "svelte-boxicons/BxHash.svelte";
     import BxMicrophone from "svelte-boxicons/BxMicrophone.svelte";
     import fallback from "$lib/assets/group.png";
     import { autorun } from "mobx";
-    import { state } from "$lib/State";
     import BxPhoneCall from "svelte-boxicons/BxPhoneCall.svelte";
     import ImageIconBase from "../ImageIconBase.svelte";
+    import { useClient } from "../client/ClientContext.svelte";
 
     interface Props {
         server?: boolean;
@@ -19,7 +16,6 @@
         attachment?: File | null;
         animate?: boolean;
         showBadge?: boolean;
-        [key: string]: any
     }
 
     let {
@@ -31,28 +27,16 @@
         showBadge = false,
         ...rest
     }: Props = $props();
-    let badge = Math.max(16, Math.floor(size / 4));
-    let max_side = $derived(state.network.media.shrinkMedia ? 64 : 256);
-    const client = useClient();
-    let iconURL;
-    run(() => {
-        iconURL = animate ? (target?.animatedIconURL || attachment?.createFileURL(true)) : (target?.iconURL || attachment?.createFileURL());
-    });
-
-    run(() => {
-        autorun(
-            () =>
-            (iconURL = animate ? (target?.animatedIconURL || attachment?.createFileURL(true)) : (target?.iconURL || attachment?.createFileURL()))
-        );
-    });
-    let isServerChannel =
-        $derived(server ||
-        (target && target.type == "TextChannel"));
+    let badge = $derived(Math.max(16, Math.floor(size / 4)));
+    let iconURL = $derived(animate ? (target?.animatedIconURL || attachment?.createFileURL(true)) : (target?.iconURL || attachment?.createFileURL()));
+    let isServerChannel = $derived(server || (target && target.type == "TextChannel"));
     // The border radius of the channel icon, if it's a server-channel it should be square (undefined).
-    let borderRadius: string | undefined = $state("--border-radius-channel-icon");
-    if (isServerChannel) {
-        borderRadius = undefined;
-    }
+    let borderRadius = $state<string|undefined>("--border-radius-channel-icon");
+    $effect.pre(()=>{
+        if (isServerChannel) {
+            borderRadius = undefined;
+        }
+    })
 </script>
 
 {#if !iconURL && isServerChannel}

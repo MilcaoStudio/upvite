@@ -1,23 +1,17 @@
 <script lang="ts">
-    import { run } from 'svelte/legacy';
-
-    import { page } from "$app/stores";
-    import { isTouchscreenDevice } from "$lib";
-    import { state } from "$lib/State";
-    import { SIDEBAR_CHANNELS, Viewport } from "$lib/stores/Layout";
+    import { SIDEBAR_CHANNELS, Viewport } from "$lib/components/state/stores/Layout";
     import { css, cx } from "@emotion/css";
     import Header from "./Header.svelte";
     import HamburgerAction from './HamburgerAction.svelte'
     import BxChevronLeft from "svelte-boxicons/BxChevronLeft.svelte";
     import BxChevronRight from "svelte-boxicons/BxChevronRight.svelte";
-
-    import type { ComponentType } from "svelte";
-    import { autorun } from "mobx";
+    import { useState } from "../state/StateContext.svelte";
+    import { page } from "$app/state";
     interface Props {
         withBackground?: boolean;
         withTransparency?: boolean;
         noBurger?: boolean;
-        icon: ComponentType;
+        icon: ConstructorOfATypedSvelteComponent;
         children?: import('svelte').Snippet;
     }
 
@@ -40,15 +34,10 @@
     }
 
     `);
-    const layout = state.layout;
-    let visible: boolean = $state();
+    const layout = useState().layout;
+    let visible = $derived(layout.isSectionOpen(SIDEBAR_CHANNELS) ?? true);
     let isVertical = layout.getViewport() == Viewport.SMALL;
-    run(() => {
-        autorun(()=>{
-            visible = layout.getSectionState(SIDEBAR_CHANNELS, true);
-        });
-    });
-    let pathname = $derived($page.url.pathname);
+    let pathname = $derived(page.url.pathname);
     function toggleState(){
         layout.toggleSectionState(SIDEBAR_CHANNELS, visible)
     }

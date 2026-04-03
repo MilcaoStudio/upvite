@@ -1,12 +1,13 @@
 <script lang="ts">
     import { goto } from "$app/navigation";
-    import { state } from "$lib/State";
     import { modalController } from "$lib/components/modals/ModalController";
+    import { useState } from "$lib/components/state/StateContext.svelte";
 
     let closing = false;
+    const layout = useState().layout;
     function exitSettings() {
         closing = true;
-        setTimeout(() => goto(state.layout.getLastPath()), 200);
+        setTimeout(() => goto(layout.getLastPath()), 200);
     }
 
     function keyDown(ev: KeyboardEvent) {
@@ -21,6 +22,7 @@
 
 <div class="baseCloseButton">
     <button
+        title="Close"
         class="close"
         onclick={() => {
             exitSettings();

@@ -24,10 +24,9 @@
                         src="/badges/developer.svg"
                     />
                     {#snippet tooltip()}
-                                        <span >{$t("app.navigation.tabs.dev")}</span
-                        >
-                                    {/snippet}</Tooltip
-                >
+                        <span>{$t("app.navigation.tabs.dev")}</span>
+                    {/snippet}
+                </Tooltip>
             {/if}
             {#if badges & (UserBadges.Supporter | UserBadges.ActiveSupporter)}
                 <Tooltip delay={300} alignment="center">
@@ -40,12 +39,12 @@
                         />
                     </a>
                     {#snippet tooltip()}
-                                        <span 
-                            >{$t(
+                        <span>
+                            {$t(
                                 "app.special.popovers.user_profile.badges.supporter",
-                            )}</span
-                        >
-                                    {/snippet}
+                            )}
+                        </span>
+                    {/snippet}
                 </Tooltip>
             {/if}
         </Row>

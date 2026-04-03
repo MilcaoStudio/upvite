@@ -1,12 +1,13 @@
 <script>
     import { t } from "svelte-i18n";
     import DialogForm from "./DialogForm.svelte";
-    import { useClient } from "$lib/controllers/ClientController";
     import { mapError } from "$lib";
     import { goto } from "$app/navigation";
+    import { useClient } from "../client/ClientContext.svelte";
     let client = useClient();
 </script>
 
+{#snippet createText()}{$t("app.special.modals.actions.create")}{/snippet}
 <DialogForm
     title={$t("app.main.groups.create")}
     schema={{ name: "text" }}
@@ -18,5 +19,7 @@
             .catch(mapError);
         return goto(`/channel/` + group.id);
     }}
-    submit={{ children: $t("app.special.modals.actions.create") }}
+    submit={{
+        children: createText,
+    }}
 />

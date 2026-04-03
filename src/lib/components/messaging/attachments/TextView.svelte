@@ -14,7 +14,7 @@
 
     let { attachment }: Props = $props();
     let url = $derived(attachment.originalUrl);
-    let gated = $state((attachment.size || 0) > 100_000);
+    let gated = $derived((attachment.size || 0) > 100_000);
     let content = $state("");
     let loading = $state(false);
     run(() => {
@@ -47,7 +47,7 @@
 
 <div class="textContent" data-loading={!content.length}>
     {#if gated}
-        <Button palette="primary" onClick={() => (gated = false)}>
+        <Button palette="primary" onclick={() => (gated = false)}>
             {$t("app.main.channel.misc.load_file")}
         </Button>
     {:else if content}

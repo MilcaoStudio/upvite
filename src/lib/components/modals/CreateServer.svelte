@@ -1,10 +1,10 @@
 <script lang="ts">
-    import { useClient } from "$lib/controllers/ClientController";
     import type { ModalProps } from "$lib/types/Modal";
     import { _ } from "svelte-i18n";
     import { goto, } from "$app/navigation";
     import { mapError } from "$lib";
     import DialogForm from "./DialogForm.svelte";
+    import { useClient } from "../client/ClientContext.svelte";
 
     // export let props: ModalProps<"create_server"> = $props(); 
     interface Props {
@@ -25,7 +25,7 @@
     }}
     schema={{name: "text"}}
     data={{name: {field: $_('app.main.servers.name')}}}
-    submit={{children: $_('app.special.modals.actions.create')}}
+    submit={{text: $_('app.special.modals.actions.create')}}
     title={$_('app.main.servers.create')} >
     {#snippet description()}
         <div >

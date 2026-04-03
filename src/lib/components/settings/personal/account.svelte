@@ -1,21 +1,17 @@
 <script lang="ts">
-    import { run } from 'svelte/legacy';
-
     import ButtonLarge from "$lib/components/atoms/buttons/ButtonLarge.svelte";
     import H1 from "$lib/components/atoms/heading/H1.svelte";
     import InDevelopment from "$lib/components/atoms/inDevelopment.svelte";
+    import { useClient } from "$lib/components/client/ClientContext.svelte";
     import { modalController } from "$lib/components/modals/ModalController";
-    import { useSession } from "$lib/controllers/ClientController";
     import { t } from "svelte-i18n";
 
-    let email = $state(".");
-    const session = useSession();
-    const client = session?.client;
-    run(() => {
-        if (session?._state == "Online" && email == ".") {
-            client?.api
-                .get("/auth/account/")
-                .then((account) => (email = account.email));
+    let email = $state<string>();
+    const client = useClient();
+    const setEmail = (value: string) => { email = value };
+    $effect(() => {
+        if (!email) {
+            client.account.fetchEmail().then(setEmail);
         }
     });
 </script>

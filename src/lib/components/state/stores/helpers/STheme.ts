@@ -12,7 +12,7 @@ import {
     type Fonts,
     type MonospaceFonts,
     type ComputedVariables,
-} from "../../components/context/Theme.svelte"
+} from "../../../context/Theme.svelte"
 
 import Settings from "../Settings";
 
@@ -183,6 +183,10 @@ export default class STheme {
         } else {
             this.settings.remove("appearance:theme:css");
         }
+    }
+
+    get css() {
+        return this.settings.get("appearance:theme:css");
     }
 
     /**

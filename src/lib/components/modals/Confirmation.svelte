@@ -3,10 +3,10 @@
   import { t } from "svelte-i18n";
   import DialogForm from "./DialogForm.svelte";
   import { translate } from "$lib/i18n";
-  import TextSvelte from "$lib/i18n/TextSvelte.svelte";
+  import TextSvelte, { createTextSnippet } from "$lib/i18n/TextSvelte.svelte";
   import { createElement } from "$lib/markdown/runtime/svelteRuntime";
   import { goto } from "$app/navigation";
-  import { clientController } from "$lib/controllers/ClientController";
+    import { useClient } from "../client/ClientContext.svelte";
 
   const EVENTS = {
     close_dm: ["confirm_close_dm", "close"],
@@ -27,23 +27,24 @@
   >;
   }
 
+  const client = useClient();
   let { props }: Props = $props();
-  const event = EVENTS[props.type];
-  let name: string | undefined | null = $state();
-  switch (props.type) {
-    case "unfriend_user":
-    case "block_user":
-      name = props.target.username;
-      break;
-    case "close_dm":
-      name = props.target.recipient?.username;
-      break;
-    case "delete_bot":
-      name = props.name;
-      break;
-    default:
-      name = props.target.name;
-  }
+  const event = $derived(EVENTS[props.type]);
+  let name = $derived.by(()=>{
+    switch (props.type) {
+      case "unfriend_user":
+      case "block_user":
+        return props.target.username;
+      case "close_dm":
+        return props.target.recipient?.username;
+      case "delete_bot":
+        return props.name;
+      default:
+        return props.target.name;
+    }
+  });
+
+  const submitSnippet = createTextSnippet(()=>$t(`app.special.modals.actions.${event[1]}`))
 </script>
 
 <DialogForm
@@ -67,21 +68,21 @@
         if (props.type != "delete_channel") await goto("/");
         break;
       case "delete_bot":
-        clientController.availableClient.bots.delete(props.target);
+        client.bots.delete(props.target);
         props.cb?.();
         break;
     }
   }}
   submit={{
     palette: "error",
-    children: $t(`app.special.modals.actions.${event[1]}`),
+    children: submitSnippet,
   }}
 >
   {#snippet description()}
+    {#snippet boldName()}<b>{name}</b>{/snippet}
     <TextSvelte
       id="app.special.modals.prompt.{event[0]}_long"
-      fields={{ name: createElement("b", null, name) }}
-      
+      fields={{ name: boldName}}
     />
   {/snippet}
 </DialogForm>

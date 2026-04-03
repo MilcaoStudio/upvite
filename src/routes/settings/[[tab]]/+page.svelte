@@ -1,16 +1,12 @@
 <script lang="ts">
-    import { run } from 'svelte/legacy';
-
     import Appearance from "$lib/components/settings/personal/appearance.svelte";
     import Profile from "$lib/components/settings/personal/profile.svelte";
     import Scroller from "$lib/components/settings/common/scroller.svelte";
     import Item from "$lib/components/settings/common/buttonSimple.svelte";
     import Category from "$lib/components/settings/common/category.svelte";
 
-    import { onDestroy, type ComponentType } from "svelte";
+    import { type Component, } from "svelte";
     import ScrollerContent from "$lib/components/settings/common/scrollerContent.svelte";
-    import { state } from "$lib/State";
-    import { modalController } from "$lib/components/modals/ModalController";
     import Tf2 from "$lib/components/settings/personal/tf2.svelte";
     import Language from "$lib/components/settings/personal/language.svelte";
     import {
@@ -19,18 +15,13 @@
         GIT_REVISION,
         REPO_URL,
     } from "$lib/revision";
-    import {
-        clientController,
-        useClient,
-    } from "$lib/controllers/ClientController";
     import Account from "$lib/components/settings/personal/account.svelte";
     import Chat from "$lib/components/settings/personal/chat.svelte";
     import Notifications from "$lib/components/settings/personal/notifications.svelte";
     import Devmode from "$lib/components/settings/personal/devmode.svelte";
-    import { Viewport } from "$lib/stores/Layout.js";
+    import { Viewport } from "$lib/components/state/stores/Layout.js";
     import SettingsMenu from "$lib/components/settings/common/SettingsMenu.svelte";
     import { t } from "svelte-i18n";
-    import { autorun } from "mobx";
     import Row from "$lib/components/atoms/layout/Row.svelte";
     import CloseButton from "$lib/components/settings/common/CloseButton.svelte";
     import UprisingApp from "$lib/components/UprisingApp.svelte";
@@ -38,13 +29,16 @@
     import Header from "$lib/components/atoms/Header.svelte";
     import IconButton from "$lib/components/atoms/input/IconButton.svelte";
     import { goto } from "$app/navigation";
-    import { navigating } from "$app/stores";
     import LeftArrow from "svelte-boxicons/BxLeftArrowAlt.svelte";
     import RightArrow from "svelte-boxicons/BxRightArrowAlt.svelte";
     import LineDivider from "$lib/components/atoms/LineDivider.svelte";
     import LogOut from "svelte-boxicons/BxLogOut.svelte";
+    import { useClient, useClientController } from "$lib/components/client/ClientContext.svelte";
+    import { useState } from "$lib/components/state/StateContext.svelte";
+    import { navigating } from "$app/state";
+    import type { PageData } from "./$types";
 
-    const Pages: Record<string, ComponentType> = {
+    const Pages: Record<string, Component> = {
         account: Account,
         profile: Profile,
         appearance: Appearance,
@@ -54,41 +48,37 @@
         devmode: Devmode,
         tf2: Tf2,
     };
-    const client = useClient();
+
     interface Props {
-        data: any;
+        data: PageData;
     }
 
     let { data }: Props = $props();
-    let isTouch = $derived(isTouchscreenDevice() && state.layout.getViewport() != Viewport.LARGE);
-    let history: string[] = $state([state.layout.getLastPath()]);
+    
+    const client = useClient();
+
+    let clientController = useClientController();
+    let layout = useState().layout;
+    let tab = $derived(data.tab);
+    let isTouch = $derived(isTouchscreenDevice() && layout.getViewport() != Viewport.LARGE);
+    let history: string[] = $state.raw([layout.getLastPath()]);
 
     let index = $state(0);
-    let nav_sub = navigating.subscribe((nav) => {
+
+    $effect(()=>{
         if(!isTouch) return;
-        if (nav && nav.to && nav.to.url.pathname != history[index]) {
+        if (navigating.to && navigating.to.url.pathname != history[index]) {
             index++;
-            history[index] = nav.to.url.pathname;
+            history[index] = navigating.to.url.pathname;
         }
     });
 
-    onDestroy(nav_sub);
-    let tab;
-    run(() => {
-        tab = data.tab;
-    });
-
-    if (tab) {
-        history.push("/settings");
-        index++;
-    }
-    let isVertical = $state(state.layout.getViewport() == Viewport.SMALL);
-    run(() => {
-        autorun(() => {
-            isVertical = state.layout.getViewport() == Viewport.SMALL;
-        });
-    });
-    run(() => {
+    let isVertical = $derived(layout.getViewport() == Viewport.SMALL);
+    $effect(()=>{
+        if (tab) {
+            history.push("/settings");
+            index++;
+        }
         if (!tab && !isVertical) {
             tab = "account";
         }

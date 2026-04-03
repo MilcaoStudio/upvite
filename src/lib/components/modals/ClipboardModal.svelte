@@ -12,6 +12,8 @@
     let { props }: Props = $props();
 </script>
 
+{#snippet closeText()}{$t("app.special.modals.actions.close")}{/snippet}
+
 <Dialog
     {...props}
     title={$t("app.special.modals.clipboard.unavailable")}
@@ -19,16 +21,14 @@
         {
             onClick: noopTrue,
             confirmation: true,
-            children: $t("app.special.modals.actions.close"),
+            children: closeText,
         },
     ]}
 >
     {#snippet description()}
-    
             {#if location.protocol != "https:"}
                 {$t("app.special.modals.clipboard.https")}
             {/if}
-        
     {/snippet}
     {$t("app.special.modals.clipboard.copy")}
     <code style:user-select="all" style:word-break="break-all">

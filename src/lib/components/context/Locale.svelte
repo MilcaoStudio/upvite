@@ -6,18 +6,18 @@
   import { setContext } from "svelte";
   import { Languages } from "../../../lang/Languages";
   import { defaultDictionary, type Dictionary, transformLanguage, dayjs, defaultLocale } from "$lib/i18n";
-  import { state } from "$lib/State";
-  import { findLanguage } from "$lib/stores/LocaleOptions";
+  import { findLanguage } from "$lib/components/state/stores/LocaleOptions";
   import { autorun } from "mobx";
+    import { useState } from '../state/StateContext.svelte';
   interface Props {
     children?: import('svelte').Snippet;
   }
 
   let { children }: Props = $props();
     
-
+  let appState = useState();
   let definitions: Dictionary = $state(defaultDictionary);
-  let lang = state.locale.getLanguage();
+  let lang = appState.locale.getLanguage();
   let source = Languages[lang];
 
   if (browser) {
@@ -60,15 +60,15 @@
     definitions = defn;
   });
 
-  run(() => {
-    autorun(()=>{
-      locale.set(state.locale.getLanguage())
-    })
+  $effect(() => {
+      locale.set(appState.locale.getLanguage())
   });
-  run(() => {
+  $effect(() => {
     definitions && setContext('dictionary', definitions);
   });
-  let document.body.style.direction = $derived(source.rtl ? "rtl" : "");
+  $effect(()=>{
+    document.body.style.direction = source.rtl ? "rtl" : "";
+  });
 </script>
 
 {#await loadLanguage($locale || defaultLocale) then }

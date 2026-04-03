@@ -1,10 +1,10 @@
 <script lang="ts">
+    import { useClientController } from '$lib/components/client/ClientContext.svelte';
   import LoginForm from '$lib/components/form/LoginForm.svelte';
-  import { clientController } from '$lib/controllers/ClientController';
   import { _ } from 'svelte-i18n';
 </script>
 
-<LoginForm type="login" callback={clientController.login}>
+<LoginForm type="login" callback={useClientController().login}>
   <span class="create">
     {$_('login.new') + ' '}
     <a href="/login/create">

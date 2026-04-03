@@ -1,11 +1,11 @@
 <script>
+    import { useClient, useClientController } from '$lib/components/client/ClientContext.svelte';
     import LoginForm from '$lib/components/form/LoginForm.svelte';
-    import { clientController, useClient } from '$lib/controllers/ClientController';
     import { _ } from 'svelte-i18n'
     const client = useClient();
 </script>
 
-<LoginForm type="create" callback={(data) =>client.account.create(data).then(_=>clientController.login(data))}>
+<LoginForm type="create" callback={(data) =>client.account.create(data).then(_=>useClientController().login(data))}>
    <span class="create">
     {$_('login.existing')+' '}
     <a href="/login">{$_('login.title')}</a>

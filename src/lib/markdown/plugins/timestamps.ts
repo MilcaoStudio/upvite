@@ -1,6 +1,6 @@
 import type { Handler } from "mdast-util-to-hast";
 
-import { createComponent } from "./remarkRegex";
+import { createRemarkPlugin } from "./remarkRegex";
 import { dayjs } from "$lib/i18n";
 
 export const timestampHandler: Handler = (s, { match, arg1 }) => {
@@ -32,7 +32,7 @@ export const timestampHandler: Handler = (s, { match, arg1 }) => {
     return {type: "element", tagName: "code", properties: {}, children: [{ type: "text", value }]}
 };
 
-export const remarkTimestamps = createComponent(
+export const remarkTimestamps = createRemarkPlugin(
     "timestamp",
     /<t:([0-9]+)(?::(\w))?>/g,
 );

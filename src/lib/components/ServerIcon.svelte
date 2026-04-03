@@ -15,12 +15,10 @@
         attachment = undefined,
         size,
         animate = false,
-        server_name = ''
+        server_name = '',
+        ...props
     }: Props = $props();
-    const iconURL = animate ? (target?.animatedIconURL || attachment?.createFileURL(true)) : (target?.iconURL || attachment?.createFileURL());
-
-    const name = target?.name ?? server_name;
+    const iconURL = $derived(animate ? (target?.animatedIconURL || attachment?.createFileURL(true)) : (target?.iconURL || attachment?.createFileURL()));
+    const name = $derived(target?.name ?? server_name);
 </script>
-<!--
-<PersonPicture class="ServerText" src={iconURL} alt={name} {size} {...$$restProps} />
--->
+<PersonPicture class="ServerText" src={iconURL} alt={name} {size} {...props} />

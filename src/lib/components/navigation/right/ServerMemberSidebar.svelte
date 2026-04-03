@@ -1,29 +1,26 @@
 <script lang="ts">
-    import { run } from 'svelte/legacy';
-
     import type { Channel } from "stoat.js";
     import GenericSidebarBase from "../GenericSidebarBase.svelte";
     import MemberList from "./MemberList.svelte";
     import { fetchMembers } from "$lib/MemberList";
-    import { useClient, useSession } from "$lib/controllers/ClientController";
-    import { writable } from "svelte/store";
+    import { useClient } from '$lib/components/client/ClientContext.svelte';
 
     interface Props {
-        channel?: Channel | undefined;
+        channel: Channel;
     }
 
-    let { channel = undefined }: Props = $props();
+    let { channel }: Props = $props();
     const FETCHED = new Set;
     const client = useClient();
-    let entries = fetchMembers(
-            channel!,
+    let entries = $derived(fetchMembers(
+            channel,
             async () => {
                 await channel?.server?.syncMembers(false);
                 return client.serverMembers.filter((members) => members.id.server == channel?.serverId);
             },
-        );
-    let server_id = channel?.serverId;
-    run(() => {
+        ));
+    let server_id = $derived(channel?.serverId);
+    $effect(() => {
         if (server_id && client.ready() && !FETCHED.has(server_id)) {
             FETCHED.add(server_id);
             channel?.server?.syncMembers(false).catch(()=>FETCHED.delete(server_id));

@@ -1,18 +1,17 @@
 <script lang="ts">
-    import { getRenderer } from "$lib/rendered/Singleton";
+    import { getRenderer } from "$lib/rendered/Singleton.svelte";
     import type { Channel } from "stoat.js";
     import Bar from "./Bar.svelte";
     import { internalEmit } from "$lib/InternalEmitter";
     import { t } from "svelte-i18n";
     import BxDownArrowAlt from "svelte-boxicons/BxDownArrowAlt.svelte";
-    import { state } from "$lib/State";
 
     interface Props {
         channel: Channel;
     }
 
     let { channel }: Props = $props();
-    let renderer = getRenderer(channel, state);
+    let renderer = $derived(getRenderer(channel));
 </script>
 
 {#if renderer.state == "RENDER" && !renderer.atBottom}

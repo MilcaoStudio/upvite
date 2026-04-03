@@ -1,19 +1,15 @@
 <script lang="ts">
-    import { run } from 'svelte/legacy';
 
     import { dayjs } from "$lib/i18n";
-    import TextSvelte from "$lib/i18n/TextSvelte.svelte";
+    import TextSvelte, { createTextSnippet } from "$lib/i18n/TextSvelte.svelte";
     import { _ } from "svelte-i18n";
-    import { useClient } from "$lib/controllers/ClientController";
-    import { useClient as useMockClient } from "../mock/MockClient";
     import BxHappyBeaming from "svelte-boxicons/BxHappyBeaming.svelte";
     import BxSend from "svelte-boxicons/BxSend.svelte";
     import BxShieldX from "svelte-boxicons/BxShieldX.svelte";
-    import type { DraftObject } from "$lib/stores/Draft";
-    import { state } from "$lib/State";
+    import type { DraftObject } from "$lib/components/state/stores/Draft";
     import { internalEmit, internalSubscribe } from "$lib/InternalEmitter";
     import { ulid } from "ulid";
-    import type { Reply } from "$lib/stores/MessageQueue";
+    import type { Reply } from "$lib/components/state/stores/MessageQueue";
     import type { API, Channel } from "stoat.js";
     import {
         CAN_UPLOAD_AT_ONCE,
@@ -26,23 +22,21 @@
     import {
         SMOOTH_SCROLL_ON_RECEIVE,
         getRenderer,
-    } from "$lib/rendered/Singleton";
-    import { getRenderer as getMockRenderer } from "../mock/MockRenderer";
+    } from "$lib/rendered/Singleton.svelte";
     import { debounce, defer, isTouchscreenDevice, takeError } from "$lib";
     import Autocomplete, { useAutoComplete } from "../Autocomplete.svelte";
     import PermissionTooltip from "../atoms/PermissionTooltip.svelte";
     import { Checkbox, Flyout } from "fluent-svelte";
     import IconButton from "../atoms/input/IconButton.svelte";
     import Picker from "../atoms/media/Picker.svelte";
-    import { autorun } from "mobx";
     import FileUploader from "$lib/controllers/FileUploader.svelte";
     import { grabFiles, uploadFile } from "$lib/types/FileUpload";
     import FilePreview from "./bars/FilePreview.svelte";
     import { modalController } from "../modals/ModalController";
     import ReplyBar from "./bars/ReplyBar.svelte";
-    import TextEditor from "../atoms/input/TextEditor.svelte";
-    import { orderingStore } from "$lib/stores/Ordering";
     import TextAreaAutoSize from "../atoms/TextAreaAutoSize.svelte";
+    import { useClient } from "../client/ClientContext.svelte";
+    import { useState } from "../state/StateContext.svelte";
 
     interface Props {
         channel: Channel;
@@ -50,12 +44,14 @@
     }
 
     let { channel, mock = false }: Props = $props();
-    const client = mock ? useMockClient() : useClient();
+    //const client = mock ? useMockClient() : useClient();
+    let client = useClient();
+    let { draft, queue, ordering } = useState();
     let uploadState: UploadState = $state({ type: "none" });
     let replies: Reply[] = $state([]);
-    let typing = 0;
+    let typing = $state(0);
 
-    let value = $state("");
+    let value = $derived(draft.get(channel.id)?.content ?? "");
     const Base = cx(
         "MessageBox",
         css`
@@ -132,9 +128,11 @@
     // Tests for code block delimiters (``` at start of line)
     const RE_CODE_DELIMITER = new RegExp("^```", "gm");
 
+    /*
     const renderer = mock
-        ? getMockRenderer(channel, state)
-        : getRenderer(channel, state);
+        ? getMockRenderer(channel)
+        : getRenderer(channel);*/
+    let renderer = $derived(getRenderer(channel));
 
     function startTyping() {
         if (mock) return;
@@ -166,7 +164,7 @@
 
     let setMessage = function (content?: string) {
         const dobj: DraftObject = { content };
-        state.draft.set(channel.id, dobj);
+        draft.set(channel.id, dobj);
         value = content ?? value;
     };
 
@@ -179,10 +177,10 @@
                       .join("\n")}\n\n`
                 : `${content} `;
 
-        if (!state.draft.has(channel.id)) {
+        if (!draft.has(channel.id)) {
             setMessage(text);
         } else {
-            setMessage(`${state.draft.get(channel.id)?.content} ${text}`);
+            setMessage(`${draft.get(channel.id)?.content} ${text}`);
         }
     }
 
@@ -198,7 +196,7 @@
     function mockSend() {
         if (uploadState.type == "uploading" || uploadState.type == "sending")
             return;
-        const content = state.draft.get(channel.id)?.content?.trim() ?? "";
+        const content = draft.get(channel.id)?.content?.trim() ?? "";
         if (uploadState.type != "none") {
             return mockSendFile(content);
         }
@@ -221,7 +219,7 @@
         } else {
             //state.settings.sounds.playSound("outbound");
 
-            state.queue.add(nonce, channel.id, {
+            queue.add(nonce, channel.id, {
                 _id: nonce,
                 channel: channel.id,
                 author: client.user!.id,
@@ -248,7 +246,7 @@
                     }),
                 );
             } catch (error) {
-                state.queue.fail(nonce, takeError(error));
+                queue.fail(nonce, takeError(error));
             }
         }
     }
@@ -414,7 +412,7 @@
     async function send() {
         if (uploadState.type == "uploading" || uploadState.type == "sending")
             return;
-        const content = state.draft.get(channel.id)?.content?.trim() ?? "";
+        const content = draft.get(channel.id)?.content?.trim() ?? "";
         if (uploadState.type != "none") {
             return sendFile(content);
         }
@@ -434,7 +432,7 @@
         } else {
             //state.settings.sounds.playSound("outbound");
 
-            state.queue.add(nonce, channel.id, {
+            queue.add(nonce, channel.id, {
                 _id: nonce,
                 channel: channel.id,
                 author: client.user!.id,
@@ -452,7 +450,7 @@
                     replies: messageReplies,
                 });
             } catch (error) {
-                state.queue.fail(nonce, takeError(error));
+                queue.fail(nonce, takeError(error));
             }
         }
     }
@@ -552,57 +550,52 @@
     }
 
     let {
-        onChange,
-        onKeyUp,
-        onKeyDown,
-        onFocus,
-        onBlur,
+        onchange,
+        onblur,
+        onfocus,
+        onkeydown,
+        onkeyup,
         ...autoCompleteProps
-    } = useAutoComplete(setMessage, {
-        users: { type: "channel", id: channel.id },
-        channels:
-            channel.type == "TextChannel"
-                ? { server: channel.serverId }
-                : undefined,
-    });
+    } = $derived(
+        useAutoComplete(setMessage, {
+            users: { type: "channel", id: channel.id },
+            channels:
+                channel.type == "TextChannel"
+                    ? { server: channel.serverId }
+                    : undefined,
+        }),
+    );
 
-    let servers = orderingStore.orderedServers;
+    let servers = $derived(ordering.orderedServers);
 
     let emojis: Record<string, EmojiInfo[]> = $state({});
     let categories: EmojiCategory[] = $state([]);
-    run(() => {
-        autorun(() => {
-            value = state.draft.get(channel.id)?.content ?? "";
-        });
-    });
-    let debounceStopTyping = $derived(debounce(stopTyping, 1000));
-    run(() => {
-        autorun(() => {
-            categories = [];
-            for (const server of $servers) {
-                // ! FIXME: add a separate map on each server for emoji
-                const list = [...client.emojis.values()]
-                    .filter(
-                        (emoji) =>
-                            emoji.parent.type != "Detached" &&
-                            emoji.parent.id == server.id,
-                    )
-                    .map(({ id, name }) => ({ id, name }));
+    let debounceStopTyping = debounce(stopTyping, 1000);
+    $effect(() => {
+        categories = [];
+        for (const server of servers) {
+            // ! FIXME: add a separate map on each server for emoji
+            const list = [...client.emojis.values()]
+                .filter(
+                    (emoji) =>
+                        emoji.parent.type != "Detached" &&
+                        emoji.parent.id == server.id,
+                )
+                .map(({ id, name }) => ({ id, name }));
 
-                if (list.length) {
-                    emojis[server.id] = list;
-                    categories.push({
-                        id: server.id,
-                        name: server.name,
-                        iconURL: server.animatedIconURL,
-                    });
-                }
+            if (list.length) {
+                emojis[server.id] = list;
+                categories.push({
+                    id: server.id,
+                    name: server.name,
+                    iconURL: server.animatedIconURL,
+                });
             }
-            categories.push({
-                id: "default",
-                name: "Default",
-                emoji: "smiley",
-            });
+        }
+        categories.push({
+            id: "default",
+            name: "Default",
+            emoji: "smiley",
         });
     });
 </script>
@@ -619,9 +612,9 @@
                 <TextSvelte
                     id="app.main.channel.misc.timed_out"
                     fields={{
-                        time: dayjs(
-                            channel.server.member.timeout,
-                        ).toISOString(),
+                        time: createTextSnippet(()=>dayjs(
+                            channel?.server?.member?.timeout,
+                        ).toISOString()),
                     }}
                 />
             </div>
@@ -641,7 +634,7 @@
         </div>
     </div>
 {:else}
-    <Autocomplete {...autoCompleteProps} />
+    <Autocomplete  {...autoCompleteProps} />
     <FilePreview
         state={uploadState}
         addFile={() => {
@@ -731,18 +724,18 @@
                 setMessage(e.currentTarget.value);
                 startTyping();
                 const t = e.currentTarget;
-                onChange(t.value, t.selectionStart, t.selectionEnd);
+                onchange(t.value, t.selectionStart, t.selectionEnd);
             }}
-            {onKeyUp}
+            onKeyUp={onkeyup}
             onKeyDown={(e) => {
                 if (e.ctrlKey && e.key == "Enter") {
                     e.preventDefault();
                     return send();
                 }
 
-                if (onKeyDown(e)) return;
+                if (onkeydown(e)) return;
 
-                if (e.key == "ArrowUp" && !state.draft.has(channel.id)) {
+                if (e.key == "ArrowUp" && !draft.has(channel.id)) {
                     e.preventDefault();
                     internalEmit("MessageRenderer", "edit_last");
                     return;
@@ -777,8 +770,8 @@
 
                 debounceStopTyping(true);
             }}
-            {onFocus}
-            {onBlur}
+            onFocus={onfocus}
+            onBlur={onblur}
             disabled={uploadState.type == "uploading" ||
                 uploadState.type == "sending"}
         />
@@ -788,13 +781,12 @@
                     <BxHappyBeaming size={24} />
                 </IconButton>
                 {#snippet override()}
-                                        <Picker
+                    <Picker
                         {categories}
                         {emojis}
                         onSelect={(emoji) => append(`:${emoji}:`, "mention")}
-                        
                     />
-                                    {/snippet}
+                {/snippet}
             </Flyout>
         </div>
         <div class={Action}>

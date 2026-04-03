@@ -10,7 +10,7 @@
 
 import type { HTMLButtonAttributes, HTMLSelectAttributes } from "svelte/elements";
 import type { CheckBoxProps, ColorSelectProps, InputBoxProps, RadioProps, TextAreaProps } from "./Inputs";
-import { type SvelteComponent } from "svelte";
+import { type Snippet, type SvelteComponent } from "svelte";
 import type { Action, Modal, ModalProps } from "./Modal";
 import type { SvelteElement } from "$lib/markdown/runtime/svelteRuntime";
 import type { FileUploaderProps } from "./FileUpload";
@@ -27,14 +27,14 @@ export type Type =
     | "combo"
     | "radio"
     | "textarea"
-    | "custom"
+    | "snippet"
     | "file";
 
 /**
  * Get default value
  */
 export function emptyValue(type: Type) {
-    return type == "custom" ? undefined : type == "checkbox" ? false : "";
+    return type == "checkbox" ? false : "";
 }
 
 /**
@@ -70,7 +70,7 @@ type Metadata = {
         };
     };
     textarea: { value: string; props: TextAreaProps };
-    custom: { value: never; props: { element: SvelteElement } };
+    snippet: { value: Snippet; props: undefined };
     file: { value: string, props: FileUploaderProps}
 };
 
@@ -162,7 +162,7 @@ export interface FormProps<T extends FormTemplate> {
     /**
      * Custom form layout
      */
-    children?: SvelteComponent;
+    children?: Snippet;
 }
 
 /**
@@ -186,7 +186,7 @@ export function getInitialValues<T extends FormTemplate>(
     return values as MapFormToValues<T>;
 }
 
-export type FormContext = Pick<FormProps<any>, "schema" | "disabled" | "onChange" | "data"> & {
+export type FormContext = Pick<FormProps<Record<string, any>>, "schema" | "disabled" | "onChange" | "data"> & {
     values: Writable<Record<string, any>>;
 }
 

@@ -1,23 +1,24 @@
 <script lang="ts">
     import { chainedDefer } from "$lib";
     import { internalEmit } from "$lib/InternalEmitter";
-    import { state } from "$lib/State";
     import IconButton from "$lib/components/atoms/input/IconButton.svelte";
     import Group from "svelte-boxicons/BxGroup.svelte";
     import UserPlus from "svelte-boxicons/BxUserPlus.svelte";
     import Cog from "svelte-boxicons/BxCog.svelte";
-    import { SIDEBAR_MEMBERS, Viewport } from "$lib/stores/Layout";
+    import { SIDEBAR_MEMBERS, Viewport } from "$lib/components/state/stores/Layout";
     import type { Channel } from "stoat.js";
     import { modalController } from "$lib/components/modals/ModalController";
 
     import VoiceActions from "./VoiceActions.svelte";
+    import { useState } from "$lib/components/state/StateContext.svelte";
 
     interface Props {
         channel: Channel;
     }
 
     let { channel }: Props = $props();
-    let isVertical = state.layout.getViewport() == Viewport.SMALL;
+    const layout = useState().layout;
+    let isVertical = $derived(layout.isVertical);
     function slideOpen() {
         if (!isVertical) return;
         const panels = document.querySelector(".snap");
@@ -29,7 +30,7 @@
 
     function openMembers() {
         if (!isVertical) {
-            state.layout.toggleSectionState(SIDEBAR_MEMBERS, true);
+            layout.toggleSectionState(SIDEBAR_MEMBERS, true);
         }
 
         slideOpen();

@@ -1,5 +1,3 @@
-import type State from "$lib/State";
-import { clientController, useClient } from "$lib/controllers/ClientController";
 import { reorder } from "$lib/dnd";
 import type Persistent from "$lib/types/Persistent";
 import type Syncable from "$lib/types/Syncable";
@@ -7,6 +5,7 @@ import { action, computed, makeAutoObservable } from "mobx";
 import type { Server } from "stoat.js";
 import { BaseStore } from "./Store";
 import { derived, get } from "svelte/store";
+import { useClient } from "$lib/components/client/ClientContext.svelte";
 
 export interface OrderingData {
     servers: string[];
@@ -20,13 +19,12 @@ export default class Ordering implements Persistent<OrderingData>, Syncable {
     /**
      * Ordered list of server IDs
      */
-    private servers: string[];
+    private servers: string[] = $state([]);
 
     /**
      * Construct new Layout store.
      */
     constructor() {
-        this.servers = [];
         makeAutoObservable(this);
         this.reorderServer = this.reorderServer.bind(this);
     }

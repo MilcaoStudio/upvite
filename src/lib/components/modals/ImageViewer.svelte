@@ -1,15 +1,16 @@
 <script lang="ts">
     import type { ModalProps } from "$lib/types/Modal";
     import Modal from "./Modal.svelte";
-    import { clientController } from "$lib/controllers/ClientController";
     import AttachmentActions from "../messaging/attachments/AttachmentActions.svelte";
     import EmbedActions from "../messaging/embed/EmbedActions.svelte";
+    import { useClient } from "../client/ClientContext.svelte";
     interface Props {
         props: ModalProps<"image_viewer">;
     }
 
     let { props }: Props = $props();
-    let { attachment, embed } = props;
+    let { attachment, embed } = $derived(props);
+    const client = useClient();
 </script>
 
 <Modal {...props}>
@@ -27,7 +28,7 @@
                 <img
                     loading="eager"
                     alt={embed.size}
-                    src={clientController.availableClient.proxyFile(embed.url)}
+                    src={client.proxyFile(embed.url)}
                     width={embed.width}
                     height={embed.height}
                 />

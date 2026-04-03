@@ -1,16 +1,18 @@
 <script lang="ts">
-    import { state } from "$lib/State";
     import type { ModalProps } from "$lib/types/Modal";
     import { t } from "svelte-i18n";
     import Dialog from "./Dialog.svelte";
     import { noopTrue } from "$lib";
+    import { useState } from "../state/StateContext.svelte";
+    import { createTextSnippet } from "$lib/i18n/TextSvelte.svelte";
 
     interface Props {
         props: ModalProps<"link_warning">;
     }
 
     let { props }: Props = $props();
-    const settings = state.settings;
+    const settings = useState().settings;
+
 </script>
 
 <Dialog
@@ -21,12 +23,12 @@
             onClick: props.callback,
             confirmation: true,
             palette: "accent",
-            children: "Continue",
+            children: createTextSnippet(()=>$t("app.special.modals.actions.continue")),
         },
         {
             onClick: noopTrue,
             confirmation: false,
-            children: "Cancel",
+            children: createTextSnippet(()=>$t("app.special.modals.actions.cancel")),
         },
         {
             onClick: () => {
@@ -38,7 +40,7 @@
                 return props.callback();
             },
             palette: "plain",
-            children: $t("app.special.modals.external_links.trust_domain"),
+            children: createTextSnippet(()=>$t("app.special.modals.external_links.trust_domain")),
         },
     ]}
 >

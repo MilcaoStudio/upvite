@@ -1,7 +1,5 @@
 <script lang="ts">
-    import { run } from 'svelte/legacy';
-
-    import { type Permission, type Channel, Server, type API } from "stoat.js";
+    import { type Permission, type Channel, Server } from "stoat.js";
     import Long from "long";
     import OverrideSwitch from "$lib/components/atoms/input/OverrideSwitch.svelte";
     import type { SwitchState } from "$lib/types/Form";
@@ -23,14 +21,13 @@
         onChange
     }: Props = $props();
 
-    let state: SwitchState = $state("Neutral");
-    run(() => {
+    let state: SwitchState = $derived.by(() => {
         if (Long.fromBigInt(value.d).and(permission).eq(permission)) {
-            state = "Deny";
+            return "Deny";
         } else if (Long.fromBigInt(value.a).and(permission).eq(permission)) {
-            state = "Allow";
+            return "Allow";
         } else {
-            state = "Neutral";
+            return "Neutral";
         }
     });
 

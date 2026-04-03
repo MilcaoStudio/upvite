@@ -1,14 +1,13 @@
-import { page } from "$app/stores";
 import { mapToRecord } from "$lib";
 import { internalEmit, internalSubscribe } from "$lib/InternalEmitter";
-import type State from "$lib/State";
-import { state } from "$lib/State";
 import { modalController } from "$lib/components/modals/ModalController";
-import { clientController } from "$lib/controllers/ClientController";
 import type Persistent from "$lib/types/Persistent";
 import localforage from "localforage";
 import { action, computed, makeAutoObservable, ObservableMap } from "mobx";
 import type { Channel, Server } from "stoat.js";
+import type State from "../State";
+import { useApi, useClient } from "$lib/components/client/ClientContext.svelte";
+import { page } from "$app/state";
 
 type Plugin = PluginInfo & {
     
@@ -99,25 +98,26 @@ export default class Plugins implements Persistent<Data> {
 
     @computed get ctx() {
         let channel: Channel | undefined, server: Server | undefined;
-        page.subscribe(p => {
-            const channel_id = p.params.channel || "";
-            const server_id = p.params.server || "";
+        const client = useClient();
+        
+            const channel_id = page.params.channel || "";
+            const server_id = page.params.server || "";
             try {
-                channel = clientController.availableClient.channels.get(channel_id);
-                server = clientController.availableClient.servers.get(server_id);
+                channel = client.channels.get(channel_id);
+                server = client.servers.get(server_id);
             } catch (err) {}
-        })
+        
         return {
             emit: internalEmit,
             on: internalSubscribe,
-            client: clientController,
-            state: state,
+            client,
+            state: this.state,
             modal: modalController,
-            api: clientController.availableClient.api,
-            configuration: clientController.availableClient.configuration,
+            api: useApi(),
+            configuration: client.configuration,
             channel,
             server,
-            user: clientController.availableClient.user
+            user: client.user
         }
     }
 

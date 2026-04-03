@@ -1,15 +1,14 @@
 <script lang="ts">
-    import JSXRender from "./JSXRender.svelte";
     import Details from "$lib/Details.svelte";
-    import { state } from "$lib/State";
-    import type { SvelteNode } from "$lib/markdown/runtime/svelteRuntime";
     import BxChevronDown from "svelte-boxicons/BxChevronDown.svelte";
+    import type { Snippet } from "svelte";
+    import { useState } from "./state/StateContext.svelte";
 
     interface Props {
         id: string;
         defaultValue: boolean;
-        summary: SvelteNode;
-        children?: import('svelte').Snippet;
+        summary?: Snippet;
+        children?: Snippet;
         [key: string]: any
     }
 
@@ -20,17 +19,15 @@
         children,
         ...rest
     }: Props = $props();
-    const layout = state.layout;
+    const layout = useState().layout;
 </script>
 
-<Details open={layout.getSectionState(id, defaultValue)} onToggle={(e) =>
+<Details open={layout.isSectionOpen(id) ?? defaultValue} ontoggle={(e) =>
     layout.setSectionState(id, e.currentTarget.open, defaultValue)
 } {...rest}>
-    <summary>
-        <div class="padding">
-            <BxChevronDown size={20} />
-            <JSXRender node={summary} />
-        </div>
-    </summary>
+    {#snippet summary()}
+        <BxChevronDown size={20} />
+        {@render summary?.()}
+    {/snippet}
     {@render children?.()}
 </Details>

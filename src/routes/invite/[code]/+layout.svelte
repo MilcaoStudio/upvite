@@ -4,6 +4,6 @@
     let { children } = $props();
 </script>
 
-<CheckAuth blockRender>
+<CheckAuth disableRedirect>
     {@render children?.()}
 </CheckAuth>

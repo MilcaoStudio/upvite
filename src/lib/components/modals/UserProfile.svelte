@@ -1,18 +1,16 @@
 <script lang="ts">
-    import { run } from 'svelte/legacy';
-
     import IconButton from "../atoms/input/IconButton.svelte";
     import Modal from "./Modal.svelte";
     import type { ModalProps } from "$lib/types/Modal";
     import UserHeader from "../user/UserHeader.svelte";
     import Edit from "svelte-boxicons/BxEdit.svelte";
     import Envelope from "svelte-boxicons/BxEnvelope.svelte";
-    import { API, ServerMember, UserPermission, UserProfile } from "stoat.js";
+    import { ServerMember, UserPermission, UserProfile } from "stoat.js";
     import { mapError } from "$lib";
     import H3 from "../atoms/heading/H3.svelte";
     import Markdown from "$lib/markdown/Markdown.svelte";
     import UserBadges from "../user/UserBadges.svelte";
-    import { useClient } from "$lib/controllers/ClientController";
+    import { useClient } from '../client/ClientContext.svelte';
 
     interface Props {
         props: ModalProps<"user_profile">;
@@ -20,9 +18,9 @@
 
     let { props }: Props = $props();
     const client = useClient();
-    let user = $state(client.users.get(props.user_id));
+    let user = $derived(client.users.get(props.user_id));
     let profile: UserProfile | undefined = $state();
-    run(() => {
+    $effect(() => {
         if (!profile) {
             if ((user?.permission || 0) & UserPermission.ViewProfile) {
                     user?.fetchProfile()
@@ -32,7 +30,7 @@
         }
     });
 
-    run(() => {
+    $effect(() => {
         if (!user) {
             client.users.fetch(props.user_id).then((u)=>(user = u)).catch(mapError);
         }
@@ -41,7 +39,7 @@
     let server =
         $derived(props.contextualServer && client.servers.get(props.contextualServer));
     let roles: ServerMember["orderedRoles"] = $state([]);
-    run(() => {
+    $effect(() => {
         if (server && user) {
             server
                 .fetchMember(user)

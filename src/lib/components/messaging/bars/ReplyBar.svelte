@@ -1,13 +1,9 @@
 <script lang="ts">
-    import { run } from 'svelte/legacy';
-
     import { internalSubscribe } from "$lib/InternalEmitter";
-    import { state } from "$lib/State";
-    import { SECTION_MENTION } from "$lib/stores/Layout";
-    import type { Reply } from "$lib/stores/MessageQueue";
+    import { SECTION_MENTION } from "$lib/components/state/stores/Layout";
+    import type { Reply } from "$lib/components/state/stores/MessageQueue";
     import { MAX_REPLIES } from "$lib/types/messaging";
     import type { Message } from "stoat.js";
-    import { onDestroy, onMount } from "svelte";
     import ReplyBase from "../attachments/Reply.svelte";
     import { t } from "svelte-i18n";
     import UserShort from "$lib/components/user/UserShort.svelte";
@@ -17,8 +13,8 @@
     import Tooltip from "$lib/components/atoms/Tooltip.svelte";
     import At from "svelte-boxicons/BxAt.svelte";
     import XCircle from "svelte-boxicons/BxXCircle.svelte";
-    import { useClient } from "$lib/controllers/ClientController";
-
+    import { useClient } from "$lib/components/client/ClientContext.svelte";
+    import { useState } from "$lib/components/state/StateContext.svelte";
     interface Props {
         replies: Reply[];
         setReplies: (replies: Reply[]) => void;
@@ -26,7 +22,7 @@
 
     let { replies = $bindable(), setReplies }: Props = $props();
     let client = useClient();
-    const layout = state.layout;
+    const layout = useState().layout;
 
     // Add new messages to reply bar.
     function addReply(msg: Message) {
@@ -41,28 +37,23 @@
             ...replies,
             {
                 id: msg.id,
-                mention:
-                    msg.authorId == client.user!.id
-                        ? false
-                        : layout.getSectionState(SECTION_MENTION, false),
+                mention: msg.authorId != client.user!.id && (layout.isSectionOpen(SECTION_MENTION) || false),
             },
         ]);
     }
 
-    let unsubscribe: Function;
-    onMount(
-        () =>
-            (unsubscribe = internalSubscribe(
+    $effect(()=>{
+        const unsubscribe = internalSubscribe(
                 "ReplyBar",
                 "add",
                 addReply as () => void,
-            )),
-    );
-    onDestroy(() => unsubscribe?.());
+            );
+        return unsubscribe;
+    });
 
     // Map all the replies to messages we are aware of.
     let messages = $derived(replies.map((x) => client.messages.get(x.id)));
-    run(() => {
+    $effect(() => {
         if (messages.includes(undefined)) {
             setReplies(replies.filter((_, i) => typeof messages[i] != "undefined"));
         }

@@ -46,9 +46,9 @@
         ...rest
     }: Props = $props();
     let ref: HTMLTextAreaElement | undefined = $state();
-    let ghost: HTMLDivElement = $state();
+    let ghost = $state<HTMLDivElement>();
 
-    const AutoSize = cx(
+    const AutoSize = $derived(cx(
         "AutoSize",
         css`
             flex-grow: 1;
@@ -72,11 +72,13 @@
                 }
             }
         `,
-    );
+    ));
     
 
     function growUp() {
-        ghost.dataset.value = ref?.value;
+        if (ghost && ref) {
+            ghost.dataset.value = ref.value;
+        }
     }
 
     function inputSelected() {
@@ -85,12 +87,8 @@
         );
     }
 
-    run(() => {
-        if (forceFocus) {
-            ref?.focus();
-        }
-
-        if (autoFocus && !inputSelected()) {
+    $effect(() => {
+        if (!inputSelected() && (forceFocus || autoFocus)) {
             ref?.focus();
         }
     });

@@ -1,24 +1,15 @@
 <script lang="ts">
-    import { run } from 'svelte/legacy';
-
     import TextAreaAutoSize from "$lib/components/atoms/TextAreaAutoSize.svelte";
     import H3 from "$lib/components/atoms/heading/H3.svelte";
     import FileReader from "$lib/controllers/FileReader.svelte";
     import FileWriter from "$lib/controllers/FileWriter.svelte";
-    import { settings } from "$lib/stores/Settings";
-    import { autorun } from "mobx";
     import { t } from "svelte-i18n";
     import { validateText } from "w3c-css-validator";
+    import { useState } from "$lib/components/state/StateContext.svelte";
 
-    let theme = settings.theme;
-    let value;
-    run(() => {
-        value = theme.getCSS();
-    });
-    let disabled;
-    run(() => {
-        disabled = value?.trim() == theme.getCSS()?.trim();
-    });
+    let theme = useState().settings.theme;
+    let value = $derived(theme.css);
+    let disabled = $derived(value?.trim() == theme.css?.trim());
     let enableValidator = true;
     let showWarnings = true;
     let syncRef: HTMLButtonElement | null = $state(null);

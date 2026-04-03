@@ -1,16 +1,14 @@
 <script module lang="ts">
-    import { useClient } from "$lib/controllers/ClientController";
-
     export function useAutoComplete(
         setValue: (v?: string) => void,
         searchClues?: SearchClues,
     ) {
-        let state: Writable<AutoCompleteState> = writable({ type: "none" });
+        let state = $state<AutoCompleteState>({ type: "none" });
         let focused = false;
         const client = useClient();
-        function onChange(value: string, selectionStart?: number, selectionEnd?: number) {
+        function onchange(value: string, selectionStart?: number, selectionEnd?: number) {
             if (!value) return;
-            let _state = get(state);
+            state;
             const result = searchString(value, selectionStart, selectionEnd);
             if (result) {
                 const [type, search] = result;
@@ -28,19 +26,14 @@
                             switch (channel?.type) {
                                 case "Group":
                                 case "DirectMessage":
-                                    users = channel.recipients!.filter(
-                                        (x) => typeof x !== "undefined",
-                                    ) as User[];
+                                    users = channel.recipients;
                                     break;
                                 case "TextChannel":
                                     {
                                         const server = channel.serverId;
-                                        users = [...client.serverMembers.keys()]
-                                            .map((x) => JSON.parse(x))
-                                            .filter((x) => x.server == server)
-                                            .map((x) =>
-                                                client.users.get(x.user),
-                                            )
+                                        users = [...client.serverMembers.values()]
+                                            .filter((x) => x.id.server == server)
+                                            .map((x) => x.user)
                                             .filter(
                                                 (x) => typeof x != "undefined",
                                             ) as User[];
@@ -62,15 +55,13 @@
                                   user.username.toLowerCase().match(regex),
                               )
                             : users
-                    )
-                        .splice(0, 5)
-                        .filter((x) => typeof x != "undefined");
+                    ).splice(0, 5);
 
                     if (matches.length) {
                         const currentPosition =
-                            _state.type != "none" ? _state.selected : 0;
+                            state.type != "none" ? state.selected : 0;
 
-                        state.set({
+                        state = {
                             type: "user",
                             matches,
                             selected: Math.min(
@@ -78,7 +69,7 @@
                                 matches.length - 1,
                             ),
                             within: false,
-                        });
+                        };
 
                         return;
                     }
@@ -97,15 +88,13 @@
                                   channel.name!.toLowerCase().match(regex),
                               )
                             : channels
-                    )
-                        .splice(0, 5)
-                        .filter((x) => typeof x != "undefined");
+                    ).splice(0, 5);
 
                     if (matches.length) {
                         const currentPosition =
-                            _state.type != "none" ? _state.selected : 0;
+                            state.type != "none" ? state.selected : 0;
 
-                        state.set({
+                        state = {
                             type: "channel",
                             matches,
                             selected: Math.min(
@@ -113,21 +102,20 @@
                                 matches.length - 1,
                             ),
                             within: false,
-                        });
+                        };
 
                         return;
                     }
                 }
             }
-            if (_state.type != "none") {
-                state.set({ type: "none" });
+            if (state.type != "none") {
+                state = { type: "none" };
             }
             setValue(value);
         }
 
-        function selectCurrent(el: HTMLElement) {
+        function selectCurrent(el: Element) {
             console.debug("[selectCurrent] selecting", el);
-            let _state = get(state);
             let value = "", selectionStart = 0, selectionEnd = 0;
             if (el instanceof HTMLDivElement) {
                 value = el.textContent ?? "";
@@ -152,18 +140,18 @@
             } else if (el instanceof HTMLTextAreaElement) {
                 ({value, selectionStart, selectionEnd} = el);
             }
-            if (_state.type != "none") {
+            if (state.type != "none") {
                 const result = searchString(value, selectionStart, selectionEnd);
                 if (result) {
                     const [_type, search, index] = result;
 
                     const content = value.split("");
-                    if (_state.type == "user") {
+                    if (state.type == "user") {
                         content.splice(
                             index,
                             search.length + 1,
                             "<@",
-                            _state.matches[_state.selected].id,
+                            state.matches[state.selected].id,
                             "> ",
                         );
                     } else {
@@ -171,7 +159,7 @@
                             index,
                             search.length + 1,
                             "<#",
-                            _state.matches[_state.selected].id,
+                            state.matches[state.selected].id,
                             "> ",
                         );
                     }
@@ -181,23 +169,22 @@
             }
         }
 
-        function onClick(ev: MouseEvent) {
+        function onclick(ev: MouseEvent) {
             ev.preventDefault();
             const el: HTMLElement = document.querySelector("#message")!;
             selectCurrent(el);
             focused = false;
         }
 
-        function onKeyDown(e: KeyboardEvent) {
-            let _state = get(state);
-            if (focused && _state.type != "none") {
+        function onkeydown(e: KeyboardEvent) {
+            if (focused && state.type != "none") {
                 if (e.key == "ArrowUp") {
                     e.preventDefault();
-                    if (_state.selected > 0) {
-                        state.update(state=>({
+                    if (state.selected > 0) {
+                        state = {
                             ...state,
-                            selected: state.type != "none" ? state.selected - 1 : 0,
-                        }));
+                            selected: state.selected - 1,
+                        };
                     }
 
                     return true;
@@ -205,11 +192,11 @@
 
                 if (e.key == "ArrowDown") {
                     e.preventDefault();
-                    if (_state.selected < _state.matches.length - 1) {
-                        state.update(state=>({
+                    if (state.selected < state.matches.length - 1) {
+                        state ={
                             ...state,
-                            selected: state.type != "none" ? state.selected + 1 : 0,
-                        }));
+                            selected: state.selected + 1,
+                        };
                     }
 
                     return true;
@@ -227,36 +214,37 @@
             return false;
         }
 
-        function onKeyUp(
+        function onkeyup(
             e: KeyboardEvent & { currentTarget: HTMLTextAreaElement },
         ) {
             if (e.currentTarget) {
-                onChange(e.currentTarget.value, e.currentTarget.selectionStart, e.currentTarget.selectionEnd);
+                onchange(e.currentTarget.value, e.currentTarget.selectionStart, e.currentTarget.selectionEnd);
             }
         }
 
-        function onFocus(
-            ev?: FocusEvent & { currentTarget: HTMLElement },
-        ) {
+        function onfocus() {
             console.debug("focus", true);
             focused = true;
         }
 
-        function onBlur() {
-            let _state = get(state);
-            if (_state.type != "none" && _state.within) return;
+        function onblur() {
+            if (state.type != "none" && state.within) return;
             console.debug("blur", false);
             focused = false;
         }
 
+        function useAutoCompleteState() {
+            return state;
+        }
+
         return {
-            state,
-            onClick,
-            onChange,
-            onKeyUp,
-            onKeyDown,
-            onFocus,
-            onBlur,
+            useAutoCompleteState,
+            onclick,
+            onchange,
+            onkeyup,
+            onkeydown,
+            onfocus,
+            onblur,
         };
     }
 
@@ -302,7 +290,7 @@
 </script>
 
 <script lang="ts">
-    import type { AutoCompleteState, SearchClues } from "$lib/types/messaging";
+    import { isNoneAutoComplete, type AutoCompleteState, type SearchClues } from "$lib/types/messaging";
     import { css, cx } from "@emotion/css";
     import type { Channel, User } from "stoat.js";
     import type {
@@ -310,16 +298,17 @@
     } from "svelte/elements";
     import UserIcon from "./user/UserIcon.svelte";
     import ChannelIcon from "./channels/ChannelIcon.svelte";
-    import { get, writable, type Writable } from "svelte/store";
+    import { useClient } from "./client/ClientContext.svelte";
 
     interface Props {
         detached?: boolean;
-        state: Writable<AutoCompleteState>;
-        onClick: MouseEventHandler<HTMLButtonElement>;
+        useAutoCompleteState: ()=>AutoCompleteState;
+        onclick: MouseEventHandler<HTMLButtonElement>;
     }
 
-    let { detached = false, state, onClick }: Props = $props();
-    const Base = cx(
+    let { detached = false, useAutoCompleteState, onclick }: Props = $props();
+    let currentState = $derived(useAutoCompleteState());
+    const Base = $derived(cx(
         "AutoComplete",
         css`
             position: relative;
@@ -369,33 +358,41 @@
                 }
             }
         `,
-    );
+    ));
 
 
+    function onmouseleave() {
+        if (isNoneAutoComplete(currentState)) return;
+        if (currentState.within) {
+            currentState = {
+                ...currentState,
+                within: false,
+            };
+        }
+    }
+
+    function onmouseenter(i: number) {
+        if (isNoneAutoComplete(currentState)) return;
+        if (i != currentState.selected || !currentState.within) {
+            currentState = {
+                ...currentState,
+                selected: i,
+                within: true,
+            };
+        }
+    }
 </script>
 
 
 <div class={Base}>
     <div>
-        {#if $state.type == "user"}
-            {#each $state.matches as match, i (match.id)}
+        {#if currentState.type == "user"}
+            {#each currentState.matches as match, i (match.id)}
                 <button
-                    class:active={i == $state.selected}
-                    onmouseenter={() => {
-                        (i != $state.selected || !$state.within) &&
-                            state.update(_state=>({
-                                ..._state,
-                                selected: i,
-                                within: true,
-                            }));
-                    }}
-                    onmouseleave={() =>
-                        $state.within &&
-                        state.update(_state =>({
-                            ..._state,
-                            within: false,
-                        }))}
-                    onclick={onClick}
+                    class:active={i == currentState.selected}
+                    onmouseenter={() => onmouseenter(i)}
+                    {onmouseleave}
+                    {onclick}
                 >
                     <UserIcon
                         size={24}
@@ -405,19 +402,11 @@
                 </button>
             {/each}
         {/if}
-        {#if $state.type == "channel"}
-            {#each $state.matches as match, i (match.id)}
-                <button class:active={i == $state.selected}
-                onmouseenter={()=>{
-                    (i != $state.selected || !$state.within) && state.update(_state=>({
-                        ..._state,
-                        selected: i,
-                        within: true
-                    }))
-                }}
-                onmouseleave={()=>{
-                    $state.within && state.update(_state=>({..._state, within: false}))
-                }}>
+        {#if currentState.type == "channel"}
+            {#each currentState.matches as match, i (match.id)}
+                <button class:active={i == currentState.selected}
+                onmouseenter={()=>onmouseenter(i)}
+                {onmouseleave}>
                 <ChannelIcon size={24} target={match} />
                 {match.name}
                 </button>

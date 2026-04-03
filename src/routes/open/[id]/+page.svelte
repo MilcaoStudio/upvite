@@ -1,22 +1,19 @@
 <script lang="ts">
-    import { run } from 'svelte/legacy';
-
     import Header from "$lib/components/atoms/Header.svelte";
-    import { useSession } from "$lib/controllers/ClientController";
     import { t } from "svelte-i18n";
     import type { PageData } from "./$types";
     import { goto } from "$app/navigation";
     import { modalController } from "$lib/components/modals/ModalController";
+    import { useClient } from "$lib/components/client/ClientContext.svelte";
 
     interface Props {
         data: PageData;
     }
 
     let { data }: Props = $props();
-    const session = useSession();
-    const client = session?.client!;
+    const client = useClient();
     let id = $derived(data.id);
-    run(() => {
+    $effect(() => {
         if (id == "saved") {
             for (const channel of client.channels.values()) {
                 if (channel?.type == "SavedMessages") {
@@ -26,7 +23,7 @@
             }
 
             client
-                .user!.openDM()
+                .user?.openDM()
                 .then((channel) => goto(`/channel/${channel?.id}`))
                 .catch((error) => {
                     modalController.push({

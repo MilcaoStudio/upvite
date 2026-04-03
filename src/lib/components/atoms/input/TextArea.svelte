@@ -35,7 +35,7 @@
     ...rest
   }: Props = $props();
 
-    const TextArea = css`
+    const TextArea = $derived(css`
       width: 100%;
       max-height: 228px;
       resize: none;
@@ -62,7 +62,7 @@
           ? `font-family: var(--monospace-font), monospace;`
           : `font-family: inherit;`}
       font-variant-ligatures: var(--ligatures);
-    `;
+    `);
   
 </script>
 

@@ -2,6 +2,7 @@ import { browser } from "$app/environment";
 import { mapToRecord } from "$lib";
 import type Persistent from "$lib/types/Persistent";
 import { ObservableMap, action, computed, makeAutoObservable, observable } from "mobx";
+import { SvelteMap } from "svelte/reactivity";
 
 /**
  * SMALL = Smartphones
@@ -57,7 +58,7 @@ export default class Layout implements Persistent<Data> {
     /**
      * Map of section IDs to their current state.
      */
-    private openSections: ObservableMap<string, boolean>;
+    private openSections: SvelteMap<string, boolean>;
 
     private viewport: Viewport | undefined;
 
@@ -69,7 +70,7 @@ export default class Layout implements Persistent<Data> {
         this.lastHomePath = "/";
         this.lastDiscoverPath = "/discover/servers";
         this.lastOpened = new ObservableMap();
-        this.openSections = new ObservableMap();
+        this.openSections = new SvelteMap();
 
         if (browser) {
             this.setViewport();
@@ -201,10 +202,9 @@ export default class Layout implements Persistent<Data> {
      *
      * @param id Section ID
      * @returns Whether the section is open
-     * @param def Default state value
      */
-    @computed getSectionState(id: string, def?: boolean) {
-        return this.openSections.get(id) ?? def ?? false
+    @computed isSectionOpen(id: string) {
+        return this.openSections.get(id);
     }
 
     /**
@@ -224,10 +224,9 @@ export default class Layout implements Persistent<Data> {
     /**
      * Toggle state of a section.
      * @param id Section ID
-     * @param def Default state value
      */
     @action toggleSectionState(id: string, def?: boolean) {
-        this.setSectionState(id, !this.getSectionState(id, def), def);
+        this.setSectionState(id, !this.isSectionOpen(id), def);
     }
 
     /**
@@ -245,5 +244,12 @@ export default class Layout implements Persistent<Data> {
                 width > 768 ?
                     Viewport.MEDIUM :
                     Viewport.SMALL);
+    }
+
+    /**
+     * Whether this layout is vertical (mobile view)
+     */
+    get isVertical() {
+        return this.viewport == Viewport.SMALL;
     }
 }

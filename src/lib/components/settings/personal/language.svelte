@@ -1,15 +1,16 @@
 <script>
-    import { state } from "$lib/State";
     import InDevelopment from "$lib/components/atoms/inDevelopment.svelte";
     import RadioLanguage from "$lib/components/atoms/input/RadioLanguage.svelte";
+    import { useState } from "$lib/components/state/StateContext.svelte";
 
     import { Languages } from "../../../../lang/Languages";
-    let group = $state(state.locale.getLanguage());
+    const locale = useState().locale;
+    let group = $derived(locale.getLanguage());
     let languages = Object.entries(Languages).sort(([localeA, _a],[localeB, _b])=>localeB == group ? 1 : (localeA.localeCompare(localeB)));
     let naturalLangs = languages.filter(([_, entry])=>!entry.cat)
     let conLangs = languages.filter(([_, entry])=>entry.cat);
     function update() {
-        state.locale.setLanguage(group);
+        locale.setLanguage(group);
     }
 </script>
 

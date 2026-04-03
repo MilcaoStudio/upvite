@@ -1,13 +1,12 @@
 <script lang="ts">
     import ContextMenu from "$lib/components/context/ContextMenu.svelte";
-    import { useClient } from "$lib/controllers/ClientController";
     import { cx } from "@emotion/css";
     import type { API, File } from "stoat.js";
     import SizedGrid from "./SizedGrid.svelte";
     import ImageView from "./ImageView.svelte";
     import AttachmentActions from "./AttachmentActions.svelte";
-    import { state } from "$lib/State";
     import TextView from "./TextView.svelte";
+    import { useState } from "$lib/components/state/StateContext.svelte";
 
     interface Props {
         attachment: File;
@@ -15,8 +14,9 @@
     }
 
     let { attachment, hasContent = false }: Props = $props();
-    let { filename, metadata } = attachment;
-    let spoiler = filename?.startsWith("SPOILER_");
+    let network = useState().network;
+    let { filename, metadata } = $derived(attachment);
+    let spoiler = $derived(filename?.startsWith("SPOILER_"));
     const style = getComputedStyle(document.documentElement);
     let MAX_ATTACHMENT_WIDTH = parseInt(
         style.getPropertyValue("--attachment-max-width"),
@@ -24,8 +24,8 @@
     let MAX_ATTACHMENT_HEIGHT = parseInt(
         style.getPropertyValue("--attachment-max-height"),
     );
-    let { shrinkMedia } = state.network.media;
-    let url = attachment.createFileURL(true);
+    let { shrinkMedia } = network.media;
+    let url = $derived(attachment.createFileURL(true));
 </script>
 
 {#if metadata.type == "Audio"}

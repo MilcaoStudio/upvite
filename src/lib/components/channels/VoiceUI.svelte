@@ -5,7 +5,6 @@
     import { VoiceStatus, voiceState } from "$lib/voice/VoiceState";
     import Row from "$lib/components/atoms/layout/Row.svelte";
     import type { Channel } from "stoat.js";
-    import { useClient } from "$lib/controllers/ClientController";
     import { internalSubscribe } from "$lib/InternalEmitter";
     import { autorun } from "mobx";
     import VideoStream from "./VideoStream.svelte";
@@ -14,6 +13,7 @@
     import BxVideoOff from "svelte-boxicons/BxVideoOff.svelte";
     import BxMicrophone from "svelte-boxicons/BxMicrophone.svelte";
     import BxMicrophoneOff from "svelte-boxicons/BxMicrophoneOff.svelte";
+    import { useClient } from '../client/ClientContext.svelte';
 
     interface Props {
         channel: Channel;
@@ -21,7 +21,7 @@
 
     let { channel }: Props = $props();
     let client = useClient();
-    let localStream: LocalStream | null = $state();
+    let localStream = $state<LocalStream|null>(null);
     let localVideo: HTMLVideoElement | undefined = $state();
 
     let video = $state(false);

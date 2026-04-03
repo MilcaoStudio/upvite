@@ -7,7 +7,7 @@
     import Category from "../atoms/Category.svelte";
     import Error from '../atoms/Error.svelte'
     import { _ } from "svelte-i18n";
-    import JsxRender from "../JSXRender.svelte";
+    import { type Snippet } from "svelte";
 
     interface Props {
         schema: FormTemplate;
@@ -15,8 +15,8 @@
         defaults?: Partial<MapFormToValues<FormTemplate>> | undefined;
         callback: (values: any)=>Promise<void>;
         title?: string | undefined;
-        submit: Omit<HTMLButtonAttributes, "type"> & ButtonProps & {children?: string} | undefined;
-        submitBtn?: Omit<HTMLButtonAttributes, "type"> & {children?: string} | undefined;
+        submit: ButtonProps | undefined;
+        submitBtn?: Omit<HTMLButtonAttributes, "type"> | undefined;
         actions?: Action[];
         description?: import('svelte').Snippet;
         [key: string]: any
@@ -30,15 +30,11 @@
         title = undefined,
         submit,
         submitBtn = undefined,
-        actions = [{
-            onClick: () => true,
-            children: "Cancel",
-            palette: "plain",
-        }],
+        actions = [],
         description,
         ...rest
     }: Props = $props();
-    let values: MapFormToValues<FormTemplate> = $state(getInitialValues(schema, defaults));
+    let values: MapFormToValues<FormTemplate> = $derived(getInitialValues(schema, defaults));
     let error = $state(''), processing = $state(false);
     
     async function onSubmit() {
@@ -58,25 +54,31 @@
     }
 </script>
 
+{#snippet submitText()}Submit{/snippet}
+{#snippet cancel()}Cancel{/snippet}
+
 <Dialog {...rest} {title} disabled={processing} actions={[
     {
         onClick: onSubmit,
-        children: "Submit",
         confirmation: true,
+        children: submitText,
         ...submit,
     },
     ...actions,
+    {
+        onClick: ()=>true,
+        confirmation: true,
+        children: cancel,
+    }
 ]}>
     {#snippet description()}
         {@render description?.()}
     {/snippet}
-    <Form schema={schema} data={data} defaults={defaults} submitBtn={submitBtn} observed={values} {onChange} >
-        {#snippet submit()}
-                {submitBtn?.children}
-            {/snippet}
+    <Form schema={schema} data={data} defaults={defaults} submitProps={submitBtn} observed={values} {onChange} >
         {#each Object.keys(schema) as key}
-            {#if schema[key] == "custom"}
-                <JsxRender node={data[key].element} />
+            {#if schema[key] == "snippet"}
+                {@const snippet = values[key] as Snippet}
+                {@render snippet()}
             {/if}
         {/each}
     </Form>

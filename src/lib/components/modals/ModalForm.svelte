@@ -14,7 +14,7 @@
         data: MapFormToData<FormTemplate>;
         defaults?: Partial<MapFormToValues<FormTemplate>> | undefined;
         callback: (values: MapFormToValues<FormTemplate>)=>Promise<void>;
-        submit: Omit<HTMLButtonAttributes, "type"> & {children?: string} | undefined;
+        submit: Omit<HTMLButtonAttributes, "type"> | undefined;
         submitBtn?: Omit<HTMLButtonAttributes, "type"> & {children?: string} | undefined;
         actions?: Action[];
         title?: import('svelte').Snippet;
@@ -31,14 +31,13 @@
         submitBtn = undefined,
         actions = [{
             onClick: () => true,
-            children: "Cancel",
             palette: "plain",
         }],
         title,
         description,
         ...rest
     }: Props = $props();
-    const values = getInitialValues(schema, defaults);
+    const values = $derived(getInitialValues(schema, defaults));
     let error = $state(''), processing = $state(false);
     async function onSubmit() {
         try {
@@ -56,7 +55,6 @@
 <Modal {...rest} disabled={processing} actions={[
     {
         onClick: onSubmit,
-        children: "Submit",
         confirmation: true,
         ...submit,
     },
@@ -68,9 +66,9 @@
     {#snippet description()}
         {@render description?.()}
     {/snippet}
-    <Form schema={schema} data={data} defaults={defaults} submitBtn={submitBtn} observed={values}>
+    <Form schema={schema} data={data} defaults={defaults} submitProps={submitBtn} observed={values}>
         {#snippet submit()}
-                {submitBtn?.children}
+                {submitBtn?.text}
             {/snippet}
     </Form>
     {#if error}

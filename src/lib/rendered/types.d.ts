@@ -1,6 +1,6 @@
 import { Message } from "revolt.js";
 
-import { ChannelRenderer } from "./Singleton";
+import { ChannelRenderer } from "./Singleton.svelte";
 
 export type ScrollState =
     | { type: "Free" }

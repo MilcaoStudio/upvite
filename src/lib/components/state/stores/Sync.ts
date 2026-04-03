@@ -11,7 +11,7 @@ import {
 import { Client } from "stoat.js";
 import { settings } from "./Settings";
 import { notificationsStore } from "./NotificationOptions";
-import { orderingStore } from "./Ordering";
+import { orderingStore } from "./Ordering.svelte";
 
 export type SyncKeys =
     | "theme"

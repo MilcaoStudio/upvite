@@ -13,11 +13,12 @@ import { find, hastToReact, html, svg } from "property-information"
 import styleToObject from "style-to-object"
 import type { VFile } from "vfile";
 import { VFileMessage } from "vfile-message";
-import { svelte, svelteDEV, sveltes, type SvelteElement } from "../runtime/svelteRuntime";
+import { svelte, svelteDEV, sveltes, type SVNode } from "../runtime/svelteRuntime";
 import type { MdxjsEsmHast } from "mdast-util-mdxjs-esm";
 import type { MdxJsxFlowElement, MdxJsxTextElement } from "mdast-util-mdx-jsx";
 import type { Position } from "unist";
 import type { MdxFlowExpression, MdxTextExpression } from "mdast-util-mdx-expression";
+import type { Component } from "svelte";
 
 const own = {}.hasOwnProperty;
 const emptyMap = new Map();
@@ -52,7 +53,7 @@ export type RuntimeUnknown = {
 type RegularFields = {
 	filePath?: string | null,
 	space?: "html" | "svg",
-	createElement: Function,
+	createElement: (type: string | Component, config: Props | null, ...children: SVNode[])=>SVNode,
 	createEvaluater?: ()=>Evaluater,
 	components?: Record<string, string | Function | null>,
 	passKeys?: boolean,
@@ -63,7 +64,7 @@ type RegularFields = {
 
 export type Options = RuntimeDevelopment & RegularFields | RegularFields & RuntimeProduction | RegularFields & RuntimeUnknown;
 
-type Child = SvelteElement | string | null;
+type Child = SVNode | string | null;
 type Style = Record<string, string>;
 type Props = Record<string, any>;
 type Evaluater = {
@@ -73,7 +74,7 @@ type Evaluater = {
 type PluginState = {
 	ancestors: Array<Parents | MdxJsxFlowElement | MdxJsxTextElement>,
 	components: Record<string, string | Function | null>,
-	create: (node: Node, type: string | Function, props: Props)=>SvelteElement,
+	create: (node: Node, type: string | Function, props: Props)=>SVNode,
 	filePath?: string,
 	elementAttributeNameCase: "react" | "html",
 	ignoreInvalidStyle: boolean,
@@ -112,7 +113,7 @@ function root(state: PluginState, node: Parent) {
 }
 
 function text(_: PluginState, node: Text) {
-	return node.value
+	return node
 }
 
 function mdxEsm(state: PluginState, node: MdxjsEsmHast): Child | undefined {
@@ -350,9 +351,9 @@ export function toSvelteRuntime(tree: Node, options: Options) {
 	}
 
 	const result = one(state, tree)
-	// Svelte component.
-	if (result && typeof result != "string") {
-		return result
+	// Text node
+	if (typeof result == "string") {
+		return { type: "text", value: result };
 	}
 
 	// No fragments in svelte
@@ -416,7 +417,7 @@ function findComponentFromName(state: PluginState, name: string, allowExpression
 	if (result.type == "Literal") {
 		const name = result.value;
 
-		return typeof name == "string" && own.call(state.components, name) ? state.components[name] : ""+name
+		return (typeof name == "string" && own.call(state.components, name)) ? state.components[name] : ""+name;
 	}
 
 	// Assume component.
@@ -493,7 +494,7 @@ function transformStylesToCssCasing(domCasing: Style) {
 
 	return cssCasing
 }
-function createProperty(state: PluginState, prop: string, value: any) {
+function createProperty(state: PluginState, prop: string, value: any): [string, any] | undefined {
 	const info = find(state.schema, prop)
 
 	// Ignore nullish and `NaN` values.
@@ -538,7 +539,7 @@ function createElementProps(state: PluginState, node: Element) {
 	let prop: string
 
 	for (prop in node.properties) {
-		if (prop != "children" && own.call(node.properties, prop)) {
+		if (prop != "children" && node.properties.hasOwnProperty(prop)) {
 			const result = createProperty(state, prop, node.properties[prop])
 
 			if (result) {
@@ -568,20 +569,20 @@ function createElementProps(state: PluginState, node: Element) {
 	return props
 }
 
-function developmentCreate(svelte: Function) {
+function developmentCreate(createStaticComponent: Function) {
 	function create(_: Node, type: string | Function, props: Props) {
 		// Only an array when there are 2 or more children.
 		const isStaticChildren = Array.isArray(props.children);
-		return svelte(type, props, isStaticChildren)
+		return createStaticComponent(type, props, isStaticChildren)
 	}
 	return create
 }
 
-function productionCreate(svelte: Function, sveltes: Function) {
+function productionCreate(createDynamicComponent: Function, createStaticComponent: Function) {
 	function create(_: Node, type: string | Function, props: Props) {
 		// Only an array when there are 2 or more children.
 		const isStaticChildren = Array.isArray(props.children)
-		const fn = isStaticChildren ? sveltes : svelte
+		const fn = isStaticChildren ? createStaticComponent : createDynamicComponent
 		return fn(type, props)
 	}
 	return create

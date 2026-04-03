@@ -11,11 +11,10 @@ import {
     type Transports,
     type Trickle,
 } from "../types/Voice";
-import { state } from "$lib/State";
 import Signaling from "./Signaling";
-import { useClient } from "$lib/controllers/ClientController";
 import { LocalStream, makeRemote, type Constraints, type RemoteStream } from "./Stream";
 import { voiceState } from "./VoiceState";
+import { useClient } from "$lib/components/client/ClientContext.svelte";
 
 interface VoiceEvents {
     ready: () => void;

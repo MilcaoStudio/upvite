@@ -1,8 +1,14 @@
-<script lang="ts">
-    import { run, preventDefault } from 'svelte/legacy';
+<script module lang="ts">
+    const [getFormContext, setFormContext] = createContext<FormContext>();
 
-    import { getInitialValues, type FormTemplate, type MapFormToData, type MapFormToValues } from "$lib/types/Form";
-    import { setContext } from "svelte";
+    export function useForm() {
+        return getFormContext();
+    }
+</script>
+
+<script lang="ts">
+    import { getInitialValues, type FormContext, type FormProps, type FormTemplate, type MapFormToData, type MapFormToValues } from "$lib/types/Form";
+    import { createContext, setContext, type Snippet } from "svelte";
     import Column from "../atoms/layout/Column.svelte";
     import FormElement from "./FormElement.svelte";
     import Button from "../atoms/Button.svelte";
@@ -18,10 +24,10 @@
         onSubmit?: (data: MapFormToValues<T>) => void;
         observed?: MapFormToValues<T> | undefined;
         defaults?: Partial<MapFormToValues<T>> | undefined;
-        submitBtn?: Omit<HTMLButtonAttributes, "type"> | undefined;
-        field?: import('svelte').Snippet;
-        children?: import('svelte').Snippet;
-        submit?: import('svelte').Snippet;
+        submitProps?: Omit<HTMLButtonAttributes, "type"> | undefined;
+        field?: Snippet;
+        children?: Snippet;
+        submit?: Snippet;
     }
 
     let {
@@ -32,20 +38,20 @@
         onSubmit = function(){},
         observed = undefined,
         defaults = undefined,
-        submitBtn = undefined,
+        submitProps = undefined,
         field,
         children,
         submit
     }: Props = $props();
 
     let keys = $derived(Object.keys(schema));
-    let values = writable(observed ?? getInitialValues(schema, defaults));
-    run(() => {
-        setContext('form', {schema, disabled, values, onChange, data })
+    let values = $derived(writable(observed ?? getInitialValues(schema, defaults)));
+    $effect(() => {
+        setFormContext({schema, disabled, values, onChange, data })
     });
 </script>
 
-<form onsubmit={preventDefault(() => onSubmit?.($values))}>
+<form onsubmit={(ev) => {ev.preventDefault();onSubmit?.($values)}}>
     <Column>
         {#if field}{@render field()}{:else}
             {#each keys as key}
@@ -53,9 +59,13 @@
             {/each}
         {/if}
         {@render children?.()}
-        {#if submitBtn}
-            <Button props={{type: "submit", disabled, ...submitBtn}}>
-                {#if submit}{@render submit()}{:else}Submit{/if}
+        {#if submitProps}
+            <Button type="submit" {disabled} {...submitProps}>
+                {#if submit}
+                    {@render submit()}
+                {:else}
+                    Submit
+                {/if}
             </Button>
         {/if}
     </Column>

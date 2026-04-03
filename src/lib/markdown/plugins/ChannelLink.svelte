@@ -1,12 +1,13 @@
 <script lang="ts">
-    import { clientController } from "$lib/controllers/ClientController";
+    import { useClient } from "$lib/components/client/ClientContext.svelte";
 
+    const client = useClient();
     interface Props {
         match: string;
     }
 
     let { match }: Props = $props();
-    let channel = $derived(clientController.availableClient?.channels.get(match))
+    let channel = $derived(client.channels.get(match))
 </script>
 
 <a href={channel?.path} >

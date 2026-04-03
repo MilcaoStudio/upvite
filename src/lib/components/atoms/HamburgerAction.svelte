@@ -1,9 +1,9 @@
 <script lang="ts">
-    import { state } from "$lib/State";
-    import { Viewport } from "$lib/stores/Layout";
+    import { Viewport } from "$lib/components/state/stores/Layout";
     import Menu from "svelte-boxicons/BxMenu.svelte";
+    import { useState } from "../state/StateContext.svelte";
 
-    let isVertical = state.layout.getViewport() == Viewport.SMALL;
+    let isVertical = useState().layout.getViewport() == Viewport.SMALL;
     function openSidebar() {
         document
             .querySelector(".snap")

@@ -1,7 +1,7 @@
 import { pushState } from "$app/navigation";
 import { mapToRecord } from "$lib";
+import { useClient } from "$lib/components/client/ClientContext.svelte";
 import { routeInformation } from "$lib/components/context/history";
-import { useClient } from "$lib/controllers/ClientController";
 import type Persistent from "$lib/types/Persistent";
 import type Syncable from "$lib/types/Syncable";
 import { ObservableMap, action, computed, makeAutoObservable } from "mobx";

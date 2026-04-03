@@ -1,41 +1,27 @@
 <script lang="ts">
-    import { handlers } from 'svelte/legacy';
-
     import { css } from "@emotion/css";
-    import { createEventDispatcher } from "svelte";
+    import type { Snippet } from "svelte";
     import type { HTMLButtonAttributes } from "svelte/elements";
 
-    interface Props {
-        props?: HTMLButtonAttributes & {
+    interface Props extends HTMLButtonAttributes {
         compact?: boolean | 'icon',
-        palette?: 
-        | "primary"
+        palette?: "primary"
         | "secondary"
         | "plain"
         | "plain-secondary"
         | "accent"
         | "success"
         | "warning"
-        | "error"};
-        palette?: string;
-        onClick?: (()=>void) | null;
-        children?: import('svelte').Snippet;
-        [key: string]: any
+        | "error";
+        children?: Snippet;
     }
 
     let {
-        props = { compact: false, palette: 'primary' },
-        palette = $bindable("primary"),
-        onClick = null,
+        compact = false,
+        palette = "primary",
         children,
         ...rest
     }: Props = $props();
-
-    const { compact } = props;
-    
-    palette = palette || props.palette || "primary";
-
-    let dispatch = createEventDispatcher();
 
     let buttonStyle = $derived(css`
         align-items:center;
@@ -115,8 +101,8 @@
             case "success": case "warning": case "error":
                 return `
                 font-weight: 600;
-                    color: var(--${props.palette}-contrast);
-                    background: var(--${props.palette});
+                    color: var(--${palette}-contrast);
+                    background: var(--${palette});
 
                     &:hover {
                         filter: brightness(1.2);
@@ -149,6 +135,6 @@
     
 </script>
 
-<button class={buttonStyle} {...props} onclick={handlers(()=>dispatch('click'), onClick)} {...rest}>
+<button class={buttonStyle} {...rest}>
     {@render children?.()}
 </button>

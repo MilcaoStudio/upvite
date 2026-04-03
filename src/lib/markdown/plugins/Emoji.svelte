@@ -1,6 +1,6 @@
 <script lang="ts">
     import { RE_ULID } from "$lib";
-    import { clientController, useClient } from "$lib/controllers/ClientController";
+    import { useClient } from "$lib/components/client/ClientContext.svelte";
     import { css, cx } from "@emotion/css";
 
     interface Props {
@@ -10,7 +10,7 @@
 
     let { match = null, arg1 }: Props = $props();
     const client = useClient();
-    const Icon = cx("emoji", match, css`
+    const Icon = $derived(cx("emoji", match, css`
         object-fit: contain;
 
         height: var(--emoji-size);
@@ -26,7 +26,7 @@
             width: 50px;
             background-image: url(ishere.jpg);
         }
-    `);
+    `));
     let fail = $state(false);
     
     let url = //RE_ULID.test(arg1) ?

@@ -1,37 +1,35 @@
 <script module lang="ts">
-    export enum Docked {
-        None,
-        Left,
-        Right,
-        Both,
-    }
-    export enum ShowIf {
-        Left = 1,
-        Right = 2,
-        Both = 3,
-        Always = 4,
-    }
+    export const Docked = Object.freeze({
+        None: 0,
+        Left: 1,
+        Right: 2,
+        Both: 3,
+    });
+    export const ShowIf = Object.freeze({
+        Left: 1,
+        Right: 2,
+        Both: 3,
+        Always: 4,
+    });
 </script>
 
 <script lang="ts">
-    import { run } from 'svelte/legacy';
+    import type { Component, Snippet } from "svelte";
 
     type Panel = {
         width?: number;
         height?: number;
-        showIf?: ShowIf;
-        component: ConstructorOfATypedSvelteComponent;
+        showIf?: number;
+        component: Component;
     };
     interface Props {
         width: string;
         height: string;
-        docked: Docked;
+        docked: number;
         leftPanel?: Panel | undefined;
         rightPanel?: Panel | undefined;
         bottomNav?: Panel | undefined;
-        children?: import('svelte').Snippet;
-        left?: import('svelte').Snippet;
-        right?: import('svelte').Snippet;
+        children?: Snippet;
     }
 
     let {
@@ -42,20 +40,20 @@
         rightPanel = undefined,
         bottomNav = undefined,
         children,
-        left,
-        right
     }: Props = $props();
     let gridTemplateColumns =
         $derived((leftPanel ? (leftPanel.width || 0) + "px" : "") +
         ` ${width} ` +
         (rightPanel ? (rightPanel.width || 0) + "px" : ""));
-    // $effect
-    let scrollRef: HTMLDivElement = $state(), bottomNavRef: HTMLDivElement = $derived(function () {
+    
+    let scrollRef: HTMLDivElement | undefined = $state(), bottomNavRef: HTMLDivElement | undefined = $state();
+
+    $effect(() => {
         const el = scrollRef;
         const bEl = bottomNavRef;
-        if (!bEl || !bottomNav || !bottomNav.height) return;
+        if (!el || !bEl || !bottomNav?.height) return;
         const showIf =
-            typeof bottomNav?.showIf == "undefined"
+            typeof bottomNav.showIf == "undefined"
                 ? ShowIf.Both
                 : bottomNav.showIf;
         console.log("ShowIf", showIf);
@@ -63,14 +61,8 @@
             bEl.style.top = "";
             return;
         }
-        const lWidth =
-            (!leftPanel || leftPanel === undefined
-                ? undefined
-                : leftPanel.width) || 0;
-        const rWidth =
-            (!rightPanel || rightPanel === undefined
-                ? undefined
-                : rightPanel.width) || 0;
+        const lWidth = leftPanel?.width || 0;
+        const rWidth = rightPanel?.width || 0;
         const hidden = bottomNav.height + "px";
         if (el.scrollLeft < lWidth) {
             if (showIf & ShowIf.Left) {
@@ -98,17 +90,9 @@
         bEl.style.top = hidden;
     });
 
-    
-    run(() => {
-        scrollRef,
-            leftPanel,
-            rightPanel,
-            !bottomNav ? undefined : bottomNav.showIf;
-        recalculate();
-    });
-    run(() => {
+    $effect(() => {
         if (!docked) {
-            height = `calc(${height} - ${bottomNav?.height}px)`;
+            height = `calc(${height} - ${(bottomNav?.height) || 0}px)`;
         }
     });
 </script>
@@ -116,15 +100,15 @@
 {#if docked}
     <div class="docked" style:width style:height>
         {#if docked & 1}
-            {@const SvelteComponent = leftPanel?.component}
-            <SvelteComponent />
+            {@const LeftPanel = leftPanel?.component}
+            <LeftPanel />
         {/if}
         <div class="main">
             {@render children?.()}
         </div>
         {#if docked & 2}
-            {@const SvelteComponent_1 = rightPanel?.component}
-            <SvelteComponent_1 />
+            {@const RightPanel = rightPanel?.component}
+            <RightPanel />
         {/if}
     </div>
 {:else}
@@ -135,24 +119,19 @@
             style:height
             style:grid-template-columns={gridTemplateColumns}
             bind:this={scrollRef}
-            onscroll={recalculate}
         >
             {#if leftPanel}
                 <leftPanel.component
                     style={`height: ${height};`}
                     snap
-                >
-                    {@render left?.()}
-                </leftPanel.component>
+                />
             {/if}
             {@render children?.()}
             {#if rightPanel}
                 <rightPanel.component
                     style={`height: ${height};`}
                     snap
-                >
-                    {@render right?.()}
-                </rightPanel.component>
+                />
             {/if}
         </div>
         {#if bottomNav}

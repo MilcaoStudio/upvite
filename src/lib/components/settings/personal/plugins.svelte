@@ -1,17 +1,10 @@
 <script lang="ts">
-    import { run } from 'svelte/legacy';
-
-    import { state } from "$lib/State";
     import PluginCheck from "$lib/components/atoms/input/PluginCheck.svelte";
     import FileReader from "$lib/controllers/FileReader.svelte";
-    import type { PluginInfo } from "$lib/stores/Plugins";
-    import { autorun } from "mobx";
-    let list: PluginInfo[] = $state([]);
-    run(() => {
-        autorun(()=>{
-            list = state.plugins.list();
-        })
-    });
+    import type { PluginInfo } from "$lib/components/state/stores/Plugins";
+    import { useState } from "$lib/components/state/StateContext.svelte";
+    const plugins = useState().plugins;
+    let list: PluginInfo[] = $derived(plugins.list());
 </script>
 Installed plugins
 {#each list as plugin}
@@ -29,7 +22,7 @@ Add a plugin
         if (!object.id) {
             console.error(file.name, "does not include an id");
         }
-        state.plugins.add({
+        plugins.add({
             format: object.format || 1,
             namespace: object.namespace || "",
             id: object.id,

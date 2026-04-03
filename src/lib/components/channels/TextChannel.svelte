@@ -8,7 +8,7 @@
     import MessageBox from "../messaging/MessageBox.svelte";
     import JumpToBottom from "../messaging/bars/JumpToBottom.svelte";
     import ChannelLayout from "./ChannelLayout.svelte";
-    import { useClient } from "$lib/controllers/ClientController";
+    import { useClient } from '../client/ClientContext.svelte';
 
     const client = useClient();
     interface Props {

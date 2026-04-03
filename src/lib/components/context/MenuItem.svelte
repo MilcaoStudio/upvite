@@ -2,7 +2,7 @@
     import { getContext } from "svelte";
 
     interface Props {
-        data: unknown;
+        data?: unknown;
         disabled?: boolean;
         children?: import('svelte').Snippet;
     }
@@ -21,6 +21,6 @@
     }
 </script>
 
-<button onclick={(ev)=>{onClick(ev, callback, data)}}>
+<button onclick={(ev)=>{data && onClick(ev, callback, data)}}>
     {@render children?.()}
 </button>

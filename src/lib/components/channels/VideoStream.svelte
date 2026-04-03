@@ -17,7 +17,7 @@
 <Column>
 {#if video}
     <!-- svelte-ignore a11y-media-has-caption -->
-    <video id={srcObject?.id} {muted} autoplay bind:this={ref} />
+    <video id={srcObject?.id} {muted} autoplay bind:this={ref}></video>
 {/if}
 </Column>
 

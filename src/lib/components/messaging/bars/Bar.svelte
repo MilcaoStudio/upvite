@@ -9,7 +9,7 @@
     }
 
     let { position, accent = false, children }: Props = $props();
-    const Bar = cx('Bar', css`
+    const Bar = $derived(cx('Bar', css`
         z-index: 1;
         position: relative;
 
@@ -101,7 +101,7 @@
                 display: none;
             }
         }
-    `);
+    `));
 </script>
 
 <div class={Bar}>{@render children?.()}</div>

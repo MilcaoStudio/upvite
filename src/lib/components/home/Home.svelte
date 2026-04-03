@@ -6,7 +6,6 @@
     import BxGroup from "svelte-boxicons/BxGroup.svelte";
     import BxMoney from "svelte-boxicons/BxMoney.svelte";
     import { css, cx } from "@emotion/css";
-    import { useClient } from "$lib/controllers/ClientController";
     import { isTouchscreenDevice } from "$lib";
     import { _ } from "svelte-i18n";
     import PageHeader from "../atoms/PageHeader.svelte";
@@ -14,6 +13,7 @@
     import { modalController } from "../modals/ModalController";
     import { DONATION } from "$lib/links";
     import { ORG_NAME } from "$lib/revision";
+    import { useClient } from "../client/ClientContext.svelte";
 
     const Overlay = cx(
         "Overlay",
@@ -201,10 +201,6 @@
 
     .actions a {
         width: 100%;
-    }
-
-    .actions a div {
-        margin: 0;
     }
 
     .actions :global([data-light="true"] .home svg) {

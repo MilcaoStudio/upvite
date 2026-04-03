@@ -1,6 +1,4 @@
 <script lang="ts">
-    import { preventDefault, stopPropagation } from 'svelte/legacy';
-
     import { takeError } from "$lib";
     import { modalController } from "$lib/components/modals/ModalController";
     import { grabFiles } from "$lib/types/FileUpload";
@@ -45,10 +43,13 @@
 
     // Let the browser know we can drop files.
     function dragover(e: DragEvent) {
+        e.stopPropagation();
+        e.preventDefault();
         if (e.dataTransfer) e.dataTransfer.dropEffect = "copy";
     }
     // File dropping.
     function drop(e: DragEvent) {
+        e.preventDefault();
         const dropped = e.dataTransfer?.files;
         if (dropped) {
             const item = dropped[0];
@@ -90,8 +91,8 @@
 
 <svelte:document
     onpaste={paste}
-    ondragover={stopPropagation(preventDefault(dragover))}
-    ondrop={preventDefault(drop)}
+    ondragover={dragover}
+    ondrop={drop}
 />
 
 <button class="flex-button" onclick={onClick}>

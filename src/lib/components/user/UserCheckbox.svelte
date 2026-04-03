@@ -1,10 +1,7 @@
 <script lang="ts">
-    import { run } from 'svelte/legacy';
-
     import { Checkbox } from "fluent-svelte";
     import Row from "../atoms/layout/Row.svelte";
     import UserIcon from "./UserIcon.svelte";
-    import Column from "../atoms/layout/Column.svelte";
     import Username from "./Username.svelte";
     import type { User } from "stoat.js";
 
@@ -15,7 +12,7 @@
     }
 
     let { checked = $bindable(), user = undefined, onChange }: Props = $props();
-    run(() => {
+    $effect(() => {
         onChange(checked);
     });
 </script>
@@ -23,7 +20,6 @@
 <Checkbox value={user?.id} bind:checked>
     <Row centred gap="8px">
         <UserIcon target={user} size={32} />
-            <Username {user} />
-        </Row
-    >
+        <Username {user} />
+    </Row>
 </Checkbox>

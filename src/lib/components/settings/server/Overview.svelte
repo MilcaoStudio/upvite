@@ -1,6 +1,4 @@
 <script lang="ts">
-    import { run } from 'svelte/legacy';
-
     import TextAreaAutoSize from "$lib/components/atoms/TextAreaAutoSize.svelte";
     import H3 from "$lib/components/atoms/heading/H3.svelte";
     import Column from "$lib/components/atoms/layout/Column.svelte";
@@ -8,7 +6,6 @@
     import InputBox from "$lib/components/form/InputBox.svelte";
     import FileUploader from "$lib/controllers/FileUploader.svelte";
     import isEqual from "lodash.isequal";
-    import { autorun } from "mobx";
     import type { API, Server } from "stoat.js";
     import { t } from "svelte-i18n";
     import Md from "svelte-boxicons/BxlMarkdown.svelte";
@@ -23,15 +20,11 @@
     }
 
     let { server }: Props = $props();
-    let name = $state(server.name);
-    let description = $state(server.description ?? "");
-    let systemMessages = $state(server.systemMessages);
-    let editable = server.havePermission("ManageServer");
-    run(() => {
-        console.log(editable);
-    });
-    autorun(() => (name = server.name));
-    autorun(() => (systemMessages = server.systemMessages));
+    let name = $derived(server.name);
+    let description = $derived(server.description ?? "");
+    let systemMessages = $derived(server.systemMessages);
+    let editable = $derived(server.havePermission("ManageServer"));
+    $inspect(editable);
     let changed = $state(false);
     function save() {
         const changes: API.DataEditServer = {};
@@ -97,7 +90,7 @@
                 type="text"
                 disabled={!editable}
                 value={name}
-                maxLength={32}
+                maxlength={32}
                 palette="secondary"
                 onChange={(e) => {
                     name = e.currentTarget.value;
@@ -190,7 +183,7 @@
 
     {#if editable}
         <p>
-            <Button onClick={save} palette="secondary" disabled={!changed}>
+            <Button onclick={save} palette="secondary" disabled={!changed}>
                 {$t("app.special.modals.actions.save")}
             </Button>
         </p>

@@ -1,14 +1,13 @@
 <script>
-    import { run } from 'svelte/legacy';
-
-    import { page } from "$app/stores";
-    import { state } from "$lib/State";
+    import { page } from "$app/state";
     import UprisingApp from "$lib/components/UprisingApp.svelte";
     import Home from "$lib/components/home/Home.svelte";
+    import { useState } from "$lib/components/state/StateContext.svelte";
     import CheckAuth from "$lib/controllers/CheckAuth.svelte";
 
-    run(() => {
-        state.layout.setLastHomePath($page.url.pathname);
+    let layout = useState().layout;
+    $effect(() => {
+        layout.setLastHomePath(page.url.pathname);
     });
 </script>
 

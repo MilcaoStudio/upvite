@@ -8,7 +8,7 @@
         preview = false,
         children
     } = $props();
-    const Base = cx(
+    const Base = $derived(cx(
         css`
             .content {
                 max-height: 32px;
@@ -63,7 +63,7 @@
             css`
                 margin-left: 0;
             `,
-    );
+    ));
 </script>
 
 <div class="Reply {Base}">

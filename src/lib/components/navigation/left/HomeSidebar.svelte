@@ -1,8 +1,4 @@
 <script lang="ts">
-    import { run } from 'svelte/legacy';
-
-    import { page } from "$app/stores";
-    import { useClient } from "$lib/controllers/ClientController";
     import { css, cx } from "@emotion/css";
     import GenericSidebarBase from "../GenericSidebarBase.svelte";
     import GenericSidebarList from "../GenericSidebarList.svelte";
@@ -18,14 +14,18 @@
     import Category from "$lib/components/atoms/Category.svelte";
     import { modalController } from "$lib/components/modals/ModalController";
     import placeholder from "../items/placeholder.svg";
-    import { createElement } from "$lib/markdown/runtime/svelteRuntime";
     import ChannelButton from "../items/ChannelButton.svelte";
-    import JsxRender from "$lib/components/JSXRender.svelte";
     import IconButton from "$lib/components/atoms/input/IconButton.svelte";
     import UserPanel from "./UserPanel.svelte";
-    import { autorun } from "mobx";
     import type { Channel } from "stoat.js";
+    import { useClient } from "$lib/components/client/ClientContext.svelte";
+    import { page } from "$app/state";
 
+    interface Props {
+        channel?: Channel
+    }
+
+    let { channel }: Props = $props();
     const Navbar = cx(
         "Navbar",
         css`
@@ -39,55 +39,31 @@
         `,
     );
     const client = useClient();
-    let pathname = $derived($page.url.pathname);
-    let channel_id = $derived($page.params.channel);
-    let channel = $derived(client.channels.get(channel_id || ""));
-    let channels: Channel[] = $state([]);
-    run(() => {
-        autorun(() => channels = [...client.channels.values()].filter(
+    let pathname = $derived(page.url.pathname);
+    let channel_id = $derived(page.params.channel);
+    let channels: Channel[] = $derived([...client.channels.values()]
+        .filter(
             (x) =>
                 (x.type == "DirectMessage" && x.active) ||
                 x.type == "Group",
-        ));
-    });
-    channels.sort((b, a) =>
-        (a.lastMessageId || "").localeCompare(b.lastMessageId || ""),
+        )
+        .sort((b, a) =>
+            (a.lastMessageId || "").localeCompare(b.lastMessageId || ""),
+        )
     );
-    let incoming = [...client.users.values()].filter(
+    let incoming = $derived([...client.users.values()].filter(
         (user) => user?.relationship == "Incoming",
-    );
-
-    let channelList = $derived(channels.map((channel) => {
-        let user;
-        if (channel.type == "DirectMessage") {
-            if (!channel.active) return null;
-            user = channel.recipient;
-            if (!user) return null;
-        }
-
-        const isUnread = channel.unread;
-        const mentionCount = channel.mentions?.size || 0;
-        return createElement(
-            ConditionalLink,
-            {
-                active: channel.id == channel_id,
-                href: `/channel/${channel.id}`,
-            },
-            createElement(ChannelButton, {
-                user,
-                channel,
-                alert:
-                    mentionCount > 0
-                        ? "mention"
-                        : isUnread
-                          ? "unread"
-                          : undefined,
-                alertCount: mentionCount,
-                active: channel.id == channel_id,
-            }),
-        );
-    }));
+    ));
 </script>
+
+{#snippet ChannelItem(channel: Channel)}
+    {@const user = channel.recipient}
+    {@const isUnread = channel.unread}
+    {@const mentionCount = channel.mentions?.size || 0}
+    <ConditionalLink active={channel.id == channel_id} href="/channel/{channel.id}">
+        <ChannelButton active={channel.id == channel_id} {user} {channel} alert={mentionCount > 0 ? "mention" : isUnread ? "unread" : undefined} />
+    </ConditionalLink>
+{/snippet}
 
 <GenericSidebarBase >
     <div class={Navbar}>
@@ -136,8 +112,8 @@
         {#if !channels.length}
             <img alt="empty channel list" src={placeholder} loading="eager" />
         {/if}
-        {#each channelList as channel}
-            <JsxRender node={channel} />
+        {#each channels as channel}
+            {@render ChannelItem(channel)}
         {/each}
     </GenericSidebarList>
     <UserPanel />

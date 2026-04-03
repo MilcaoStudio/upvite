@@ -12,11 +12,13 @@ type LinkType =
     | { type: "none" };
 
 export const DONATION = "https://ko-fi.com/projectuprising";
+
+export const HOSTNAME = browser ? globalThis.location.hostname : "localhost";
 /**
  * Allowed origins for relative navigation
  */
 const ALLOWED_ORIGINS = [
-    browser ? globalThis.location.hostname : "localhost",
+    HOSTNAME,
     "rolt.chat",
     // TODO: include domains
 ];

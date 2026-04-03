@@ -20,7 +20,6 @@
     data={{
         name: {
             field: "Name",
-            palette: "secondary",
         },
         file: {
             behavior: {

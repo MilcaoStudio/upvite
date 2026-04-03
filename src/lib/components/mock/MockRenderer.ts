@@ -1,9 +1,8 @@
-import { ChannelRenderer, SMOOTH_SCROLL_ON_RECEIVE } from "$lib/rendered/Singleton";
+import { ChannelRenderer, SMOOTH_SCROLL_ON_RECEIVE } from "$lib/rendered/Singleton.svelte";
 import type { RendererRoutines, ScrollState } from "$lib/rendered/types";
 import type { Channel, Message } from "stoat.js";
 import { mockFetchMessagesWithUsers } from "./MockClient";
 import { runInAction } from "mobx";
-import type State from "$lib/State";
 
 const MAX_MESSAGES = 200;
 export const MockRenderer: RendererRoutines = {
@@ -156,10 +155,10 @@ export const MockRenderer: RendererRoutines = {
     }
 }
 const renderers: Record<string, ChannelRenderer> = {};
-export function getRenderer(channel: Channel, currentState: State) {
+export function getRenderer(channel: Channel) {
     let renderer = renderers[channel.id];
     if (!renderer) {
-        renderer = new ChannelRenderer(channel, currentState);
+        renderer = new ChannelRenderer(channel);
         renderer.currentRenderer = MockRenderer;
         renderers[channel.id] = renderer;
     }

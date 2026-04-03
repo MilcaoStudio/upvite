@@ -1,14 +1,15 @@
 <script lang="ts">
     import { css, cx } from "@emotion/css";
+    import type { Snippet } from "svelte";
+    import type { SVGAttributes } from "svelte/elements";
 
-    interface Props {
+    interface Props extends SVGAttributes<SVGElement> {
         borderRadius?: string;
         hover?: boolean;
         onClick?: ((e: MouseEvent)=>void) | null;
         ref?: SVGElement | null;
         class?: string;
-        children?: import('svelte').Snippet;
-        [key: string]: any
+        children?: Snippet;
     }
 
     let {
@@ -21,7 +22,7 @@
         ...rest
     }: Props = $props();
     
-    const IconBase = cx('IconBase', className, css`
+    const IconBase = $derived(cx('IconBase', className, css`
     flex-shrink: 0;
     cursor: pointer;
     img {
@@ -36,7 +37,7 @@
         ${hover ? `&:hover .icon { filter: brightness(0.8); }` : ``}
         
     }
-    `)
+    `))
 </script>
 
 <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->

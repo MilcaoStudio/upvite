@@ -1,6 +1,5 @@
 <script lang="ts">
     import { mapError } from "$lib";
-    import { useClient } from "$lib/controllers/ClientController";
     import type { ModalProps } from "$lib/types/Modal";
     import { t } from "svelte-i18n";
     import DialogForm from "./DialogForm.svelte";
@@ -63,6 +62,12 @@
     }
 </script>
 
+{#snippet submit()}
+    {props.field == "email"
+                ? $t("app.special.modals.actions.send_email")
+                : $t("app.special.modals.actions.update")}
+{/snippet}
+
 <DialogForm
     {...props}
     {callback}
@@ -78,10 +83,7 @@
         new_password: { field: $t("login.new_password") },
     }}
     submit={{
-        children:
-            props.field == "email"
-                ? $t("app.special.modals.actions.send_email")
-                : $t("app.special.modals.actions.update"),
+        children: submit,
     }}
     title={$t(`app.special.modals.account.change.${props.field}`)}
 >

@@ -1,11 +1,8 @@
 <script lang="ts">
-    import { run } from 'svelte/legacy';
-
     import type { ModalProps } from "$lib/types/Modal";
     import { t } from "svelte-i18n";
     import DialogForm from "./DialogForm.svelte";
-    import { createElement } from "$lib/markdown/runtime/svelteRuntime";
-    import TextSvelte from "$lib/i18n/TextSvelte.svelte";
+    import TextSvelte, { createTextSnippet } from "$lib/i18n/TextSvelte.svelte";
     import { css, cx } from "@emotion/css";
     import { modalController } from "./ModalController";
     import { takeError } from "$lib";
@@ -30,10 +27,10 @@
     }
 
     let { props }: Props = $props();
-    let { target } = props;
+    let { target } = $derived(props);
     let processing = $state(false),
         code = $state("");
-    run(() => {
+    $effect(() => {
         if (target) {
             processing = true;
             target
@@ -46,33 +43,32 @@
         }
     });
 
-    let data = $derived({
-        message: {
-            element: processing
-                ? createElement(TextSvelte, {
-                      id: "app.special.modals.prompt.create_invite_generate",
-                  })
-                : createElement(
-                      "div",
-                      { class: InviteCard },
-                      createElement(TextSvelte, {
-                          id: "app.special.modals.prompt.create_invite_created",
-                      }),
-                      createElement("code", null, code),
-                  ),
-        },
-    });
+    const copyLink = createTextSnippet(()=>$t("app.context_menu.copy_link"));
+    const submit = createTextSnippet(()=>$t("app.special.modals.actions.ok"));
 </script>
+
+{#snippet message()}
+    {#if processing}
+        <TextSvelte id="app.special.modals.prompt.create_invite_generate" />
+    {:else}
+        <div class={InviteCard}>
+            <TextSvelte id="app.special.modals.prompt.create_invite_created" />
+            <code>{code}</code>
+        </div>
+    {/if}
+{/snippet}
 
 <DialogForm
     title={$t("app.context_menu.create_invite")}
-    schema={{ message: "custom" }}
-    {data}
+    schema={{ message: "snippet" }}
+    data={{
+        message,
+    }}
     callback={async () => {}}
-    submit={{ children: $t("app.special.modals.actions.ok") }}
+    submit={{children: submit}}
     actions={[
         {
-            children: $t("app.context_menu.copy_link"),
+            children: copyLink,
             onClick: () =>
                 modalController.writeText(
                     `${window.location.host}/invite/${code}`,

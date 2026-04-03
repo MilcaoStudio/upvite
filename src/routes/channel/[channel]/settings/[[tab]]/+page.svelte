@@ -1,19 +1,15 @@
 <script lang="ts">
-    import { run } from 'svelte/legacy';
+    import { run } from "svelte/legacy";
 
     import { goto, pushState } from "$app/navigation";
-    import { state } from "$lib/State";
     import { modalController } from "$lib/components/modals/ModalController.js";
     import Overview from "$lib/components/settings/channel/Overview.svelte";
     import SettingsMenu from "$lib/components/settings/common/SettingsMenu.svelte";
     import Category from "$lib/components/settings/common/category.svelte";
     import Item from "$lib/components/settings/common/buttonSimple.svelte";
     import ScrollerContent from "$lib/components/settings/common/scrollerContent.svelte";
-    import { useClient } from "$lib/controllers/ClientController";
-    import { Viewport } from "$lib/stores/Layout";
-    import { autorun } from "mobx";
     import type { Channel } from "stoat.js";
-    import type { ComponentType, SvelteComponent } from "svelte";
+    import type { Component } from "svelte";
     import { t } from "svelte-i18n";
     import Info from "svelte-boxicons/BxInfoCircle.svelte";
     import List from "svelte-boxicons/BxListUl.svelte";
@@ -21,40 +17,33 @@
     import Scroller from "$lib/components/settings/common/scroller.svelte";
     import Row from "$lib/components/atoms/layout/Row.svelte";
     import CloseButton from "$lib/components/settings/common/CloseButton.svelte";
+    import type { PageData } from "./$types";
+    import { useClient } from "$lib/components/client/ClientContext.svelte";
+    import { useState } from "$lib/components/state/StateContext.svelte";
 
-    const Pages: Record<
-        string,
-        ComponentType<SvelteComponent<{ channel: Channel }>>
-    > = {
+    const Pages: Record<string, Component<{ channel: Channel }>> = {
         overview: Overview,
         permissions: Permissions,
     };
 
     interface Props {
-        data: any;
+        data: PageData;
     }
 
     let { data }: Props = $props();
-    let tab;
-    run(() => {
-        tab = data.tab;
-    });
+    let tab = $derived(data.tab);
+    const layout = useState().layout;
     let client = useClient();
     let channel = $derived(client.channels.get(data.channel));
-    let isVertical = $state(state.layout.getViewport() == Viewport.SMALL);
-    run(() => {
-        autorun(() => {
-            isVertical = state.layout.getViewport() == Viewport.SMALL;
-        });
-    });
-    run(() => {
+    let isVertical = $derived(layout.isVertical);
+    $effect(() => {
         if (!tab && !isVertical) {
             tab = "overview";
         }
     });
 
     function exitSettings() {
-        setTimeout(() => goto(state.layout.getLastPath()), 200);
+        setTimeout(() => goto(layout.getLastPath()), 200);
     }
 
     function keyDown(ev: KeyboardEvent) {
@@ -73,16 +62,22 @@
             {#if !isVertical}
                 <Scroller>
                     <Category>{channel.name}</Category>
-                    <Item onClick={()=>tab = "overview"} active={tab == "overview"}>
+                    <Item
+                        onClick={() => (tab = "overview")}
+                        active={tab == "overview"}
+                    >
                         {#snippet svg()}
-                                                <Info size={20}  />
-                                            {/snippet}
+                            <Info size={20} />
+                        {/snippet}
                         {$t("app.settings.channel_pages.overview.title")}
                     </Item>
-                    <Item onClick={()=>tab="permissions"} active={tab == "permissions"}>
+                    <Item
+                        onClick={() => (tab = "permissions")}
+                        active={tab == "permissions"}
+                    >
                         {#snippet svg()}
-                                                <List size={20}  />
-                                            {/snippet}
+                            <List size={20} />
+                        {/snippet}
                         {$t("app.settings.channel_pages.permissions.title")}
                     </Item>
                 </Scroller>
@@ -98,20 +93,19 @@
             </ScrollerContent>
             <CloseButton />
         </Row>
-        
     {:else}
         <SettingsMenu>
             <Category>{channel.name}</Category>
             <Item href="settings/overview" large active>
                 {#snippet svg()}
-                                <Info size={20}  />
-                            {/snippet}
+                    <Info size={20} />
+                {/snippet}
                 {$t("app.settings.channel_pages.overview.title")}
             </Item>
             <Item href="settings/permissions" large active>
                 {#snippet svg()}
-                                <List size={20}  />
-                            {/snippet}
+                    <List size={20} />
+                {/snippet}
                 {$t("app.settings.channel_pages.permissions.title")}
             </Item>
         </SettingsMenu>

@@ -1,25 +1,22 @@
 <script module lang="ts">
     import { defer } from "$lib";
     import { internalEmit, internalSubscribe } from "$lib/InternalEmitter";
-    import { useSession } from "$lib/controllers/ClientController";
-    import { getRenderer } from "$lib/rendered/Singleton";
+    import { getRenderer } from "$lib/rendered/Singleton.svelte";
     import type { ScrollState } from "$lib/rendered/types";
     import { autorun, runInAction } from "mobx";
     import type { Channel } from "stoat.js";
-    import { onDestroy, onMount, setContext } from "svelte";
+    import { onMount, setContext } from "svelte";
     import { modalController } from "../modals/ModalController";
 
     export const MESSAGE_AREA_PADDING = 82;
 </script>
 
 <script lang="ts">
-    import { run } from 'svelte/legacy';
-
     import Preloader from "../indicators/Preloader.svelte";
     import MessageRenderer from "./MessageRenderer.svelte";
     import Start from "./Start.svelte";
-    import { afterNavigate, beforeNavigate } from "$app/navigation";
-    import { state } from "$lib/State";
+    import { beforeNavigate } from "$app/navigation";
+    import { useSession } from "../client/ClientContext.svelte";
 
     interface Props {
         lastId?: string | undefined;
@@ -28,17 +25,16 @@
     }
 
     let { lastId = undefined, messageId = null, channel }: Props = $props();
-    const session = useSession()!;
 
     // ? This is the scroll container.
-    let ref: HTMLDivElement = $state();
-    let width: number = $state();
-    let height: number = $state();
+    let ref: HTMLDivElement | undefined = $state();
+    let width = $state(0);
+    let height = $state(0);
 
     let highlight: string | undefined = $state();
 
     // ? Current channel state.
-    const renderer = $state(getRenderer(channel, state));
+    const renderer = $derived(getRenderer(channel));
 
     // ? avoid re-renders
     let scrollState: ScrollState = $state({ type: "Free" });
@@ -115,12 +111,12 @@
 
     // it works?
 
-    autorun(() => setScrollState(renderer.scrollState));
+    $effect(() => setScrollState(renderer.scrollState));
 
     onMount(() => {
         // ? Load channel initially.
         if (renderer.state == "RENDER") {
-            runInAction(() => (renderer.fetching = true));
+            renderer.fetching = true;
 
             if (renderer.scrollAnchored) {
                 setScrollState({ type: "ScrollToBottom" });
@@ -153,9 +149,8 @@
     });
 
     // ? If we are waiting for network, try again.
-    let sessionState = session.state;
-    run(() => {
-        switch ($sessionState) {
+    $effect(() => {
+        switch (useSession()?.state) {
             case "Online":
                 if (renderer.state == "WAITING_FOR_NETWORK") {
                     renderer.init();
@@ -205,15 +200,15 @@
         }
     };
 
-    let stbOnResize = $derived(function () {
+    let stbOnResize = $derived(function() {
         if (!atBottom() && scrollState.type == "Bottom") {
-            ref.scrollTo({ behavior: "instant", top: ref.scrollHeight });
+            ref?.scrollTo({ behavior: "instant", top: ref.scrollHeight });
             setScrollState({ type: "Bottom" });
         }
     });
 
-    run(() => {
-        height && stbOnResize();
+    $effect(() => {
+        stbOnResize();
     });
 
     let keyUp = $derived(function (e: KeyboardEvent) {
@@ -223,7 +218,7 @@
         }
     });
 
-    run(() => {
+    $effect(() => {
         setContext("MessageAreaWidth", (width ?? 0) - MESSAGE_AREA_PADDING);
     });
 </script>
@@ -241,10 +236,7 @@
             <Preloader type="ring" />
         {/if}
         {#if renderer.state == "RENDER"}
-            <!--Force renderer update on highlight-->
-            {#key highlight}
-                <MessageRenderer {lastId} {renderer} {highlight} />
-            {/key}
+            <MessageRenderer {lastId} {renderer} {highlight} />
         {/if}
         {#if renderer.state == "EMPTY"}
             <Start {channel} />

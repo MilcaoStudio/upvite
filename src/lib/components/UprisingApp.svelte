@@ -1,39 +1,35 @@
 <script lang="ts">
-    import { run } from 'svelte/legacy';
-
-    import { page } from "$app/stores";
     import { isTouchscreenDevice } from "$lib";
     import OverlapPanel, { Docked, ShowIf } from "./OverlapPanel.svelte";
     import TitleBar from "./TitleBar.svelte";
     import LeftSidebar from "./navigation/LeftSidebar.svelte";
     import RightSidebar from "./navigation/RightSidebar.svelte";
     import BottomNavigation from "./navigation/BottomNavigation.svelte";
-    import { state } from "$lib/State";
-    import { Viewport } from "$lib/stores/Layout";
+    import { Viewport } from "$lib/components/state/stores/Layout";
+    import type { Snippet } from 'svelte';
+    import { page } from "$app/state";
+    import { useState } from "./state/StateContext.svelte";
+
     interface Props {
-        children?: import('svelte').Snippet;
+        children?: Snippet;
     }
 
     let { children }: Props = $props();
 
     // Make true on worker alert
     // let showStatusBar = false;
-    let path: string = $state(), fixedBottomNav: boolean = $state(), inChannel: boolean = $state(), inServer: boolean = $state(), inSpecial: boolean = $state();
-    let isTouch = isTouchscreenDevice();
-    run(() => {
-        path = $page.url.pathname;
-        fixedBottomNav =
-            path === "/" ||
+    let layout = useState().layout;
+    let path = page.url.pathname;
+    let fixedBottomNav = $derived(path == "/" ||
             path.startsWith("/settings") ||
             path.startsWith("/friends") ||
-            path.startsWith("/discover");
-        inChannel = path.includes("/channel");
-        inServer = path.includes("/server");
-        inSpecial =
-            (path.startsWith("/friends") && isTouch) ||
-            path.startsWith("/invite") || path.startsWith("/settings");
-    });;
-    let isVertical = state.layout.getViewport() == Viewport.SMALL;
+            path.startsWith("/discover"));
+    let inChannel = $derived(path.includes("/channel"));
+    //let inServer = $derived(path.includes("/server"));
+    let isTouch = isTouchscreenDevice();
+    let inSpecial: boolean = $derived((path.startsWith("/friends") && isTouch) ||
+            path.startsWith("/invite") || path.startsWith("/settings"));
+    let isVertical = layout.getViewport() == Viewport.SMALL;
 </script>
 
 <div class="app-container">

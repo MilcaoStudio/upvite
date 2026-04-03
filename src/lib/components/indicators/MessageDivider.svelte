@@ -26,11 +26,10 @@
             color: var(--tertiary-foreground);
             background: var(--primary-background);
         }
-        ${unread ? `border-top: thin solid var(--accent);`: ``}
     `);
 </script>
 
-<div class={Base}>
+<div class={[Base, unread && "border"]}>
     {#if unread}
         <div class="Unread">NEW</div>
     {/if}
@@ -49,5 +48,9 @@ div.Unread {
     padding: 2px 6px;
     margin-top: -1px;
     border-radius: 60px;
+}
+
+.border {
+    border-top: thin solid var(--accent);
 }
 </style>

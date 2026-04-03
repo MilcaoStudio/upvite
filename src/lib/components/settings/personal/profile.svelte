@@ -1,20 +1,16 @@
 <script lang="ts">
-    import { run } from 'svelte/legacy';
-
     import AutoComplete, {
         useAutoComplete,
     } from "$lib/components/Autocomplete.svelte";
     import TextAreaAutoSize from "$lib/components/atoms/TextAreaAutoSize.svelte";
     import H3 from "$lib/components/atoms/heading/H3.svelte";
     import H4 from "$lib/components/atoms/heading/H4.svelte";
+    import { useClient } from "$lib/components/client/ClientContext.svelte";
     import UserHeader from "$lib/components/user/UserHeader.svelte";
-    import { useSession } from "$lib/controllers/ClientController";
     import FileUploader from "$lib/controllers/FileUploader.svelte";
-    import { autorun } from "mobx";
     import type { UserProfile } from "stoat.js";
     import { t } from "svelte-i18n";
-    const session = useSession()!;
-    const client = session.client!;
+    const client = useClient();
     const user = client.user!;
     let profile: UserProfile | undefined = $state();
     let profileContent: string | undefined;
@@ -23,12 +19,10 @@
         profile = result;
         profileContent = result.content;
     }
-    run(() => {
-        autorun(() => {
-            if (!profile && session._state == "Online") {
-                refreshProfile();
-            }
-        });
+    $effect(() => {
+        if (!profile) {
+            refreshProfile();
+        }
     });
 
     function setContent(content?: string) {
@@ -36,11 +30,11 @@
     }
 
     let {
-        onChange,
-        onKeyUp,
-        onKeyDown,
-        onFocus,
-        onBlur,
+        onchange,
+        onkeyup,
+        onkeydown,
+        onfocus,
+        onblur,
         ...autoCompleteProps
     } = useAutoComplete(setContent, {
         users: { type: "all" },
@@ -108,7 +102,7 @@
     value={profile?.content ?? ""}
     disabled={typeof profile == "undefined"}
     onChange={(ev) => {
-        onChange(ev.currentTarget.value);
+        onchange(ev.currentTarget.value);
         setContent(ev.currentTarget.value);
         // TODO: DEBOUNCE
         user.edit({profile: { content: profile?.content }});
@@ -118,10 +112,10 @@
             typeof profile == "undefined" ? "fetching" : "placeholder"
         }`,
     )}
-    {onKeyUp}
-    {onKeyDown}
-    {onFocus}
-    {onBlur}
+    onKeyUp={onkeyup}
+    onKeyDown={onkeydown}
+    onFocus={onfocus}
+    onBlur={onblur}
 />
 <H4>Descriptions support Markdown formatting</H4>
 

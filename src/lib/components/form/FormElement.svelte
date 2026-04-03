@@ -2,14 +2,15 @@
     import { getContext } from "svelte";
     import InputElement from "./InputElement.svelte";
     import type { FormContext, Value } from "$lib/types/Form";
+    import { useForm } from "./Form.svelte";
 
     interface Props {
         id: string;
     }
 
     let { id }: Props = $props();
-    const { schema, disabled, values, onChange, data } = getContext<FormContext>('form');
-    const props = {
+    const { schema, disabled, values, onChange, data } = useForm();
+    const inputProps = $derived({
         type: schema[id],
         disabled,
         value: () => $values[id] as Value<typeof schema[typeof id]>,
@@ -18,7 +19,7 @@
             onChange?.($values, id);
         },
         ...data[id]
-    }
+    })
 </script>
 
-<InputElement props={props} />
+<InputElement props={inputProps} />

@@ -6,7 +6,7 @@
     interface Props {
         disabled?: boolean;
         account?: boolean;
-        icon: ConstructorOfATypedSvelteComponent;
+        icon?: ConstructorOfATypedSvelteComponent;
         description?: string;
         onClick?: any;
         action?: 'chevron' | 'external' | ConstructorOfATypedSvelteComponent;

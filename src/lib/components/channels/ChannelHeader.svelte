@@ -3,7 +3,6 @@
     import BxAt from "svelte-boxicons/BxAt.svelte";
     import BxHash from "svelte-boxicons/BxHash.svelte";
     import PageHeader from "../atoms/PageHeader.svelte";
-    import type { ComponentType } from "svelte";
     import ChannelName from "./ChannelName.svelte";
     import { isTouchscreenDevice } from "$lib";
     import { useStatusColor } from "../user/UserIcon.svelte";
@@ -13,7 +12,6 @@
     import BxPhoneCall from "svelte-boxicons/BxPhoneCall.svelte";
     import BxNotepad from "svelte-boxicons/BxNotepad.svelte";
     import { t } from "svelte-i18n";
-    import { LocalStream, type Constraints } from "$lib/voice/Stream";
     import VoiceUi from "./VoiceUI.svelte";
 
     interface Props {
@@ -21,20 +19,22 @@
     }
 
     let { channel }: Props = $props();
-    let icon: ComponentType = $state(), recipient: User | null = null;
-    switch (channel.type) {
-        case "TextChannel":
-            icon = channel.isVoice ? BxPhoneCall : BxHash;
-            break;
-        // case "DirectMessage":
-        // case "Group":
-        case "SavedMessages":
-            icon = BxNotepad;
-            break;
-        default:
-            icon = BxAt;
-    }
-    document.title = (channel.type == "SavedMessages" ? $t('app.navigation.tabs.saved') : channel.server ? `#${channel.name} - ${channel.server.name}` : channel.recipient ? `${channel.recipient.username}` : `${channel.name}`) + " | Uprising";
+    let recipient: User | null = null;
+    let icon = $derived.by(()=>{
+        switch (channel.type) {
+            case "TextChannel":
+                return channel.isVoice ? BxPhoneCall : BxHash;
+            // case "DirectMessage":
+            // case "Group":
+            case "SavedMessages":
+                return BxNotepad;
+            default:
+                return BxAt;
+        }
+    });
+    $effect(()=>{
+        document.title = (channel.type == "SavedMessages" ? $t('app.navigation.tabs.saved') : channel.server ? `#${channel.name} - ${channel.server.name}` : channel.recipient ? `${channel.recipient.username}` : `${channel.name}`) + " | Uprising";
+    });
 </script>
 
 <PageHeader {icon} withTransparency>

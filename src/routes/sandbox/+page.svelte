@@ -1,22 +1,22 @@
 <script lang="ts">
     import { takeError } from "$lib";
-    import { state } from "$lib/State";
     import TextAreaAutoSize from "$lib/components/atoms/TextAreaAutoSize.svelte";
     import H1 from "$lib/components/atoms/heading/H1.svelte";
     import H2 from "$lib/components/atoms/heading/H2.svelte";
     import H3 from "$lib/components/atoms/heading/H3.svelte";
     import InputBox from "$lib/components/form/InputBox.svelte";
-    import { clientController } from "$lib/controllers/ClientController";
     import FileReader from "$lib/controllers/FileReader.svelte";
     import FileWriter from "$lib/controllers/FileWriter.svelte";
     import Button from "$lib/components/atoms/Button.svelte";
     import { Checkbox } from "fluent-svelte";
     import Play from "svelte-boxicons/BxPlay.svelte";
+    import { useState } from "$lib/components/state/StateContext.svelte";
+    import { useClient } from "$lib/components/client/ClientContext.svelte";
 
     document.title = "Sandbox | Uprising";
     const entryPlaceholder =
         "ctx => {\n\treturn {\n\t\tonUnload(){},\n\t\tonUpdate(){}\n\t}\n}";
-    const ctx = $state(state.plugins.ctx);
+    const plugins = useState().plugins;
     let entrypoint = $state("");
     let format = $state(1);
     let namespace = $state("");
@@ -25,8 +25,12 @@
     let enabled = $state(true);
     let error: string = $state("");
     let channel_id: string = $state("");
-    let ctx.channel = $derived(clientController.availableClient.channels.get(channel_id));
-    let ctx.server = $derived(ctx.channel?.server);
+    const ctx = $derived(plugins.ctx);
+
+    $effect(()=>{
+        ctx.channel = useClient().channels.get(channel_id);
+        ctx.server = ctx.channel?.server;
+    });
 
     function setEntrypoint(content?: string) {
         entrypoint = content ?? "";
@@ -104,7 +108,7 @@
     <div class="row">
         <div>
             Channel ID:
-            <InputBox type="text" bind:value={channel_id} placeholder={"0".repeat(26)} maxlength="26" /> 
+            <InputBox type="text" value={channel_id} placeholder={"0".repeat(26)} maxlength={26} onChange={(ev)=>(channel_id = ev.currentTarget.value)} /> 
         </div>
     </div>
 </section>
@@ -120,19 +124,19 @@
             <br>
             (Author or organization name)
             <br>
-            <InputBox type="text" bind:value={namespace} />
+            <InputBox type="text" value={namespace} onChange={(ev)=>namespace=ev.currentTarget.value} />
         </div>
         <div>
             ID:
-            <InputBox type="text" bind:value={id} placeholder="my_plugin" />
+            <InputBox type="text" value={id} placeholder="my_plugin" onChange={(ev)=>id=ev.currentTarget.value} />
         </div>
         <div>
             Version:
-            <InputBox type="text" bind:value={version} placeholder="1.0.0" />
+            <InputBox type="text" value={version} placeholder="1.0.0" onChange={(ev)=>version=ev.currentTarget.value} />
         </div>
     </div>
     Entrypoint:
-    <Button props={{palette: "plain"}} on:click={runScript}><Play size={14} />Run</Button>
+    <Button palette="plain" onclick={runScript}><Play size={14} />Run</Button>
     {#if error}
         <span style:color="var(--error)">{error}</span>
     {/if}

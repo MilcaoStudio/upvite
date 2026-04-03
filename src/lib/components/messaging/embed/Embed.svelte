@@ -8,20 +8,21 @@
     import { modalController } from "$lib/components/modals/ModalController";
     import Markdown from "$lib/markdown/Markdown.svelte";
     import Attachment from "../attachments/Attachment.svelte";
-    import { state } from "$lib/State";
     import {
         isImageEmbed,
         isTextEmbed,
         isVideoEmbed,
         isWebsiteEmbed,
     } from "./MessageEmbed";
+    import { useState } from '$lib/components/state/StateContext.svelte';
 
     interface Props {
         embed: MessageEmbed;
     }
 
     let { embed }: Props = $props();
-    let shrinkMedia = state.network.media.shrinkMedia;
+    let network = useState().network;
+    let shrinkMedia = network.media.shrinkMedia;
     let root = getComputedStyle(document.documentElement);
     let maxWidth =
         parseInt(root.getPropertyValue("--embed-max-width")) /

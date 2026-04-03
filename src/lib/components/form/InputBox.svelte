@@ -1,16 +1,14 @@
 <script lang="ts">
     import { css, cx } from "@emotion/css";
     import { t } from "svelte-i18n";
-    import type { ChangeEventHandler } from "svelte/elements";
+    import type { ChangeEventHandler, HTMLInputAttributes } from "svelte/elements";
 
     
-    interface Props {
-        class?: string | null;
+    interface Props extends HTMLInputAttributes {
         palette?: "primary" | "secondary";
         onChange?: ChangeEventHandler<HTMLInputElement>;
         type: HTMLInputElement["type"];
         padding?: boolean;
-        [key: string]: any
     }
 
     let {

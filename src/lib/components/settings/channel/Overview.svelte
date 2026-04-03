@@ -1,6 +1,4 @@
 <script lang="ts">
-    import { run } from 'svelte/legacy';
-
     import Button from "$lib/components/atoms/Button.svelte";
     import TextAreaAutoSize from "$lib/components/atoms/TextAreaAutoSize.svelte";
     import Row from "$lib/components/atoms/layout/Row.svelte";
@@ -15,26 +13,14 @@
     }
 
     let { channel }: Props = $props();
-    let editable = channel.havePermission("ManageChannel");
-    let name;
-    run(() => {
-        name = channel.name;
-    });
-    let description;
-    run(() => {
-        description = channel.description;
-    });
-    let nsfw;
-    run(() => {
-        nsfw = channel.mature;
-    });
-    let changed;
-    run(() => {
-        changed =
-            name != channel.name ||
-            description != channel.description ||
-            nsfw != channel.mature;
-    });
+    let editable = $derived(channel.havePermission("ManageChannel"));
+    let name = $derived(channel.name);
+    let description = $derived(channel.description);
+    let nsfw = $derived(channel.mature);
+    let changed = $derived(name != channel.name ||
+        description != channel.description ||
+        nsfw != channel.mature);
+    
     function save() {
         const changes: API.DataEditChannel = {};
         if (name) {
@@ -86,7 +72,7 @@
             type="text"
             disabled={!editable}
             value={name}
-            max-length="32"
+            maxlength={32}
             onChange={(e) => {
                 name = e.currentTarget.value;
             }}
@@ -114,7 +100,7 @@
 </Checkbox>
 {#if editable}
     <p>
-        <Button palette="secondary" disabled={!changed} onClick={save}>
+        <Button palette="secondary" disabled={!changed} onclick={save}>
             {$t("app.special.modals.actions.save")}
         </Button>
     </p>

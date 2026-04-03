@@ -20,25 +20,9 @@
     }: Props = $props();
     const normal = `var(--secondary-foreground)`;
     const hover = `var(--foreground)`;
-    const Icon = cx(
+    const Icon = $derived(cx(
         "IconButton",
         css`
-            width: fit-content;
-
-            z-index: 1;
-            display: grid;
-            cursor: pointer;
-            place-items: center;
-
-            transition: 0.1s ease all;
-            //background: var(--secondary-header);
-            border-radius: var(--border-radius-inner);
-            padding: 6px;
-
-            svg {
-                transition: 0.2s ease transform;
-            }
-
             fill: ${normal};
             color: ${normal};
 
@@ -54,25 +38,43 @@
                     color: ${hover};
                 }
             }
-            ${shape == "circle" &&
-            `
-            padding: 4px;
-            border-radius: var(--border-radius-half);
-            background-color: var(--secondary-header);
-
-            &:hover {
-                background-color: var(--primary-header);
-            }
-        `}
+            
             ${rotate &&
             `
             svg {
                 transform: rotateZ(${rotate});
             }`}
         `,
-    );
+    ));
 </script>
 
-<a class={Icon} {...rest} {href} onclick={onClick}>
+<a class={[Icon, shape == "circle" && "circle"]} {...rest} {href} onclick={onClick}>
     {@render children?.()}
 </a>
+
+<style>
+    .IconButton {
+        width: fit-content;
+
+        z-index: 1;
+        display: grid;
+        cursor: pointer;
+        place-items: center;
+
+        transition: 0.1s ease all;
+            
+        border-radius: var(--border-radius-inner);
+        padding: 6px;
+    }
+    :global(svg) {
+        transition: 0.2s ease transform;
+    }
+    .circle {
+        padding: 4px;
+        border-radius: var(--border-radius-half);
+        background-color: var(--secondary-header);
+    }
+    .circle:hover {
+        background-color: var(--primary-header);
+    }
+</style>

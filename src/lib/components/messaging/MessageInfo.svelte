@@ -8,7 +8,7 @@
     }
 
     let { click = false, showAlways = false, children }: Props = $props();
-    const Info = cx('MessageInfo', css`
+    const Info = $derived(cx('MessageInfo', css`
         width: 62px;
         display: flex;
         flex-shrink: 0;
@@ -62,7 +62,7 @@
         }
         ${click ? `cursor: pointer;` : ``}`, !showAlways && css`
         &:hover time { opacity: 1; }
-        time { opacity: 0; }`);
+        time { opacity: 0; }`));
 </script>
 
 <div class={Info}>

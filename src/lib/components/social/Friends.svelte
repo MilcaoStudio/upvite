@@ -1,8 +1,4 @@
 <script lang="ts">
-    import { run } from 'svelte/legacy';
-
-    import { useClient } from "$lib/controllers/ClientController";
-    import { autorun } from "mobx";
     import PageHeader from "../atoms/PageHeader.svelte";
     import Friend from "./Friend.svelte";
     import UserDetail from "svelte-boxicons/BxUser.svelte";
@@ -14,15 +10,12 @@
     import { t } from "svelte-i18n";
     import { modalController } from "../modals/ModalController";
     import { isTouchscreenDevice } from "$lib";
+    import { useClient } from "../client/ClientContext.svelte";
 
     const client = useClient();
     let users = $state([...client.users.values()]);
-    run(() => {
-        autorun(() => {
-            users = [...client.users.values()];
-        });
-    });
-    run(() => {
+    
+    $effect(() => {
         users.sort((a, b) => a.username.localeCompare(b.username));
     });
     let friends = $derived(users.filter((x) => x.relationship == "Friend"));
@@ -80,8 +73,10 @@
                 defaultValue
                 sticky
                 large
-                summary="{$t("app.special.friends.pending")} - {incoming.length}"
             >
+                {#snippet summary()}
+                    {$t("app.special.friends.pending")} - {incoming.length}
+                {/snippet}
                 <div class="UserGrid">
                     {#each incoming as user}
                         <Friend {user} />
@@ -95,8 +90,10 @@
                 defaultValue
                 sticky
                 large
-                summary="{$t("app.special.friends.sent")} - {outgoing.length}"
             >
+                {#snippet summary()}
+                    {$t("app.special.friends.sent")} - {outgoing.length}
+                {/snippet}
                 <div class="UserGrid">
                     {#each outgoing as user}
                         <Friend {user} />
@@ -110,8 +107,10 @@
                 defaultValue
                 sticky
                 large
-                summary="{$t("app.status.online")} - {online.length}"
             >
+            {#snippet summary()}
+                {$t("app.status.online")} - {online.length}
+            {/snippet}
                 <div class="UserGrid">
                     {#each online as user}
                         <Friend {user} />
@@ -125,8 +124,10 @@
                 defaultValue
                 sticky
                 large
-                summary="{$t("app.status.offline")} - {offline.length}"
             >
+            {#snippet summary()}
+                {$t("app.status.offline")} - {offline.length}
+            {/snippet}
                 <div class="UserGrid">
                     {#each offline as user}
                         <Friend {user} />

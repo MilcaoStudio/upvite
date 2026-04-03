@@ -18,7 +18,7 @@
         bottomBorder = false,
         children
     }: Props = $props();
-    const style = cx(
+    const style = $derived(cx(
         "Header",
         css`
             ${withTransparency
@@ -41,7 +41,7 @@
         ${topBorder ? `border-start-start-radius: 8px;` : ``}
         ${bottomBorder ? ` border-end-start-radius: 8px;` : ``}
         `,
-    );
+    ));
 </script>
 
 <style>

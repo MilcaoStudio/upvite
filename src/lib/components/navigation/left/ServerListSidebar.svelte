@@ -1,7 +1,6 @@
 <script lang="ts">
-    import { state } from "$lib/State";
     import { modalController } from "$lib/components/modals/ModalController";
-    import { orderingStore } from "$lib/stores/Ordering";
+    import { orderingStore } from "$lib/components/state/stores/Ordering.svelte";
 
     import ServerList from "../servers/ServerList.svelte";
     interface Props {
@@ -18,7 +17,6 @@
 <ServerList
     active={server_id}
     {createServer}
-    home={state.layout.getLastHomePath}
     servers={$servers}
     reorder={(servers)=>orderingStore.hydrate({servers: servers.map(s=>s.id)})}
 />

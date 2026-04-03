@@ -4,34 +4,32 @@
     import DialogForm from "./DialogForm.svelte";
     import { createElement } from "$lib/markdown/runtime/svelteRuntime";
     import Message from "../messaging/Message.svelte";
+    import { createTextSnippet } from "$lib/i18n/TextSvelte.svelte";
 
     interface Props {
         props: ModalProps<"delete_message">;
     }
 
     let { props }: Props = $props();
-    let data = {
-        message: {
-            element: createElement(Message, {
-                message: props.target,
-                head: true,
-                compact: true,
-            }),
-        },
-    };
 </script>
+
+{#snippet message()}
+    <Message message={props.target} head compact />
+{/snippet}
 
 <DialogForm
     {...props}
     title={$t("app.context_menu.delete_message")}
     schema={{
-        message: "custom",
+        message: "snippet",
     }}
-    {data}
+    data={{
+        message,
+    }}
     callback={() => props.target.delete()}
     submit={{
         palette: "error",
-        children: $t("app.special.modals.actions.delete"),
+        children: createTextSnippet(()=>$t("app.special.modals.actions.delete")),
     }}
 >
     {#snippet description()}

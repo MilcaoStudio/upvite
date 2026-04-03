@@ -1,6 +1,11 @@
 import { goto } from "$app/navigation";
-import { state } from "$lib/State";
+import { useState } from "$lib/components/state/StateContext.svelte";
 
 export async function load() {
-    goto(state.layout.getLastPath())
+    try {
+        goto(useState().layout.getLastPath())
+    } catch (error) {
+        console.error(error);
+        goto("/404");
+    }
 }

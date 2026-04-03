@@ -1,6 +1,4 @@
 <script lang="ts">
-    import { run } from 'svelte/legacy';
-
     import InputBox from "./InputBox.svelte";
     import type { HTMLInputAttributes } from "svelte/elements";
     import Category from "../atoms/Category.svelte";
@@ -12,20 +10,18 @@
     import type { FileUploaderProps } from "$lib/types/FileUpload";
 
     interface Props {
-        props: HTMLInputAttributes & Partial<FileUploaderProps> & {
-        onChange?: (value: string) => void;
-        field?: string;
-        options?: Choice[];
-    };
+        props: HTMLInputAttributes &
+            Partial<FileUploaderProps> & {
+                onChange?: (value: string) => void;
+                field?: string;
+                options?: Choice[];
+            };
     }
 
     let { props }: Props = $props();
-    const { value, type, field, onChange, options, ..._props } = props;
-    let v;
-    run(() => {
-        v = typeof value == "function" ? value() : value;
-    });
-    run(() => {
+    const { value, type, field, onChange, options, ..._props } = $derived(props);
+    let v = $derived(typeof value == "function" ? value() : value);
+    $effect(() => {
         props.onChange?.(v);
     });
 </script>
@@ -47,14 +43,21 @@
             {/each}
         </ComboBox>
     {:else if type == "radio" && props.options}
-    <Column>
-        {#each props.options as option (option.value)}
-            <RadioButton bind:group={v} value={option.value}>{option.name}</RadioButton>
-        {/each}
-    </Column>
+        <Column>
+            {#each props.options as option (option.value)}
+                <RadioButton bind:group={v} value={option.value}
+                    >{option.name}</RadioButton
+                >
+            {/each}
+        </Column>
     {:else if type == "text" || type == "password"}
-        <InputBox {type} value={v} onChange={ev=>onChange?.(ev.currentTarget.value)} {..._props} />
-    <!-- TODO: Add props for FileUploader
+        <InputBox
+            {type}
+            value={v}
+            onChange={(ev) => onChange?.(ev.currentTarget.value)}
+            {..._props}
+        />
+        <!-- TODO: Add props for FileUploader
     {:else if type == "file"}
         <FileUploader {..._props} />
         -->

@@ -1,7 +1,4 @@
 <script lang="ts">
-    import { run } from 'svelte/legacy';
-
-    import { getRenderer } from "$lib/rendered/Singleton";
     import type { Channel, Message } from "stoat.js";
     import Reply from "./Reply.svelte";
     import BxReply from "svelte-boxicons/BxReply.svelte";
@@ -9,8 +6,7 @@
     import UserShort from "$lib/components/user/UserShort.svelte";
     import BxFile from "svelte-boxicons/BxFile.svelte";
     import Markdown from "$lib/markdown/Markdown.svelte";
-    import { state } from "$lib/State";
-    import { useClient } from "$lib/controllers/ClientController";
+    import { useClient } from '$lib/components/client/ClientContext.svelte';
 
     interface Props {
         index: number;
@@ -25,11 +21,11 @@
         id,
         mentions
     }: Props = $props();
-    let view = $derived(channel && getRenderer(channel, state));
+    //let view = $derived(channel && getRenderer(channel));
     let message: Message | undefined = $state();
     let client = useClient();
 
-    run(() => {
+    $effect(() => {
         const msg = client.messages.get(id);
         if (msg) {
             message = msg;
@@ -37,9 +33,6 @@
             channel?.fetchMessage(id).then((_message) => (message = _message));
         }
     });
-
-    if (view?.state == "RENDER") {
-    }
 </script>
 
 {#if message}

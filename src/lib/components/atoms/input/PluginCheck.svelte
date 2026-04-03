@@ -1,16 +1,16 @@
 <script lang="ts">
-    import { state } from "$lib/State";
-    import type { PluginInfo } from "$lib/stores/Plugins";
+    import { useState } from "$lib/components/state/StateContext.svelte";
+    import type { PluginInfo } from "$lib/components/state/stores/Plugins";
     import { Checkbox } from "fluent-svelte";
     import { onDestroy } from "svelte";
 
-    const plugins = state.plugins;
+    const plugins = useState().plugins;
     interface Props {
         plugin: PluginInfo;
     }
 
     let { plugin }: Props = $props();
-    let checked = $state(plugin.enabled);
+    let checked = $derived(plugin.enabled);
     function onChange() {
         console.log(plugin.id);
         // checked value updates slower than onChange
@@ -21,9 +21,18 @@
             plugins.unload(plugin.namespace, plugin.id);
         }
     }
-    let source = plugins.get(`${plugin.namespace}/${plugin.id}`)?.entrypoint;
-    let url = source && URL.createObjectURL(new Blob([source], {type: "text/plain"}));
-    onDestroy(()=>url && URL.revokeObjectURL(url));
+    let source = $derived(plugins.get(`${plugin.namespace}/${plugin.id}`)?.entrypoint);
+    let url = $state<string>();
+    $effect(()=>{
+        if (source) {
+            url = URL.createObjectURL(new Blob([source], {type: "text/plain"}));
+        }
+        return ()=>{
+            if (url) {
+                URL.revokeObjectURL(url);
+            }
+        }
+    })
 </script>
 
 <Checkbox bind:checked on:change={onChange}>{plugin.namespace}/{plugin.id} {plugin.version}</Checkbox>

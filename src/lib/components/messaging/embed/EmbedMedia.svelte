@@ -1,9 +1,9 @@
 <script lang="ts">
-    import { state } from "$lib/State";
     import { modalController } from "$lib/components/modals/ModalController";
-    import { useClient } from "$lib/controllers/ClientController";
-    import type { ImageEmbed, VideoEmbed, WebsiteEmbed } from "stoat.js";
+    import type { WebsiteEmbed } from "stoat.js";
     import { isWebsiteEmbed } from "./MessageEmbed";
+    import { useClient } from "$lib/components/client/ClientContext.svelte";
+    import { useState } from "$lib/components/state/StateContext.svelte";
 
     interface Props {
         embed: WebsiteEmbed;
@@ -12,8 +12,10 @@
     }
 
     let { embed, width = 0, height }: Props = $props();
+    let network = useState().network;
+    let locale = useState().locale;
     let client = useClient();
-    let autoplay = state.network.media.autoplay;
+    let autoplay = network.media.autoplay;
     
 </script>
 
@@ -23,7 +25,7 @@
             title="YouTube"
             {height}
             loading="lazy"
-            src="http://www.youtube-nocookie.com/embed/{embed.specialContent.id}?modestbranding=1&hl={state.locale.getLanguage()}&start={embed.specialContent.timestamp ?? 0}"
+            src="http://www.youtube-nocookie.com/embed/{embed.specialContent.id}?modestbranding=1&hl={locale.getLanguage()}&start={embed.specialContent.timestamp ?? 0}"
             frameborder="0"
             allowfullscreen
 ></iframe>

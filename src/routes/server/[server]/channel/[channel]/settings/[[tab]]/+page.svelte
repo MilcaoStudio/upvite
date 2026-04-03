@@ -1,13 +1,11 @@
 <script lang="ts">
+    import { useClient } from "$lib/components/client/ClientContext.svelte";
     import Overview from "$lib/components/settings/channel/Overview.svelte";
     import Permissions from "$lib/components/settings/channel/Permissions.svelte";
     import Settings from "$lib/components/settings/common/Settings.svelte";
-    import ScrollerContent from "$lib/components/settings/common/scrollerContent.svelte";
-    import { useClient } from "$lib/controllers/ClientController";
-    import { t } from "svelte-i18n";
-
+    import type { PageData } from "./$types";
     interface Props {
-        data: any;
+        data: PageData;
     }
 
     let { data }: Props = $props();

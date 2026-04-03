@@ -11,7 +11,7 @@
     }
 
     let { message, onFinish }: Props = $props();
-    let content = $state(message.content ?? "");
+    let content = $derived(message.content);
 
     function setContent(c: string) {
         content = c;
@@ -38,13 +38,13 @@
         onFocus,
         onBlur,
         ...autoCompleteProps
-    } = useAutoComplete((v) => setContent(v ?? ""), {
+    } = $derived(useAutoComplete((v) => setContent(v ?? ""), {
         users: { type: "channel", id: message.channel!.id },
         channels:
             message.channel!.type == "TextChannel"
                 ? { server: message.channel!.serverId }
                 : undefined,
-    });
+    }));
 </script>
 
 <svelte:document

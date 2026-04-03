@@ -1,38 +1,48 @@
 import stringify from "json-stringify-deterministic";
 import localforage from "localforage";
 import type { Client } from "stoat.js";
-import type Persistent from "./types/Persistent";
+import type Persistent from "$lib/types/Persistent";
 import MessageQueue from "./stores/MessageQueue";
-import { $auth, type Data as AuthData } from "./stores/Auth";
+import Auth, { $auth, type Data as AuthData } from "./stores/Auth";
 import type { Data as DataSync, SyncKeys } from './stores/Sync'
-import { clientController } from "./controllers/ClientController";
 import { makeAutoObservable, reaction, runInAction } from "mobx";
 import { injectWindow } from "$lib";
 import Layout from "./stores/Layout";
-import { notificationsStore } from "./stores/NotificationOptions";
-import { orderingStore, type OrderingData } from "./stores/Ordering";
-import { settings } from "./stores/Settings";
+import NotificationOptions, { notificationsStore } from "./stores/NotificationOptions";
+import Ordering, { orderingStore, type OrderingData } from "./stores/Ordering.svelte";
+import Settings from "./stores/Settings";
 import Draft from "./stores/Draft";
-import { sync } from "./stores/Sync";
+import Sync, { sync } from "./stores/Sync";
 import Changelog from "./stores/Changelog";
-import type Syncable from "./types/Syncable";
+import type Syncable from "$lib/types/Syncable";
 import Plugins from "./stores/Plugins";
 import LocaleOptions from "./stores/LocaleOptions";
 import NetworkOptions from "./stores/NetworkOptions";
+import { useClientController } from "../client/ClientContext.svelte";
+
+/**
+ * Introduce some delay before writing state to disk
+ */
+const DISK_WRITE_WAIT_MS = 1200;
+
+/**
+ * Stores for which we don't want to wait to write to
+ */
+const IGNORE_WRITE_DELAY = ["auth"];
 
 export default class State {
     private persistent: [string, Persistent<unknown>][];
-    //auth = new Auth;
+    auth = new Auth;
     changelog = new Changelog;
     queue = new MessageQueue;
     layout = new Layout;
     locale = new LocaleOptions;
     network = new NetworkOptions;
-    //notifications: NotificationOptions;
-    //ordering: Ordering;
+    notifications = new NotificationOptions;
+    ordering = new Ordering;
     plugins: Plugins;
-    //settings = new Settings;
-    //sync: Sync;
+    settings = new Settings;
+    sync: Sync;
     draft = new Draft;
 
     constructor() {
@@ -42,13 +52,9 @@ export default class State {
         makeAutoObservable(this);
 
         //this.disable = this.disable.bind(this);
-
-        //this.notifications = new NotificationOptions();
-        //this.ordering = new Ordering();
-        //this.sync = new Sync();
+        this.sync = new Sync();
         this.plugins = new Plugins(this);
         this.register();
-        injectWindow('state', this);
     }
 
     private register() {
@@ -118,7 +124,7 @@ export default class State {
                 }
             }
             await this.save();
-            clientController.hydrate();
+            useClientController().hydrate();
 
             // Post-hydration, init plugins.
             this.plugins.init();
@@ -155,19 +161,8 @@ export default class State {
             sync
                 .pull(client)
                 .catch(console.error)
-                .finally(() => state.changelog.checkForUpdates());
+                .finally(() => this.changelog.checkForUpdates());
         }
-
-        const authUnsubscribe = $auth.subscribe((sessions) => {
-            localforage.setItem("auth", JSON.parse(stringify({ sessions }))).then(() => {
-                console.debug("[$auth] auth saved in localforage");
-            });
-        });
-        const orderingUnsubscribe = orderingStore.subscribe((data) => {
-            localforage.setItem("ordering", JSON.parse(stringify(data))).then(() => {
-                console.debug("[$ordering] ordering saved in localforage");
-            });
-        })
         // Register all the listeners required for saving and syncing state.
         const listeners = this.persistent.map(([id, store]) => {
             return reaction(
@@ -187,7 +182,7 @@ export default class State {
 
                         switch (id) {
                             case "settings": {
-                                const { appearance, theme } = settings.toSyncable();
+                                const { appearance, theme } = this.settings.toSyncable();
 
                                 const obj: Record<string, unknown> = {};
                                 if (sync.isEnabled("appearance")) {
@@ -246,9 +241,6 @@ export default class State {
                 );
             }
 
-            authUnsubscribe();
-            orderingUnsubscribe();
-
             // Wipe all listeners.
             listeners.forEach((x) => x());
         };
@@ -258,19 +250,16 @@ export default class State {
             this.draft = new Draft();
             //this.experiments = new Experiments();
             this.layout = new Layout();
-            //this.notifications = new NotificationOptions();
+            this.notifications = new NotificationOptions();
             this.queue = new MessageQueue();
 
-            //this.settings = new Settings();
-            //this.sync = new Sync();
-            //this.ordering = new Ordering();
+            this.settings = new Settings();
+            this.sync = new Sync();
+            this.ordering = new Ordering();
             this.save();
 
             this.persistent = [];
             this.register();
         });
     }
-
 }
-
-export const state = new State;

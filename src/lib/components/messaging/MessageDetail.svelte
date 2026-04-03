@@ -13,28 +13,23 @@
 
     let { message, position }: Props = $props();
     const dict = getContext<Dictionary>("dictionary");
+    let time = $derived(
+        dayjs(decodeTime(message.id)).format(dict.dayjs?.timeFormat || "HH:mm"),
+    );
 </script>
 
 {#if position == "left" && dict}
+    <time class="copyTime">
+        <i class="copyBracket">[</i>
+        {time}
+        <i class="copyBracket">]</i>
+    </time>
     {#if message.editedAt}
-        <time class="copyTime">
-            <i class="copyBracket">[</i>
-            {dayjs(decodeTime(message.id)).format(dict.dayjs?.timeFormat)}
-            <i class="copyBracket">]</i>
-        </time>
         <span class="edited">
-            <Tooltip content={dayjs(message.editedAt).format("LLLL")}
-                >{$t("app.main.channel.edited")}</Tooltip
-            >
+            <Tooltip content={dayjs(message.editedAt).format("LLLL")}>
+                {$t("app.main.channel.edited")}
+            </Tooltip>
         </span>
-    {:else}
-        <time>
-            <i class="copyBracket">[</i>
-            {dayjs(decodeTime(message.id)).format(
-                dict.dayjs?.timeFormat || "HH:mm",
-            )}
-            <i class="copyBracket">]</i>
-        </time>
     {/if}
 {:else}
     <div class="Detail">

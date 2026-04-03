@@ -3,7 +3,6 @@
 
     import "./Emojis.css";
     import Column from "$lib/components/atoms/layout/Column.svelte";
-    import { autorun } from "mobx";
     import type { Server } from "stoat.js";
     import EmojiUploader from "./EmojiUploader.svelte";
     import { t } from "svelte-i18n";
@@ -16,13 +15,8 @@
 
     let { server }: Props = $props();
 
-    let emojis = $state(server.emojis);
-    run(() => {
-        autorun(() => {
-            emojis = server.emojis;
-            console.debug("[Emojis.svelte] Emoji list for %s updated", server.id);
-        });
-    });
+    let emojis = $derived(server.emojis);
+    $inspect("[Emojis.svelte] Emoji list for %s updated", server.id);
 </script>
 
 <Column>

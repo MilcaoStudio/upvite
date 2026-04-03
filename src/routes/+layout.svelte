@@ -1,10 +1,6 @@
 <!-- @migration-task Error while migrating Svelte code: Can't migrate code with afterUpdate. Please migrate by hand. -->
 <script lang="ts">
-    import { browser } from "$app/environment";
-    import { state } from "$lib/State";
-    import Binder from "$lib/components/context/Binder.svelte";
     import Locale from "$lib/components/context/Locale.svelte";
-    import Preloader from "$lib/components/indicators/Preloader.svelte";
     import ModalRenderer from "$lib/components/modals/ModalRenderer.svelte";
     import "../styles/app.css";
     import '../styles/overlap.css';
@@ -13,30 +9,18 @@
     import "fluent-svelte/theme.css";
     import 'tippy.js/dist/tippy.css';
     import "../styles/buttons.css";
-    import { afterUpdate } from "svelte";
     import Theme from "$lib/components/context/Theme.svelte";
-    
-
-    let ready = false;
-    if (browser) {
-        state.hydrate().then(() => (ready = true));
-    }
-    $: console.debug("<Layout> ready:", ready);
-
-    afterUpdate(()=>{state.plugins.onUpdate()});
-
+    import StateContext from "$lib/components/state/StateContext.svelte";
+    import ClientContext from "$lib/components/client/ClientContext.svelte";
 </script>
 
-
-
-{#if ready}
-    <Locale>
-        <slot />
-        <Binder />
-        <ModalRenderer />
-    </Locale>
+<StateContext>
+    <ClientContext>
+        <Locale>
+            <slot />
+            <ModalRenderer />
+        </Locale>
+    </ClientContext>
     <Theme />
-{:else}
-    <Preloader type="spinner" />
-{/if}
+</StateContext>
 

@@ -1,54 +1,42 @@
 <script>
-    import { run } from 'svelte/legacy';
-
-    import { state } from "$lib/State";
-    import { SIDEBAR_CHANNELS } from "$lib/stores/Layout";
-    import { autorun } from "mobx";
+    import { SIDEBAR_CHANNELS, Viewport } from "$lib/components/state/stores/Layout";
     import SidebarBase from "./SidebarBase.svelte";
     import HomeSidebar from "./left/HomeSidebar.svelte";
     import ServerListSidebar from "./left/ServerListSidebar.svelte";
     import ServerSidebar from "./left/ServerSidebar.svelte";
-    import { page } from "$app/stores";
-    import { useClient } from "$lib/controllers/ClientController";
-    import { servers, useClient as useMockClient } from "../mock/MockClient";
+    import { page } from "$app/state";
+    import { useClient } from "../client/ClientContext.svelte";
+    import { useState } from "../state/StateContext.svelte";
 
-    /** @type {{snap?: boolean}} */
     let { snap = false } = $props();
-    let demo = $derived($page.data.demo || false);
-    let channel_id = $derived($page.params.channel);
-    let server_id = $derived($page.params.server);
-    console.debug("<Page> params", $page.data);
-    let client = $derived(demo ? useMockClient() : useClient());
-    let channel = $derived(demo ? servers[0].channels[0] : channel_id ? client.channels.get(channel_id) : undefined);
-    let server = $derived(demo ? servers[0] : server_id ? client.servers.get(server_id) : undefined);
-    let document.title = $derived(server
+    //let demo = $derived(page.data.demo || false);
+    let channel_id = $derived(page.params.channel);
+    let server_id = $derived(page.params.server);
+    console.debug("<Page> params", page.data);
+    //let client = $derived(demo ? useMockClient() : useClient());
+    //let channel = $derived(demo ? servers[0].channels[0] : channel_id ? client.channels.get(channel_id) : undefined);
+    //let server = $derived(demo ? servers[0] : server_id ? client.servers.get(server_id) : undefined);
+    let client = useClient();
+    let channel = $derived(client.channels.get(channel_id || ""));
+    let server = $derived(client.servers.get(server_id || ""));
+    let layout = useState().layout;
+    $effect(()=>{
+        document.title = server
         ? `#${channel?.name ?? ""} - ${server.name} | Uprising`
         : channel
           ? `#${channel.name} | Uprising`
-          : `Uprising`);
-    let openLeft = $state(state.layout.getSectionState(
-        SIDEBAR_CHANNELS,
-        true,
-    ));
-    run(() => {
-        autorun(() => {
-            openLeft = state.layout.getSectionState(
-                SIDEBAR_CHANNELS,
-                true,
-            );
-        });
+          : `Uprising`
     });
+    let openLeft = $derived(layout.isSectionOpen(SIDEBAR_CHANNELS,) || layout.getViewport() != Viewport.SMALL,);
 </script>
 
 <SidebarBase>
     <ServerListSidebar {server_id} />
     {#if openLeft || snap}
         {#if server}
-            {#key channel}
-                <ServerSidebar {client} {server} {channel} />
-            {/key}
+            <ServerSidebar {client} {server} {channel} />
         {:else}
-            <HomeSidebar />
+            <HomeSidebar {channel} />
         {/if}
     {/if}
 </SidebarBase>
